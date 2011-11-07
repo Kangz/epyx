@@ -1,0 +1,50 @@
+int main(int argc, char** argv) {
+    //4 espaces pour indentation
+    if (foo == 1) {
+        //blah
+    } else {
+        //blih
+    }
+
+    if ((toto == 2) || //Operateur booleen à la fin de la ligne.
+        (toto == 3))   //On reprend dessous, une case aprÃ¨s la premiere parenthese
+
+    switch (bar) {
+      case 4 : // 2 espaces
+        break; // 2 en plus
+    }
+    printf( (toto == true) ? "oui" : "non" ); // Ternaire autorise.
+	 
+	 return 0; // OK
+	 return -1; // Rien ne va plus
+	 return -2: // Je me suis planté
+}
+
+/*
+TOUT EN ANGLAIS!!! 
+EVERYTHING SHALL BE IN ENGLISH!!!
+
+
+Convention de nommage :
+variable : Pas de lettres de type : int iCount Interdit.
+Constante Preprocesseur  NAME_CONSTANT 
+
+nameOfVariable
+NameOfClass
+namespaceName
+
+typedef enum MyEnum {
+    PREFIX_NAME_OPT;
+}MyEnum;
+
+
+Fonction : convention Doxygen 
+
+Fichier :
+Une classe par fichier et un fichier par classe (un .h et un .cpp).
+Un Dossier par Module
+On refondra le systeme de fichier/dossier plus tard...
+
+Systeme de build compatible Windows + Linux (Mac ?) cmake ?
+
+*/

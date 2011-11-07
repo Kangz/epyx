@@ -1,0 +1,83 @@
+Conversion Host <-> Network 
+htons() : host to network short
+htonl() : host to network long
+ntohs() : network to host short
+ntohl() : network to host long
+
+inet_pton(AF_INET, "192.0.2.1", &(sa.sin_addr)); // IPv4
+inet_pton(AF_INET6, "2001:db8:63b3:1::3490", &(sa6.sin6_addr)); // IPv6
+
+char ip4[INET_ADDRSTRLEN];  // space to hold the IPv4 string
+struct sockaddr_in sa;      // pretend this is loaded with something
+inet_ntop(AF_INET, &(sa.sin_addr), ip4, INET_ADDRSTRLEN);
+
+char ip6[INET6_ADDRSTRLEN]; // space to hold the IPv6 string
+struct sockaddr_in6 sa6;    // pretend this is loaded with something
+inet_ntop(AF_INET6, &(sa6.sin6_addr), ip6, INET6_ADDRSTRLEN);
+
+nstead of inet_aton() or inet_addr(), use inet_pton().
+Instead of inet_ntoa(), use inet_ntop().
+Instead of gethostbyname(), use the superior getaddrinfo().
+Instead of gethostbyaddr(), use the superior getnameinfo().
+
+Structures :
+
+Returned data from getaddrinfo :
+struct addrinfo {
+    int              ai_flags;     // AI_PASSIVE, AI_CANONNAME, etc.
+    int              ai_family;    // AF_INET, AF_INET6, AF_UNSPEC
+    int              ai_socktype;  // SOCK_STREAM, SOCK_DGRAM
+    int              ai_protocol;  // use 0 for "any"
+    size_t           ai_addrlen;   // size of ai_addr in bytes
+    struct sockaddr *ai_addr;      // struct sockaddr_in or _in6
+    char            *ai_canonname; // full canonical hostname
+
+    struct addrinfo *ai_next;      // linked list, next node
+};
+
+// Pattern
+struct sockaddr {
+    unsigned short    sa_family;    // address family, AF_xxx (AF_INET for Pv4 and AF_INET6 for IPv6)
+    char              sa_data[14];  // 14 bytes of protocol address
+};
+
+// For IPv4 :
+struct sockaddr_in {
+    short int          sin_family;  // Address family, AF_INET
+    unsigned short int sin_port;    // Port number, Network Byte Order
+    struct in_addr     sin_addr;    // Internet address
+    unsigned char      sin_zero[8]; // Same size as struct sockaddr
+};
+struct in_addr {
+    uint32_t s_addr;
+};
+
+// For IPv6
+struct sockaddr_in6 {
+    u_int16_t       sin6_family;   // address family, AF_INET6
+    u_int16_t       sin6_port;     // Port number, Network Byte Order
+    u_int32_t       sin6_flowinfo; // IPv6 flow information
+    struct in6_addr sin6_addr;     // IPv6 address
+    u_int32_t       sin6_scope_id; // Scope ID
+};
+struct in6_addr {
+    unsigned char   s6_addr[16];   // IPv6 address
+};
+
+// ANY address
+sa.sin_addr.s_addr = INADDR_ANY;  // use my IPv4 address
+sa6.sin6_addr = in6addr_any; // use my IPv6 address
+struct in6_addr ia6 = IN6ADDR_ANY_INIT;
+
+
+// WINDOWS :
+#include <winsock.h>
+WSADATA wsaData;   // if this doesn't work
+//WSAData wsaData; // then try this instead
+// MAKEWORD(1,1) for Winsock 1.1, MAKEWORD(2,0) for Winsock 2.0:
+if (WSAStartup(MAKEWORD(1,1), &wsaData) != 0) {
+    fprintf(stderr, "WSAStartup failed.\n");
+    exit(1);
+}
+/* ... */
+WSACleanUp();
