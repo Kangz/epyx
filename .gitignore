@@ -4,6 +4,6 @@ Makefile
 cmake_install.cmake
 .anjuta
 .anjuta_sym_db.db
-test-server
+bin/*
 *~
 

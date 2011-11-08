@@ -12,6 +12,8 @@ add_executable(
     src/core/exception.cpp
     src/core/thread.cpp
     src/server/server.cpp
+    src/server/server-link.cpp
+    src/server/server-listener.cpp
     src/test-server.cpp
 )
 
