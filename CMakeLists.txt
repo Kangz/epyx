@@ -7,15 +7,15 @@ project(Epyx)
 
 # Test executables
 add_executable(
-    test-server
-    src/address.cpp
-    src/exception.cpp
-    src/server.cpp
+    bin/test-server
+    src/core/address.cpp
+    src/core/exception.cpp
+    src/core/thread.cpp
+    src/server/server.cpp
     src/test-server.cpp
-    src/thread.cpp
 )
 
 target_link_libraries(
-    test-server
+    bin/test-server
     pthread
 )

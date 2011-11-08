@@ -3,8 +3,8 @@
  */
 
 #include <iostream>
-#include "exception.h"
-#include "server.h"
+#include "core/exception.h"
+#include "server/server.h"
 
 int main()
 {
