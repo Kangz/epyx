@@ -35,6 +35,12 @@ bool TestServer(Epyx::ServerLink& link)
             throw Epyx::FailException("test-server", "A client tried to kill me");
         else if (!strcasecmp(line, "o<"))
             link.sendText("PAN !\n");
+        else {
+            // Mirror
+            out << '\n';
+            link.sendText("Mirror: ");
+            link.sendText(out.str().c_str());
+        }
     }
     return true;
 }
