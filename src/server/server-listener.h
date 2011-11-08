@@ -26,7 +26,6 @@ namespace Epyx
     {
     private:
         int sockfd;
-        struct addrinfo ai;
         Thread *thread;
         volatile bool running;
         Address *srvAddr;

@@ -1,6 +1,5 @@
 #include "thread.h"
 #include "exception.h"
-#include <signal.h>
 
 extern "C"
 {

@@ -74,7 +74,6 @@ namespace Epyx
         
         if (!pai)
             throw FailException("ServerListener", "pai is NULL");
-        this->ai = *pai;
         this->sockfd = -1;
         this->thread = NULL;
         this->runFn = runFn_;
