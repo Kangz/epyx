@@ -4,12 +4,13 @@
 #ifndef EPYX_SERVER_H
 #define EPYX_SERVER_H
 
-#include "server-listener.h"
+#include "server-listener.h" /* for ServerRun */
 
 namespace Epyx
 {
-    class Server;
-    
+    class ServerLink;
+    class ServerListener;
+
     class Server
     {
     private:
@@ -35,8 +36,8 @@ namespace Epyx
          */
         static bool init();
 
-        Server(int port_, int nbConn_);
-        ~Server();
+        Server(int port_, int nbConn_, ServerRun runFn);
+        virtual ~Server();
     };
 }
 

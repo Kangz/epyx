@@ -7,18 +7,40 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <ostream>
 #include "../core/address.h"
+#include "server-listener.h" /* for ServerRun */
 
 namespace Epyx
 {
     class ServerLink
     {
     private:
-        Address clientAddr;
-        Address srvAddr;
         int sockfd;
     public:
-        ServerLink(struct sockaddr *aiSrv, struct sockaddr *aiClient, int sockfd_);
+        ServerListener *listener;
+        Address clientAddr;
+        Address *srvAddr;
+
+        ServerLink(ServerListener *listener, Address *srvAddr_,
+                   struct sockaddr *aiClient, int sockfd_);
+        ~ServerLink();
+
+        void close();
+
+        /**
+         * send may not send everything if the system tells so
+         */
+        unsigned int send(const void *data, unsigned int size);
+        bool sendAll(const void *data, unsigned int size);
+        bool sendText(const char *text);
+
+        /**
+         * receive data, blocking calls
+         */
+        unsigned int recv(void *data, unsigned int size);
+        bool recvAll(void *data, unsigned int size);
+        bool recvLine(std::ostream& out);
     };
 }
 

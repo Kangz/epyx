@@ -10,6 +10,7 @@
 #include <netdb.h>
 #include "../core/exception.h"
 #include "server-listener.h"
+#include "server-link.h"
 
 extern "C"
 {
@@ -41,14 +42,14 @@ namespace Epyx
         return true;
     }
 
-    Server::Server(int port_, int nbConn_)
+    Server::Server(int port_, int nbConn_, ServerRun runFn)
     {
         struct addrinfo hints, *addrAll, *pai;
         int status, i;
         std::stringstream portSStream;
 
         if (port_ >= 65536)
-            throw new FailException("Server", "Too high port");
+            throw FailException("Server", "Too high port");
         
         this->port = port_;
         this->nbConn = nbConn_;
@@ -80,7 +81,7 @@ namespace Epyx
         this->listener = new ServerListener[i];
         for (i = 0, pai = addrAll; pai != NULL; pai = pai->ai_next, i++) {
             try {
-                this->listener[i].run(this, pai, nbConn_);
+                this->listener[i].run(pai, nbConn_, runFn);
                 // Only run the first one
                 break;
             } catch (Exception e) {

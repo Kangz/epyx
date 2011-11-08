@@ -1,5 +1,6 @@
 #include "address.h"
 #include "exception.h"
+#include <sstream>
 
 namespace Epyx
 {
@@ -21,9 +22,15 @@ namespace Epyx
             inet_ntop(AF_INET6, &(ipv6->sin6_addr), this->ipStr,
                       sizeof (this->ipStr));
             this->ipVersion = 6;
-        } else
-            throw FailException("Address", "You have just invented a new IP \
-                version without giving me informations about how to handle it");
+        } else {
+            std::ostringstream out;
+            out << "You have just invented a new IP version without giving me" \
+                << " information about how to handle it\n" \
+                << "The version is: " << saddr->sa_family << "\n" \
+                << "IPv4 is: " << AF_INET << "\n" \
+                << "IPv6 is: " << AF_INET6;
+            throw FailException("Address", out.str().c_str());
+        }
     }
 
     std::ostream& operator<<(std::ostream& os, Address& addr)
@@ -35,5 +42,13 @@ namespace Epyx
 
         if (addr.port)
             os << ':' << addr.port;
+    }
+
+    std::ostream& operator<<(std::ostream& os, Address *addr)
+    {
+        if (!addr)
+            os << "(null)";
+        else
+            os << (*addr);
     }
 }

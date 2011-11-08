@@ -10,22 +10,35 @@
 
 namespace Epyx
 {
-    class Server;
+    class ServerLink;
     class Thread;
+    class Address;
+
+    /**
+     * This function is called each time the server accepts a connection
+     * Returns true if ok, false tells the server to quit
+     * Throw an exception onerror
+     */
+    typedef bool (ServerRun)(ServerLink& link);
     
+
     class ServerListener
     {
     private:
-        Server *srv;
         int sockfd;
         struct addrinfo ai;
         Thread *thread;
+        volatile bool running;
+        Address *srvAddr;
     public:
+        ServerRun *runFn;
+
         ServerListener();
         ~ServerListener();
-        void run(Server *srv_, struct addrinfo *pai, int nbConn);
+        void run(struct addrinfo *pai, int nbConn, ServerRun runFn_);
         void AcceptLoop();
         void wait();
+        void stop();
     };
 }
 

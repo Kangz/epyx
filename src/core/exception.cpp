@@ -32,7 +32,7 @@ namespace Epyx
         :FailException(module_, "")
     {
         std::stringstream msg;
-        msg << fct << " error " << errno << ": " << strerror(errno);
+        msg << fct << " error " << errno << ", " << strerror(errno);
         this->append(msg.str().c_str());
     }
 }

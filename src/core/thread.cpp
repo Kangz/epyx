@@ -1,5 +1,6 @@
 #include "thread.h"
 #include "exception.h"
+#include <signal.h>
 
 extern "C"
 {
@@ -32,5 +33,12 @@ namespace Epyx
         int status = pthread_join(this->thread, NULL);
         if (status)
             throw FailException("Thread", "pthread join error");
+    }
+
+    void Thread::term()
+    {
+        int status = pthread_cancel(this->thread);
+        if (status)
+            throw FailException("Thread", "pthread cancel error");
     }
 }

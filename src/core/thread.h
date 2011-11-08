@@ -29,6 +29,11 @@ namespace Epyx
          * Wait until the end
          */
         void wait();
+
+        /**
+         * Terminate a thread
+         */
+        void term();            
     };
 }
 

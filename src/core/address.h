@@ -19,6 +19,7 @@ namespace Epyx
     public:
         Address(const struct sockaddr *saddr);
         friend std::ostream& operator<<(std::ostream& os, Address& addr);
+        friend std::ostream& operator<<(std::ostream& os, Address *addr);
     };
 }
 
