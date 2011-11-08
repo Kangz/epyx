@@ -5,9 +5,11 @@ cmake_minimum_required(VERSION 2.6)
 # Project name
 project(Epyx)
 
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+
 # Test executables
 add_executable(
-    bin/test-server
+    test-server
     src/core/address.cpp
     src/core/exception.cpp
     src/core/thread.cpp
@@ -18,6 +20,6 @@ add_executable(
 )
 
 target_link_libraries(
-    bin/test-server
+    test-server
     pthread
 )
