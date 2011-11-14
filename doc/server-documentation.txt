@@ -1,26 +1,38 @@
-Conversion Host <-> Network 
+////////////////////////////////////////////
+Fonctions :
+////////////////////////////////////////////
+
+Conversion Host <-> Network (byte order)
 htons() : host to network short
 htonl() : host to network long
 ntohs() : network to host short
 ntohl() : network to host long
 
+How to convert an string ip to a usable addr :
 inet_pton(AF_INET, "192.0.2.1", &(sa.sin_addr)); // IPv4
 inet_pton(AF_INET6, "2001:db8:63b3:1::3490", &(sa6.sin6_addr)); // IPv6
 
+How to do the exact opposite
+//IPv4
 char ip4[INET_ADDRSTRLEN];  // space to hold the IPv4 string
 struct sockaddr_in sa;      // pretend this is loaded with something
 inet_ntop(AF_INET, &(sa.sin_addr), ip4, INET_ADDRSTRLEN);
-
+//Ipv6
 char ip6[INET6_ADDRSTRLEN]; // space to hold the IPv6 string
 struct sockaddr_in6 sa6;    // pretend this is loaded with something
 inet_ntop(AF_INET6, &(sa6.sin6_addr), ip6, INET6_ADDRSTRLEN);
 
-nstead of inet_aton() or inet_addr(), use inet_pton().
-Instead of inet_ntoa(), use inet_ntop().
-Instead of gethostbyname(), use the superior getaddrinfo().
-Instead of gethostbyaddr(), use the superior getnameinfo().
+Choices :
+Instead of inet_aton() or inet_addr(), use inet_pton(). It will "return" an internal addr from a string ip
+Instead of inet_ntoa(), use inet_ntop(). It will do the exact opposite.
+Instead of gethostbyname(), use the superior getaddrinfo(). It will "return" an addrinfo struct from an hostname.
+Instead of gethostbyaddr(), use the superior getnameinfo(). It will "return" an hostname from a sockaddr (for instance the one in struct addrinfo).
+For those 2, see http://en.wikipedia.org/wiki/Getaddrinfo for more infos.
 
+
+////////////////////////////////////////////
 Structures :
+////////////////////////////////////////////
 
 Returned data from getaddrinfo :
 struct addrinfo {
