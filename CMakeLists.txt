@@ -7,18 +7,27 @@ project(Epyx)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
+# Make some sets of files
+
+file(
+	GLOB_RECURSE
+	core_sources
+	src/core/*
+)
+
+file(
+	GLOB_RECURSE
+	server_sources
+	src/server/*
+)
+
 # Test executables
 add_executable(
     test-server
-    src/core/address.cpp
-    src/core/exception.cpp
-    src/core/thread.cpp
-    src/server/server.cpp
-    src/server/server-link.cpp
-    src/server/server-listener.cpp
+    ${core_sources}
+    ${server_sources}
     src/test-server.cpp
 )
-
 target_link_libraries(
     test-server
     pthread
