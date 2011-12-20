@@ -10,15 +10,15 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 # Make some sets of files
 
 file(
-	GLOB_RECURSE
-	core_sources
-	src/core/*
+    GLOB_RECURSE
+    core_sources
+    src/core/*
 )
 
 file(
-	GLOB_RECURSE
-	server_sources
-	src/server/*
+    GLOB_RECURSE
+    server_sources
+    src/server/*
 )
 
 # Test executables
@@ -30,5 +30,15 @@ add_executable(
 )
 target_link_libraries(
     test-server
+    pthread
+)
+
+add_executable(
+    test-thread
+    ${core_sources}
+    src/test-thread.cpp
+)
+target_link_libraries(
+    test-thread
     pthread
 )
