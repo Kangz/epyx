@@ -29,7 +29,7 @@ namespace Epyx
          */
         int nbListener;
         ServerListener *listener;
-        
+
     public:
         /**
          * Global setup

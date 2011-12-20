@@ -13,7 +13,7 @@ namespace Epyx
     {
     public:// FIXME: private ?
         std::string type;
-        
+
         /**
          * Module where the exception was thrown
          */
@@ -28,7 +28,7 @@ namespace Epyx
          * Append to message
          */
         void append(const std::string& txt);
-            
+
         /**
          * Print an exception
          */

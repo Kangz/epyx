@@ -26,7 +26,7 @@ namespace Epyx
     unsigned int ServerLink::send(const void *data, unsigned int size)
     {
         unsigned int bytes;
-        
+
         if (data == NULL)
             throw FailException("ServerLink", "data is nul");
         bytes = ::send(this->sockfd, data, size, 0);
@@ -43,7 +43,7 @@ namespace Epyx
         unsigned int bytes;
         if (data == NULL)
             throw FailException("ServerLink", "data == NULL");
-        
+
         while (size > 0) {
             bytes = this->send(data, size);
             if (!bytes)
@@ -54,7 +54,7 @@ namespace Epyx
         }
         return true;
     }
-    
+
     bool ServerLink::sendText(const char *text)
     {
         if (text == NULL)
@@ -65,7 +65,7 @@ namespace Epyx
     unsigned int ServerLink::recv(void *data, unsigned int size)
     {
         unsigned int bytes;
-        
+
         if (data == NULL)
             throw FailException("ServerLink", "data is nul");
         bytes = ::recv(this->sockfd, data, size, 0);
@@ -82,7 +82,7 @@ namespace Epyx
         unsigned int bytes;
         if (data == NULL)
             throw FailException("ServerLink", "data == NULL");
-// TODO: feof !        
+// TODO: feof !
         while (size > 0) {
             bytes = this->recv(data, size);
             if (!bytes)

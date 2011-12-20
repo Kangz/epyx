@@ -20,7 +20,7 @@ namespace Epyx
      * Throw an exception onerror
      */
     typedef bool (ServerRun)(ServerLink& link);
-    
+
 
     class ServerListener
     {

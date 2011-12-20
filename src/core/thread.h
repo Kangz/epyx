@@ -9,7 +9,7 @@
 namespace Epyx
 {
     typedef void (ThreadFn)(void*);
-    
+
     class Thread
     {
     private:
@@ -19,7 +19,7 @@ namespace Epyx
         void *arg;
 
         Thread(ThreadFn fn_, void *arg_);
-        
+
         /**
          * Start the thread
          */
@@ -33,7 +33,7 @@ namespace Epyx
         /**
          * Terminate a thread
          */
-        void term();            
+        void term();
     };
 }
 

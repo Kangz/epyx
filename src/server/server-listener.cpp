@@ -55,7 +55,7 @@ namespace Epyx
         this->thread = NULL;
         this->running = false;
     }
-    
+
     ServerListener::~ServerListener()
     {
         if (this->sockfd >= 0) {
@@ -71,7 +71,7 @@ namespace Epyx
     void ServerListener::run(struct addrinfo *pai, int nbConn, ServerRun runFn_)
     {
         int status, flag;
-        
+
         if (!pai)
             throw FailException("ServerListener", "pai is NULL");
         this->sockfd = -1;
@@ -109,11 +109,11 @@ namespace Epyx
         this->thread = new Thread(server_runAcceptLoop, this);
         this->thread->run();
     }
-            
+
     void ServerListener::AcceptLoop()
     {
         int newfd = -1;
-        bool running = true; 
+        bool running = true;
         struct sockaddr_storage clientAddr;
         socklen_t clientAddrLen;
         ServerLink *newLink = NULL;

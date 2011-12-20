@@ -31,7 +31,7 @@ namespace Epyx
     bool Server::init()
     {
         struct sigaction sigAct;
-        
+
         // Dead process need to be waited
         sigAct.sa_handler = sigchld_handler;
         sigemptyset(&sigAct.sa_mask);
@@ -50,7 +50,7 @@ namespace Epyx
 
         if (port_ >= 65536)
             throw FailException("Server", "Too high port");
-        
+
         this->port = port_;
         this->nbConn = nbConn_;
         this->nbListener = 0;
