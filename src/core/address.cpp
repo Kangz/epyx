@@ -1,9 +1,23 @@
 #include "address.h"
 #include "exception.h"
 #include <sstream>
+#include <string.h>
 
 namespace Epyx
 {
+    Address::Address()
+        :port(0), ipVersion(0)
+    {
+        strcpy(this->ipStr, "*");
+    }
+
+    Address::Address(const char *ip, unsigned int port_, int ipVersion_)
+        :port(port_), ipVersion(ipVersion_)
+    {
+        strncpy(this->ipStr, ip, INET6_ADDRSTRLEN);
+        this->ipStr[INET6_ADDRSTRLEN] = 0;
+    }
+
     Address::Address(const struct sockaddr *saddr)
     {
         if (!saddr)

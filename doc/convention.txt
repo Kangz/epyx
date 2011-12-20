@@ -14,20 +14,20 @@ int main(int argc, char** argv) {
         break; // 2 en plus
     }
     printf( (toto == true) ? "oui" : "non" ); // Ternaire autorise.
-	 
-	 return 0; // OK
-	 return -1; // Rien ne va plus
-	 return -2: // Je me suis planté
+
+     return 0; // OK
+     return -1; // Noting works
+     return -2: // I failed
 }
 
 /*
-TOUT EN ANGLAIS!!! 
+TOUT EN ANGLAIS!!!
 EVERYTHING SHALL BE IN ENGLISH!!!
 
 
 Convention de nommage :
 variable : Pas de lettres de type : int iCount Interdit.
-Constante Preprocesseur  NAME_CONSTANT 
+Constante Preprocesseur  NAME_CONSTANT
 
 nameOfVariable
 NameOfClass
@@ -38,7 +38,7 @@ typedef enum MyEnum {
 }MyEnum;
 
 
-Fonction : convention Doxygen 
+Fonction : convention Doxygen
 
 Fichier :
 Une classe par fichier et un fichier par classe (un .h et un .cpp).
