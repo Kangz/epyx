@@ -14,6 +14,10 @@ namespace Epyx
     private:
         pthread_mutex_t mutex;
 
+        // Disable copy construction and assignment.
+        Mutex (const Mutex&);
+        const Mutex &operator = (const Mutex&);
+
     public:
         inline Mutex ()
         {
