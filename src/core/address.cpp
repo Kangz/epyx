@@ -66,4 +66,11 @@ namespace Epyx
         else
             return os << (*addr);
     }
+
+    bool operator==(const Address& addr1, const Address& addr2)
+    {
+        return (addr1.port == addr2.port)
+            && (addr1.ipVersion == addr2.ipVersion)
+            && !strncmp(addr1.ipStr, addr2.ipStr, INET6_ADDRSTRLEN);
+    }
 }

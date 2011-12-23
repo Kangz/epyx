@@ -21,6 +21,13 @@ file(
     src/server/*
 )
 
+file(
+    GLOB_RECURSE
+    localn2np_sources
+    src/localn2np/*
+    src/n2np/*
+)
+
 # Test executables
 add_executable(
     test-server
@@ -40,5 +47,16 @@ add_executable(
 )
 target_link_libraries(
     test-thread
+    pthread
+)
+
+add_executable(
+    test-n2np
+    ${core_sources}
+    ${localn2np_sources}
+    src/test-n2np.cpp
+)
+target_link_libraries(
+    test-n2np
     pthread
 )

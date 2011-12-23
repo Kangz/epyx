@@ -22,6 +22,13 @@ namespace Epyx
         Address(const struct sockaddr *saddr);
         friend std::ostream& operator<<(std::ostream& os, const Address& addr);
         friend std::ostream& operator<<(std::ostream& os, const Address *addr);
+
+        friend bool operator==(const Address& addr1, const Address& addr2);
+            
+        friend inline bool operator!=(const Address& addr1, const Address& addr2)
+        {
+            return !(addr1 == addr2);
+        }
     };
 }
 
