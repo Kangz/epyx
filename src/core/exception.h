@@ -32,7 +32,7 @@ namespace Epyx
         /**
          * Print an exception
          */
-        friend std::ostream& operator<<(std::ostream& os, Exception& e);
+        friend std::ostream& operator<<(std::ostream& os, const Exception& e);
     };
 
     /**

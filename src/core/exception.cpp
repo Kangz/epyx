@@ -17,7 +17,7 @@ namespace Epyx
         this->message += txt;
     }
 
-    std::ostream& operator<<(std::ostream& os, Exception& e)
+    std::ostream& operator<<(std::ostream& os, const Exception& e)
     {
         return os << e.type << " in module " << e.module << ": " << e.message << "\n";
     }

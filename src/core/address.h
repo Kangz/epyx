@@ -20,8 +20,8 @@ namespace Epyx
         Address();
         Address(const char *ip, unsigned int port_, int ipVersion_);
         Address(const struct sockaddr *saddr);
-        friend std::ostream& operator<<(std::ostream& os, Address& addr);
-        friend std::ostream& operator<<(std::ostream& os, Address *addr);
+        friend std::ostream& operator<<(std::ostream& os, const Address& addr);
+        friend std::ostream& operator<<(std::ostream& os, const Address *addr);
     };
 }
 

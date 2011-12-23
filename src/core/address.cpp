@@ -47,7 +47,7 @@ namespace Epyx
         }
     }
 
-    std::ostream& operator<<(std::ostream& os, Address& addr)
+    std::ostream& operator<<(std::ostream& os, const Address& addr)
     {
         if (addr.ipVersion == 6)
             os << '[' << addr.ipStr << ']';
@@ -59,7 +59,7 @@ namespace Epyx
         return os;
     }
 
-    std::ostream& operator<<(std::ostream& os, Address *addr)
+    std::ostream& operator<<(std::ostream& os, const Address *addr)
     {
         if (!addr)
             return os << "(null)";
