@@ -56,13 +56,14 @@ namespace Epyx
 
         if (addr.port)
             os << ':' << addr.port;
+        return os;
     }
 
     std::ostream& operator<<(std::ostream& os, Address *addr)
     {
         if (!addr)
-            os << "(null)";
+            return os << "(null)";
         else
-            os << (*addr);
+            return os << (*addr);
     }
 }

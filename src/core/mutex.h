@@ -15,32 +15,32 @@ namespace Epyx
         pthread_mutex_t mutex;
 
         // Disable copy construction and assignment.
-        Mutex (const Mutex&);
-        const Mutex &operator = (const Mutex&);
+        Mutex(const Mutex&);
+        const Mutex& operator=(const Mutex&);
 
     public:
-        inline Mutex ()
+        inline Mutex()
         {
             int status = pthread_mutex_init (&(this->mutex), NULL);
             if (status)
                 throw FailException("Mutex", "pthread_mutex init error");
         }
 
-        inline ~Mutex ()
+        inline ~Mutex()
         {
             int status = pthread_mutex_destroy (&(this->mutex));
             if (status)
                 throw FailException("Mutex", "pthread_mutex destroy error");
         }
 
-        inline void lock ()
+        inline void lock()
         {
             int status = pthread_mutex_lock (&(this->mutex));
             if (status)
                 throw FailException("Mutex", "pthread_mutex lock error");
         }
 
-        inline void unlock ()
+        inline void unlock()
         {
             int status = pthread_mutex_unlock (&(this->mutex));
             if (status)

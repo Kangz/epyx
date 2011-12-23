@@ -19,7 +19,7 @@ namespace Epyx
 
     std::ostream& operator<<(std::ostream& os, Exception& e)
     {
-        os << e.type << " in module " << e.module << ": " << e.message << "\n";
+        return os << e.type << " in module " << e.module << ": " << e.message << "\n";
     }
 
 
