@@ -14,7 +14,7 @@ namespace Epyx
     class N2npPacketType
     {
     private:
-        char typeStr[N2npPacketTypeMaxLen];
+        char typeStr[N2npPacketTypeMaxLen + 1];
 
     public:
         N2npPacketType(const char *type);

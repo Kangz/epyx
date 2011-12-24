@@ -28,5 +28,6 @@ namespace Epyx
         char *data_ = new char[pkt.size];
         memcpy(data_, pkt.data, pkt.size);
         this->data = data_;
+        return *this;
     }
 }
