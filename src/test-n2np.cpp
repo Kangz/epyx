@@ -50,7 +50,7 @@ void test_command(Epyx::LocalNode *node, const Epyx::Address& addr)
 /**
  * Receive callback for every node
  */
-bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt)
+bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_)
 {
     std::cout << "[Node " << node << "] Recv from " << pkt.from << ": `"
         << pkt.data << "'\n";
@@ -74,7 +74,7 @@ int main()
         for (int i = 0; i < nodeNum; i++) {
             nodes[i] = new Epyx::LocalNode();
             nodes[i]->attach(relay);
-            nodes[i]->registerRecv(type, nodeRecv);
+            nodes[i]->registerRecv(type, nodeRecv, NULL);
             nodes[i]->run();
         }
 

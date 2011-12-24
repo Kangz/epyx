@@ -89,13 +89,17 @@ namespace Epyx
                 //    << " type " << pkt.type << '\n';
 
                 // Find the recv callback
-                LocalPacketRecvCb *recvCb = NULL;
+                bool foundCallback = false;
+                ReceiveCbData recvCbData;
+
                 this->recvCallbacksMutex.lock();
-                if (this->recvCallbacks.count(pkt.type))
-                    recvCb = (*(this->recvCallbacks.find(pkt.type))).second;
+                if (this->recvCallbacks.count(pkt.type)){
+                    recvCbData = (*(this->recvCallbacks.find(pkt.type))).second;
+                    foundCallback = true;
+                }
                 this->recvCallbacksMutex.unlock();
 
-                if (recvCb == NULL) {
+                if (!foundCallback) {
                     std::cout << "[Node " << this << "] Unknown type " << pkt.type << '\n';
                     continue;
                 }
@@ -103,7 +107,7 @@ namespace Epyx
                 // Call the callback
                 bool result = false;
                 try {
-                    result = (*recvCb)(*this, pkt);
+                    result = (*recvCbData.cb)(*this, pkt, recvCbData.arg);
                 } catch (Exception e) {
                     std::cerr << "[Node " << this << "] Exception " << e;
                     result = false;
@@ -122,10 +126,11 @@ namespace Epyx
         this->runThread.run();
     }
 
-    void LocalNode::registerRecv(const N2npPacketType& type, const LocalPacketRecvCb *cb)
+    void LocalNode::registerRecv(const N2npPacketType& type, ReceiveCb *cb, void* cbData)
     {
+        ReceiveCbData cbEntry = {cb, cbData};
         this->recvCallbacksMutex.lock();
-        this->recvCallbacks.insert(std::make_pair(type, cb));
+        this->recvCallbacks.insert(std::make_pair(type, cbEntry));
         this->recvCallbacksMutex.unlock();
     }
 }

@@ -17,11 +17,18 @@ namespace Epyx
 {
     // Recv callback
     class LocalNode;
-    typedef bool (LocalPacketRecvCb)(LocalNode&, const N2npPacket&);
 
     class LocalNode
     {
     private:
+    
+        //Internal definition used for the callback
+        typedef bool (ReceiveCb)(LocalNode&, const N2npPacket&, void* cbData);
+        typedef struct{
+            ReceiveCb* cb;
+            void* arg;
+        }ReceiveCbData;
+
         N2npNodeId id;
         LocalRelay *relay;
 
@@ -33,7 +40,7 @@ namespace Epyx
         Thread runThread;
 
         // Callbacks for Recv
-        std::map<N2npPacketType, LocalPacketRecvCb*> recvCallbacks;
+        std::map<N2npPacketType, ReceiveCbData> recvCallbacks;
         Mutex recvCallbacksMutex;
 
         // Disable copy
@@ -73,7 +80,7 @@ namespace Epyx
         /**
          * Register a receive callback
          */
-        void registerRecv(const N2npPacketType& type, const LocalPacketRecvCb *cb);
+        void registerRecv(const N2npPacketType& type, ReceiveCb *cb, void* cbData);
     };
 }
 
