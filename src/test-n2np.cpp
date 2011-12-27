@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <string.h>
 #include "localn2np/local-node.h"
 #include "core/exception.h"
 
@@ -56,8 +57,18 @@ bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_)
     std::cout << "[Node " << node << "] Recv from " << pkt.from << ": `"
         << pkt.data << "'\n";
     // Send a pong with the same data
-    Epyx::N2npPacket pongPkt(pkt);
-    pongPkt.type = pongType;
+    // .. or not
+    const char *data = pkt.data;
+    int size = pkt.size;
+
+    if (!strcasecmp(pkt.data, "o<"))
+        data = "PAN !";
+    else if (!strcasecmp(pkt.data, "Question?"))
+        data = "The answer is 42.";
+    if (data != pkt.data)
+        size = strlen(data) + 1;
+
+    Epyx::N2npPacket pongPkt(pongType, size, data);
     node.send(pkt.from, pongPkt);
     return true;
 }
