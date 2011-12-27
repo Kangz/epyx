@@ -11,18 +11,18 @@ namespace Epyx{
  * Every Routine you create shoud be cast to the Routine type (it is safe)
  */
 struct Routine{
-	void (*_rt_call)(void*rt_this);
-	void* rt_this;
+    void (*_rt_call)(void*rt_this);
+    void* rt_this;
 
-	/*
-	 * call() makes the actual call to the function (you can use the () operator too
-	 */
-	void call(){
-		_rt_call(rt_this);
-	}
-	void operator()(){
-		this->call();
-	};
+    /*
+     * call() makes the actual call to the function (you can use the () operator too
+     */
+    void call(){
+        _rt_call(rt_this);
+    }
+    void operator()(){
+        this->call();
+    };
 };
 
 
@@ -36,21 +36,21 @@ struct Routine{
  * See the example in ****.cpp
  */
 #define ROUTINE_DECLARE(name, ...) \
-	void _rt_call_##name(void *r);\
-	\
-	struct name{\
-		void (*_rt_call)(void* rt_this);\
-		void *_rt_this;\
-		\
-		int _rt_p;\
-		void _rt_do();\
-		name(__VA_ARGS__);\
-		\
-		static void _rt_cast_and_call(void *r){\
-			name * routine = (name *) r;\
-			routine->_rt_do();\
-		}\
-	
+    void _rt_call_##name(void *r);\
+    \
+    struct name{\
+        void (*_rt_call)(void* rt_this);\
+        void *_rt_this;\
+        \
+        int _rt_p;\
+        void _rt_do();\
+        name(__VA_ARGS__);\
+        \
+        static void _rt_cast_and_call(void *r){\
+            name * routine = (name *) r;\
+            routine->_rt_do();\
+        }\
+
 /*
  * ROUTINE_LOCAL_VARS has to be put before the list of local vars
  * It does nothing, really except that it reminds you that local
@@ -71,10 +71,10 @@ struct Routine{
  * Remember that these parameters are only accessible from ROUTINE_INIT and NOT in ROUTINE_MAIN
  */
 #define ROUTINE_INIT(name, ...)\
-	name::name(__VA_ARGS__){\
-		_rt_p = 0;\
-		_rt_this = this;\
-		_rt_call = & name ::_rt_cast_and_call;\
+    name::name(__VA_ARGS__){\
+        _rt_p = 0;\
+        _rt_this = this;\
+        _rt_call = & name ::_rt_cast_and_call;\
 
 /*
  * ROUTINE_INIT_END does what it says
@@ -88,10 +88,10 @@ struct Routine{
  * in which you should NOT use switch ... case statements
  */
 #define ROUTINE_MAIN(name)\
-	void name::_rt_do(){\
-		const int _rt_counter_start = __COUNTER__ + 1;\
-		switch(_rt_p){\
-		case __COUNTER__ - _rt_counter_start:\
+    void name::_rt_do(){\
+        const int _rt_counter_start = __COUNTER__ + 1;\
+        switch(_rt_p){\
+        case __COUNTER__ - _rt_counter_start:\
 
 /*
  * ROUTINE_MAIN_END does what it says
