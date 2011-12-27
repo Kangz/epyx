@@ -52,7 +52,19 @@ void test_command(Epyx::LocalNode *node, const Epyx::Address& addr)
  */
 bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_)
 {
+    Epyx::N2npPacketType pongType("pong");
     std::cout << "[Node " << node << "] Recv from " << pkt.from << ": `"
+        << pkt.data << "'\n";
+    // Send a pong with the same data
+    Epyx::N2npPacket pongPkt(pkt);
+    pongPkt.type = pongType;
+    node.send(pkt.from, pongPkt);
+    return true;
+}
+
+bool nodeRecvPong(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_)
+{
+    std::cout << "[Node " << node << "] Pong from " << pkt.from << ": `"
         << pkt.data << "'\n";
     return true;
 }
@@ -65,6 +77,7 @@ int main()
     try {
         Epyx::Address addr("L0C4L", 0, 0);
         Epyx::N2npPacketType type("test");
+        Epyx::N2npPacketType pongType("pong");
 
         // Create a relay
         relay = new Epyx::LocalRelay(addr);
@@ -75,6 +88,7 @@ int main()
             nodes[i] = new Epyx::LocalNode();
             nodes[i]->attach(relay);
             nodes[i]->registerRecv(type, nodeRecv, NULL);
+            nodes[i]->registerRecv(pongType, nodeRecvPong, NULL);
             nodes[i]->run();
         }
 

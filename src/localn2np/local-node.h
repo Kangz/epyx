@@ -21,7 +21,7 @@ namespace Epyx
     class LocalNode
     {
     private:
-    
+
         //Internal definition used for the callback
         typedef bool (ReceiveCb)(LocalNode&, const N2npPacket&, void* cbData);
         typedef struct{

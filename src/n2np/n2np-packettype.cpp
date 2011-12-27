@@ -22,8 +22,8 @@ namespace Epyx
             return os << (*type);
     }
 
-    int operator<(const N2npPacketType& type1, const N2npPacketType& type2)
+    bool operator<(const N2npPacketType& type1, const N2npPacketType& type2)
     {
-        return strncmp(type1.typeStr, type2.typeStr, N2npPacketTypeMaxLen);
+        return strncmp(type1.typeStr, type2.typeStr, N2npPacketTypeMaxLen) < 0;
     }
 }

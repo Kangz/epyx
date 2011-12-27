@@ -21,7 +21,7 @@ namespace Epyx
         friend std::ostream& operator<<(std::ostream& os, const N2npPacketType& type);
         friend std::ostream& operator<<(std::ostream& os, const N2npPacketType *type);
 
-        friend int operator<(const N2npPacketType& type1, const N2npPacketType& type2);
+        friend bool operator<(const N2npPacketType& type1, const N2npPacketType& type2);
     };
 }
 
