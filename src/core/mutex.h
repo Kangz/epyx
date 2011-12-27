@@ -46,6 +46,11 @@ namespace Epyx
             if (status)
                 throw FailException("Mutex", "pthread_mutex unlock error");
         }
+
+        inline pthread_mutex_t* getInternal()
+        {
+            return &mutex;
+        }
     };
 }
 
