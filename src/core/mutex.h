@@ -6,6 +6,7 @@
 
 #include <pthread.h>
 #include "exception.h"
+#include <errno.h>
 
 namespace Epyx
 {
@@ -45,6 +46,15 @@ namespace Epyx
             int status = pthread_mutex_unlock(&(this->mutex));
             if (status)
                 throw FailException("Mutex", "pthread_mutex unlock error");
+        }
+
+        //Returns true if it successfully locked the mutex)
+        inline bool tryLock()
+        {
+            int status = pthread_mutex_trylock(&(this->mutex));
+            if (status && status != EBUSY)
+                throw FailException("Mutex", "pthread_mutex trylock error");
+            return status != EBUSY;
         }
 
         inline pthread_mutex_t* getInternal()

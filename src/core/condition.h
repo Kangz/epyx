@@ -26,6 +26,7 @@ namespace Epyx {
         ~Condition();
 
         void lock();
+        bool tryLock();
         void unlock();
         void wait();
 
@@ -38,6 +39,8 @@ namespace Epyx {
 
         void notify();
         void notifyAll();
+
+        Mutex& getMutex();
     };
 }
 

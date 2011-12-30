@@ -21,6 +21,10 @@ namespace Epyx {
         this->mutex.lock();
     }
 
+    bool Condition::tryLock() {
+        return this->mutex.tryLock();
+    }
+
     void Condition::unlock() {
         this->mutex.unlock();
     }
@@ -62,4 +66,9 @@ namespace Epyx {
         int status = pthread_cond_broadcast(&(this->cond));
         if (status) throw FailException("Condition", "pthread_cond_broadcast error");
     }
+
+    Mutex& Condition::getMutex() {
+        return this->mutex;
+    }
+
 }
