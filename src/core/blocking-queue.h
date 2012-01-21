@@ -29,8 +29,11 @@ namespace Epyx {
         T* tryPop();
 
         //Do not implement the following methods due to a lack of atomic operations
+        //TODO: do it
         //int length();
         //bool isEmpty();
+        
+        //TODO: allow someone to flush the queue (ie copy)
     };
 
     template<typename T> BlockingQueue<T>::BlockingQueue() {}
@@ -58,27 +61,37 @@ namespace Epyx {
         while(fifo.empty()){
             cond.wait();
         }
-        T& result = fifo.front();
+        T* result = new T(fifo.front());
         fifo.pop();
-        return &result;
+        cond.unlock();
+        return result;
     }
 
     template<typename T> T* BlockingQueue<T>::pop(int msec){
         cond.lock();
-        while(fifo.empty()){
+        if(fifo.empty()){
             cond.timedWait(msec);
         }
-        T& result = fifo.front();
+        if(fifo.empty()){
+            cond.unlock();
+            return NULL;
+        }
+        T* result = new T(fifo.front());
         fifo.pop();
-        return &result;
+        cond.unlock();
+        return result;
     }
 
     template<typename T> T* BlockingQueue<T>::tryPop(){
         if(cond.tryLock()){
-            T& result = fifo.front();
+            if(fifo.empty()){
+                cond.unlock();
+                return NULL;
+            }
+            T* result = new T(fifo.front());
             fifo.pop();
             cond.unlock();
-            return &result;
+            return result;
         }
         return NULL;
     }
