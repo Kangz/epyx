@@ -7,6 +7,8 @@ project(Epyx)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
+SET(CMAKE_CXX_FLAGS "-g -Wall -Wextra")
+
 # Make some sets of files
 
 file(
