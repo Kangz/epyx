@@ -32,7 +32,7 @@ namespace Epyx {
         //TODO: do it
         //int length();
         //bool isEmpty();
-        
+
         //TODO: allow someone to flush the queue (ie copy)
     };
 
