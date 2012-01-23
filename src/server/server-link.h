@@ -31,15 +31,15 @@ namespace Epyx
         /**
          * send may not send everything if the system tells so
          */
-        unsigned int send(const void *data, unsigned int size);
-        bool sendAll(const void *data, unsigned int size);
+        unsigned int send(const void *data, int size);
+        bool sendAll(const void *data, int size);
         bool sendText(const char *text);
 
         /**
          * receive data, blocking calls
          */
-        unsigned int recv(void *data, unsigned int size);
-        bool recvAll(void *data, unsigned int size);
+        unsigned int recv(void *data, int size);
+        bool recvAll(void *data, int size);
         bool recvLine(std::ostream& out);
     };
 }

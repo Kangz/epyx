@@ -5,8 +5,8 @@ namespace Epyx
 {
     N2npPacket::N2npPacket(const N2npPacketType type_, unsigned int size_,
                            const char *data_)
-        :type(type_), size(size_), data(data_),
-        from(), to()
+        :from(), to(), type(type_), size(size_), data(data_)
+        
     {
     }
 

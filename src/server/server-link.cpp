@@ -6,7 +6,7 @@ namespace Epyx
 {
     ServerLink::ServerLink(ServerListener *listener_, Address *srvAddr_,
                            struct sockaddr *aiClient, int sockfd_)
-        :listener(listener_), srvAddr(srvAddr_), clientAddr(aiClient), sockfd(sockfd_)
+        :sockfd(sockfd_), listener(listener_), clientAddr(aiClient), srvAddr(srvAddr_)
     {
     }
 
@@ -23,9 +23,9 @@ namespace Epyx
         }
     }
 
-    unsigned int ServerLink::send(const void *data, unsigned int size)
+    unsigned int ServerLink::send(const void *data, int size)
     {
-        unsigned int bytes;
+        int bytes;
 
         if (data == NULL)
             throw FailException("ServerLink", "data is nul");
@@ -38,9 +38,9 @@ namespace Epyx
         return bytes;
     }
 
-    bool ServerLink::sendAll(const void *data, unsigned int size)
+    bool ServerLink::sendAll(const void *data, int size)
     {
-        unsigned int bytes;
+        int bytes;
         if (data == NULL)
             throw FailException("ServerLink", "data == NULL");
 
@@ -62,9 +62,9 @@ namespace Epyx
         return this->sendAll(text, strlen(text));
     }
 
-    unsigned int ServerLink::recv(void *data, unsigned int size)
+    unsigned int ServerLink::recv(void *data, int size)
     {
-        unsigned int bytes;
+        int bytes;
 
         if (data == NULL)
             throw FailException("ServerLink", "data is nul");
@@ -77,9 +77,9 @@ namespace Epyx
         return bytes;
     }
 
-    bool ServerLink::recvAll(void *data, unsigned int size)
+    bool ServerLink::recvAll(void *data, int size)
     {
-        unsigned int bytes;
+        int bytes;
         if (data == NULL)
             throw FailException("ServerLink", "data == NULL");
 // TODO: feof !
