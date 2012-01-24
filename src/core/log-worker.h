@@ -14,11 +14,7 @@ namespace Epyx {
 namespace log {
 
     class Worker {
-<<<<<<< HEAD
     private:
-=======
-    private:            
->>>>>>> 5d0ccf16e5f21f57716bc24afb91340f930576aa
         Worker(const Worker&);
         const Worker& operator=(const Worker&);
 

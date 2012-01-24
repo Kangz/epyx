@@ -10,11 +10,7 @@ namespace log {
     Worker::Worker(int flags_, const std::string& file): flags(flags_), thread(start_worker, this){
         if(!file.empty() && (this->flags & LOGFILE)) {
             this->logFile.open(file.c_str());
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> 5d0ccf16e5f21f57716bc24afb91340f930576aa
             if(!logFile.is_open()) {
                 this->flags ^= LOGFILE;
                 //How will FailException warn ? it should not use the logger
