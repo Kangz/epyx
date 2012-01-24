@@ -5,6 +5,7 @@
 
 #include <queue>
 #include "condition.h"
+#include <iostream>
 
 //TODO: add documentation
 
@@ -12,7 +13,7 @@ namespace Epyx {
     template<typename T> class BlockingQueue {
     private:
         Condition cond;
-        std::queue<T> fifo;
+        std::deque<T> fifo;
 
         // Disable copy construction and assignment.
         BlockingQueue(const BlockingQueue&);
@@ -28,6 +29,11 @@ namespace Epyx {
         T* pop(int msec);
         T* tryPop();
 
+        std::deque<T>* flush();
+        std::deque<T>* flush(int msec);
+        std::deque<T>* tryFlush();
+
+
         //Do not implement the following methods due to a lack of atomic operations
         //TODO: do it
         //int length();
@@ -41,14 +47,14 @@ namespace Epyx {
 
     template<typename T> void BlockingQueue<T>::push(T& e) {
         cond.lock();
-        fifo.push(e);
+        fifo.push_back(e);
         cond.notify();
         cond.unlock();
     }
 
     template<typename T> bool BlockingQueue<T>::tryPush(T& e) {
         if(cond.tryLock()){
-            fifo.push(e);
+            fifo.push_back(e);
             cond.notify();
             cond.unlock();
             return true;
@@ -62,7 +68,7 @@ namespace Epyx {
             cond.wait();
         }
         T* result = new T(fifo.front());
-        fifo.pop();
+        fifo.pop_front();
         cond.unlock();
         return result;
     }
@@ -77,7 +83,7 @@ namespace Epyx {
             return NULL;
         }
         T* result = new T(fifo.front());
-        fifo.pop();
+        fifo.pop_front();
         cond.unlock();
         return result;
     }
@@ -89,12 +95,54 @@ namespace Epyx {
                 return NULL;
             }
             T* result = new T(fifo.front());
-            fifo.pop();
+            fifo.pop_front();
             cond.unlock();
             return result;
         }
         return NULL;
     }
+
+    template<typename T> std::deque<T>* BlockingQueue<T>::flush(){
+        cond.lock();
+        while(fifo.empty()){
+            cond.wait();
+        }
+        std::deque<T>* result = new std::deque<T>(fifo);
+        fifo.clear();
+        cond.unlock();
+        return result;
+    }
+
+    template<typename T> std::deque<T>* BlockingQueue<T>::flush(int msec){
+        cond.lock();
+        if(fifo.empty()){
+            cond.timedWait(msec);
+        }
+        if(fifo.empty()){
+            cond.unlock();
+            return NULL;
+        }
+        std::deque<T>* result = new std::deque<T>(fifo);
+        fifo.clear();
+        cond.unlock();
+        return result;
+    }
+
+    template<typename T> std::deque<T>* BlockingQueue<T>::tryFlush(){
+        if(cond.tryLock()){
+            if(fifo.empty()){
+                cond.unlock();
+                return NULL;
+            }
+            std::deque<T>* result = new std::deque<T>(fifo);
+            fifo.clear();
+            cond.unlock();
+            return result;
+        }
+        return NULL;
+    }
+
+
 }
 
 #endif /* EPYX_BLOCKING_QUEUE_H */
