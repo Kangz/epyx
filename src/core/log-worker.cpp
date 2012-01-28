@@ -5,6 +5,7 @@ namespace log {
 
     Worker::Worker(int flags_, const std::string& file): flags(flags_), thread(this, "Logging Worker"){
         if(!file.empty() && (this->flags & LOGFILE)) {
+            //TODO: Close it
             this->logFile.open(file.c_str());
 
             if(!logFile.is_open()) {
@@ -50,16 +51,16 @@ namespace log {
                     thread_buffer << "[" << entry.thread_name << " " << id << "]";
                 }
 
+                //TODO: Flush control commands
                 //Do the actual IO
                 if(this->flags & CONSOLE) {
                     std::cout << "[" << time_buffer << "] " << thread_buffer.str() << " " << entry.str << "\n";
                 }
                 if(this->flags & ERRORCONSOLE) {
-                    std::cerr << entry.str << "\n";
+                    std::cerr << "[" << time_buffer << "] " << thread_buffer.str() << " " << entry.str << "\n";
                 }
                 if(this->flags & LOGFILE) {
-                    //TODO
-                    // std::cout << entry.str << std::endl;
+                    logFile << "[" << date_buffer << " " << time_buffer << "] " << thread_buffer.str() << " " << entry.str << "\n";
                 }
 
                 entries->pop_front();

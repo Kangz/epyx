@@ -182,7 +182,7 @@ void stress_test_logger(){
 
 int main(){
     Thread::init();
-    log::init(log::CONSOLE);
+    log::init(log::CONSOLE | log::LOGFILE, "Test.log");
 
     test_mutex();
     test_cond();
