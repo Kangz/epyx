@@ -15,27 +15,24 @@ using namespace Epyx;
 Mutex *my_mutex;
 int my_counter;
 
-void mutex_thread(void *pThreadId) {
-    int i;
-    int threadId = -1;
+class MutexThread : public Runnable {
+public:
+    virtual void run(){
+        int i;
 
-    if (pThreadId) threadId = *(int*)pThreadId;
+        usleep(100000 * (1 + rand()%20));
+        my_mutex->lock();
+        i = ++my_counter;
+        my_mutex->unlock();
+        log::info << "Inc Cnt to " << i << log::endl;
 
-    usleep(100000 * (1 + rand()%20));
-    my_mutex->lock();
-    i = ++my_counter;
-    my_mutex->unlock();
-    log::info << "[Thread " << threadId << "] Inc Cnt to " << i << log::endl;
-
-    usleep(100000 * (1 + rand()%20));
-    my_mutex->lock();
-    i = --my_counter;
-    my_mutex->unlock();
-    log::info << "[Thread " << threadId << "] Dec Cnt to " << i << log::endl;
-
-    delete (int*)pThreadId;
-    pThreadId = 0;
-}
+        usleep(100000 * (1 + rand()%20));
+        my_mutex->lock();
+        i = --my_counter;
+        my_mutex->unlock();
+        log::info << "Dec Cnt to " << i << log::endl;
+    }
+};
 
 void test_mutex() {
     const int threadNumber = 10;
@@ -43,18 +40,18 @@ void test_mutex() {
     my_mutex = 0;
 
     try {
-        log::info << "[Main] Create Mutex" << log::endl;
+        log::info << "Create Mutex" << log::endl;
         my_mutex = new Mutex();
         my_counter = 0;
 
         for (int i = 0; i < threadNumber; i++) {
-            log::info << "[Main] Spawn thread " << i << log::endl;
-            threads[i] = new Thread(mutex_thread, new int(i));
+            log::info << "Spawn thread " << i << log::endl;
+            threads[i] = new Thread(new MutexThread(), "Mutex", i);
             threads[i]->run();
         }
 
         for (int i = 0; i < threadNumber; i++) {
-            log::info << "[Main] Wait for thread " << i << log::endl;
+            log::info << "Wait for thread " << i << log::endl;
             threads[i]->wait();
             delete threads[i];
             threads[i] = 0;
@@ -71,57 +68,50 @@ void test_mutex() {
 
 Condition *cond_condition;
 
-void cond_thread(void *pThreadId) {
-    int threadId = -1;
+class ConditionThread : public Runnable {
+public:
+    virtual void run(){
+        cond_condition->lock();
+        cond_condition->wait();
+        cond_condition->unlock();
+        log::info << "Woken up" << log::endl;
 
-    if (pThreadId) threadId = *(int*)pThreadId;
+        cond_condition->lock();
+        cond_condition->wait();
+        cond_condition->unlock();
+        log::info << "Woken up AGAIN" << log::endl;
+    }
+};
 
-    cond_condition->lock();
-    cond_condition->wait();
-    cond_condition->unlock();
-    log::info << "[Thread " << threadId << "] woken up" << log::endl;
+class ImpatientConditionThread : public Runnable {
+public:
+    virtual void run(){
+        cond_condition->lock();
+        cond_condition->timedWait(500);
+        cond_condition->unlock();
+        log::info << "I timed out" << log::endl;
 
-
-    cond_condition->lock();
-    cond_condition->wait();
-    cond_condition->unlock();
-    log::info << "[Thread " << threadId << "] woken up AGAIN" << log::endl;
-
-    delete (int*)pThreadId;
-}
-
-void cond_impatient_thread(void *pThreadId) {
-    int threadId = -1;
-
-    if (pThreadId) threadId = *(int*)pThreadId;
-
-    cond_condition->lock();
-    cond_condition->timedWait(500);
-    cond_condition->unlock();
-    log::info << "[Thread " << threadId << "] I timed out" << log::endl;
-
-    cond_condition->lock();
-    cond_condition->timedWait(500);
-    cond_condition->unlock();
-    log::info << "[Thread " << threadId << "] I'm really too impatient" << log::endl;
-
-    delete (int*)pThreadId;
-}
+        cond_condition->lock();
+        cond_condition->timedWait(500);
+        cond_condition->unlock();
+        log::info << "I'm really too impatient" << log::endl;
+    }
+};
 
 void test_cond(){
     const int threadNumber = 6;
     Thread *threads[threadNumber];
 
     try {
-        log::info << "[Main] Create Condition" << log::endl;
+        log::info << "Create Condition" << log::endl;
         cond_condition = new Condition();
 
         for (int i = 0; i < threadNumber; i++) {
-            log::info << "[Main] Spawn thread " << i << log::endl;
+            log::info << "Spawn thread " << i << log::endl;
             if(i == 0) {
-                threads[i] = new Thread(cond_impatient_thread, new int(i));
+                threads[i] = new Thread(new ImpatientConditionThread(), "Impatient", i);
             } else {
-                threads[i] = new Thread(cond_thread, new int(i));
+                threads[i] = new Thread(new ConditionThread(), "Condition", i);
             }
             threads[i]->run();
         }
@@ -157,18 +147,14 @@ void test_cond(){
     }
 }
 
-void spamming_thread(void *pThreadId) {
-    int threadId = -1;
-
-    if (pThreadId) threadId = *(int*)pThreadId;
-
-    for(int i=0; i<100; i++){
-        log::info<<"Thread " << threadId << " spamming!!!§ " << i << " times " << log::endl;
+class SpammingThread : public Runnable {
+public:
+    virtual void run(){
+        for(int i=0; i<10000; i++){
+            log::info<<"Spamming!!!§ " << i << " times " << log::endl;
+        }
     }
-
-    delete (int*)pThreadId;
-}
-
+};
 
 void stress_test_logger(){
     const int threadNumber = 6;
@@ -176,14 +162,14 @@ void stress_test_logger(){
 
     try {
         for (int i = 0; i < threadNumber; i++) {
-            log::info << "[Main] Spawn thread " << i << log::endl;
-            threads[i] = new Thread(spamming_thread, new int(i));
+            log::info << "Spawn thread " << i << log::endl;
+            threads[i] = new Thread(new SpammingThread(), "Spamming", i);
         }
         for (int i = 0; i < threadNumber; i++) {
             threads[i]->run();
         }
         for (int i = 0; i < threadNumber; i++) {
-            log::info << "[Main] Wait for thread " << i << log::endl;
+            log::info << "Wait for thread " << i << log::endl;
             threads[i]->wait();
             delete threads[i];
             threads[i] = 0;
@@ -195,8 +181,8 @@ void stress_test_logger(){
 }
 
 int main(){
+    Thread::init();
     log::init(log::CONSOLE);
-    std::cout << log::_buffers << std::endl;
 
     test_mutex();
     test_cond();

@@ -3,7 +3,7 @@
 namespace Epyx {
 namespace log {
 
-    Worker::Worker(int flags_, const std::string& file): flags(flags_), thread(this){
+    Worker::Worker(int flags_, const std::string& file): flags(flags_), thread(this, "Logging Worker"){
         if(!file.empty() && (this->flags & LOGFILE)) {
             this->logFile.open(file.c_str());
 
@@ -17,25 +17,42 @@ namespace log {
     }
 
     void Worker::write(const std::string& message, int prio) {
-        time_t rawtime;
-        struct tm* timeinfo;
-        time(&rawtime);
-        timeinfo = localtime(&rawtime);
-
-        LogEntry entry = {message, prio, *timeinfo};
+        LogEntry entry = {message, prio, time(NULL), Thread::getName(), Thread::getId()};
 
         this->entries.push(entry);
     }
 
     void Worker::run() {
+        //As this function is called from only one thread I can use static variables to avoid allocations
+        static char time_buffer[20];
+        static char date_buffer[20];
+
 	    while(1){
-            //TODO use flush instead
+            //Take all the elements from the queue with only one call
             std::deque<LogEntry>* entries = this->entries.flush();
             if(entries == NULL) continue;
+
             while(!entries->empty()){
                 LogEntry& entry = entries->front();
+
+                //This returns a pointer to a static struct, I hope I'm the only one using it
+                //TODO: fix this!
+                tm* timeinfo = localtime(&entry.time);
+                strftime(time_buffer, 20, "%H:%M:%S", timeinfo);
+                strftime(date_buffer, 20, "%Y-%m-%d", timeinfo);
+
+                //Make the part with the thread's name
+                std::ostringstream thread_buffer;
+                int id = entry.thread_id;
+                if(id < 0){
+                    thread_buffer << "[" << entry.thread_name << "]";
+                }else{
+                    thread_buffer << "[" << entry.thread_name << " " << id << "]";
+                }
+
+                //Do the actual IO
                 if(this->flags & CONSOLE) {
-                    std::cout << entry.str << "\n";
+                    std::cout << "[" << time_buffer << "] " << thread_buffer.str() << " " << entry.str << "\n";
                 }
                 if(this->flags & ERRORCONSOLE) {
                     std::cerr << entry.str << "\n";
@@ -44,6 +61,7 @@ namespace log {
                     //TODO
                     // std::cout << entry.str << std::endl;
                 }
+
                 entries->pop_front();
             }
         }

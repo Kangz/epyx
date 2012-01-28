@@ -31,16 +31,16 @@ file(
 )
 
 # Test executables
-add_executable(
-    test-server
-    ${core_sources}
-    ${server_sources}
-    src/test-server.cpp
-)
-target_link_libraries(
-    test-server
-    pthread
-)
+#add_executable(
+#    test-server
+#    ${core_sources}
+#    ${server_sources}
+#    src/test-server.cpp
+#)
+#target_link_libraries(
+#    test-server
+#    pthread
+#)
 
 add_executable(
     test-thread
@@ -52,13 +52,13 @@ target_link_libraries(
     pthread
 )
 
-add_executable(
-    test-n2np
-    ${core_sources}
-    ${localn2np_sources}
-    src/test-n2np.cpp
-)
-target_link_libraries(
-    test-n2np
-    pthread
-)
+#add_executable(
+#    test-n2np
+#    ${core_sources}
+#    ${localn2np_sources}
+#    src/test-n2np.cpp
+#)
+#target_link_libraries(
+#    test-n2np
+#    pthread
+#)

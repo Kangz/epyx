@@ -21,7 +21,9 @@ namespace log {
         struct LogEntry {
             std::string str;
             int prio;
-            tm time;
+            time_t time;
+            std::string thread_name;
+            int thread_id;
         };
 
         BlockingQueue<LogEntry> entries;

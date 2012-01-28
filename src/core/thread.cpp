@@ -3,7 +3,14 @@
 
 namespace Epyx
 {
-    Thread::Thread(Runnable* rn_): rn(rn_), thread(0){}
+    TLSPointer<detail::ThreadInfo>* detail::thread_infos = NULL;
+
+    Thread::Thread(Runnable* rn_, std::string name, int id): rn(rn_), thread(0), info(NULL){
+        //Set up the thread info dor this thread
+        info = new detail::ThreadInfo();
+        info->name = name;
+        info->id = id;
+    }
 
     bool Thread::run()
     {
@@ -32,9 +39,32 @@ namespace Epyx
         this->thread = 0;
     }
 
+    std::string Thread::getName()
+    {
+        return detail::thread_infos->get()->name;
+    }
+
+    int Thread::getId()
+    {
+        return detail::thread_infos->get()->id;
+    }
+
+
+    void Thread::init(std::string name, int id)
+    {
+        detail::thread_infos = new TLSPointer<detail::ThreadInfo>();
+
+        //Add the main thread's info
+        detail::ThreadInfo* main_ti = new detail::ThreadInfo();
+        main_ti->name = name;
+        main_ti->id = id;
+        detail::thread_infos->reset(main_ti);
+    }
+
     void* Thread::_thread_start(void *arg)
     {
         Epyx::Thread *self = (Epyx::Thread*) arg;
+        detail::thread_infos->reset(self->info);
         self->rn->run();
         return NULL;
     }
