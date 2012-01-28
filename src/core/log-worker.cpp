@@ -3,11 +3,7 @@
 namespace Epyx {
 namespace log {
 
-    static void start_worker(void* worker){
-        ((Worker*)worker)->run();
-    }
-
-    Worker::Worker(int flags_, const std::string& file): flags(flags_), thread(start_worker, this){
+    Worker::Worker(int flags_, const std::string& file): flags(flags_), thread(this){
         if(!file.empty() && (this->flags & LOGFILE)) {
             this->logFile.open(file.c_str());
 

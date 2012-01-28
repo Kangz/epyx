@@ -5,20 +5,19 @@
 #define EPYX_THREAD_H
 
 #include <pthread.h>
+#include "runnable.h"
 
-namespace Epyx
-{
-    typedef void (ThreadFn)(void*);
+namespace Epyx {
 
-    class Thread
-    {
+    class Thread {
     private:
-        pthread_t thread;
-    public:
-        ThreadFn *fn;
-        void *arg;
+        static void* _thread_start(void*);
 
-        Thread(ThreadFn fn_, void *arg_);
+        Runnable* rn;
+        pthread_t thread;
+
+    public:
+        Thread(Runnable* rn_);
 
         /**
          * Start the thread

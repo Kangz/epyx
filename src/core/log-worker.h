@@ -13,7 +13,7 @@
 namespace Epyx {
 namespace log {
 
-    class Worker {
+    class Worker : public Runnable {
     private:
         Worker(const Worker&);
         const Worker& operator=(const Worker&);
@@ -33,7 +33,7 @@ namespace log {
         Worker(int flags, const std::string& file);
         void write(const std::string& message, int prio);
 
-        void run();
+        virtual void run();
     };
 
 }

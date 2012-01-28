@@ -1,28 +1,13 @@
 #include "thread.h"
 #include "exception.h"
 
-extern "C"
-{
-    static void *thread_main (void *arg)
-    {
-        Epyx::Thread *self = (Epyx::Thread*) arg;
-        self->fn (self->arg);
-        return NULL;
-    }
-}
-
 namespace Epyx
 {
-    Thread::Thread(ThreadFn fn_, void *arg_)
-    {
-        this->fn = fn_;
-        this->arg = arg_;
-        this->thread = 0;
-    }
+    Thread::Thread(Runnable* rn_): rn(rn_), thread(0){}
 
     bool Thread::run()
     {
-        int status = pthread_create(&(this->thread), NULL, thread_main, this);
+        int status = pthread_create(&(this->thread), NULL, Thread::_thread_start, this);
         if (status)
             throw FailException("Thread", "pthread create error");
         if (!this->thread)
@@ -46,4 +31,12 @@ namespace Epyx
             throw FailException("Thread", "pthread cancel error");
         this->thread = 0;
     }
+
+    void* Thread::_thread_start(void *arg)
+    {
+        Epyx::Thread *self = (Epyx::Thread*) arg;
+        self->rn->run();
+        return NULL;
+    }
+
 }
