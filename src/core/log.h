@@ -8,6 +8,7 @@
 #include <string>
 #include "log-worker.h"
 #include "tls-pointer.h"
+#include "assert.h"
 
 namespace Epyx {
 namespace log {
@@ -22,6 +23,8 @@ namespace log {
         std::ostringstream b[5];
     };
     extern TLSPointer<BufferContainer>* _buffers;
+
+    extern bool initialized;
 
     //Debug levels
     enum {
@@ -48,10 +51,7 @@ namespace log {
     public:
         Stream(int prio);
         ~Stream();
-        template<typename T> Stream& operator<<(const T& arg) {
-            _buffers->get()->b[this->priority] << arg;
-            return *this;
-        }
+        template<typename T> Stream& operator<<(const T& arg);
         Stream& operator<<(const EndlStruct& f);
     };
 
@@ -61,6 +61,14 @@ namespace log {
     static Stream warn(WARN);
     static Stream error(ERROR);
     static Stream fatal(FATAL);
+
+    //End of the definition of Stream
+    template<typename T> Stream& Stream::operator<<(const T& arg) {
+        EPYX_ASSERT(log::initialized);
+        _buffers->get()->b[this->priority] << arg;
+        return *this;
+    }
+
 
     //Entry point for the logger
     enum {
