@@ -8,37 +8,37 @@
 #ifndef EPYX_SOCKET_H_
 #define EPYX_SOCKET_H_
 
-#include<sys/socket.h>
-#include<stdio.h>
-#include<String>
+#include <sys/socket.h>
+#include <stdio.h>
+#include <string>
+namespace Epyx{
+    class Socket
+    {
+    public:
+        int connect();
+        Socket();
+        static void init();
+        static void fini();
+        Socket(std::string address, short port);
+        void setAddress(std::string address);
+        void setPort(short port);
+        short getPort();
+        std::string getAddress();
+        int close();
+        int write(std::string message);
+        std::string recv();
+        ~Socket();
+    protected:
 
-class Socket
-{
-public:
-    int connect();
-    Socket();
-    static void init();
-    static void fini();
-    Socket(String adress, short port);
-    void setAddress(String address);
-    void setPort(short port);
-    short getPort();
-    String getAddress();
-    int close();
-    int write(String message);
-    String recv();
-    ~Socket();
-protected:
+    private:
+        static int erreur;
+        std::string Address;
+        short port;
 
-private:
-    static int erreur;
-    String Address;
-    short port;
+        int socket;
 
-    int socket;
-
-//    String outBuffer;
-//    String inBuffer;
-};
-
+    //    std::string outBuffer;
+    //    std::string inBuffer;
+    };
+}
 #endif // EPYX_SOCKET_H_
