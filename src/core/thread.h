@@ -17,6 +17,7 @@ namespace Epyx {
             int id;
         };
         extern TLSPointer<ThreadInfo>* thread_infos;
+        extern bool thread_initialized;
     }
 
     class Thread {
@@ -29,6 +30,7 @@ namespace Epyx {
         detail::ThreadInfo* info;
 
     public:
+
         Thread(Runnable* rn_, std::string name, int id = -1);
 
         /**
@@ -50,6 +52,7 @@ namespace Epyx {
         static int getId();
 
         static void init(std::string name = "Main", int id = -1);
+        static bool isInitialized();
     };
 }
 

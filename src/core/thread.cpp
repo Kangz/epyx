@@ -4,6 +4,7 @@
 namespace Epyx
 {
     TLSPointer<detail::ThreadInfo>* detail::thread_infos = NULL;
+    bool detail::thread_initialized = false;
 
     Thread::Thread(Runnable* rn_, std::string name, int id): rn(rn_), thread(0), info(NULL){
         //Set up the thread info dor this thread
@@ -59,14 +60,21 @@ namespace Epyx
         main_ti->name = name;
         main_ti->id = id;
         detail::thread_infos->reset(main_ti);
+
+        detail::thread_initialized = true;
+    }
+
+    bool Thread::isInitialized()
+    {
+        return detail::thread_initialized;
     }
 
     void* Thread::_thread_start(void *arg)
     {
         Epyx::Thread *self = (Epyx::Thread*) arg;
+
         detail::thread_infos->reset(self->info);
         self->rn->run();
         return NULL;
     }
-
 }
