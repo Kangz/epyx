@@ -19,6 +19,16 @@ namespace log {
         initialized = true;
     }
 
+    void flush(){
+        _worker->flush(false);
+    }
+    void waitFlush(){
+        _worker->flush(true);
+    }
+    void flushAndQuit(){
+        _worker->quit();
+    }
+
     Stream::Stream(int prio): priority(prio) {}
 
     Stream::~Stream(){}

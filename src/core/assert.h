@@ -9,9 +9,9 @@
 #define EPYX_ASSERT(condition)\
 {\
     if(!(bool)(condition)){\
-        Epyx::log::error << "\n[ASSERT] " #condition "\n";\
-        Epyx::log::error << "    - Function: " << __FUNCTION__ << " \n";\
-        Epyx::log::error << "    - File: " << __FILE__ << " : " << __LINE__ << Epyx::log::endl;\
+        Epyx::log::fatal << "\n[ASSERT] " #condition "\n";\
+        Epyx::log::fatal << "    - Function: " << __FUNCTION__ << " \n";\
+        Epyx::log::fatal << "    - File: " << __FILE__ << " : " << __LINE__ << Epyx::log::endl;\
     }\
 }
 
