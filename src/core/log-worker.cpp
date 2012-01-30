@@ -57,7 +57,7 @@ namespace log {
 
 
     void Worker::run() {
-	    while(1){
+        while(1){
             //Take all the elements from the queue with only one call
             std::deque<LogEntry>* entries = this->entries.flush();
             if(entries == NULL) continue;

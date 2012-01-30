@@ -2,7 +2,7 @@
 /*
  * epyx
  * Copyright (C) aniem 2012 <jeremy.buet@polytechnique.org>
- * 
+ *
  */
 
 #ifndef EPYX_SOCKET_H_
@@ -15,30 +15,30 @@
 class Socket
 {
 public:
-	int connect();
-	Socket();
-	static void init();
-	static void fini();
-	Socket(String adress, short port);
-	void setAddress(String address);
-	void setPort(short port);
-	short getPort();
-	String getAddress();
-	int close();
-	int write(String message);
-	String recv();
-	~Socket();
+    int connect();
+    Socket();
+    static void init();
+    static void fini();
+    Socket(String adress, short port);
+    void setAddress(String address);
+    void setPort(short port);
+    short getPort();
+    String getAddress();
+    int close();
+    int write(String message);
+    String recv();
+    ~Socket();
 protected:
 
 private:
-	static int erreur;
-	String Address;
-	short port;
+    static int erreur;
+    String Address;
+    short port;
 
-	int socket;
-	
-//	String outBuffer;
-//	String inBuffer;
+    int socket;
+
+//    String outBuffer;
+//    String inBuffer;
 };
 
 #endif // EPYX_SOCKET_H_
