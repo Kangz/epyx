@@ -187,5 +187,6 @@ int main(){
     test_mutex();
     test_cond();
     stress_test_logger();
+    log::flushAndQuit();
     return 0;
 }

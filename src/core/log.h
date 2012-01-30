@@ -32,7 +32,10 @@ namespace log {
         INFO,
         WARN,
         ERROR,
-        FATAL
+        FATAL,
+
+        FLUSH,
+        QUIT
     };
 
     //Defines a Stream class to handle << operators nicely
@@ -78,6 +81,9 @@ namespace log {
     };
 
     void init(int flags, const std::string& file = "");
+    void flush();
+    void waitFlush();
+    void flushAndQuit();
 
 }
 }

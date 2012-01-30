@@ -8,6 +8,7 @@
 #include <string>
 #include "thread.h"
 #include "blocking-queue.h"
+#include "condition.h"
 #include "log.h"
 
 namespace Epyx {
@@ -24,6 +25,7 @@ namespace log {
             time_t time;
             std::string thread_name;
             int thread_id;
+            Condition* cond;
         };
 
         BlockingQueue<LogEntry> entries;
@@ -31,9 +33,13 @@ namespace log {
         std::ofstream logFile;
         Thread thread;
 
+        void printEntry(LogEntry& entry);
+
     public:
         Worker(int flags, const std::string& file);
         void write(const std::string& message, int prio);
+        void flush(bool wait);
+        void quit();
 
         virtual void run();
     };
