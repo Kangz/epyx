@@ -10,6 +10,8 @@
 
 //#include <sys/socket.h>
 #include <string>
+#include "mutex.h"
+
 namespace Epyx{
     class Socket
     {
@@ -24,17 +26,24 @@ namespace Epyx{
         short getPort();
         std::string getAddress();
         void close();
-        int write(std::string message);
-        std::string recv();
+        int send(const void *data, int size);
+        void sendAll(const void *data, int size);
+        void write(std::string message);
+        int recv(void *data, int size);
+        void recvAll(void *data, int size);
+        bool recvLine(std::ostream& out);
+        std::string read();
         ~Socket();
     protected:
 
     private:
-        //static int erreur;
         std::string address;
         short port;
-
         int sock;
+        static int is_init;
+        static Mutex init_mutex;
+        // Last end-of-line caracter (\r or \n)
+        char last_eol;
 
     //    std::string outBuffer;
     //    std::string inBuffer;

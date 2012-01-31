@@ -4,7 +4,6 @@
 #define EPYX_ASSERT_H
 
 #include <iostream>
-#include "log.h"
 
 #define EPYX_ASSERT(condition)\
 {\
@@ -24,5 +23,6 @@
     }\
 }
 
+#include "log.h"
 
 #endif /* EPYX_ASSERT_H */
