@@ -8,8 +8,7 @@
 #ifndef EPYX_SOCKET_H_
 #define EPYX_SOCKET_H_
 
-#include <sys/socket.h>
-#include <stdio.h>
+//#include <sys/socket.h>
 #include <string>
 namespace Epyx{
     class Socket
@@ -24,18 +23,18 @@ namespace Epyx{
         void setPort(short port);
         short getPort();
         std::string getAddress();
-        int close();
+        void close();
         int write(std::string message);
         std::string recv();
         ~Socket();
     protected:
 
     private:
-        static int erreur;
-        std::string Address;
+        //static int erreur;
+        std::string address;
         short port;
 
-        int socket;
+        int sock;
 
     //    std::string outBuffer;
     //    std::string inBuffer;
