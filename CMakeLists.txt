@@ -13,6 +13,12 @@ SET(CMAKE_CXX_FLAGS "-g -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable
 
 file(
     GLOB_RECURSE
+    tinyxml_sources
+    include/tinyxml/*
+)
+
+file(
+    GLOB_RECURSE
     core_sources
     src/core/*
 )
@@ -21,6 +27,11 @@ file(
     GLOB_RECURSE
     server_sources
     src/server/*
+)
+file(
+    GLOB_RECURSE
+    natpunching_sources
+    src/natpunching/*
 )
 
 file(
@@ -45,6 +56,8 @@ file(
 add_executable(
     test-thread
     ${core_sources}
+    ${natpunching_sources}
+    ${tinyxml_sources}
     src/test-thread.cpp
 )
 target_link_libraries(

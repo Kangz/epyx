@@ -13,16 +13,17 @@
 #define SERVICEPREFIX u
 #define BIG_SIZE 4096
 namespace Epyx{
+namespace UPNP{
 Command::Command(){
-    command="";
-    answer="";
-    address="";
+    command = "";
+    answers = std::map<std::string,std::string>();
+    address = "";
     port=0;
     needArgs=false;
-    args=std::map();
+    args=std::map<std::string,std::string>();
 }
 Command::Command(std::string addr, short port){
-    this->Command();
+    Command();
     this->setAddress(addr);
     this->setPort(port);
 }
@@ -51,9 +52,10 @@ UPNP_Arg Command::buildArg(std::string name, std::string value){
     return arg;
 }
 
-void Command::setOption(Action_type type){
+void Command::setOption(UPNP_Action_type type){
     this->type = type;
 }
+
 void Command::setArguments(std::map<std::string,std::string> args){
     this->args = args;
 }
@@ -61,7 +63,7 @@ void Command::addArgument(std::string name, std::string value){
     args[name]=value;
 }
 
-void Command::setOption(Action_type type, std::map<std::string,std::string> args){
+void Command::setOption(UPNP_Action_type type, std::map<std::string,std::string> args){
     setOption(type);
     setArguments(args);
 }
@@ -83,25 +85,25 @@ void Command::buildCommand(){ //TODO Manage Errors a bit better than this
     TiXmlElement * body = new TiXmlElement("SOAPPREFIX:Body");
     envelope->LinkEndChild(body);
     
-    TiXmlElement * action_command = new TiXmlElement("SERVICEPREFIX:"+actiontype);
-    action_command->SetAttribute("xmlns:SERVICEPREFIX",service);
+    TiXmlElement * action_command = new TiXmlElement(("SERVICEPREFIX:"+actiontype).c_str());
+    action_command->SetAttribute("xmlns:SERVICEPREFIX",service.c_str());
     body->LinkEndChild(action_command);
-    std::list<TiXmlElement> list_args = new std::list();
+    std::list<TiXmlElement> list_args = std::list<TiXmlElement>();
     for(std::map<std::string,std::string>::iterator it=args.begin(); it!=args.end(); ++it){
-        list_args.push_back(TiXmlElement(it->first));
-        list_args.back().LinkEndChild( new TiXmlText(it->second) );
+        list_args.push_back(TiXmlElement(it->first.c_str()));
+        list_args.back().LinkEndChild( new TiXmlText(it->second.c_str()) );
         action_command->LinkEndChild( &(list_args.back()) );
     }
     
     //XML Data Built. Now we export it into this->command.
-    TiXmlPrinter printer = new TiXmlPrinter();
+    TiXmlPrinter printer = TiXmlPrinter();
     printer.SetIndent("    ");
     dom_command.Accept( &printer );
     command = printer.CStr();
 }
 
 std::string Command::findAction(){
-    switch(type){
+    switch(this->type){
     case UPNP_ACTION_CONNTYPE :
         return "GetConnectionTypeInfo";
     case UPNP_ACTION_GET_EXT_IP :
@@ -120,6 +122,9 @@ std::string Command::findAction(){
     case UPNP_ACTION_LIST_PORTMAP :
         needArgs=true;
         return "GetListOfPortMappings";
+	case UPNP_ACTION_GET_GEN_PORTMAP :
+		needArgs=true;
+		return "GetGenericPortMappingEntry";
     }
 }
 
@@ -134,10 +139,11 @@ void Command::Parse(){
 void Command::send(){
     Socket s(address,port);
     s.write(command);
-    char[BIG_SIZE] data;
+    char data[BIG_SIZE];
     s.recvAll((void*)data, BIG_SIZE);
     raw_answer = std::string(data); //We may want to strip header from raw_data
     
 }
 
+}
 }

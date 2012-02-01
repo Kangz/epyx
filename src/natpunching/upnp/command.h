@@ -13,6 +13,7 @@
 #include "../../../include/tinyxml/tinyxml.h"
 
 namespace Epyx{
+namespace UPNP{
 typedef struct UPNP_Arg{std::string name; std::string value; }UPNP_Arg;
 typedef enum UPNP_Action_type{
     UPNP_ACTION_CONNTYPE, 
@@ -21,7 +22,7 @@ typedef enum UPNP_Action_type{
     UPNP_ACTION_DELPORTMAP, 
     UPNP_ACTION_NUMENTRIES_PORTMAP, 
     UPNP_ACTION_SPECIFICPORTMAP, 
-    UNPN_ACTION_GET_GEN_PORTMAP, 
+    UPNP_ACTION_GET_GEN_PORTMAP, 
     UPNP_ACTION_LIST_PORTMAP
 }UPNP_Action;
     class Command
@@ -38,8 +39,8 @@ typedef enum UPNP_Action_type{
             void setPort(short port);
             short getPort();
             
-            void setOption(Action_type type);
-            void setOption(Action_type type, std::map<std::string,std::string> args);
+            void setOption(UPNP_Action_type type);
+            void setOption(UPNP_Action_type type, std::map<std::string,std::string> args);
             void setArguments(std::map<std::string,std::string> args);
             void addArgument(std::string name, std::string value);
             
@@ -68,8 +69,7 @@ typedef enum UPNP_Action_type{
             
             bool needArgs;
             std::string findAction();
-            std::string service;
     };
 }
-
+}
 #endif // EPYX_COMMAND_H_
