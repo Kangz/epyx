@@ -19,11 +19,12 @@ namespace Epyx{
         int connect();
         Socket();
         static void init();
+        void initialize();
         static void fini();
-        Socket(std::string address, short port);
+        Socket(std::string address, unsigned short port);
         void setAddress(std::string address);
-        void setPort(short port);
-        short getPort();
+        void setPort(unsigned short port);
+        unsigned short getPort();
         std::string getAddress();
         void close();
         int send(const void *data, int size);
@@ -35,11 +36,11 @@ namespace Epyx{
         std::string read();
         ~Socket();
     protected:
-
-    private:
-        std::string address;
-        short port;
         int sock;
+        
+    private:
+        unsigned short port;
+        std::string address;
         static int is_init;
         static Mutex init_mutex;
         // Last end-of-line caracter (\r or \n)

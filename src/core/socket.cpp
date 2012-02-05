@@ -17,6 +17,7 @@
     #define SOCKET_ERROR (-1)
 #endif
 
+#include "exception.h"
 #include "socket.h"
 #include "assert.h"
 #include <iostream>
@@ -29,24 +30,26 @@ namespace Epyx{
     Mutex Socket::init_mutex;
 
     Socket::Socket(){
-        //outBuffer ="";
-        //inBuffer = "";
-        address ="";
-        port = -1;
-        sock = ::socket(PF_INET,SOCK_STREAM,0);
-        init();
+        initialize();
     }
 
-    Socket::Socket(std::string add, short p){
-        Socket();
-        address = add;
-        port = p;
+    Socket::Socket(std::string add, unsigned short p) {
+        initialize();
+        this->setPort(p);
+        this->setAddress(add);
     }
 
     Socket::~Socket(){
         close();
     }
 
+    void Socket::initialize(){
+        port = -1;
+        this->sock = ::socket(AF_INET,SOCK_STREAM,0);
+        if (this->sock == -1)
+            ErrException("Socket","constructor");
+    }
+    
     void Socket::init(){
         if (is_init == 0){
             #if defined (WIN32)
@@ -73,18 +76,18 @@ namespace Epyx{
 
 
     void Socket::setAddress(std::string add){
-        address = add;
+        address=std::string(add);
     }
 
     std::string Socket::getAddress(){
         return address;
     }
 
-    void Socket::setPort(short p){
+    void Socket::setPort(unsigned short p){
         port = p;
     }
 
-    short Socket::getPort(){
+    unsigned short Socket::getPort(){
         return port;
     }
 
@@ -94,18 +97,22 @@ namespace Epyx{
         server.sin_addr.s_addr  = inet_addr(address.c_str());
         server.sin_port         = htons(port);
         memset(&server.sin_zero, '\0', sizeof(server.sin_zero));
-        if (::connect(sock, (sockaddr *)&server, sizeof(server)) == SOCKET_ERROR){
-            std::cerr << "Failed connecting to " << address << ":"<<port<<std::endl; //Replace by error log.
+        int result = ::connect(this->sock, (sockaddr *)&server, sizeof(server));
+        if ( result < 0){
+            std::cerr << "Failed connecting to " << address << ":" << port << " : " << strerror(errno) << std::endl; //Replace by error log.
+            std::cerr << this->sock << "   " << server.sin_zero << std::endl;
             return -1;
         }
         return 0;
     }
 
     void Socket::close(){ //TODO Implement the tests.
+        //std::cout << "Closing Socket ..." << std::endl;
         //Is Socket connected? If so,
         ::shutdown(sock,SHUT_RDWR);
         //Is Socket close? If so,
         ::close(sock);
+        //std::cout << "Socket Closed" << std::endl;
     }
 
     /**
@@ -132,7 +139,6 @@ namespace Epyx{
     {
         int bytes;
         EPYX_ASSERT(data != NULL);
-
         while (size > 0) {
             bytes = this->send(data, size);
             if (!bytes)
