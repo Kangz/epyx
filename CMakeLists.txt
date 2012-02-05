@@ -53,15 +53,26 @@ file(
 #    pthread
 #)
 
+#add_executable(
+#    test-thread
+#    ${core_sources}
+#    ${server_sources}
+#    src/test-thread.cpp
+#)
+#target_link_libraries(
+#    test-thread
+#    pthread
+#)
+
 add_executable(
-    test-thread
+    test-natpunching
     ${core_sources}
     ${natpunching_sources}
     ${tinyxml_sources}
-    src/test-thread.cpp
 )
+
 target_link_libraries(
-    test-thread
+    test-natpunching
     pthread
 )
 

@@ -11,6 +11,7 @@
 #include <string>
 #include <map>
 #include "../../../include/tinyxml/tinyxml.h"
+#include "../../core/socket.h"
 
 namespace Epyx{
 namespace UPNP{
@@ -29,15 +30,24 @@ typedef enum UPNP_Action_type{
     {
     public:
             Command();
-            Command(std::string addr, short port);
+            Command(std::string addr, unsigned short port);
             Command(std::string filename);
+            ~Command();
             
             static UPNP_Arg buildArg(std::string name, std::string value);
             
             void setAddress(std::string addr);
             std::string getAddress();
-            void setPort(short port);
-            short getPort();
+            void setPort(unsigned short port);
+            unsigned short getPort();
+            std::string getAnswer();
+            void setService(std::string service);
+            std::string getService();
+            std::string getOrder();
+            
+            void setPath(std::string);
+            std::string getPath();
+            
             
             void setOption(UPNP_Action_type type);
             void setOption(UPNP_Action_type type, std::map<std::string,std::string> args);
@@ -46,6 +56,7 @@ typedef enum UPNP_Action_type{
             
             void buildCommand();
             
+            void Receive();
             void Parse();
             void send();            
              
@@ -64,11 +75,14 @@ typedef enum UPNP_Action_type{
             std::string action;
             std::string service;
             
+            std::string path;
+            
             std::string address;
-            short port;
+            unsigned short port;
             
             bool needArgs;
             std::string findAction();
+            Socket *s;
     };
 }
 }
