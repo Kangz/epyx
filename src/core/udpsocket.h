@@ -1,5 +1,5 @@
-#ifndef UDPSOCKET_H
-#define UDPSOCKET_H
+#ifndef EPYX_UDPSOCKET_H
+#define EPYX_UDPSOCKET_H
 #include "socket.h"
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -7,16 +7,21 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <arpa/inet.h>
-
+#include <cstring>
 
 namespace Epyx {
     class UDPSocket : public Socket
     {
         public:
             UDPSocket();
+            UDPSocket(bool);
+            void close();
+            int recv(void*, int);
+            void connect();
         private:
+            bool reply;
             int ans_sock;
     };
     
 }
-#endif // UDPSOCKET_H
+#endif // EPYX_UDPSOCKET_H

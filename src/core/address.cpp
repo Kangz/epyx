@@ -47,6 +47,14 @@ namespace Epyx
         }
     }
 
+    char* Address::ip(){
+        return this->ipStr;
+    }
+    
+    unsigned short Address::getPort(){
+        return (unsigned short) this->port;
+    }
+    
     std::ostream& operator<<(std::ostream& os, const Address& addr)
     {
         if (addr.ipVersion == 6)
