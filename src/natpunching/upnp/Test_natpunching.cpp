@@ -1,6 +1,8 @@
 #include <iostream>
+#include <sstream>
 #include "command.h"
 #include "openconnect.h"
+#include "../../core/socket.h"
 
 
 #include <sys/types.h>
@@ -13,9 +15,10 @@
 
 
 int main(int argc, char* argv[]){
+    std::string endl ="\r\n";
     std::string address, service, path;
     unsigned short port;
-       
+    
     std::cout << "Enter Address to connect with : " ;
     std::cin >> address;
     std::cout << "Enter Port : ";
@@ -25,9 +28,9 @@ int main(int argc, char* argv[]){
     std::cout << "Enter Path to access : " ;
     std::cin >> path;
     
-    std::cout << "The command is being created ..." << std::endl;
+   std::cout << "The command is being created ..." << std::endl;
     Epyx::UPNP::Command ordre(address,port);
-    ordre.setOption(Epyx::UPNP::UPNP_ACTION_CONNTYPE);
+    ordre.setOption(Epyx::UPNP::UPNP_ACTION_GET_EXT_IP);
     ordre.setService(service);
     ordre.setPath(path);
     

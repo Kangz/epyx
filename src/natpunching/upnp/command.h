@@ -24,7 +24,8 @@ typedef enum UPNP_Action_type{
     UPNP_ACTION_NUMENTRIES_PORTMAP, 
     UPNP_ACTION_SPECIFICPORTMAP, 
     UPNP_ACTION_GET_GEN_PORTMAP, 
-    UPNP_ACTION_LIST_PORTMAP
+    UPNP_ACTION_LIST_PORTMAP,
+    UPNP_ACTION_GET_STATINFO
 }UPNP_Action;
     class Command
     {
@@ -35,6 +36,7 @@ typedef enum UPNP_Action_type{
             ~Command();
             
             static UPNP_Arg buildArg(std::string name, std::string value);
+            
             
             void setAddress(std::string addr);
             std::string getAddress();
@@ -83,6 +85,7 @@ typedef enum UPNP_Action_type{
             bool needArgs;
             std::string findAction();
             Socket *s;
+            std::string endl;
     };
 }
 }

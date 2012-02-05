@@ -6,6 +6,7 @@
  */
 
 #include "command.h"
+#include "../../core/exception.h"
 #include <list>
 
 
@@ -24,9 +25,11 @@ namespace Epyx{
             port=-1;
             needArgs=false;
             args=std::map<std::string,std::string>();
+            endl = "\r\n";
         }
         Command::Command(std::string addr,unsigned short port) {
             command = "";
+            endl= "\r\n";
             answers = std::map<std::string,std::string>();
             needArgs=false;
             args=std::map<std::string,std::string>();
@@ -87,15 +90,15 @@ namespace Epyx{
         void Command::buildCommand(){ //TODO Manage Errors a bit better than this
             std::string actiontype=findAction();
             if (needArgs && args.size() == 0){
-                exit(-1); //Let's at least Verify We don't send incomplete data
+                FailException("buildCommand","You must specify arguments for this command");
             }
             dom_command = TiXmlDocument();
             TiXmlDeclaration *decl = new TiXmlDeclaration("1.0","","");
             dom_command.LinkEndChild(decl); //Creation de l'entete
             
             TiXmlElement * envelope = new TiXmlElement(SOAPPREFIX":Envelope");
-            envelope->SetAttribute("xmlns:"SOAPPREFIX,"http://schemas.xmlsoap.org/soap/envelope");
-            envelope->SetAttribute(SOAPPREFIX":encodingStyle","http://schemas.xmlsoap.org/encoding");
+            envelope->SetAttribute("xmlns:"SOAPPREFIX,"http://schemas.xmlsoap.org/soap/envelope/");
+            envelope->SetAttribute(SOAPPREFIX":encodingStyle","http://schemas.xmlsoap.org/soap/encoding/");
             dom_command.LinkEndChild(envelope);
             
             TiXmlElement * body = new TiXmlElement(SOAPPREFIX":Body");
@@ -115,22 +118,24 @@ namespace Epyx{
             //XML Data Built. Now we export it into this->command.
             TiXmlPrinter printer = TiXmlPrinter();
             printer.SetIndent("    ");
+            printer.SetLineBreak("\r\n");
             dom_command.Accept( &printer );
             command = printer.CStr();
             
+            
             //The Content is now build. Now we need to add the headers.
             std::stringstream httpcommand;
-            httpcommand << "POST " << this->path << " HTTP/1.1"                            << std::endl;
-            httpcommand << "Host: " << this->address <<":"<<this->port                     << std::endl;
-            httpcommand << "User-Agent: Epyx Natpunching FTW"                              << std::endl;
-            httpcommand << "Content-Length: " << command.length()                          << std::endl;
-            httpcommand << "Content-Type: text/xml"                                        << std::endl;
-            httpcommand << "SOAPAction: \""<< this->service << "#"<< actiontype << "\""    << std::endl;
-            httpcommand << "Connection: Close"                                             << std::endl;
-            httpcommand << "Cache-Control: no-cache"                                       << std::endl;
-            httpcommand << "Pragma: no-cache"                                              << std::endl;
-            httpcommand << std::endl;
-            httpcommand << command;
+            httpcommand << "POST " << this->path << " HTTP/1.1"                             << endl;
+            httpcommand << "Host: " << this->address <<":"<<this->port                      << endl;
+            httpcommand << "User-Agent: Epyx Natpunching FTW"                               << endl;
+            httpcommand << "Content-Length: " << command.length()                           << endl;
+            httpcommand << "Content-Type: text/xml"                                         << endl;
+            httpcommand << "SOAPAction: \""<< this->service << "#"<< actiontype << "\""     << endl;
+            httpcommand << "Connection: Close"                                              << endl;
+            httpcommand << "Cache-Control: no-cache"                                        << endl;
+            httpcommand << "Pragma: no-cache"                                               << endl;
+            httpcommand << ""                                                               << endl;
+            httpcommand << command                                                          << endl;
             command = httpcommand.str();
             
         }
@@ -158,6 +163,9 @@ namespace Epyx{
             case UPNP_ACTION_GET_GEN_PORTMAP :
                 needArgs=true;
                 return "GetGenericPortMappingEntry";
+            case UPNP_ACTION_GET_STATINFO:
+                needArgs=false;
+                return "GetStatusInfo";
             default :
                 return "";
             }
