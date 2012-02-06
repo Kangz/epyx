@@ -6,7 +6,7 @@
 
 //#include <SFML/socket>
 #include <string>
-
+#include <map>
 
 namespace Epyx {
     namespace UPNP {
@@ -20,10 +20,11 @@ namespace Epyx {
                 void testConnection();
                 
                 
-                
+                std::map<std::string,unsigned short> validIGD;
                 std::string address;
                 unsigned short port;
                 std::string service;
+                std::string endl;
         };
     }
 }

@@ -8,6 +8,7 @@
 #include "command.h"
 #include "../../core/exception.h"
 #include <list>
+#include "../../core/httpheaders.h"
 
 
 #include <iostream>
@@ -172,13 +173,31 @@ namespace Epyx{
         }
         
         void Command::Parse(){ 
+            std::string answer;
+            answer = Epyx::HTTPHeaders::stripHeaders(this->raw_answer);
             dom_answer = TiXmlDocument();
-            dom_answer.Parse((const char*) raw_answer.c_str(),0,TIXML_DEFAULT_ENCODING); 
+            dom_answer.Parse((const char*) answer.c_str(),0,TIXML_DEFAULT_ENCODING); 
             dom_answer.SaveFile("toto.xml");
+            TiXmlPrinter printer = TiXmlPrinter();
+            printer.SetIndent("    ");
+            printer.SetLineBreak("\r\n");
+            dom_answer.Accept( &printer );
+            std::cout << printer.CStr() << std::endl;
+            TiXmlNode * balise = dom_answer.RootElement();
+            while (!(strstr(balise->Value(),"Body")))
+                balise =  balise->FirstChild(); //Each Parent of <s:Body> has only an only Child
+            balise = balise->FirstChild();
+            for( TiXmlNode * child = balise->FirstChild(); child; child = child->NextSibling() ){
+                answers[child->Value()]=child->FirstChild()->Value(); //Normally, child is of form <Name>Value</Name>
+            }
             
             
         }
 
+        std::map<std::string,std::string> Command::getResult(){
+            return this->answers;
+        }
+        
         void Command::send(){
             s = new Socket(address,port);
             s->connect();
@@ -210,5 +229,6 @@ namespace Epyx{
         std::string Command::getOrder(){
             return this->command;
         }
+        
     }
 }   

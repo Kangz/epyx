@@ -46,6 +46,8 @@ typedef enum UPNP_Action_type{
             void setService(std::string service);
             std::string getService();
             std::string getOrder();
+            std::map<std::string,std::string> getResult();
+            
             
             void setPath(std::string);
             std::string getPath();
@@ -61,7 +63,6 @@ typedef enum UPNP_Action_type{
             void Receive();
             void Parse();
             void send();            
-             
     protected:
 
     private:

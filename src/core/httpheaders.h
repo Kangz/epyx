@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-namespace Epyx{
+namespace Epyx {
     class HTTPHeaders //This class is to complete, perhaps to inherit From another to easy GTP implementation
     {
         public:

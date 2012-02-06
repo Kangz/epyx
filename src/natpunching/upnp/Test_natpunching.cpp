@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <map>
 #include "command.h"
 #include "openconnect.h"
 #include "../../core/socket.h"
@@ -30,13 +31,13 @@ int main(int argc, char* argv[]){
     
    std::cout << "The command is being created ..." << std::endl;
     Epyx::UPNP::Command ordre(address,port);
-    ordre.setOption(Epyx::UPNP::UPNP_ACTION_GET_EXT_IP);
+    ordre.setOption(Epyx::UPNP::UPNP_ACTION_CONNTYPE);
     ordre.setService(service);
     ordre.setPath(path);
     
     ordre.buildCommand();
     
-    std::cout << "Command Built. Sending ..." << std::endl <<ordre.getOrder() << std::endl;
+    std::cout << "Command Built. Sending ..." << std::endl;
     try{
         ordre.send();
         std::cout << "Command sent. Waiting for Answer..." << std::endl;
@@ -48,6 +49,12 @@ int main(int argc, char* argv[]){
     std::cout << "Received Answer of size " << ordre.getAnswer().size() <<" : "<< std::endl;
     std::cout << ordre.getAnswer() << std::endl;
     
+    ordre.Parse();
+    
+    std::map<std::string,std::string> answers = ordre.getResult();
+    for (std::map<std::string,std::string>::iterator it = answers.begin(); it != answers.end(); ++it){
+        std::cout << it->first << " : " << it->second << std::endl;
+    }
     
     return 0;
     
