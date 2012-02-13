@@ -169,13 +169,16 @@ namespace Epyx{
     {
         int bytes;
         EPYX_ASSERT(data != NULL);
-        bytes = ::recv(this->sock, data, size, 0);
+        bytes = ::recv(this->sock, data, size-1, 0);
+        //recv doesn't set the after-the-last byte to zero. We must do it to avoid some issues. (writing into a prefilled longer data buffer fucks everything up)
+        //memset( ((char *) data) + bytes,'\0',1); //The only way to set it correctly (with data being a void pointer).  the char* is here to set correctly the pointer arithmetic (So it advances "bytes" bytes)
+        *(((char *) data) + bytes) = '\0';
         // TODO: Implement status error (ex. Conn closed, ...)
         if (bytes == -1)
             throw ErrException("Socket", "recv");
         return bytes;
     }
-
+    
     /**
      * Receive exactly (size) bytes from the network
      * @data: buffer pointer
