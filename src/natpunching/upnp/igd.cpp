@@ -12,7 +12,6 @@
 #include "command.h"
 #include "../../core/socket.h"
 #include "../../core/httpheaders.h"
-#include "../../../include/tinyxml/tinyxml.h"
 #include <sstream>
 #include <queue>
 
@@ -48,7 +47,7 @@ namespace Epyx {
             this->address = Address();
             this->setRootDescPath(rootDescPath);
         }
-        
+       
         void IGD::setAddress(Address address){
             this->address = address;
         }
@@ -58,10 +57,23 @@ namespace Epyx {
         void IGD::setRootDescPath(std::string rootDescPath){
             this->rootDescPath = rootDescPath;
         }
-        
+        void IGD::parseRootDescFile(TiXmlElement * actualNode){
+            if     (strcmp(actualNode->Value(),"service") == 0 ) //If true, actualNode->Value() == "service"
+                this->services[actualNode->FirstChildElement("serviceType")->GetText()]=actualNode->FirstChildElement("controlURL")->GetText();
+            else if(strcmp(actualNode->Value(),"serviceList") == 0)
+                parseRootDescFile(actualNode->FirstChildElement());
+            else if(strcmp(actualNode->Value(),"deviceList") == 0)
+                parseRootDescFile(actualNode->FirstChildElement());
+            else if(strcmp(actualNode->Value(),"device") == 0)
+                parseRootDescFile(actualNode->FirstChildElement());
+            
+            if (actualNode->NextSiblingElement() != NULL)
+                parseRootDescFile(actualNode->NextSiblingElement());
+        }
+
         void IGD::getServices(){
             std::stringstream header;
-            header << "GET /rootDesc.xml HTTP/1.1" << endl
+            header << "GET " << rootDescPath << " HTTP/1.1" << endl
                    << "Host: "<< this->address << endl
                    << "Connection: Close" << endl
                    << "User-Agent: Epyx Natpunching FTW" << endl << endl;
@@ -69,27 +81,19 @@ namespace Epyx {
             sock.connect();
             sock.write(header.str());
             char data[BIG_SIZE];
-            sock.recv(data, BIG_SIZE);
-            std::string rootDesc = HTTPHeaders::stripHeaders(data);
+            int bytes = sock.recv(data, BIG_SIZE);
+            std::string reply = data;
+            int packetSize = HTTPHeaders::getlength(HTTPHeaders::getHeaders(reply));
+            while (bytes < packetSize) {    
+                memset(data,'\0',BIG_SIZE); // Needed for the working of sock.recv()
+                bytes += sock.recv( (void *) data, BIG_SIZE);
+                reply.append(data);
+            }
+            std::string rootDesc = HTTPHeaders::stripHeaders(reply);
             //We got the rootDesc data. We now need to parse it to find all the available services.
             TiXmlDocument domRootDesc;
             domRootDesc.Parse(rootDesc.c_str());
-            std::queue<TiXmlElement *> nodeQueue;
-            TiXmlElement * actualNode;
-            nodeQueue.push(domRootDesc.FirstChildElement());
-            while (!nodeQueue.empty()){
-                actualNode = nodeQueue.front();
-                for(TiXmlElement * serviceN = actualNode->FirstChildElement("Service"); serviceN; serviceN->NextSiblingElement("Service")){
-                    this->services[serviceN->FirstChildElement("serviceType")->GetText()]=serviceN->FirstChildElement("controlURL")->GetText();
-                }
-                for(TiXmlElement * deviceN = actualNode->FirstChildElement("device");deviceN;deviceN->NextSiblingElement("device"))
-                    nodeQueue.push(deviceN);
-                for(TiXmlElement * deviceLN = actualNode->FirstChildElement("deviceList");deviceLN;deviceLN->NextSiblingElement("deviceList"))
-                    nodeQueue.push(deviceLN);
-                for(TiXmlElement * serviceLN = actualNode->FirstChildElement("serviceList");serviceLN;serviceLN->NextSiblingElement("serviceList"))
-                    nodeQueue.push(serviceLN);
-                nodeQueue.pop();
-            }
+            parseRootDescFile(domRootDesc.FirstChildElement()->FirstChildElement());
         }
         
         std::string IGD::getExtIPAdress(){
@@ -104,6 +108,7 @@ namespace Epyx {
             }
             order.setService(WanIPConnService);
             order.setPath(WanIPConnCtl);
+            order.buildCommand();
             order.send();
             order.Receive();
             order.Parse();
@@ -126,6 +131,7 @@ namespace Epyx {
                 }
                 order.setService(WanIPConnService);
                 order.setPath(WanIPConnCtl);
+                order.buildCommand();
                 order.send();
                 order.Receive();
                 returnedHeader = HTTPHeaders::getHeaders(order.getAnswer());
@@ -153,7 +159,8 @@ namespace Epyx {
                     tmpAddrPtr=&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
                     char addressBuffer[INET_ADDRSTRLEN];
                     inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-                    if (memcmp(addressBuffer, this->address.ip(), 3)) {
+                    if (memcmp(addressBuffer, this->address.ip(), 3) == 0) { // the condition is true is the first 3 bytes of addressBuffer are equal to the first 3 bytes of the ip address. 
+                        //This is needed to change by comparing the address with netmasks. For example, first comparing the addresses with applied netmask, then, if ok, turn into string with the inet_top method.
                         IPAddress = addressBuffer;
                         break;
                     }
@@ -163,18 +170,24 @@ namespace Epyx {
             return IPAddress;
         }
         Epyx::Address IGD::addPortMap(unsigned short port, protocol proto){
-            std::string prot = (proto = Epyx::UPNP::TCP)? "TCP" : "UDP";
+            return this->addPortMap(port,proto,port);
+        }
+        Epyx::Address IGD::addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port){
+            std::string prot = (proto == Epyx::UPNP::TCP)? "TCP" : "UDP";
+            std::cout<< "Entering addPortMap("<<loc_port<<","<<prot<<","<<ext_port<<")"<<std::endl;
             std::string localIP = this->getLocalAdress();
+            std::cout << "Local IP Address is " << localIP << std::endl;
             Epyx::UPNP::Command order (this->address.ip(),this->address.getPort());
             order.setOption(Epyx::UPNP::UPNP_ACTION_ADDPORTMAP);
             
-            char portChar[10];
-            sprintf(portChar,"%d",port);
+            char loc_portChar[10],ext_portChar[10];
+            sprintf(loc_portChar,"%d",loc_port);
+            sprintf(ext_portChar,"%d",ext_port);
             
             order.addArgument("NewRemoteHost","");
-            order.addArgument("NewExternalPort",portChar);
+            order.addArgument("NewExternalPort",ext_portChar);
             order.addArgument("NewProtocol",prot);
-            order.addArgument("NewInternalPort",portChar);
+            order.addArgument("NewInternalPort",loc_portChar);
             order.addArgument("NewInternalClient",localIP);
             order.addArgument("NewEnabled","1");
             order.addArgument("NewPortMappingDescription",EPYX_MSG);
@@ -188,18 +201,25 @@ namespace Epyx {
                     WanIPConnCtl = it->second;
                 }
             }
+            std::cout << "Selected service is "<< WanIPConnService <<" His Control Remote path is " << WanIPConnCtl << std::endl;
             order.setService(WanIPConnService);
             order.setPath(WanIPConnCtl);
+            order.buildCommand();
+            std::cout << "Sending ..." << std::endl;
             order.send();
+            std::cout << "Sent!" << std::endl << "Waiting for answer" << std::endl;
             order.Receive();
-            if (HTTPHeaders::getHeaders(order.getAnswer()).find("500 Internal"))
+            std::cout << "Answer received ! : " << order.getAnswer() << std::endl;
+            if (HTTPHeaders::getHeaders(order.getAnswer()).find("500 Internal") != std::string::npos){
+                std::cerr << "IGD : Couldn't add port map" << std::endl;
                 throw FailException("IGD","Couldn't add requested Port Map");
-            return Epyx::Address(this->getExtIPAdress().c_str(),port,4);
+            }
+            return Epyx::Address(this->getExtIPAdress().c_str(),ext_port,4);
         }
         void IGD::delPortMap(Address addr, protocol proto){
-            std::string prot = (proto = Epyx::UPNP::TCP)? "TCP" : "UDP";
+            std::string prot = (proto == Epyx::UPNP::TCP)? "TCP" : "UDP";
             Epyx::UPNP::Command order (this->address.ip(),this->address.getPort());
-            order.setOption(Epyx::UPNP::UPNP_ACTION_ADDPORTMAP);
+            order.setOption(Epyx::UPNP::UPNP_ACTION_DELPORTMAP);
             
             char portChar[10];
             sprintf(portChar,"%d",addr.getPort());
@@ -217,10 +237,14 @@ namespace Epyx {
             }
             order.setService(WanIPConnService);
             order.setPath(WanIPConnCtl);
+            order.buildCommand();
             order.send();
             order.Receive();
-            if (HTTPHeaders::getHeaders(order.getAnswer()).find("500 Internal"))
+            if (HTTPHeaders::getHeaders(order.getAnswer()).find("500 Internal")!= std::string::npos)
                 throw FailException("IGD","Couldn't delete requested Port Map");
+        }
+        std::map<std::string,std::string> IGD::getServiceList(){
+            return this->services;
         }
     }
 }

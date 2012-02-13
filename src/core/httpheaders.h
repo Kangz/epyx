@@ -10,6 +10,7 @@ namespace Epyx {
             //HTTPHeaders();
             static std::string stripHeaders(std::string message);
             static std::string getHeaders(std::string message);
+            static int getlength(std::string header);
             // static std::vector<std::string> separateHTTPPackages(std::string messages); //To Implement.
     };
 }

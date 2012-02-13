@@ -42,6 +42,9 @@ namespace Epyx{
         }
         Command::~Command(){
             s->close();
+            delete s;
+            s=NULL;
+            
         }
         
         void Command::setAddress(std::string addr){
@@ -108,11 +111,11 @@ namespace Epyx{
             TiXmlElement * action_command = new TiXmlElement((SERVICEPREFIX":"+actiontype).c_str());
             action_command->SetAttribute("xmlns:"SERVICEPREFIX,service.c_str());
             body->LinkEndChild(action_command);
-            std::list<TiXmlElement> list_args = std::list<TiXmlElement>();
+            std::list<TiXmlElement *> list_args;
             for(std::map<std::string,std::string>::iterator it=args.begin(); it!=args.end(); ++it){
-                list_args.push_back(TiXmlElement(it->first.c_str()));
-                list_args.back().LinkEndChild( new TiXmlText(it->second.c_str()) );
-                action_command->LinkEndChild( &(list_args.back()) );
+                list_args.push_back(new TiXmlElement(it->first.c_str()));
+                list_args.back()->LinkEndChild( new TiXmlText(it->second.c_str()) );
+                action_command->LinkEndChild( list_args.back() );
             }
             action_command->LinkEndChild(new TiXmlText("") );
             
@@ -139,6 +142,16 @@ namespace Epyx{
             httpcommand << command                                                          << endl;
             command = httpcommand.str();
             
+            
+/*           //Let's free everything
+            delete[] action_command;
+            action_command = NULL;
+            delete[] body;
+            body = NULL;
+            delete[] envelope;
+            envelope = NULL;
+            delete[] decl;
+            decl = NULL;*/
         }
         
         std::string Command::findAction(){
@@ -199,21 +212,31 @@ namespace Epyx{
         }
         
         void Command::send(){
+            std::cout << "Received send Command" << std::endl;
             s = new Socket(address,port);
+            std::cout << "The socket has been initialized with address " << s->getAddress() << " and port n° " << s->getPort() << std::endl;
+            std::cout << "Connecting ..." << std::endl;
             s->connect();
-            s->write(command);
+            std::cout << "Writing command "<<std::endl<< this->command <<std::endl;
+            s->write(this->command);
         }
         
         void Command::Receive(){
             char data[BIG_SIZE];
-            s->recv((void*)data, BIG_SIZE);
+            int bytes = s->recv((void*)data, BIG_SIZE);
             /*for (int i = 0 ; i < bytes ; i++){
                 if (data[i] < 32)
                     std::cout << (int) data[i];
                 std::cout << data[i];
             }
             std::cout << std::endl;*/
-            raw_answer = std::string(data); //We may want to strip header from raw_data
+            raw_answer = std::string(data);
+            //We better assure we got all the data. Maybe thatpart will need to be implemented in a different class/function
+            int length = HTTPHeaders::getlength(HTTPHeaders::getHeaders(this->raw_answer));
+            while (bytes < length){
+                bytes += s->recv((void *) data, BIG_SIZE);
+                raw_answer += data;
+            }
             
         }
         

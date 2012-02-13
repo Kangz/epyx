@@ -4,7 +4,9 @@
 #include "command.h"
 #include "openconnect.h"
 #include "../../core/socket.h"
-
+#include "../../core/address.h"
+#include "igd.h"
+#include "../../core/exception.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -24,36 +26,32 @@ int main(int argc, char* argv[]){
     std::cin >> address;
     std::cout << "Enter Port : ";
     std::cin >> port;
-    std::cout << "Enter Service Name : " ;
-    std::cin >> service;
-    std::cout << "Enter Path to access : " ;
+    std::cout << "Enter Path to rootDesc.xml : " ;
     std::cin >> path;
     
-   std::cout << "The command is being created ..." << std::endl;
-    Epyx::UPNP::Command ordre(address,port);
-    ordre.setOption(Epyx::UPNP::UPNP_ACTION_CONNTYPE);
-    ordre.setService(service);
-    ordre.setPath(path);
+    std::string blah;
     
-    ordre.buildCommand();
-    
-    std::cout << "Command Built. Sending ..." << std::endl;
-    try{
-        ordre.send();
-        std::cout << "Command sent. Waiting for Answer..." << std::endl;
-        ordre.Receive();
-    }catch(Epyx::ErrException e){
-        std::cerr << e;
-    }
-
-    std::cout << "Received Answer of size " << ordre.getAnswer().size() <<" : "<< std::endl;
-    std::cout << ordre.getAnswer() << std::endl;
-    
-    ordre.Parse();
-    
-    std::map<std::string,std::string> answers = ordre.getResult();
-    for (std::map<std::string,std::string>::iterator it = answers.begin(); it != answers.end(); ++it){
+    std::cout << "The command is being created ..." << std::endl;
+    Epyx::UPNP::IGD igd;
+    igd.setAddress(address, port);
+    igd.setRootDescPath(path);
+    igd.getServices();
+    std::map<std::string,std::string> services = igd.getServiceList();
+    for (std::map<std::string,std::string>::iterator it=services.begin(); it != services.end(); ++it){
         std::cout << it->first << " : " << it->second << std::endl;
+    }
+    std::cout << "IGD Configured. Adding port map" << std::endl;
+    try{
+        Epyx::Address addr = igd.addPortMap(22,Epyx::UPNP::TCP,1337);
+        std::cout << "Port map added" << std::endl;
+        std::cout << "Does it work? ";
+        std::cin >> blah;
+        std::cout << "Deleting Port Map" << std::endl;
+        igd.delPortMap(addr,Epyx::UPNP::TCP);
+        std::cout << "Port Map deleted" << std::endl;
+    }
+    catch(Epyx::FailException e){
+        std::cerr << e << std::endl;
     }
     
     return 0;
