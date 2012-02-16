@@ -3,8 +3,8 @@
 #include <map>
 #include "command.h"
 #include "openconnect.h"
-#include "../../core/socket.h"
-#include "../../core/address.h"
+#include "../../net/socket.h"
+#include "../../net/address.h"
 #include "igd.h"
 #include "../../core/exception.h"
 
@@ -21,16 +21,16 @@ int main(int argc, char* argv[]){
     std::string endl ="\r\n";
     std::string address, service, path;
     unsigned short port;
-    
+
     std::cout << "Enter Address to connect with : " ;
     std::cin >> address;
     std::cout << "Enter Port : ";
     std::cin >> port;
     std::cout << "Enter Path to rootDesc.xml : " ;
     std::cin >> path;
-    
+
     std::string blah;
-    
+
     std::cout << "The command is being created ..." << std::endl;
     Epyx::UPNP::IGD igd;
     igd.setAddress(address, port);
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
     catch(Epyx::FailException e){
         std::cerr << e << std::endl;
     }
-    
+
     return 0;
-    
+
 }

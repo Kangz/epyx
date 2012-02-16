@@ -1,6 +1,6 @@
 #include "udpsocket.h"
-#include "exception.h"
-#include "assert.h"
+#include "../core/exception.h"
+#include "../core/assert.h"
 
 #define BUF_SIZE 4096
 namespace Epyx{

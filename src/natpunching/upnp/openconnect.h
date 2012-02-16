@@ -2,7 +2,7 @@
 #define OPENCONNECT_H
 
 
-#include "../../core/socket.h"
+#include "../../net/socket.h"
 
 //#include <SFML/socket>
 #include <string>
@@ -18,8 +18,8 @@ namespace Epyx {
                 void discover();
                 void openMapPort();
                 void testConnection();
-                
-                
+
+
                 std::map<std::string,unsigned short> validIGD;
                 std::string address;
                 unsigned short port;

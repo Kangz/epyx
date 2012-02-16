@@ -8,7 +8,7 @@
 #include "command.h"
 #include "../../core/exception.h"
 #include <list>
-#include "../../core/httpheaders.h"
+#include "../../net/httpheaders.h"
 
 
 #include <iostream>
@@ -44,9 +44,9 @@ namespace Epyx{
             s->close();
             delete s;
             s=NULL;
-            
+
         }
-        
+
         void Command::setAddress(std::string addr){
             this->address=addr;
         }
@@ -60,7 +60,7 @@ namespace Epyx{
         std::string Command::getAddress(){
             return this->address;
         }
-        
+
         void Command::setPath(std::string path){
             this->path = path;
         }
@@ -74,23 +74,23 @@ namespace Epyx{
             arg.value=value;
             return arg;
         }
-        
+
         void Command::setOption(UPNP_Action_type type){
             this->type = type;
         }
-        
+
         void Command::setArguments(std::map<std::string,std::string> args){
             this->args = args;
         }
         void Command::addArgument(std::string name, std::string value){
             args[name]=value;
         }
-        
+
         void Command::setOption(UPNP_Action_type type, std::map<std::string,std::string> args){
             setOption(type);
             setArguments(args);
         }
-        
+
         void Command::buildCommand(){ //TODO Manage Errors a bit better than this
             std::string actiontype=findAction();
             if (needArgs && args.size() == 0){
@@ -99,15 +99,15 @@ namespace Epyx{
             dom_command = TiXmlDocument();
             TiXmlDeclaration *decl = new TiXmlDeclaration("1.0","","");
             dom_command.LinkEndChild(decl); //Creation de l'entete
-            
+
             TiXmlElement * envelope = new TiXmlElement(SOAPPREFIX":Envelope");
             envelope->SetAttribute("xmlns:"SOAPPREFIX,"http://schemas.xmlsoap.org/soap/envelope/");
             envelope->SetAttribute(SOAPPREFIX":encodingStyle","http://schemas.xmlsoap.org/soap/encoding/");
             dom_command.LinkEndChild(envelope);
-            
+
             TiXmlElement * body = new TiXmlElement(SOAPPREFIX":Body");
             envelope->LinkEndChild(body);
-            
+
             TiXmlElement * action_command = new TiXmlElement((SERVICEPREFIX":"+actiontype).c_str());
             action_command->SetAttribute("xmlns:"SERVICEPREFIX,service.c_str());
             body->LinkEndChild(action_command);
@@ -118,15 +118,15 @@ namespace Epyx{
                 action_command->LinkEndChild( list_args.back() );
             }
             action_command->LinkEndChild(new TiXmlText("") );
-            
+
             //XML Data Built. Now we export it into this->command.
             TiXmlPrinter printer = TiXmlPrinter();
             printer.SetIndent("    ");
             printer.SetLineBreak("\r\n");
             dom_command.Accept( &printer );
             command = printer.CStr();
-            
-            
+
+
             //The Content is now build. Now we need to add the headers.
             std::stringstream httpcommand;
             httpcommand << "POST " << this->path << " HTTP/1.1"                             << endl;
@@ -141,8 +141,8 @@ namespace Epyx{
             httpcommand << ""                                                               << endl;
             httpcommand << command                                                          << endl;
             command = httpcommand.str();
-            
-            
+
+
 /*           //Let's free everything
             delete[] action_command;
             action_command = NULL;
@@ -153,7 +153,7 @@ namespace Epyx{
             delete[] decl;
             decl = NULL;*/
         }
-        
+
         std::string Command::findAction(){
             switch(this->type){
             case UPNP_ACTION_CONNTYPE :
@@ -184,12 +184,12 @@ namespace Epyx{
                 return "";
             }
         }
-        
-        void Command::Parse(){ 
+
+        void Command::Parse(){
             std::string answer;
             answer = Epyx::HTTPHeaders::stripHeaders(this->raw_answer);
             dom_answer = TiXmlDocument();
-            dom_answer.Parse((const char*) answer.c_str(),0,TIXML_DEFAULT_ENCODING); 
+            dom_answer.Parse((const char*) answer.c_str(),0,TIXML_DEFAULT_ENCODING);
             dom_answer.SaveFile("toto.xml");
             TiXmlPrinter printer = TiXmlPrinter();
             printer.SetIndent("    ");
@@ -203,24 +203,24 @@ namespace Epyx{
             for( TiXmlNode * child = balise->FirstChild(); child; child = child->NextSibling() ){
                 answers[child->Value()]=child->FirstChild()->Value(); //Normally, child is of form <Name>Value</Name>
             }
-            
-            
+
+
         }
 
         std::map<std::string,std::string> Command::getResult(){
             return this->answers;
         }
-        
+
         void Command::send(){
             std::cout << "Received send Command" << std::endl;
-            s = new Socket(address,port);
-            std::cout << "The socket has been initialized with address " << s->getAddress() << " and port n° " << s->getPort() << std::endl;
+            Socket s(address.c_str(),port);
+            std::cout << "The socket has been initialized with address " << s.getAddress() << std::endl;
             std::cout << "Connecting ..." << std::endl;
-            s->connect();
+            s.connect();
             std::cout << "Writing command "<<std::endl<< this->command <<std::endl;
-            s->write(this->command);
+            s.write(this->command);
         }
-        
+
         void Command::Receive(){
             char data[BIG_SIZE];
             int bytes = s->recv((void*)data, BIG_SIZE);
@@ -237,9 +237,9 @@ namespace Epyx{
                 bytes += s->recv((void *) data, BIG_SIZE);
                 raw_answer += data;
             }
-            
+
         }
-        
+
         std::string Command::getAnswer(){
             return this->raw_answer;
         }
@@ -252,6 +252,6 @@ namespace Epyx{
         std::string Command::getOrder(){
             return this->command;
         }
-        
+
     }
-}   
+}

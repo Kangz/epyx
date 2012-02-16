@@ -1,6 +1,6 @@
 #include "tcpsocket.h"
-#include "exception.h"
-#include "assert.h"
+#include "../core/exception.h"
+#include "../core/assert.h"
 #include "address.h"
 
 namespace Epyx{

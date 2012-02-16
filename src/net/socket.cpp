@@ -17,9 +17,9 @@
     #define SOCKET_ERROR (-1)
 #endif
 
-#include "exception.h"
+#include "../core/exception.h"
 #include "socket.h"
-#include "assert.h"
+#include "../core/assert.h"
 #include <iostream>
 #include <cstring>
 

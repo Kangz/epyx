@@ -10,7 +10,7 @@
 
 //#include <sys/socket.h>
 #include <string>
-#include "mutex.h"
+#include "../core/mutex.h"
 #include "address.h"
 
 namespace Epyx

@@ -10,8 +10,8 @@
 
 #include "igd.h"
 #include "command.h"
-#include "../../core/socket.h"
-#include "../../core/httpheaders.h"
+#include "../../net/socket.h"
+#include "../../net/httpheaders.h"
 #include <sstream>
 #include <queue>
 
@@ -47,7 +47,7 @@ namespace Epyx {
             this->address = Address();
             this->setRootDescPath(rootDescPath);
         }
-       
+
         void IGD::setAddress(Address address){
             this->address = address;
         }
@@ -66,7 +66,7 @@ namespace Epyx {
                 parseRootDescFile(actualNode->FirstChildElement());
             else if(strcmp(actualNode->Value(),"device") == 0)
                 parseRootDescFile(actualNode->FirstChildElement());
-            
+
             if (actualNode->NextSiblingElement() != NULL)
                 parseRootDescFile(actualNode->NextSiblingElement());
         }
@@ -84,7 +84,7 @@ namespace Epyx {
             int bytes = sock.recv(data, BIG_SIZE);
             std::string reply = data;
             int packetSize = HTTPHeaders::getlength(HTTPHeaders::getHeaders(reply));
-            while (bytes < packetSize) {    
+            while (bytes < packetSize) {
                 memset(data,'\0',BIG_SIZE); // Needed for the working of sock.recv()
                 bytes += sock.recv( (void *) data, BIG_SIZE);
                 reply.append(data);
@@ -95,7 +95,7 @@ namespace Epyx {
             domRootDesc.Parse(rootDesc.c_str());
             parseRootDescFile(domRootDesc.FirstChildElement()->FirstChildElement());
         }
-        
+
         std::string IGD::getExtIPAdress(){
             Command order (address.ip(), address.getPort());
             order.setOption(Epyx::UPNP::UPNP_ACTION_GET_EXT_IP);
@@ -114,7 +114,7 @@ namespace Epyx {
             order.Parse();
             return order.getResult()["NewExternalIPAddress"];
         }
-        
+
         std::list<portMap> IGD::getListPortMap(){
             std::list<portMap> res;
             std::string returnedHeader ="";
@@ -139,51 +139,57 @@ namespace Epyx {
                 std::map<std::string,std::string> parsedResult = order.getResult();
                 unsigned short extPort = (unsigned short) atoi(parsedResult["NewExternalPort"].c_str());
                 unsigned short intPort = (unsigned short) atoi(parsedResult["NewInternalPort"].c_str());
-                portMap tmp={(parsedResult["NewEnabled"]!="0"),Epyx::Address(parsedResult["NewInternalClient"].c_str(),intPort,4),extPort,parsedResult["NewProtocol"], parsedResult["NewPortMappingDescription"]};
+                Epyx::Address newInternalAddress(parsedResult["NewInternalClient"].c_str(),intPort,4);
+                portMap tmp={(parsedResult["NewEnabled"]!="0"),
+                    newInternalAddress,
+                    extPort,
+                    parsedResult["NewProtocol"],
+                    parsedResult["NewPortMappingDescription"]
+                    };
                 res.push_back(tmp);
             }while(!returnedHeader.find("500 Internal"));
             return res;
         }
-        
+
         std::string IGD::getLocalAdress(){
             std::string IPAddress;
             struct ifaddrs * ifAddrStruct=NULL;
             struct ifaddrs * ifa=NULL;
             void * tmpAddrPtr=NULL;
-            
+
             getifaddrs(&ifAddrStruct);
-            
+
             for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next) {
                 if (ifa ->ifa_addr->sa_family==AF_INET) { // check it is IP4
                     // is a valid IP4 Address
                     tmpAddrPtr=&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
                     char addressBuffer[INET_ADDRSTRLEN];
                     inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-                    if (memcmp(addressBuffer, this->address.ip(), 3) == 0) { // the condition is true is the first 3 bytes of addressBuffer are equal to the first 3 bytes of the ip address. 
+                    if (memcmp(addressBuffer, this->address.ip(), 3) == 0) { // the condition is true is the first 3 bytes of addressBuffer are equal to the first 3 bytes of the ip address.
                         //This is needed to change by comparing the address with netmasks. For example, first comparing the addresses with applied netmask, then, if ok, turn into string with the inet_top method.
                         IPAddress = addressBuffer;
                         break;
                     }
-                } 
+                }
             }
             if (ifAddrStruct!=NULL) freeifaddrs(ifAddrStruct);
             return IPAddress;
         }
-        Epyx::Address IGD::addPortMap(unsigned short port, protocol proto){
+        const Epyx::Address IGD::addPortMap(unsigned short port, protocol proto){
             return this->addPortMap(port,proto,port);
         }
-        Epyx::Address IGD::addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port){
+        const Epyx::Address IGD::addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port){
             std::string prot = (proto == Epyx::UPNP::TCP)? "TCP" : "UDP";
             std::cout<< "Entering addPortMap("<<loc_port<<","<<prot<<","<<ext_port<<")"<<std::endl;
             std::string localIP = this->getLocalAdress();
             std::cout << "Local IP Address is " << localIP << std::endl;
             Epyx::UPNP::Command order (this->address.ip(),this->address.getPort());
             order.setOption(Epyx::UPNP::UPNP_ACTION_ADDPORTMAP);
-            
+
             char loc_portChar[10],ext_portChar[10];
             sprintf(loc_portChar,"%d",loc_port);
             sprintf(ext_portChar,"%d",ext_port);
-            
+
             order.addArgument("NewRemoteHost","");
             order.addArgument("NewExternalPort",ext_portChar);
             order.addArgument("NewProtocol",prot);
@@ -192,8 +198,8 @@ namespace Epyx {
             order.addArgument("NewEnabled","1");
             order.addArgument("NewPortMappingDescription",EPYX_MSG);
             order.addArgument("NewLeaseDuration","0");
-            
-            
+
+
             std::string WanIPConnService, WanIPConnCtl;
             for(std::map<std::string,std::string>::iterator it = services.begin(); it != services.end(); ++it ){
                 if (it->first.find("WANIPConn")){
@@ -214,20 +220,21 @@ namespace Epyx {
                 std::cerr << "IGD : Couldn't add port map" << std::endl;
                 throw FailException("IGD","Couldn't add requested Port Map");
             }
-            return Epyx::Address(this->getExtIPAdress().c_str(),ext_port,4);
+            const Epyx::Address extAddress(this->getExtIPAdress().c_str(),ext_port,4);
+            return extAddress;
         }
         void IGD::delPortMap(Address addr, protocol proto){
             std::string prot = (proto == Epyx::UPNP::TCP)? "TCP" : "UDP";
             Epyx::UPNP::Command order (this->address.ip(),this->address.getPort());
             order.setOption(Epyx::UPNP::UPNP_ACTION_DELPORTMAP);
-            
+
             char portChar[10];
             sprintf(portChar,"%d",addr.getPort());
-            
+
             order.addArgument("NewRemoteHost","");
             order.addArgument("NewExternalPort",portChar);
             order.addArgument("NewProtocol",prot);
-            
+
             std::string WanIPConnService, WanIPConnCtl;
             for(std::map<std::string,std::string>::iterator it = services.begin(); it != services.end(); ++it ){
                 if (it->first.find("WANIPConn")){

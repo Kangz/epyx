@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include <list>
-#include "../../core/address.h"
+#include "../../net/address.h"
 #include "../../../include/tinyxml/tinyxml.h"
 
 namespace Epyx {
@@ -39,8 +39,14 @@ namespace Epyx {
                 void setRootDescPath(std::string rootDescPath);
                 std::string getExtIPAdress();
                 std::list<portMap> getListPortMap();
-                Epyx::Address addPortMap(unsigned short port, protocol proto); //Returns Address class with which we can join the user from the internet. For compatibility reasons the remote Port must be the same as the local port
-                Epyx::Address addPortMap(unsigned short loc_port, protocol proto,unsigned short ext_port );
+
+                /**
+                 * Returns Address class with which we can join the user from
+                 * the internet. For compatibility reasons the remote Port must
+                 * be the same as the local port
+                 */
+                const Epyx::Address addPortMap(unsigned short port, protocol proto);
+                const Epyx::Address addPortMap(unsigned short loc_port, protocol proto,unsigned short ext_port );
                 void getServices();
                 std::string getLocalAdress(); //Gets the local IP adress which communicates with the IGD.
                 void delPortMap(Epyx::Address addr, protocol proto); //Addr must be the IP TCP/UDP coordinates for access to user machine through IGD NAT Device. (Ex the return value of addPortMap)
@@ -50,7 +56,7 @@ namespace Epyx {
                 Epyx::Address address;
                 std::string rootDescPath;
                 void parseRootDescFile(TiXmlElement *actualNode);
-                
+
         };
     }
 }

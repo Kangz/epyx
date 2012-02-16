@@ -1,5 +1,5 @@
 #include "address.h"
-#include "exception.h"
+#include "../core/exception.h"
 #include <sstream>
 #include <string.h>
 
@@ -18,7 +18,7 @@ namespace Epyx
         this->ipStr[INET6_ADDRSTRLEN] = 0;
     }
 
-    Address::Address(Address& addr)
+    Address::Address(const Address& addr)
         :port(addr.port), ipVersion(addr.ipVersion)
     {
         strncpy(this->ipStr, addr.ipStr, INET6_ADDRSTRLEN);

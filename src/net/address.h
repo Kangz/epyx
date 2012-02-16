@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <arpa/inet.h>
-#include "assert.h"
+#include "../core/assert.h"
 
 namespace Epyx
 {
@@ -21,7 +21,7 @@ namespace Epyx
         Address();
         Address(const char *ip, unsigned short port_, int ipVersion_ = 4);
         Address(const struct sockaddr *saddr);
-        Address(Address& addr);
+        Address(const Address& addr);
 
         const char* ip();
         unsigned short getPort();

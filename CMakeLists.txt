@@ -25,6 +25,12 @@ file(
 
 file(
     GLOB_RECURSE
+    net_sources
+    src/net/*
+)
+
+file(
+    GLOB_RECURSE
     server_sources
     src/server/*
 )
@@ -67,6 +73,7 @@ file(
 add_executable(
     test-natpunching
     ${core_sources}
+    ${net_sources}
     ${natpunching_sources}
     ${tinyxml_sources}
 )
