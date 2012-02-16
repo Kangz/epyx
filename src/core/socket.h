@@ -11,38 +11,51 @@
 //#include <sys/socket.h>
 #include <string>
 #include "mutex.h"
+#include "address.h"
 
-namespace Epyx{
+namespace Epyx
+{
     class Socket
     {
     public:
-        int connect();
-        Socket();
         static void init();
-        void initialize();
         static void fini();
-        Socket(std::string address, unsigned short port);
-        void setAddress(std::string address);
-        void setPort(unsigned short port);
-        unsigned short getPort();
-        std::string getAddress();
+
+        Socket();
+        Socket(Address& addr);
+        Socket(const char* addr, unsigned int port);
+        ~Socket();
+
+        bool connect();
         void close();
+
+        void setAddress(Address& addr);
+        Address getAddress();
+
+        // Senders
         int send(const void *data, int size);
         void sendAll(const void *data, int size);
         void write(std::string message);
+
+        // Recevers
         int recv(void *data, int size);
         void recvAll(void *data, int size);
         bool recvLine(std::ostream& out);
         std::string read();
-        ~Socket();
+
     protected:
+        // Socket file descriptor
         int sock;
-        
+        bool isConnected;
+
+        // IP + port associated with the socket
+        Address address;
+
     private:
-        unsigned short port;
-        std::string address;
+        // Global initialisation stuff
         static int is_init;
         static Mutex init_mutex;
+
         // Last end-of-line caracter (\r or \n)
         char last_eol;
 

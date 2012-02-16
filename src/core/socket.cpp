@@ -26,30 +26,10 @@
 namespace Epyx{
     #define BUF_SIZE 4096
 
+    // Socket library initialisation
     int Socket::is_init = 0;
     Mutex Socket::init_mutex;
 
-    Socket::Socket(){
-        initialize();
-    }
-
-    Socket::Socket(std::string add, unsigned short p) {
-        initialize();
-        this->setPort(p);
-        this->setAddress(add);
-    }
-
-    Socket::~Socket(){
-        close();
-    }
-
-    void Socket::initialize(){
-        port = -1;
-        this->sock = ::socket(AF_INET,SOCK_STREAM,0);
-        if (this->sock == -1)
-            ErrException("Socket","constructor");
-    }
-    
     void Socket::init(){
         if (is_init == 0){
             #if defined (WIN32)
@@ -63,7 +43,6 @@ namespace Epyx{
     }
 
     void Socket::fini(){
-        static int erreur;
         init_mutex.lock();
         is_init--;
         init_mutex.unlock();
@@ -74,45 +53,64 @@ namespace Epyx{
         }
     }
 
-
-    void Socket::setAddress(std::string add){
-        address=std::string(add);
+    Socket::Socket()
+        :sock(-1), isConnected(false)
+    {
     }
 
-    std::string Socket::getAddress(){
+    Socket::Socket(Address &addr)
+        :sock(-1), isConnected(false), address(addr)
+    {
+    }
+
+    Socket::Socket(const char* addr, unsigned int port)
+        :sock(-1), isConnected(false), address(addr, port)
+    {
+    }
+
+    Socket::~Socket()
+    {
+        this->close();
+    }
+
+    void Socket::setAddress(Address& addr)
+    {
+        address = addr;
+    }
+
+    Address Socket::getAddress()
+    {
         return address;
     }
 
-    void Socket::setPort(unsigned short p){
-        port = p;
-    }
-
-    unsigned short Socket::getPort(){
-        return port;
-    }
-
-    int Socket::connect(){ //TODO : Include Logger functionnality somewhere.
-        sockaddr_in server;
-        server.sin_family       = AF_INET;
-        server.sin_addr.s_addr  = inet_addr(address.c_str());
-        server.sin_port         = htons(port);
-        memset(&server.sin_zero, '\0', sizeof(server.sin_zero));
-        int result = ::connect(this->sock, (sockaddr *)&server, sizeof(server));
-        if ( result < 0){
-            std::cerr << "Failed connecting to " << address << ":" << port << " : " << strerror(errno) << std::endl; //Replace by error log.
-            std::cerr << this->sock << "   " << server.sin_zero << std::endl;
-            return -1;
+    bool Socket::connect()
+    {
+        EPYX_ASSERT(this->sock >= 0);
+        //TODO : Include Logger functionnality somewhere.
+        sockaddr_storage server;
+        this->address.getSockAddr((struct sockaddr*)&server);
+        int result = ::connect(this->sock, (sockaddr*)&server, sizeof(server));
+        if (result < 0) {
+            //Replace by error log.
+            Epyx::log::error << "Failed connecting to " << this->address << ": "
+                << strerror(errno) << Epyx::log::endl;
+            return false;
         }
-        return 0;
+        this->isConnected = true;
+        return true;
     }
 
     void Socket::close(){ //TODO Implement the tests.
-        //std::cout << "Closing Socket ..." << std::endl;
+        //Epyx::log::debug << "Closing Socket ..." << Epyx::log::endl;
         //Is Socket connected? If so,
-        ::shutdown(sock,SHUT_RDWR);
-        //Is Socket close? If so,
+        if (sock < 0)
+            return;
+        if (isConnected)
+            ::shutdown(sock,SHUT_RDWR);
+        isConnected = false;
         ::close(sock);
-        //std::cout << "Socket Closed" << std::endl;
+        sock = -1;
+        //Epyx::log::debug << "Socket Closed" << Epyx::log::endl;
     }
 
     /**
@@ -123,6 +121,8 @@ namespace Epyx{
     {
         int bytes;
         EPYX_ASSERT(data != NULL);
+        EPYX_ASSERT(this->sock >= 0);
+        EPYX_ASSERT(this->isConnected);
         bytes = ::send(this->sock, data, size, 0);
         // TODO: Implement status error (ex. Conn closed, ...)
 
@@ -169,6 +169,8 @@ namespace Epyx{
     {
         int bytes;
         EPYX_ASSERT(data != NULL);
+        EPYX_ASSERT(this->sock >= 0);
+        EPYX_ASSERT(this->isConnected);
         bytes = ::recv(this->sock, data, size-1, 0);
         //recv doesn't set the after-the-last byte to zero. We must do it to avoid some issues. (writing into a prefilled longer data buffer fucks everything up)
         //memset( ((char *) data) + bytes,'\0',1); //The only way to set it correctly (with data being a void pointer).  the char* is here to set correctly the pointer arithmetic (So it advances "bytes" bytes)
@@ -178,7 +180,7 @@ namespace Epyx{
             throw ErrException("Socket", "recv");
         return bytes;
     }
-    
+
     /**
      * Receive exactly (size) bytes from the network
      * @data: buffer pointer

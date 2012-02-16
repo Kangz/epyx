@@ -13,8 +13,7 @@ namespace Epyx {
     class UDPSocket : public Socket
     {
         public:
-            UDPSocket();
-            UDPSocket(bool);
+            UDPSocket(bool reply = false);
             void close();
             int recv(void*, int);
             void connect();
@@ -22,6 +21,6 @@ namespace Epyx {
             bool reply;
             int ans_sock;
     };
-    
+
 }
 #endif // EPYX_UDPSOCKET_H
