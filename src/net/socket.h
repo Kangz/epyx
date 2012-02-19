@@ -22,8 +22,9 @@ namespace Epyx
         static void fini();
 
         Socket();
-        Socket(Address& addr);
-        Socket(const char* addr, unsigned int port);
+        Socket(const Address& addr);
+        Socket(const char* addr, unsigned short port);
+        Socket(int sock, const Address &addr);
         ~Socket();
 
         bool connect();

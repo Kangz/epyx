@@ -58,14 +58,20 @@ namespace Epyx{
     {
     }
 
-    Socket::Socket(Address &addr)
+    Socket::Socket(const Address &addr)
         :sock(-1), isConnected(false), address(addr)
     {
     }
 
-    Socket::Socket(const char* addr, unsigned int port)
+    Socket::Socket(const char* addr, unsigned short port)
         :sock(-1), isConnected(false), address(addr, port)
     {
+    }
+
+    Socket::Socket(int sock, const Address &addr)
+        :sock(sock), isConnected(true), address(addr)
+    {
+        EPYX_ASSERT(sock >= 0);
     }
 
     Socket::~Socket()
@@ -171,13 +177,18 @@ namespace Epyx{
         EPYX_ASSERT(data != NULL);
         EPYX_ASSERT(this->sock >= 0);
         EPYX_ASSERT(this->isConnected);
-        bytes = ::recv(this->sock, data, size-1, 0);
-        //recv doesn't set the after-the-last byte to zero. We must do it to avoid some issues. (writing into a prefilled longer data buffer fucks everything up)
-        //memset( ((char *) data) + bytes,'\0',1); //The only way to set it correctly (with data being a void pointer).  the char* is here to set correctly the pointer arithmetic (So it advances "bytes" bytes)
-        *(((char *) data) + bytes) = '\0';
-        // TODO: Implement status error (ex. Conn closed, ...)
+        bytes = ::recv(this->sock, data, size, 0);
+        // TODO: Implement status error (eg. Conn closed, ...)
         if (bytes == -1)
             throw ErrException("Socket", "recv");
+
+        /**
+         * recv doesn't set the after-the-last byte to zero. We must do it to
+         * avoid some issues.
+         * (writing into a prefilled longer data buffer fucks everything up)
+         */
+        if (bytes < size)
+            ((char*) data)[bytes] = 0;
         return bytes;
     }
 

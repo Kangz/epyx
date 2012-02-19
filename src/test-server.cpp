@@ -5,56 +5,83 @@
 #include <iostream>
 #include <sstream>
 #include <strings.h>
+#include "core/log.h"
 #include "core/exception.h"
-#include "server/server.h"
-#include "server/server-link.h"
+#include "net/tcpserver.h"
 
-bool TestServer(Epyx::ServerLink& link)
+class TestServer : public Epyx::ServerRun
 {
-    const char *line;
+public:
+    Epyx::Thread *srvThread;
+    void srvrun(Epyx::Server& srv, Epyx::Socket& sock)
+    {
+        const char *line;
 
-    std::ostringstream hello;
-    hello << "Hello, you address is " << link.clientAddr << " !\n";
-    link.sendText(hello.str().c_str());
-    link.sendText("Type QUIT to quit the server\n");
-    link.sendText("Type EXIT to exit the session\n");
-    link.sendText("Type PAN to kill the session\n");
-    while (true) {
-        std::ostringstream out;
-        if (!link.recvLine(out)) {
-            std::cout << "end\n";
-            return true;
+        Epyx::log::debug << "[" << sock.getAddress() << "] "
+            << "Incoming for " << srv.getAddress() << Epyx::log::endl;
+
+        std::ostringstream hello;
+        hello << "Hello, you address is " << sock.getAddress() << " !\n";
+        sock.write(hello.str());
+        sock.write("Type QUIT to quit the server\n");
+        sock.write("Type EXIT to exit the session\n");
+        sock.write("Type PAN to kill the session\n");
+        while (true) {
+            std::ostringstream out;
+            if (!sock.recvLine(out)) {
+                Epyx::log::debug << "[" << sock.getAddress() << "] "
+                    << "Remote disconnected" << Epyx::log::endl;
+                return;
+            }
+            Epyx::log::debug << "[" << sock.getAddress() << "-RECV] "
+                << out.str() << Epyx::log::endl;
+            line = out.str().c_str();
+            if (!strcasecmp(line, "quit")) {
+                srv.close();
+                if (this->srvThread != NULL) {
+                    this->srvThread->term();
+                }
+                return;
+            } else if (!strcasecmp(line, "exit"))
+                return;
+            else if (!strcasecmp(line, "pan"))
+                throw Epyx::FailException("test-server", "A client tried to kill me");
+            else if (!strcasecmp(line, "o<"))
+                sock.write("PAN !\n");
+            else {
+                // Mirror
+                out << '\n';
+                sock.write("Mirror: ");
+                sock.write(out.str());
+            }
         }
-        std::cout << "[RECV@" << link.clientAddr << "] " << out.str() << "\n";
-        line = out.str().c_str();
-        if (!strcasecmp(line, "quit"))
-            return false;
-        else if (!strcasecmp(line, "exit"))
-            return true;
-        else if (!strcasecmp(line, "pan"))
-            throw Epyx::FailException("test-server", "A client tried to kill me");
-        else if (!strcasecmp(line, "o<"))
-            link.sendText("PAN !\n");
-        else {
-            // Mirror
-            out << '\n';
-            link.sendText("Mirror: ");
-            link.sendText(out.str().c_str());
-        }
+        return;
     }
-    return true;
+};
+
+void test_server()
+{
+    Epyx::log::debug << "Starting server at port 4242..." << Epyx::log::endl;
+    TestServer ts;
+    Epyx::TCPServer srv(4242, 20, ts);
+    Epyx::Thread t(&srv, "Server");
+    ts.srvThread = &t;
+    Epyx::log::debug << "(server) RUN!" << Epyx::log::endl;
+    t.run();
+    t.wait();
+    Epyx::log::debug << "Server thread has terminated" << Epyx::log::endl;
 }
 
 int main()
 {
-    Epyx::Server *srv = NULL;
+    Epyx::Thread::init();
+    Epyx::log::init(Epyx::log::CONSOLE, "");
+    Epyx::Socket::init();
     try {
-        Epyx::Server::init();
-        srv = new Epyx::Server(4242, 20, TestServer);
+        test_server();
     } catch (Epyx::Exception e) {
-        std::cerr << e;
+        Epyx::log::error << e << Epyx::log::endl;
     }
-    if (srv)
-        delete srv;
+    Epyx::log::flushAndQuit();
 }
 

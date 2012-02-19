@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <ostream>
-#include "../core/address.h"
+#include "../net/address.h"
 #include "server-listener.h" /* for ServerRun */
 
 namespace Epyx
