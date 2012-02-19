@@ -55,16 +55,16 @@ namespace Epyx
                 clientAddrLen = sizeof clientAddr;
                 newfd = ::accept(this->sockfd, (struct sockaddr*)&clientAddr,
                                &clientAddrLen);
-                if (newfd == -1)
-                    throw ErrException("Server::run", "accept");
 
                 // If this thread was not killed, return
-                if (!this->running) {
+                if (!this->running || this->sockfd < 0) {
                     ::shutdown(newfd, SHUT_RDWR);
                     ::close(newfd);
                     newfd = -1;
                     break;
                 }
+                if (newfd == -1)
+                    throw ErrException("Server::run", "accept");
 
                 // Encapsulate socket
                 try {
