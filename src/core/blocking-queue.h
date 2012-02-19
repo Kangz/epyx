@@ -39,7 +39,6 @@ namespace Epyx {
         //int length();
         //bool isEmpty();
 
-        //TODO: allow someone to flush the queue (ie copy)
     };
 
     template<typename T> BlockingQueue<T>::BlockingQueue() {}
