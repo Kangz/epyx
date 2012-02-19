@@ -1,4 +1,5 @@
 #include "exception.h"
+#include "log.h"
 #include <iostream>
 #include <errno.h>
 #include <string.h>
@@ -32,7 +33,8 @@ namespace Epyx
         :FailException(module_, "")
     {
         std::stringstream msg;
-        msg << fct << " error " << errno << ", " << strerror(errno);
+        log::error << fct << ": " << log::errstd << log::endl;
+        msg << "Error with " << fct;
         this->append(msg.str().c_str());
     }
 }

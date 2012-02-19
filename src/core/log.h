@@ -43,6 +43,10 @@ namespace log {
     struct EndlStruct{};
     extern EndlStruct endl;
 
+    // Special token : error string to print errno nicely
+    struct ErrstdStruct{};
+    extern ErrstdStruct errstd;
+
     class Stream {
     private:
         std::ostringstream buffer;
@@ -56,6 +60,7 @@ namespace log {
         ~Stream();
         template<typename T> Stream& operator<<(const T& arg);
         Stream& operator<<(const EndlStruct& f);
+        Stream& operator<<(const ErrstdStruct& f);
     };
 
     //Here the definition of the different log streams

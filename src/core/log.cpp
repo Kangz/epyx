@@ -1,4 +1,7 @@
 #include "log.h"
+#include "mutex.h"
+#include <errno.h>
+#include <cstring>
 
 namespace Epyx {
 namespace log {
@@ -6,6 +9,7 @@ namespace log {
     Worker* _worker = NULL;
     TLSPointer<BufferContainer>* _buffers = NULL;
     EndlStruct endl;
+    ErrstdStruct errstd;
     bool initialized = false;
 
     static BufferContainer* create_buffers(){
@@ -22,6 +26,7 @@ namespace log {
     void flush(){
         _worker->flush(false);
     }
+
     void waitFlush(){
         _worker->flush(true);
     }
@@ -41,5 +46,15 @@ namespace log {
         return *this;
     }
 
+    Stream& Stream::operator<<(const ErrstdStruct& f) {
+        EPYX_ASSERT(log::initialized);
+        int err_code = errno;
+        static Mutex strerrorMutex;
+        strerrorMutex.lock();
+        const char *err_str = std::strerror(err_code);
+        strerrorMutex.unlock();
+        *this << err_str << " (errno #" << err_code << ")";
+        return *this;
+    }
 }
 }

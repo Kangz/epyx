@@ -1,3 +1,4 @@
+#include "log.h"
 #include "thread.h"
 #include "exception.h"
 
@@ -74,7 +75,11 @@ namespace Epyx
         Epyx::Thread *self = (Epyx::Thread*) arg;
 
         detail::thread_infos->reset(self->info);
-        self->rn->run();
+        try {
+            self->rn->run();
+        } catch (Exception e) {
+            log::fatal << e << log::endl;
+        }
         return NULL;
     }
 }

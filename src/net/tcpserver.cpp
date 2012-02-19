@@ -58,9 +58,7 @@ namespace Epyx
                 this->address = Address(pai->ai_addr);
                 break;
             }
-
-            // TODO: Epyx::log::warn << bind error (to see already-in-use addresses)
-            log::warn << "Bind status " << status << log::endl;
+            log::warn << "bind: " << log::errstd << log::endl;
 
             // Close socket if bind fails
             ::close(this->sockfd);
