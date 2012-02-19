@@ -213,7 +213,7 @@ namespace Epyx{
 
         void Command::send(){
             std::cout << "Received send Command" << std::endl;
-            Socket s(address.c_str(),port);
+            Socket s(address.c_str(),(unsigned short)port);
             std::cout << "The socket has been initialized with address " << s.getAddress() << std::endl;
             std::cout << "Connecting ..." << std::endl;
             s.connect();

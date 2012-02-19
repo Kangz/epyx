@@ -25,15 +25,11 @@ file(
 
 file(
     GLOB_RECURSE
-    net_sources
-    src/net/*
+    localn2np_sources
+    src/localn2np/*
+    src/n2np/*
 )
 
-file(
-    GLOB_RECURSE
-    server_sources
-    src/server/*
-)
 file(
     GLOB_RECURSE
     natpunching_sources
@@ -42,33 +38,31 @@ file(
 
 file(
     GLOB_RECURSE
-    localn2np_sources
-    src/localn2np/*
-    src/n2np/*
+    net_sources
+    src/net/*
 )
 
 # Test executables
-#add_executable(
-#    test-server
-#    ${core_sources}
-#    ${server_sources}
-#    src/test-server.cpp
-#)
-#target_link_libraries(
-#    test-server
-#    pthread
-#)
+add_executable(
+    test-thread
+    ${core_sources}
+    src/test-thread.cpp
+)
+target_link_libraries(
+    test-thread
+    pthread
+)
 
-#add_executable(
-#    test-thread
-#    ${core_sources}
-#    ${server_sources}
-#    src/test-thread.cpp
-#)
-#target_link_libraries(
-#    test-thread
-#    pthread
-#)
+add_executable(
+    test-server
+    ${core_sources}
+    ${net_sources}
+    src/test-server.cpp
+)
+target_link_libraries(
+    test-server
+    pthread
+)
 
 add_executable(
     test-natpunching
