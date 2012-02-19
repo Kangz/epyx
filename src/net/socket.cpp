@@ -1,10 +1,7 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
-/*
- * epyx
- * Copyright (C) aniem 2012 <jeremy.buet@polytechnique.org>
- *
- */
-
+#include "socket.h"
+#include "../core/common.h"
+#include <iostream>
+#include <cstring>
 #if defined (WIN32)
     #include <winsock2.h>
 #else
@@ -17,15 +14,8 @@
     #define SOCKET_ERROR (-1)
 #endif
 
-#include "../core/exception.h"
-#include "socket.h"
-#include "../core/assert.h"
-#include <iostream>
-#include <cstring>
-
-namespace Epyx{
-    #define BUF_SIZE 4096
-
+namespace Epyx
+{
     // Socket library initialisation
     int Socket::is_init = 0;
     Mutex Socket::init_mutex;
@@ -253,4 +243,3 @@ namespace Epyx{
         return out.str();
     }
 }
-

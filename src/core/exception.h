@@ -5,7 +5,6 @@
 #define EPYX_EXCEPTION_H
 
 #include <string>
-#include <iostream>
 
 namespace Epyx
 {

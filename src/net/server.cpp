@@ -1,6 +1,5 @@
 #include "server.h"
-#include "../core/assert.h"
-#include "../core/log.h"
+#include "../core/common.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>

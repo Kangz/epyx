@@ -1,5 +1,5 @@
 #include "address.h"
-#include "../core/exception.h"
+#include "../core/common.h"
 #include <sstream>
 #include <string.h>
 

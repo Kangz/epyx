@@ -5,10 +5,6 @@
 #include <iostream>
 #include <stdlib.h>
 #include "core/common.h"
-#include "core/thread.h"
-#include "core/mutex.h"
-#include "core/condition.h"
-
 
 using namespace Epyx;
 

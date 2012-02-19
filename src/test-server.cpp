@@ -5,8 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <strings.h>
-#include "core/log.h"
-#include "core/exception.h"
+#include "core/common.h"
 #include "net/tcpserver.h"
 
 class TestServer : public Epyx::ServerRun

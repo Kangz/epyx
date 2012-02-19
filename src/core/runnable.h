@@ -1,10 +1,8 @@
 /**
- *
+ * Runnable object for threads
  */
 #ifndef EPYX_RUNNABLE_H
 #define EPYX_RUNNABLE_H
-
-#include "runnable.h"
 
 namespace Epyx {
 

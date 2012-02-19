@@ -1,17 +1,13 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
-/*
- * epyx
- * Copyright (C) aniem 2012 <jeremy.buet@polytechnique.org>
- *
+/**
+ * Socket astraction layer
  */
 
 #ifndef EPYX_SOCKET_H_
 #define EPYX_SOCKET_H_
 
-//#include <sys/socket.h>
-#include <string>
 #include "../core/mutex.h"
 #include "address.h"
+#include <string>
 
 namespace Epyx
 {

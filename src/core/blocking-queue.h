@@ -1,4 +1,6 @@
 /**
+ * Blocking queue implementation
+ * TODO: add documentation
  */
 #ifndef EPYX_BLOCKING_QUEUE_H
 #define EPYX_BLOCKING_QUEUE_H
@@ -6,8 +8,6 @@
 #include <queue>
 #include "condition.h"
 #include <iostream>
-
-//TODO: add documentation
 
 namespace Epyx {
     template<typename T> class BlockingQueue {

@@ -1,4 +1,5 @@
 /**
+ * Assert() macro implementation with Epyx logger
  */
 #ifndef EPYX_ASSERT_H
 #define EPYX_ASSERT_H
