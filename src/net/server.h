@@ -1,7 +1,10 @@
+/**
+ * Basic Internet server class
+ */
 #ifndef EPYX_SERVER_H
 #define EPYX_SERVER_H
 
-#include "socket.h"
+#include "address.h"
 #include "serverrun.h"
 
 namespace Epyx

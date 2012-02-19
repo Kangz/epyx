@@ -1,7 +1,7 @@
 /**
  * Thread condition management astraction layer
- * It is not exposing the full pthread capabilities on purpose to make it simpler
- * even if it might create small overheads
+ * It is not exposing the full pthread capabilities on purpose to make it
+ * simpler even if it might create small overheads
  */
 #ifndef EPYX_CONDITION_H
 #define EPYX_CONDITION_H

@@ -1,12 +1,11 @@
 /**
- * Addresses and Ports management
+ * IP addresses and ports management
  */
 #ifndef EPYX_ADDRESS_H
 #define EPYX_ADDRESS_H
 
 #include <iostream>
 #include <arpa/inet.h>
-#include "../core/assert.h"
 
 namespace Epyx
 {

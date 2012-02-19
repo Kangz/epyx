@@ -1,5 +1,6 @@
 /**
- * Runnable object which manage a server connection.
+ * Runnable object which manage a server connection
+ * ServerRunnable is an internal class to use ServerRun with a thread.
  */
 #ifndef EPYX_SERVERRUN_H
 #define EPYX_SERVERRUN_H

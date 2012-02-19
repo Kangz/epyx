@@ -5,8 +5,8 @@
 #define EPYX_MUTEX_H
 
 #include <pthread.h>
-#include "exception.h"
 #include <errno.h>
+#include "exception.h"
 
 namespace Epyx
 {

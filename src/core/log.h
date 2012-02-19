@@ -1,4 +1,5 @@
 /**
+ * Thread-safe logging system
  */
 #ifndef EPYX_LOG_H
 #define EPYX_LOG_H

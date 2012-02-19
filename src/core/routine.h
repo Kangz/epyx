@@ -1,5 +1,5 @@
 /**
- * Epyx exceptions
+ * Epyx routine
  */
 #ifndef EPYX_ROUTINE_H
 #define EPYX_ROUTINE_H

@@ -1,7 +1,5 @@
 #include "tcpsocket.h"
-#include "../core/exception.h"
-#include "../core/assert.h"
-#include "address.h"
+#include "../core/common.h"
 
 namespace Epyx{
     TCPSocket::TCPSocket()
