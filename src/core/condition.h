@@ -13,14 +13,6 @@
 
 namespace Epyx {
     class Condition {
-    private:
-        Mutex mutex;
-        pthread_cond_t cond;
-
-        // Disable copy construction and assignment.
-        Condition(const Condition&);
-        const Condition& operator=(const Condition&);
-
     public:
         Condition();
         ~Condition();
@@ -41,6 +33,14 @@ namespace Epyx {
         void notifyAll();
 
         Mutex& getMutex();
+
+    private:
+        Mutex mutex;
+        pthread_cond_t cond;
+
+        // Disable copy construction and assignment.
+        Condition(const Condition&);
+        const Condition& operator=(const Condition&);
     };
 }
 

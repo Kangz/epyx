@@ -20,15 +20,8 @@ namespace Epyx {
         extern bool thread_initialized;
     }
 
+
     class Thread {
-    private:
-        static void* _thread_start(void*);
-
-        //And this is the ofstream of each stream
-        Runnable* rn;
-        pthread_t thread;
-        detail::ThreadInfo* info;
-
     public:
 
         Thread(Runnable* rn_, std::string name, int id = -1);
@@ -53,7 +46,16 @@ namespace Epyx {
 
         static void init(std::string name = "Main", int id = -1);
         static bool isInitialized();
+
+    private:
+        static void* _thread_start(void*);
+
+        //And this is the ofstream of each stream
+        Runnable* rn;
+        pthread_t thread;
+        detail::ThreadInfo* info;
     };
+
 }
 
 #endif /* EPYX_THREAD_H */
