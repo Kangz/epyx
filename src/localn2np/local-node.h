@@ -9,6 +9,8 @@
 
 #include "../core/mutex.h"
 #include "../n2np/n2np-packet.h"
+#include "../core/blocking-queue.h"
+#include "../core/runnable.h"
 #include "local-relay.h"
 #include <list>
 #include <map>
@@ -18,7 +20,7 @@ namespace Epyx
     // Recv callback
     class LocalNode;
 
-    class LocalNode
+    class LocalNode : public Runnable
     {
     private:
 
@@ -33,11 +35,7 @@ namespace Epyx
         LocalRelay *relay;
 
         // Packet queue
-        std::list<N2npPacket> packetQueue;
-        Mutex packetQueueMutex;
-
-        // Running thread
-        Thread runThread;
+        BlockingQueue<N2npPacket> packetQueue;
 
         // Callbacks for Recv
         std::map<N2npPacketType, ReceiveCbData> recvCallbacks;
@@ -63,24 +61,30 @@ namespace Epyx
         void send(const N2npNodeId& to, const N2npPacket& pkt);
 
         /**
+         * Register a receive callback
+         */
+        void registerRecv(const N2npPacketType& type, ReceiveCb *cb, void* cbData);
+
+        /**
          * Another thread post a packet
          */
-        void post(const N2npPacket& pkt);
+        inline void post(const N2npPacket& pkt)
+        {
+            packetQueue.push(pkt);
+        }
+
+        /**
+         * Close packet queue
+         */
+        inline void close()
+        {
+            packetQueue.close();
+        }
 
         /**
          * Internal loop
          */
-        void runLoop();
-
-        /**
-         * Start a thread which runs runLoop()
-         */
         void run();
-
-        /**
-         * Register a receive callback
-         */
-        void registerRecv(const N2npPacketType& type, ReceiveCb *cb, void* cbData);
     };
 }
 

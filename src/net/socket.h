@@ -23,9 +23,10 @@ namespace Epyx
         Socket(int sock, const Address &addr);
         ~Socket();
 
-        bool connect();
+        virtual bool connect();
         void close();
 
+        void setFd(int sockfd);
         void setAddress(Address& addr);
         Address getAddress();
 

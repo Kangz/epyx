@@ -5,7 +5,7 @@
 #ifndef EPYX_N2NP_NODE_ID_H
 #define EPYX_N2NP_NODE_ID_H
 
-#include "../core/address.h"
+#include "../net/address.h"
 #include <string>
 
 namespace Epyx

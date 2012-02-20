@@ -7,8 +7,8 @@
 
 namespace Epyx
 {
-    Server::Server(unsigned short port, unsigned int nbConn, ServerRun& srvRun)
-        :srvRun(srvRun), port(port), nbConn(nbConn), sockfd(-1)
+    Server::Server(unsigned short port)
+        :port(port), sockfd(-1)
     {
     }
 
@@ -33,78 +33,64 @@ namespace Epyx
         running = false;
     }
 
-    void Server::run()
+    bool Server::_internal_bind(int socktype)
     {
-        int newfd = -1;
-        struct sockaddr_storage clientAddr;
-        socklen_t clientAddrLen;
-        Socket *newSock = NULL;
-        ServerRunnable *srun = NULL;
-        int spawnId = 1;
+        //EPYX_ASSERT(port < 65536);
+        char charport[10];
+        struct addrinfo hints, *addrAll, *pai;
+        int status, flag;
 
-        // Bind if no socket available
-        if (this->sockfd < 0 && !this->bind())
-            throw FailException("Server::run", "Unable to bind");
-
-        EPYX_ASSERT(this->sockfd >= 0);
-        log::debug << "Listening on " << this->address << log::endl;
-        try {
-            this->running = true;
-            while (this->running && this->sockfd >= 0) {
-                clientAddrLen = sizeof clientAddr;
-                newfd = ::accept(this->sockfd, (struct sockaddr*)&clientAddr,
-                               &clientAddrLen);
-
-                // If this thread was not killed, return
-                if (!this->running || this->sockfd < 0) {
-                    ::shutdown(newfd, SHUT_RDWR);
-                    ::close(newfd);
-                    newfd = -1;
-                    break;
-                }
-                if (newfd == -1)
-                    throw ErrException("Server::run", "accept");
-
-                // Encapsulate socket
-                try {
-                    newSock = new Socket(newfd, Address((struct sockaddr*)&clientAddr));
-                } catch (Exception e) {
-                    log::error << "Unable to setup the link:\n" << e << log::endl;
-                    if (newSock)
-                        delete newSock;
-                    else if (newfd >= 0) {
-                        // newfd is managed by newSock
-                        ::close(newfd);
-                    }
-                    newSock = NULL;
-                }
-                // Make newfd variable invalid
-                newfd = -1;
-
-                if (newSock != NULL) {
-                    try {
-                        srun = new ServerRunnable(this->srvRun, this, newSock);
-                        std::stringstream portSStream;
-                        Thread t(srun, "client", spawnId++);//TODO: Set server-internal name
-                        t.run();
-                    } catch (Exception e) {
-                        log::error << e << log::endl;
-                        log::error << "Unable to start a thread" << log::endl;
-                        if (srun != NULL)
-                            delete srun;
-                        delete newSock;
-                    }
-                    // DO NOT delete newSock nor srun as they are owned by an other thread
-                    newSock = NULL;
-                    srun = NULL;
-                }
-            }
-        } catch (Exception e) {
-            log::error << e << log::endl;
-            log::error << "Arg ! An exception killed me !" << log::endl;
-            if (newSock)
-                delete newSock;
+        // Convert port to char* to find address hints
+        snprintf(charport, sizeof(charport), "%u", port);
+        memset(&hints, 0, sizeof hints);
+        // AF_INET or AF_INET6 to force IP version
+        hints.ai_family = AF_UNSPEC;
+        // SOCK_STREAM (TCP) or SOCK_DGRAM (UDP)
+        hints.ai_socktype = socktype;
+        // Server = passive
+        hints.ai_flags = AI_PASSIVE;
+        status = ::getaddrinfo(NULL, charport, &hints, &addrAll);
+        if (status != 0) {
+            log::fatal << "getaddrinfo error " << status << ": "
+                << gai_strerror(status) << log::endl;
+            throw FailException("TCPServer::bind", "getaddrinfo error");
         }
-        log::debug << "Clean exit on " << this->address << log::endl;
+
+        // getaddrinfo() returns a list of address structures.
+        // Try each address until we successfully bind.
+        for (pai = addrAll; pai != NULL; pai = pai->ai_next) {
+            // Create a new socket
+            this->sockfd = ::socket(pai->ai_family, pai->ai_socktype,
+                pai->ai_protocol);
+            if (this->sockfd == -1)
+                continue;
+
+            // Allow reusing the address (ignore failure)
+            flag = 1;
+            setsockopt(this->sockfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(int));
+
+            // Bind to a listening address/port
+            status = ::bind(this->sockfd, pai->ai_addr, pai->ai_addrlen);
+            if (status == 0) {
+                // Success : remember used address
+                this->address = Address(pai->ai_addr);
+                break;
+            }
+            log::warn << "bind(" << Address(pai->ai_addr) << "): " << log::errstd << log::endl;
+
+            // Close socket if bind fails
+            ::close(this->sockfd);
+            this->sockfd = -1;
+        }
+        // Free results
+        freeaddrinfo(addrAll);
+        if (pai == NULL) {
+            log::debug << "Nowhere to bind." << log::endl;
+            return false;
+        }
+
+        // Now there is a socket, listen to nbConn connections
+        EPYX_ASSERT(sockfd >= 0);
+        return true;
     }
 }

@@ -1,31 +1,13 @@
 #include "local-relay.h"
+#include "../core/common.h"
 #include "local-node.h"
-#include "../core/exception.h"
 #include <sstream>
 #include <iostream>
 
 namespace Epyx
 {
-    /**
-     * Relay listening thread
-     */
-    static void LocalRelayRun(void *arg)
-    {
-        if (!arg)
-            std::cerr << "[LocalRelayRun] Err: arg = NULL\n";
-        else {
-            LocalRelay *self = (LocalRelay*)arg;
-            try {
-                self->runLoop();
-            } catch (Exception e) {
-                std::cerr << e;
-            }
-        }
-    }
-
     LocalRelay::LocalRelay(Address addr_)
-        :addr(addr_), id(addr_), lastNodeId(0),
-        runThread(LocalRelayRun, this)
+        :addr(addr_), id(addr_), lastNodeId(0)
     {
     }
 
@@ -62,8 +44,7 @@ namespace Epyx
         N2npNodeId nodeId(nodeName.c_str(), this->addr);
 
         // This may not happen, as this is an auto-increment index
-        if (this->nodes.count(nodeName))
-            throw FailException("LocalRelay", "internal node counter error");
+        EPYX_ASSERT(this->nodes.count(nodeName) == 0);
 
         this->nodesMutex.lock();
         this->nodes.insert(make_pair(nodeName, node));
@@ -72,55 +53,35 @@ namespace Epyx
         return nodeId;
     }
 
-    void LocalRelay::post(const N2npPacket& pkt)
-    {
-        this->packetQueueMutex.lock();
-        // Here deeply copy the packet
-        this->packetQueue.push_back(pkt);
-        this->packetQueueMutex.unlock();
-    }
-
-    void LocalRelay::runLoop()
-    {
-        std::cout << "[Relay " << this << "] Running\n";
-        while (true) {
-            while (!this->packetQueue.empty()) {
-                // Pop front packet
-                this->packetQueueMutex.lock();
-                N2npPacket pkt = this->packetQueue.front();
-                this->packetQueue.pop_front();
-                this->packetQueueMutex.unlock();
-
-                // Get the node name
-                std::string nodeName = pkt.to.getName();
-
-                // Find the node
-                LocalNode *node = NULL;
-                this->nodesMutex.lock();
-                if (this->nodes.count(nodeName))
-                    node = (*(this->nodes.find(nodeName))).second;
-                this->nodesMutex.unlock();
-
-                // Send to the node if found
-                if (node == NULL) {
-                    std::cout << "[Relay " << this << "] Destination not found: "
-                        << pkt.to << '\n';
-                    continue;
-                }
-                // Debug
-                //std::cout << "[Relay " << this << "] Send from " << pkt.from
-                //    << " to " << node << '\n';
-
-                //Post
-                node->post(pkt);
-
-            }
-            usleep(100);
-        }
-    }
-
     void LocalRelay::run()
     {
-        this->runThread.run();
+        log::debug << "[Relay " << this << "] Running" << log::endl;
+        while (true) {
+            N2npPacket *pkt =  this->packetQueue.pop();
+            // Null packet means the queue is closed
+            if (pkt == NULL)
+                return;
+
+            // Find the node
+            std::string nodeName = pkt->to.getName();
+            LocalNode *node = NULL;
+            this->nodesMutex.lock();
+            if (this->nodes.count(nodeName))
+                node = (*(this->nodes.find(nodeName))).second;
+            this->nodesMutex.unlock();
+
+            // Send to the node if found
+            if (node == NULL) {
+                log::debug << "[Relay " << this << "] Destination not found: "
+                    << pkt->to << log::endl;
+                continue;
+            }
+            // Debug
+            //log::debug << "[Relay " << this << "] Send from " << pkt.from
+            //    << " to " << node << log::debug ;
+
+            //Post
+            node->post(*pkt);
+        }
     }
 }

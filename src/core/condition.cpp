@@ -1,20 +1,20 @@
 #include "condition.h"
+#include "assert.h"
+#include "log.h"
 #include <errno.h>
 #include <sys/time.h>
-#include "exception.h"
 
 namespace Epyx {
     Condition::Condition() {
         //The mutex is automatically initialized
-
-        int status = pthread_cond_init(&(this->cond), NULL);
-        if (status) throw FailException("Condition", "pthread_cond init error");
+        int cond_init_status = pthread_cond_init(&(this->cond), NULL);
+        EPYX_ASSERT(cond_init_status == 0);
     }
 
     Condition::~Condition() {
         //The mutex is automatically destroyed
-        int status = pthread_cond_destroy(&(this->cond));
-        if (status) throw FailException("Condition", "pthread_cond_destroy error");
+        int cond_destroy_status = pthread_cond_destroy(&(this->cond));
+        EPYX_ASSERT(cond_destroy_status == 0);
     }
 
     void Condition::lock() {
@@ -30,8 +30,8 @@ namespace Epyx {
     }
 
     void Condition::wait() {
-        int status = pthread_cond_wait(&this->cond, this->mutex.getInternal());
-        if (status) throw FailException("Condition", "pthread_cond_wait error");
+        int cond_wait_status = pthread_cond_wait(&this->cond, this->mutex.getInternal());
+        EPYX_ASSERT(cond_wait_status == 0);
     }
 
     bool Condition::timedWait(int seconds, int nanoseconds) {
@@ -40,17 +40,17 @@ namespace Epyx {
         const unsigned int billion = 1000000000;
 
         //Find the absolute limit time
-        int status = gettimeofday(&current, NULL);
-        if (status) throw FailException("Condition", "gettimeofday error");
+        int gettimeofday_status = gettimeofday(&current, NULL);
+        EPYX_ASSERT(gettimeofday_status == 0);
         limit.tv_sec = current.tv_sec + seconds;
         limit.tv_nsec = current.tv_usec * 1000 + nanoseconds;
         limit.tv_sec += limit.tv_nsec / billion;
         limit.tv_nsec %= billion;
 
-        status = pthread_cond_timedwait(&this->cond, this->mutex.getInternal(), &limit);
-        if (status && status != ETIMEDOUT) throw FailException("Condition", "pthread_cond_timedwait error");
+        int cond_timedwait_status = pthread_cond_timedwait(&this->cond, this->mutex.getInternal(), &limit);
+        EPYX_ASSERT(cond_timedwait_status == 0 || cond_timedwait_status == ETIMEDOUT);
 
-        return status == ETIMEDOUT;
+        return cond_timedwait_status == ETIMEDOUT;
     }
 
     bool Condition::timedWait(int ms) {
@@ -58,13 +58,13 @@ namespace Epyx {
     }
 
     void Condition::notify() {
-        int status = pthread_cond_signal(&(this->cond));
-        if (status) throw FailException("Condition", "pthread_cond_signal error");
+        int cond_signal_status = pthread_cond_signal(&(this->cond));
+        EPYX_ASSERT(cond_signal_status == 0);
     }
 
     void Condition::notifyAll() {
-        int status = pthread_cond_broadcast(&(this->cond));
-        if (status) throw FailException("Condition", "pthread_cond_broadcast error");
+        int cond_broadcast_status = pthread_cond_broadcast(&(this->cond));
+        EPYX_ASSERT(cond_broadcast_status == 0);
     }
 
     Mutex& Condition::getMutex() {

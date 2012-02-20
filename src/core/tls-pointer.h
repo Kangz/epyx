@@ -1,9 +1,11 @@
 /**
+ * Thread Local Storage astraction layer
  */
 #ifndef EPYX_TLS_POINTER_H
 #define EPYX_TLS_POINTER_H
 
 #include <pthread.h>
+#include "assert.h"
 #include "exception.h"
 
 namespace Epyx {
@@ -37,16 +39,16 @@ namespace Epyx {
 
     template<typename T> TLSPointer<T>::TLSPointer(void (*destructor_)(T*))
         :destructor(destructor_), constructor(NULL), key(new pthread_key_t) {
-        if( pthread_key_create(this->key, reinterpret_cast<void_destructor_func*>(this->destructor)) ){
-            throw FailException("TLSPointer", "pthread_key_create error");
-        }
+        int key_create_status = pthread_key_create(this->key,
+            reinterpret_cast<void_destructor_func*>(this->destructor));
+        EPYX_ASSERT_NO_LOG(key_create_status == 0);
     }
 
     template<typename T> TLSPointer<T>::TLSPointer(T* (*constructor_)(), void (*destructor_)(T*))
         :destructor(destructor_), constructor(constructor_), key(new pthread_key_t){
-        if( pthread_key_create(this->key, reinterpret_cast<void_destructor_func*>(this->destructor)) ){
-            throw FailException("TLSPointer", "pthread_key_create error");
-        }
+        int key_create_status = pthread_key_create(this->key,
+            reinterpret_cast<void_destructor_func*>(this->destructor));
+        EPYX_ASSERT_NO_LOG(key_create_status == 0);
     }
 
     template<typename T> TLSPointer<T>::~TLSPointer(){//TODO

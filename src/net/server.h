@@ -9,12 +9,16 @@
 
 namespace Epyx
 {
-    class Server : public Runnable
+    class Server
     {
     public:
-        Server(unsigned short port, unsigned int nbConn, ServerRun& srvRun);
+        Server(unsigned short port);
         ~Server();
 
+        inline void setPort(unsigned short port_)
+        {
+            this->port = port_;
+        }
         const Address& getAddress();
 
         /**
@@ -27,21 +31,19 @@ namespace Epyx
          */
         void close();
 
-        /**
-         * Run a basic listening loop
-         */
-        void run();
-
     protected:
-        ServerRun& srvRun;
         Address address;
         unsigned short port;
-        unsigned int nbConn;
         int sockfd;
         // Another thread tells the server to shut down
         bool running;
 
-    private:
+        /**
+         * Common code for TCP and UDP bind
+         * @param socktype: SOCK_STREAM (TCP) or SOCK_DGRAM (UDP)
+         * @return true on success
+         */
+        bool _internal_bind(int socktype);
     };
 
 }

@@ -7,18 +7,18 @@
 #define EPYX_LOCAL_RELAY_H
 
 #include "../n2np/n2np-packet.h"
-#include "../core/address.h"
+#include "../net/address.h"
 #include "../core/mutex.h"
 #include "../core/thread.h"
+#include "../core/blocking-queue.h"
 #include <ostream>
 #include <map>
-#include <list>
 
 namespace Epyx
 {
     class LocalNode;
 
-    class LocalRelay
+    class LocalRelay : public Runnable
     {
     private:
         Address addr;
@@ -28,11 +28,7 @@ namespace Epyx
         Mutex nodesMutex;
 
         // Packet queue
-        std::list<N2npPacket> packetQueue;
-        Mutex packetQueueMutex;
-
-        // Running thread
-        Thread runThread;
+        BlockingQueue<N2npPacket> packetQueue;
 
         // Disable copy
         LocalRelay(const LocalRelay&);
@@ -52,15 +48,21 @@ namespace Epyx
         /**
          * Another thread post a packet
          */
-        void post(const N2npPacket& pkt);
+        inline void post(const N2npPacket& pkt)
+        {
+            packetQueue.push(pkt);
+        }
+
+        /**
+         * Close packet queue
+         */
+        inline void close()
+        {
+            packetQueue.close();
+        }
 
         /**
          * Internal loop
-         */
-        void runLoop();
-
-        /**
-         * Start a thread which runs runLoop()
          */
         void run();
     };
