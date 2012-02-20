@@ -70,7 +70,7 @@ namespace Epyx
          */
         inline void post(const N2npPacket& pkt)
         {
-            packetQueue.push(pkt);
+            packetQueue.push(new N2npPacket(pkt));
         }
 
         /**
