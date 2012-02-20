@@ -38,7 +38,7 @@ namespace Epyx
         pkt.to = to;
         this->relay->post(pkt);
     }
-    
+
     void LocalNode::registerRecv(const N2npPacketType& type, ReceiveCb *cb, void* cbData)
     {
         ReceiveCbData cbEntry = {cb, cbData};
@@ -55,14 +55,14 @@ namespace Epyx
             // Null packet means the queue is closed
             if (pkt == NULL)
                 return;
-            
+
             // Ensure I am the destination
             if (pkt->to != this->id) {
                 log::error << "[Node " << this << "] "
                     << "Bad routing, I received a message for " << pkt->to << log::endl;
                 continue;
             }
-            
+
             // Debug
             //log::debug << "[Node " << this << "] Recv from " << pkt->from
             //    << " type " << pkt->type << log::endl;
@@ -82,7 +82,7 @@ namespace Epyx
                 log::error << "[Node " << this << "] Unknown type " << pkt->type << log::endl;
                 continue;
             }
-            
+
             // Call the callback
             bool result = false;
             try {

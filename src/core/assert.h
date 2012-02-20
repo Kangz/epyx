@@ -14,7 +14,7 @@
         Epyx::log::fatal << "\n[ASSERT] " #condition "\n";\
         Epyx::log::fatal << "    - Function: " << __FUNCTION__ << " \n";\
         Epyx::log::fatal << "    - File: " << __FILE__ << " : " << __LINE__ << Epyx::log::endl;\
-        throw Epyx::FailException("false assert", #condition);\
+        throw Epyx::FailException("False assert", #condition);\
     }\
 }
 
@@ -33,7 +33,7 @@
         std::cerr << "[ASSERT] " #condition "\n";\
         std::cerr << "    - Function: " << __FUNCTION__ << " \n";\
         std::cerr << "    - File: " << __FILE__ << " : " << __LINE__ << std::endl;\
-        throw Epyx::FailException("false assert", #condition);\
+        throw Epyx::FailException("False assert", #condition);\
     }\
 }
 

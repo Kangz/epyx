@@ -133,15 +133,14 @@ namespace Epyx
      */
     void Socket::sendAll(const void *data, int size)
     {
-        int bytes;
+        int sentBytes;
         EPYX_ASSERT(data != NULL);
         while (size > 0) {
-            bytes = this->send(data, size);
-            if (!bytes)
+            sentBytes = this->send(data, size);
+            if (!sentBytes)
                 throw FailException("Socket", "Unable to send data");
-            if (bytes > size)
-                throw FailException("Socket", "More data was sent ?");
-            size -= bytes;
+            EPYX_ASSERT(sentBytes <= size);
+            size -= sentBytes;
         }
     }
 
@@ -189,16 +188,15 @@ namespace Epyx
      */
     void Socket::recvAll(void *data, int size)
     {
-        int bytes;
+        int recvBytes;
         EPYX_ASSERT(data != NULL);
         // TODO: feof !
         while (size > 0) {
-            bytes = this->recv(data, size);
-            if (!bytes)
+            recvBytes = this->recv(data, size);
+            if (!recvBytes)
                 throw FailException("Socket", "Unable to recv data");
-            if (bytes > size)
-                throw FailException("Socket", "More data was recv ?");
-            size -= bytes;
+            EPYX_ASSERT(recvBytes <= size);
+            size -= recvBytes;
         }
     }
 

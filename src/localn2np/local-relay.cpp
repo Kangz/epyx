@@ -44,8 +44,7 @@ namespace Epyx
         N2npNodeId nodeId(nodeName.c_str(), this->addr);
 
         // This may not happen, as this is an auto-increment index
-        if (this->nodes.count(nodeName))
-            throw FailException("LocalRelay", "internal node counter error");
+        EPYX_ASSERT(this->nodes.count(nodeName) == 0);
 
         this->nodesMutex.lock();
         this->nodes.insert(make_pair(nodeName, node));
