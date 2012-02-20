@@ -122,7 +122,7 @@ void test_n2np()
         delete relay;
     for (int i = 0; i < nodeNum; i++) {
         if (nodes[i])
-            nodes[i]->close();        
+            nodes[i]->close();
         if (nodeThread[i]) {
             nodeThread[i]->wait();
             delete nodeThread[i];

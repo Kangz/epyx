@@ -2,25 +2,20 @@
 #define EPYX_UDPSOCKET_H
 
 #include "socket.h"
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <stdio.h>
-#include <arpa/inet.h>
-#include <cstring>
+#include "udpserver.h"
 
 namespace Epyx {
     class UDPSocket : public Socket
     {
-        public:
-            UDPSocket(bool reply = false);
-            void close();
-            int recv(void*, int);
-            void connect();
-        private:
-            bool reply;
-            int ans_sock;
+    public:
+        UDPSocket(bool reply = false);
+        void close();
+        int recv(void*, int);
+        bool connect();
+
+    private:
+        // Use an UDP server to get answers, if they are waited
+        UDPServer *answerServ;
     };
 
 }

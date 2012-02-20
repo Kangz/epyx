@@ -69,6 +69,13 @@ namespace Epyx
         this->close();
     }
 
+    void Socket::setFd(int sockfd)
+    {
+        EPYX_ASSERT(this->sock < 0);
+        EPYX_ASSERT(sockfd >= 0);
+        this->sock = sockfd;
+    }
+
     void Socket::setAddress(Address& addr)
     {
         address = addr;

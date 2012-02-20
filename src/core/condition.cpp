@@ -1,5 +1,6 @@
 #include "condition.h"
 #include "assert.h"
+#include "log.h"
 #include <errno.h>
 #include <sys/time.h>
 
