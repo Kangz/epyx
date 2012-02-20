@@ -1,7 +1,6 @@
 #include "condition.h"
 #include <errno.h>
 #include <sys/time.h>
-#include "exception.h"
 
 namespace Epyx {
     Condition::Condition() {

@@ -1,5 +1,7 @@
 /**
  * Assert() macro implementation with Epyx logger
+ *
+ * You need to include log.h and exception.h to use this file
  */
 #ifndef EPYX_ASSERT_H
 #define EPYX_ASSERT_H
@@ -34,8 +36,5 @@
         throw Epyx::FailException("false assert", #condition);\
     }\
 }
-
-#include "log.h"
-#include "exception.h"
 
 #endif /* EPYX_ASSERT_H */
