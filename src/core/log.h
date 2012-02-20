@@ -73,7 +73,7 @@ namespace log {
 
     //End of the definition of Stream
     template<typename T> Stream& Stream::operator<<(const T& arg) {
-        EPYX_ASSERT(log::initialized);
+        EPYX_ASSERT_NO_LOG(log::initialized);
         _buffers->get()->b[this->priority] << arg;
         return *this;
     }

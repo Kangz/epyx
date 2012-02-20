@@ -8,12 +8,7 @@ namespace log {
         if(!file.empty() && (this->flags & LOGFILE)) {
             //TODO: Close it
             this->logFile.open(file.c_str());
-
-            if(!logFile.is_open()) {
-                this->flags ^= LOGFILE;
-                //How will FailException warn ? it should not use the logger
-                //FailException("Logger", "Could not open the log file");
-            }
+            EPYX_ASSERT_NO_LOG(logFile.is_open())
         }
         this->thread.run();
     }
@@ -28,18 +23,21 @@ namespace log {
     void Worker::flush(bool wait) {
         LogEntry initializer = {"", FLUSH, 0, "", 0, NULL};
         LogEntry* entry = new LogEntry(initializer);
+        Condition* cond = NULL;
 
         if(wait) {
             entry->cond = new Condition();
             entry->cond->lock();
+            cond = entry->cond;
         }
 
         this->entries.push(entry);
 
+        //The entry will get destroyed but not the condition
         if(wait) {
-            entry->cond->wait();
-            entry->cond->unlock();
-            delete entry->cond;
+            cond->wait();
+            cond->unlock();
+            delete cond;
         }
     }
 
@@ -86,6 +84,9 @@ namespace log {
                 } else {
                     this->printEntry(entry);
                 }
+
+                delete entry;
+
                 entries->pop_front();
             }
         }

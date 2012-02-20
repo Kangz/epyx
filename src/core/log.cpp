@@ -39,7 +39,7 @@ namespace log {
     Stream::~Stream(){}
 
     Stream& Stream::operator<<(const EndlStruct& f) {
-        EPYX_ASSERT(log::initialized);
+        EPYX_ASSERT_NO_LOG(log::initialized);
         std::ostringstream* buffer = &_buffers->get()->b[this->priority];
         _worker->write(buffer->str(), this->priority);
         buffer->str("");
@@ -47,7 +47,7 @@ namespace log {
     }
 
     Stream& Stream::operator<<(const ErrstdStruct& f) {
-        EPYX_ASSERT(log::initialized);
+        EPYX_ASSERT_NO_LOG(log::initialized);
         int err_code = errno;
         static Mutex strerrorMutex;
         strerrorMutex.lock();
