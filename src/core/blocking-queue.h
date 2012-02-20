@@ -14,7 +14,7 @@ namespace Epyx {
     template<typename T> class BlockingQueue {
     private:
         Condition cond;
-        std::deque<T> fifo;
+        std::deque<T*> fifo;
         bool opened;
 
         // Disable copy construction and assignment.
@@ -28,15 +28,15 @@ namespace Epyx {
         void close();
         bool isOpened();
 
-        bool push(const T& e);
-        bool tryPush(const T& e);
+        bool push(T* e);
+        bool tryPush(T* e);
         T* pop();
         T* pop(int msec);
         T* tryPop();
 
-        std::deque<T>* flush();
-        std::deque<T>* flush(int msec);
-        std::deque<T>* tryFlush();
+        std::deque<T*>* flush();
+        std::deque<T*>* flush(int msec);
+        std::deque<T*>* tryFlush();
 
 
         //Do not implement the following methods due to a lack of atomic operations
@@ -58,17 +58,17 @@ namespace Epyx {
 
     template<typename T> void BlockingQueue<T>::close()
     {
-        opened = false;
+        this->opened = false;
         // Unlock codition
-        cond.notify();
+        cond.notifyAll();
     }
 
     template<typename T> bool BlockingQueue<T>::isOpened()
     {
-        return opened;
+        return this->opened;
     }
 
-    template<typename T> bool BlockingQueue<T>::push(const T& e) {
+    template<typename T> bool BlockingQueue<T>::push(T* e) {
         if(!opened)
             return false;
         cond.lock();
@@ -78,7 +78,7 @@ namespace Epyx {
         return true;
     }
 
-    template<typename T> bool BlockingQueue<T>::tryPush(const T& e) {
+    template<typename T> bool BlockingQueue<T>::tryPush(T* e) {
         if(opened && cond.tryLock()){
             fifo.push_back(e);
             cond.notify();
@@ -98,7 +98,7 @@ namespace Epyx {
             cond.unlock();
             return NULL;
         }
-        T* result = new T(fifo.front());
+        T* result = fifo.front();
         fifo.pop_front();
         cond.unlock();
         return result;
@@ -113,7 +113,7 @@ namespace Epyx {
             cond.unlock();
             return NULL;
         }
-        T* result = new T(fifo.front());
+        T* result = fifo.front();
         fifo.pop_front();
         cond.unlock();
         return result;
@@ -125,7 +125,7 @@ namespace Epyx {
                 cond.unlock();
                 return NULL;
             }
-            T* result = new T(fifo.front());
+            T* result = fifo.front();
             fifo.pop_front();
             cond.unlock();
             return result;
@@ -133,7 +133,7 @@ namespace Epyx {
         return NULL;
     }
 
-    template<typename T> std::deque<T>* BlockingQueue<T>::flush(){
+    template<typename T> std::deque<T*>* BlockingQueue<T>::flush(){
         cond.lock();
         while(opened && fifo.empty()){
             cond.wait();
@@ -142,13 +142,13 @@ namespace Epyx {
             cond.unlock();
             return NULL;
         }
-        std::deque<T>* result = new std::deque<T>(fifo);
+        std::deque<T*>* result = new std::deque<T*>(fifo);
         fifo.clear();
         cond.unlock();
         return result;
     }
 
-    template<typename T> std::deque<T>* BlockingQueue<T>::flush(int msec){
+    template<typename T> std::deque<T*>* BlockingQueue<T>::flush(int msec){
         cond.lock();
         if(opened && fifo.empty()){
             cond.timedWait(msec);
@@ -157,19 +157,19 @@ namespace Epyx {
             cond.unlock();
             return NULL;
         }
-        std::deque<T>* result = new std::deque<T>(fifo);
+        std::deque<T*>* result = new std::deque<T*>(fifo);
         fifo.clear();
         cond.unlock();
         return result;
     }
 
-    template<typename T> std::deque<T>* BlockingQueue<T>::tryFlush(){
+    template<typename T> std::deque<T*>* BlockingQueue<T>::tryFlush(){
         if(opened && cond.tryLock()){
             if(fifo.empty()){
                 cond.unlock();
                 return NULL;
             }
-            std::deque<T>* result = new std::deque<T>(fifo);
+            std::deque<T*>* result = new std::deque<T*>(fifo);
             fifo.clear();
             cond.unlock();
             return result;

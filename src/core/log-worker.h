@@ -33,7 +33,7 @@ namespace log {
         std::ofstream logFile;
         Thread thread;
 
-        void printEntry(LogEntry& entry);
+        void printEntry(LogEntry* entry);
 
     public:
         Worker(int flags, const std::string& file);
