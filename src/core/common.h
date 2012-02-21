@@ -1,8 +1,8 @@
 /**
- * This header file regroups all the files in core, which is a good base for
+ * @file common.h
+ * @brief This header file regroups all the files in core, which is a good base for
  * multi-threaded applications
  */
-
 #ifndef EPYX_CORE_COMMON_H
 #define EPYX_CORE_COMMON_H
 

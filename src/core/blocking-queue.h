@@ -1,6 +1,6 @@
 /**
- * Blocking queue implementation
- * TODO: add documentation
+ * @file blocking-queue.h
+ * @brief a blocking queue definition.
  */
 #ifndef EPYX_BLOCKING_QUEUE_H
 #define EPYX_BLOCKING_QUEUE_H
@@ -27,7 +27,12 @@ namespace Epyx {
 
     template<typename T> class BlockingQueue {
     public:
+
+        /**
+         * @brief The BlockingQueue constructor
+         */
         BlockingQueue();
+
         /**
          * @brief The BlockingQueue destructor
          *

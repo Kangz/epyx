@@ -1,5 +1,6 @@
 /**
- * Assert() macro implementation with Epyx logger
+ * @file assert.h
+ * @brief Assert() macro implementation with Epyx logger
  *
  * You need to include log.h and exception.h to use this file
  */
@@ -8,6 +9,10 @@
 
 #include <iostream>
 
+/**
+ * @def EPYX_ASSERT(condition)
+ * An assert using Epyx' logging system.
+ */
 #define EPYX_ASSERT(condition)\
 {\
     if(!(bool)(condition)){\
@@ -18,6 +23,10 @@
     }\
 }
 
+/**
+ * @def EPYX_ASSERT_WARN(condition)
+ * An assert using Epyx' logging system. It does not throw an exception thus it only warns about the error.
+ */
 #define EPYX_ASSERT_WARN(condition)\
 {\
     if(!(bool)(condition)){\
@@ -27,6 +36,10 @@
     }\
 }
 
+/**
+ * @def EPYX_ASSERT_NO_LOG(condition)
+ * An assert that does not use Epyx' logging system (for use in the logging system).
+ */
 #define EPYX_ASSERT_NO_LOG(condition)\
 {\
     if(!(bool)(condition)){\
