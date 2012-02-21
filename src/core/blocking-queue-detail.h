@@ -1,5 +1,9 @@
-//You should never include this file directly
-
+/**
+ * @file blocking-queue-detail.h
+ * @brief a blocking queue implementation
+ *
+ * You should never include this file directly
+ */
 #ifndef EPYX_BLOCKING_QUEUE_DETAIL_H
 #define EPYX_BLOCKING_QUEUE_DETAIL_H
 
@@ -17,8 +21,10 @@ namespace Epyx {
     template<typename T> void BlockingQueue<T>::close()
     {
         this->opened = false;
-        // Unlock codition
+        // Unlock condition
+        cond.lock();
         cond.notifyAll();
+        cond.unlock();
     }
 
     template<typename T> bool BlockingQueue<T>::isOpened()
