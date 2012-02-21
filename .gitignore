@@ -8,3 +8,4 @@ bin/*
 *~
 *.log
 /nbproject/
+doc/doxygen
