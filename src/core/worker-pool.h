@@ -30,6 +30,7 @@ namespace Epyx {
         std::string worker_name_prefix;
         int worker_name_counter;
 
+        void internalPost(T& message);
         void addWorker();
         void removeWorker();
         void bookKeep();
@@ -39,17 +40,17 @@ namespace Epyx {
         //The Workers threads
         class Worker: public Runnable{
         public:
-            Worker(WorkerPool& pool, int id);
+            Worker(WorkerPool<T>* pool, int id);
             void start();
             void run();
 
         private:
-            WorkerPool& pool;
+            WorkerPool* pool;
             Thread thread;
             bool running;
         };
         int worker_count;
-        Mutex worker_mutex;
+        Mutex workers_mutex;
         std::list<Worker*> workers;
         Mutex workers_to_destroy_mutex;
         std::list<Worker*> workers_to_destroy;

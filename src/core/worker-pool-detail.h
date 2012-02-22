@@ -24,9 +24,9 @@ namespace Epyx {
 
         //Prevent the automatic destruction of the workers
         this->workers_to_destroy_mutex.lock();
-        for(int i=0; i<backup.size(); i++){
+        for(int i=0; i<(int)backup.size(); i++){
             this->removeWorker();
-        }
+       }
         this->workers_to_destroy_mutex.unlock();
 
         for(typename std::list<Worker*>::iterator it = backup.begin(); it != backup.end(); ++it){
@@ -39,7 +39,7 @@ namespace Epyx {
 
     template<typename T> void WorkerPool<T>::post(T& message){
         this->bookKeep();
-        this->message->push(&message);
+        this->messages.push(&message);
     }
 
     template<typename T> int WorkerPool<T>::getNumWorkers(){
@@ -47,22 +47,29 @@ namespace Epyx {
     }
 
     template<typename T> void WorkerPool<T>::setNumWorkers(int n){
-        //TODO PLEASE
+        if(this->worker_count > n){
+            for(int i=0; i < this->worker_count - n; i++){
+                this->removeWorker();
+            }
+        }else{
+            for(int i=0; i < n - this->worker_count; i++){
+                this->removeWorker();
+            }
+        }
     }
 
     template<typename T> void WorkerPool<T>::addWorker(){
-        Worker* w = new Worker(this, this->worker_name_prefix);
+        Worker* w = new Worker(this, this->worker_name_counter);
 
-        this->workers.push(w);
+        this->workers.push_front(w);
         w->start();
 
-        this->worker_name_prefix ++;
+        this->worker_name_counter ++;
         this->worker_count ++;
     }
 
     template<typename T> void WorkerPool<T>::removeWorker(){
-        this->bookKeep();
-        this->message->push(NULL);
+        this->messages.push(NULL);
     }
 
     template<typename T> void WorkerPool<T>::bookKeep(){
@@ -83,7 +90,7 @@ namespace Epyx {
 
 
 
-    template<typename T> WorkerPool<T>::Worker::Worker(WorkerPool& pool, int id)
+    template<typename T> WorkerPool<T>::Worker::Worker(WorkerPool<T>* pool, int id)
         :pool(pool), thread(this, pool->worker_name_prefix, id){
     }
 
@@ -94,23 +101,23 @@ namespace Epyx {
 
     template<typename T> void WorkerPool<T>::Worker::run(){
         while(this->running){
-            T* msg = this->pool.messages.pop();
+            T* msg = this->pool->messages.pop();
 
             if(msg == NULL){
                 this->running = false;
             }else{
-                this->pool.treat(*msg);
+                this->pool->treat(*msg);
             }
 
             delete msg;
         }
-        pool.workers_mutex.lock();
-        pool.workers.remove(this);
-        pool.workers_mutex.unlock();
+        pool->workers_mutex.lock();
+        pool->workers.remove(this);
+        pool->workers_mutex.unlock();
 
-        pool.workers_to_destroy_mutex.lock();
-        pool.workers_to_destroy.push_front(this);
-        pool.workers_to_destroy_mutex.unlock();
+        pool->workers_to_destroy_mutex.lock();
+        pool->workers_to_destroy.push_front(this);
+        pool->workers_to_destroy_mutex.unlock();
     }
 
 }
