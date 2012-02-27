@@ -1,5 +1,9 @@
-//You should never include this file directly
-
+/**
+ * @file tls-pointer-detail.h
+ * @brief TLS pointer implementation
+ *
+ * You should never include this file directly
+ */
 #ifndef EPYX_TLS_POINTER_DETAIL_H
 #define EPYX_TLS_POINTER_DETAIL_H
 

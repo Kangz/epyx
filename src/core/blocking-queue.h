@@ -42,6 +42,7 @@ namespace Epyx {
 
         /**
          * @brief Closes the queue prior to deletion
+         *
          * This is to be used to notify the threads waiting on the queue
          * as it makes all the pending pop() return NULL.
          */

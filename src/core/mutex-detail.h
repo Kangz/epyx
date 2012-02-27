@@ -1,5 +1,9 @@
-//You should never include this file directly
-
+/**
+ * @file mutex-detail.h
+ * @brief a mutex implementation
+ *
+ * You should never include this file directly
+ */
 #ifndef EPYX_MUTEX_DETAIL_H
 #define EPYX_MUTEX_DETAIL_H
 
