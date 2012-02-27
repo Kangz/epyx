@@ -106,7 +106,7 @@ namespace log {
         strftime(time_buffer, 20, "%H:%M:%S", timeinfo);
         strftime(date_buffer, 20, "%Y-%m-%d", timeinfo);
 
-        //Make the part with tthread.he thread's name
+        //Make the part with the thread's name
         std::ostringstream info_buffer;
         int id = entry->thread_id;
         info_buffer << "[" << logLevelNames[entry->prio] << "] ";
