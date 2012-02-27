@@ -53,7 +53,7 @@ namespace Epyx {
             }
         }else{
             for(int i=0; i < n - this->worker_count; i++){
-                this->removeWorker();
+                this->addWorker();
             }
         }
     }
