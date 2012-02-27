@@ -5,7 +5,6 @@
 #define EPYX_SERVER_H
 
 #include "address.h"
-#include "serverrun.h"
 
 namespace Epyx
 {

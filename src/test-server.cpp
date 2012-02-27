@@ -8,16 +8,20 @@
 #include "core/common.h"
 #include "net/tcpserverthread.h"
 
-class TestServer : public Epyx::ServerRun
+class TestServer : public Epyx::TCPServerThread
 {
 public:
-    Epyx::Thread *srvThread;
-    void srvrun(Epyx::Server& srv, Epyx::Socket& sock)
+    TestServer(int port, std::string threadname)
+    :TCPServerThread(port, 20, threadname)
+    {
+    }
+
+    void runSocket(Epyx::Socket& sock)
     {
         const char *line;
 
         Epyx::log::debug << "[" << sock.getAddress() << "] "
-            << "Incoming for " << srv.getAddress() << Epyx::log::endl;
+            << "Incoming for " << this->getAddress() << Epyx::log::endl;
 
         std::ostringstream hello;
         hello << "Hello, you address is " << sock.getAddress() << " !\n";
@@ -36,10 +40,8 @@ public:
                 << out.str() << Epyx::log::endl;
             line = out.str().c_str();
             if (!strcasecmp(line, "quit")) {
-                srv.close();
-                if (this->srvThread != NULL) {
-                    this->srvThread->term();
-                }
+                this->close();
+                //this->term ??? to end server
                 return;
             } else if (!strcasecmp(line, "exit"))
                 return;
@@ -61,9 +63,7 @@ public:
 void test_server()
 {
     Epyx::log::debug << "Starting server at port 4242..." << Epyx::log::endl;
-    TestServer ts;
-    Epyx::TCPServerThread t(4242, 20, ts, "Server");
-    ts.srvThread = &t;
+    TestServer t(4242, "Server");
     Epyx::log::debug << "(server) RUN!" << Epyx::log::endl;
     t.start();
     t.wait();

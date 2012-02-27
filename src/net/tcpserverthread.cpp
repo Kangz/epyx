@@ -3,9 +3,47 @@
 
 namespace Epyx
 {
+    /**
+     * Internal thread class to spawn a new thread for each accepted connection
+     */
+    class _TCPSocketThread : public Thread
+    {
+    public:
+        _TCPSocketThread(TCPServerThread *srv, Socket *sock,
+            std::string name, int id)
+        :Thread(name, id), srv(srv), sock(sock)
+        {
+            EPYX_ASSERT(sock != NULL && srv != NULL);
+        }
+    protected:
+        void run()
+        {
+            EPYX_ASSERT(sock != NULL && srv != NULL);
+            try {
+                // Call real function
+                srv->runSocket(*sock);
+                log::debug << "Client terminated (was " << sock->getAddress()
+                    << ")" << log::endl;
+                delete sock;
+                sock = NULL;
+            } catch (Exception e) {
+                log::error << "Error from " << sock->getAddress()
+                    << " : " << e << log::endl;
+            }
+            // Close socket
+            delete sock;
+            // Yes, we can do it !
+            // FIXME: change this !
+            delete this;
+        }
+    private:
+        TCPServerThread *srv;
+        Socket *sock;
+    };
+
     TCPServerThread::TCPServerThread(unsigned short port, unsigned int nbConn,
-            ServerRun& srvRun, std::string name, int id)
-    :TCPServer(port, nbConn), Thread(name, id), srvRun(srvRun)
+                                     std::string name, int id)
+    :TCPServer(port, nbConn), Thread(name, id)
     {
     }
 
@@ -15,7 +53,7 @@ namespace Epyx
         struct sockaddr_storage clientAddr;
         socklen_t clientAddrLen;
         Socket *newSock = NULL;
-        ServerThread *sthread = NULL;
+        _TCPSocketThread *sthread = NULL;
         int spawnId = 1;
 
         // Bind if no socket available
@@ -59,7 +97,7 @@ namespace Epyx
 
                 if (newSock != NULL) {
                     try {
-                        sthread = new ServerThread(this->srvRun, this, newSock,
+                        sthread = new _TCPSocketThread(this, newSock,
                             "client", spawnId++);
                         sthread->start();
                     } catch (Exception e) {

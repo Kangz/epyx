@@ -2,6 +2,7 @@
 #define EPYX_UDPSERVER_H
 
 #include "server.h"
+#include "socket.h"
 
 namespace Epyx
 {
