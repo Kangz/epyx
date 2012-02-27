@@ -14,7 +14,7 @@
 namespace Epyx {
 namespace log {
 
-    class Worker : public Runnable {
+    class Worker : public Thread {
     private:
         Worker(const Worker&);
         const Worker& operator=(const Worker&);
@@ -31,7 +31,6 @@ namespace log {
         BlockingQueue<LogEntry> entries;
         int flags;
         std::ofstream logFile;
-        Thread thread;
 
         void printEntry(LogEntry* entry);
 

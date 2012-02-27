@@ -3,8 +3,8 @@
 
 namespace Epyx
 {
-    LocalNode::LocalNode()
-        :id(), relay(NULL)
+    LocalNode::LocalNode(const std::string& threadname, int threadid)
+        :Thread(threadname, threadid), id(), relay(NULL)
     {
     }
 

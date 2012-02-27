@@ -32,6 +32,12 @@ namespace Epyx
         friend std::ostream& operator<<(std::ostream& os, const Address& addr);
         friend std::ostream& operator<<(std::ostream& os, const Address *addr);
 
+        /**
+         * @brief get a std::string representation of the address
+         */
+        std::string toString();
+
+
         friend bool operator==(const Address& addr1, const Address& addr2);
 
         friend inline bool operator!=(const Address& addr1, const Address& addr2)

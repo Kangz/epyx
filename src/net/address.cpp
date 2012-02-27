@@ -106,6 +106,14 @@ namespace Epyx
             return os << (*addr);
     }
 
+    std::string Address::toString()
+    {
+        std::ostringstream stream;
+        stream << *this;
+        return stream.str();
+    }
+
+
     bool operator==(const Address& addr1, const Address& addr2)
     {
         return (addr1.port == addr2.port)

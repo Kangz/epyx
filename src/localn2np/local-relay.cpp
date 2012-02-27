@@ -6,8 +6,8 @@
 
 namespace Epyx
 {
-    LocalRelay::LocalRelay(Address addr_)
-        :addr(addr_), id(addr_), lastNodeId(0)
+    LocalRelay::LocalRelay(Address addr)
+        :Thread("Relay" + addr.toString()), addr(addr), id(addr), lastNodeId(0)
     {
     }
 

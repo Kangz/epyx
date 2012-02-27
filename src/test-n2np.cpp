@@ -85,7 +85,6 @@ void test_n2np()
 {
     const int nodeNum = 42;
     Epyx::LocalNode* nodes[nodeNum];
-    Epyx::Thread *relayThread, *nodeThread[nodeNum];
     Epyx::LocalRelay *relay = NULL;
     try {
         Epyx::Address addr("L0C4L", 0, 0);
@@ -94,41 +93,32 @@ void test_n2np()
 
         // Create a relay
         relay = new Epyx::LocalRelay(addr);
-        relayThread = new Epyx::Thread(relay, "relay");
-        // TODO : delete on quit
-        relayThread->run();
+        relay->start();
 
         // Create nodes
         for (int i = 0; i < nodeNum; i++) {
-            nodes[i] = new Epyx::LocalNode();
+            nodes[i] = new Epyx::LocalNode("node", i+1);
             nodes[i]->attach(relay);
             nodes[i]->registerRecv(type, nodeRecv, NULL);
             nodes[i]->registerRecv(pongType, nodeRecvPong, NULL);
-            nodeThread[i] = new Epyx::Thread(nodes[i], "node", i+1);
-            nodeThread[i]->run();
+            nodes[i]->start();
         }
 
         test_command(nodes[0], addr);
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }
-    if (relay)
+    if (relay) {
         relay->close();
-    if (relayThread) {
-        relayThread->wait();
-        delete relayThread;
-    }
-    if (relay)
+        relay->wait();
         delete relay;
+    }
     for (int i = 0; i < nodeNum; i++) {
-        if (nodes[i])
+        if (nodes[i]) {
             nodes[i]->close();
-        if (nodeThread[i]) {
-            nodeThread[i]->wait();
-            delete nodeThread[i];
-        }
-        if (nodes[i])
+            nodes[i]->wait();
             delete nodes[i];
+        }
     }
 }
 

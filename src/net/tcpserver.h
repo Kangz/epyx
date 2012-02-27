@@ -5,22 +5,16 @@
 
 namespace Epyx
 {
-    class TCPServer : public Server, public Runnable
+    class TCPServer : public Server
     {
     public:
-        TCPServer(unsigned short port, unsigned int nbConn, ServerRun& srvRun);
+        TCPServer(unsigned short port, unsigned int nbConn);
         ~TCPServer();
 
         bool bind();
 
-        /**
-         * Run a basic listening loop
-         */
-        void run();
-
     private:
         unsigned int nbConn;
-        ServerRun& srvRun;
     };
 
 }

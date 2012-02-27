@@ -18,7 +18,7 @@ namespace Epyx
 {
     class LocalNode;
 
-    class LocalRelay : public Runnable
+    class LocalRelay : public Thread
     {
     private:
         Address addr;
@@ -41,12 +41,12 @@ namespace Epyx
         friend std::ostream& operator<<(std::ostream& os, const LocalRelay *relay);
 
         /**
-         * Return the new node ID
+         * @brief Return the new node ID
          */
         N2npNodeId attachNode(LocalNode *node);
 
         /**
-         * Another thread post a packet
+         * @brief Another thread post a packet
          */
         inline void post(const N2npPacket& pkt)
         {
@@ -54,15 +54,16 @@ namespace Epyx
         }
 
         /**
-         * Close packet queue
+         * @brief Close packet queue
          */
         inline void close()
         {
             packetQueue.close();
         }
 
+    protected:
         /**
-         * Internal loop
+         * @brief Internal loop
          */
         void run();
     };

@@ -8,8 +8,8 @@ namespace Epyx
     TLSPointer<detail::ThreadInfo>* detail::thread_infos = NULL;
     bool detail::thread_initialized = false;
 
-    Thread::Thread(Runnable* rn, std::string name, int id)
-        :rn(rn), thread(0), info(NULL)
+    Thread::Thread(std::string name, int id)
+        :thread(0), info(NULL)
     {
         //Set up the thread info dor this thread
         info = new detail::ThreadInfo();
@@ -17,7 +17,7 @@ namespace Epyx
         info->id = id;
     }
 
-    bool Thread::run()
+    bool Thread::start()
     {
         int thread_create_status = pthread_create(&(this->thread), NULL,
                                                   Thread::_thread_start, this);
@@ -72,10 +72,11 @@ namespace Epyx
     void* Thread::_thread_start(void *arg)
     {
         try {
+            // Call Thread::run()
             Epyx::Thread *self = (Epyx::Thread*) arg;
             EPYX_ASSERT(self != NULL);
             detail::thread_infos->reset(self->info);
-            self->rn->run();
+            self->run();
         } catch (Exception e) {
             log::fatal << "Thread exception !" << log::endl;
             log::fatal << e << log::endl;

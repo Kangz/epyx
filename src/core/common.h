@@ -14,7 +14,6 @@
 #include "mutex.h"
 #include "condition.h"
 #include "blocking-queue.h"
-#include "runnable.h"
 #include "thread.h"
 
 #endif // EPYX_CORE_COMMON_H

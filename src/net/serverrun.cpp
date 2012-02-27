@@ -4,13 +4,14 @@
 
 namespace Epyx
 {
-    ServerRunnable::ServerRunnable(ServerRun& srvRun, Server *srv, Socket *sock)
-        :srvRun(srvRun), srv(srv), sock(sock)
+    ServerThread::ServerThread(ServerRun& srvRun, Server *srv, Socket *sock,
+        std::string name, int id)
+        :Thread(name, id), srvRun(srvRun), srv(srv), sock(sock)
     {
         EPYX_ASSERT(sock != NULL && srv != NULL);
     }
 
-    void ServerRunnable::run()
+    void ServerThread::run()
     {
         EPYX_ASSERT(sock != NULL && srv != NULL);
         try {
@@ -27,6 +28,7 @@ namespace Epyx
         // Close socket
         delete sock;
         // Yes, we can do it !
+        // FIXME: change this !
         delete this;
     }
 }

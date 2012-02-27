@@ -10,7 +10,7 @@
 #include "../core/mutex.h"
 #include "../n2np/n2np-packet.h"
 #include "../core/blocking-queue.h"
-#include "../core/runnable.h"
+#include "../core/thread.h"
 #include "local-relay.h"
 #include <list>
 #include <map>
@@ -20,7 +20,7 @@ namespace Epyx
     // Recv callback
     class LocalNode;
 
-    class LocalNode : public Runnable
+    class LocalNode : public Thread
     {
     private:
 
@@ -46,27 +46,27 @@ namespace Epyx
         const LocalNode& operator=(const LocalNode&);
 
     public:
-        LocalNode();
+        LocalNode(const std::string& threadname, int threadid);
         friend std::ostream& operator<<(std::ostream& os, const LocalNode& node);
         friend std::ostream& operator<<(std::ostream& os, const LocalNode *node);
 
         /**
-         * Attach the node to another relay
+         * @brief Attach the node to another relay
          */
         void attach(LocalRelay *relay);
 
         /**
-         * Send packet to another node
+         * @brief Send packet to another node
          */
         void send(const N2npNodeId& to, const N2npPacket& pkt);
 
         /**
-         * Register a receive callback
+         * @brief Register a receive callback
          */
         void registerRecv(const N2npPacketType& type, ReceiveCb *cb, void* cbData);
 
         /**
-         * Another thread post a packet
+         * @brief Another thread post a packet
          */
         inline void post(const N2npPacket& pkt)
         {
@@ -74,15 +74,16 @@ namespace Epyx
         }
 
         /**
-         * Close packet queue
+         * @brief Close packet queue
          */
         inline void close()
         {
             packetQueue.close();
         }
 
+    protected:
         /**
-         * Internal loop
+         * @brief Internal loop
          */
         void run();
     };

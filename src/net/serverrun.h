@@ -6,7 +6,7 @@
 #define EPYX_SERVERRUN_H
 
 #include "socket.h"
-#include "../core/runnable.h"
+#include "../core/thread.h"
 
 namespace Epyx
 {
@@ -24,12 +24,13 @@ namespace Epyx
     };
 
     /**
-     * The ServerRunnable is intended to pass parameters to a ServerRun object
+     * The ServerThread is intended to pass parameters to a ServerRun object
      */
-    class ServerRunnable : public Runnable
+    class ServerThread : public Thread
     {
     public:
-        ServerRunnable(ServerRun& srvRun, Server *srv, Socket *sock);
+        ServerThread(ServerRun& srvRun, Server *srv, Socket *sock,
+            std::string name, int id);
         void run();
     private:
         ServerRun& srvRun;

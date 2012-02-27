@@ -6,7 +6,7 @@
 #include <sstream>
 #include <strings.h>
 #include "core/common.h"
-#include "net/tcpserver.h"
+#include "net/tcpserverthread.h"
 
 class TestServer : public Epyx::ServerRun
 {
@@ -62,11 +62,10 @@ void test_server()
 {
     Epyx::log::debug << "Starting server at port 4242..." << Epyx::log::endl;
     TestServer ts;
-    Epyx::TCPServer srv(4242, 20, ts);
-    Epyx::Thread t(&srv, "Server");
+    Epyx::TCPServerThread t(4242, 20, ts, "Server");
     ts.srvThread = &t;
     Epyx::log::debug << "(server) RUN!" << Epyx::log::endl;
-    t.run();
+    t.start();
     t.wait();
     Epyx::log::debug << "Server thread has terminated" << Epyx::log::endl;
 }

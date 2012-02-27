@@ -4,13 +4,16 @@
 namespace Epyx {
 namespace log {
 
-    Worker::Worker(int flags_, const std::string& file): flags(flags_), thread(this, "Logging Worker"){
+    Worker::Worker(int flags_, const std::string& file)
+    :Thread("Logging Worker"), flags(flags_)
+    {
         if(!file.empty() && (this->flags & LOGFILE)) {
             //TODO: Close it
             this->logFile.open(file.c_str());
             EPYX_ASSERT_NO_LOG(logFile.is_open())
         }
-        this->thread.run();
+        // start thread
+        this->start();
     }
 
     void Worker::write(const std::string& message, int prio) {
@@ -47,7 +50,7 @@ namespace log {
 
         this->entries.push(entry);
 
-        this->thread.wait();
+        this->wait();
     }
 
     std::string logLevelNames[5] = {
@@ -103,7 +106,7 @@ namespace log {
         strftime(time_buffer, 20, "%H:%M:%S", timeinfo);
         strftime(date_buffer, 20, "%Y-%m-%d", timeinfo);
 
-        //Make the part with the thread's name
+        //Make the part with tthread.he thread's name
         std::ostringstream info_buffer;
         int id = entry->thread_id;
         info_buffer << "[" << logLevelNames[entry->prio] << "] ";

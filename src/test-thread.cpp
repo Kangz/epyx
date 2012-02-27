@@ -11,8 +11,10 @@ using namespace Epyx;
 Mutex *my_mutex;
 int my_counter;
 
-class MutexThread : public Runnable {
+class MutexThread : public Thread {
 public:
+    MutexThread(int i):Thread("Mutex", i){}
+protected:
     virtual void run(){
         int i;
 
@@ -42,8 +44,8 @@ void test_mutex() {
 
         for (int i = 0; i < threadNumber; i++) {
             log::info << "Spawn thread " << i << log::endl;
-            threads[i] = new Thread(new MutexThread(), "Mutex", i);
-            threads[i]->run();
+            threads[i] = new MutexThread(i);
+            threads[i]->start();
         }
 
         for (int i = 0; i < threadNumber; i++) {
@@ -64,8 +66,10 @@ void test_mutex() {
 
 Condition *cond_condition;
 
-class ConditionThread : public Runnable {
+class ConditionThread : public Thread {
 public:
+    ConditionThread(int i):Thread("Condition", i) {}
+protected:
     virtual void run(){
         cond_condition->lock();
         cond_condition->wait();
@@ -79,8 +83,10 @@ public:
     }
 };
 
-class ImpatientConditionThread : public Runnable {
+class ImpatientConditionThread : public Thread {
 public:
+    ImpatientConditionThread(int i):Thread("Impatient", i) {}
+protected:
     virtual void run(){
         cond_condition->lock();
         cond_condition->timedWait(500);
@@ -105,11 +111,11 @@ void test_cond(){
         for (int i = 0; i < threadNumber; i++) {
             log::info << "Spawn thread " << i << log::endl;
             if(i == 0) {
-                threads[i] = new Thread(new ImpatientConditionThread(), "Impatient", i);
+                threads[i] = new ImpatientConditionThread(i);
             } else {
-                threads[i] = new Thread(new ConditionThread(), "Condition", i);
+                threads[i] = new ConditionThread(i);
             }
-            threads[i]->run();
+            threads[i]->start();
         }
 
         sleep(2);
@@ -143,8 +149,10 @@ void test_cond(){
     }
 }
 
-class SpammingThread : public Runnable {
+class SpammingThread : public Thread {
 public:
+    SpammingThread(int i):Thread("Spamming", i) {}
+protected:
     virtual void run(){
         for(int i=0; i<10000; i++){
             log::info<<"Spamming!!!§ " << i << " times " << log::endl;
@@ -159,10 +167,10 @@ void stress_test_logger(){
     try {
         for (int i = 0; i < threadNumber; i++) {
             log::info << "Spawn thread " << i << log::endl;
-            threads[i] = new Thread(new SpammingThread(), "Spamming", i);
+            threads[i] = new SpammingThread(i);
         }
         for (int i = 0; i < threadNumber; i++) {
-            threads[i]->run();
+            threads[i]->start();
         }
         for (int i = 0; i < threadNumber; i++) {
             log::info << "Wait for thread " << i << log::endl;
