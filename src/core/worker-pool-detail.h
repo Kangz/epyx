@@ -6,12 +6,7 @@
 namespace Epyx {
 
     template<typename T> WorkerPool<T>::WorkerPool(int num_workers, std::string name)
-        :name(name), worker_name_counter(0){
-        //Build the prefix for the worker threads names
-        std::ostringstream concatenator;
-        concatenator << name << "Worker";
-        this->worker_name_prefix = concatenator.str();
-
+        :name(name), worker_name_counter(0), worker_count(0){
         for(int i=0; i<num_workers; i++){
             this->addWorker();
         }
@@ -26,12 +21,12 @@ namespace Epyx {
         this->workers_to_destroy_mutex.lock();
         for(int i=0; i<(int)backup.size(); i++){
             this->removeWorker();
-       }
+        }
         this->workers_to_destroy_mutex.unlock();
 
         for(typename std::list<Worker*>::iterator it = backup.begin(); it != backup.end(); ++it){
             Worker* w = *it;
-            w->thread.wait();
+            w->wait();
             delete w;
         }
     }
@@ -48,11 +43,13 @@ namespace Epyx {
 
     template<typename T> void WorkerPool<T>::setNumWorkers(int n){
         if(this->worker_count > n){
-            for(int i=0; i < this->worker_count - n; i++){
+            int to_remove = this->worker_count - n;
+            for(int i=0; i < to_remove; i++){
                 this->removeWorker();
             }
         }else{
-            for(int i=0; i < n - this->worker_count; i++){
+            int to_add = n - this->worker_count;
+            for(int i=0; i < to_add; i++){
                 this->addWorker();
             }
         }
@@ -69,7 +66,15 @@ namespace Epyx {
     }
 
     template<typename T> void WorkerPool<T>::removeWorker(){
-        this->messages.push(NULL);
+        this->workers_mutex.lock();
+        Worker* w = workers.front();
+        workers.pop_front();
+        this->workers_mutex.unlock();
+
+        w->running_mutex.lock();
+        w->running = false;
+        w->running_mutex.unlock();
+        this->worker_count --;
     }
 
     template<typename T> void WorkerPool<T>::bookKeep(){
@@ -83,7 +88,7 @@ namespace Epyx {
 
             //We can wait here as it won't happen often and will be fairly quick
             //and we probably can't destroy a thread while it's running
-            w->thread.wait();
+            w->wait();
             delete w;
         }
     }
@@ -91,16 +96,14 @@ namespace Epyx {
 
 
     template<typename T> WorkerPool<T>::Worker::Worker(WorkerPool<T>* pool, int id)
-        :pool(pool), thread(this, pool->worker_name_prefix, id){
-    }
-
-    template<typename T> void WorkerPool<T>::Worker::start(){
-        this->running = true;
-        this->thread.run();
+        :pool(pool), Thread(pool->name, id), running(true){
     }
 
     template<typename T> void WorkerPool<T>::Worker::run(){
+        this->running_mutex.lock();
         while(this->running){
+            this->running_mutex.unlock();
+
             T* msg = this->pool->messages.pop();
 
             if(msg == NULL){
@@ -110,10 +113,10 @@ namespace Epyx {
             }
 
             delete msg;
+
+            this->running_mutex.lock();
         }
-        pool->workers_mutex.lock();
-        pool->workers.remove(this);
-        pool->workers_mutex.unlock();
+        this->running_mutex.unlock();
 
         pool->workers_to_destroy_mutex.lock();
         pool->workers_to_destroy.push_front(this);

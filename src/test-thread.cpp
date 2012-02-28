@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include "core/common.h"
+#include "core/worker-pool.h"
 
 using namespace Epyx;
 
@@ -184,13 +185,62 @@ void stress_test_logger(){
     }
 }
 
+class WaitingWorkerPool: public WorkerPool<int> {
+public:
+    WaitingWorkerPool():WorkerPool<int>(6, "WaitingWorker"){}
+
+    virtual void treat(int& t){
+        sleep(t);
+        log::info << "Worker finished" << log::endl;
+    }
+};
+
+void test_worker_pool(){
+    WaitingWorkerPool p;
+
+    log::info << "First wave of sleeps" << log::endl;
+    for(int i=0; i<6; i++){
+        int* one = new int(1);
+        p.post(*one);
+    }
+    sleep(2);
+
+    log::info << "Second wave of sleeps" << log::endl;
+
+    p.setNumWorkers(3);
+    for(int i=0; i<6; i++){
+        int* one = new int(1);
+        p.post(*one);
+    }
+    sleep(3);
+
+    log::info << "Second wave of sleeps (continued)" << log::endl;
+
+    for(int i=0; i<6; i++){
+        int* one = new int(1);
+        p.post(*one);
+    }
+    sleep(3);
+
+    log::info << "Third wave of sleeps" << log::endl;
+
+    p.setNumWorkers(6);
+    for(int i=0; i<6; i++){
+        int* one = new int(1);
+        p.post(*one);
+    }
+    sleep(2);
+}
+
 int main(){
     Thread::init();
     log::init(log::CONSOLE | log::LOGFILE, "Test.log");
 
-    test_mutex();
-    test_cond();
-    stress_test_logger();
+    //test_mutex();
+    //test_cond();
+    //stress_test_logger();
+    test_worker_pool();
+
     log::flushAndQuit();
     return 0;
 }

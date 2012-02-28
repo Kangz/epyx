@@ -27,7 +27,6 @@ namespace Epyx {
 
         //Everything related to names
         std::string name;
-        std::string worker_name_prefix;
         int worker_name_counter;
 
         void internalPost(T& message);
@@ -38,15 +37,14 @@ namespace Epyx {
         BlockingQueue<T> messages;
 
         //The Workers threads
-        class Worker: public Runnable{
+        class Worker: public Thread{
         public:
             Worker(WorkerPool<T>* pool, int id);
-            void start();
             void run();
 
         private:
             WorkerPool* pool;
-            Thread thread;
+            Mutex running_mutex;
             bool running;
         };
         int worker_count;
