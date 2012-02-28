@@ -198,14 +198,14 @@ public:
 void test_worker_pool(){
     WaitingWorkerPool p;
 
-    log::info << "First wave of sleeps" << log::endl;
+    log::info << "First wave of sleeps: 6 posts for 6 workers" << log::endl;
     for(int i=0; i<6; i++){
         int* one = new int(1);
         p.post(*one);
     }
     sleep(2);
 
-    log::info << "Second wave of sleeps" << log::endl;
+    log::info << "Second wave of sleeps: 6 sleeps and ask the pool have only 3 workers" << log::endl;
 
     p.setNumWorkers(3);
     for(int i=0; i<6; i++){
@@ -214,7 +214,8 @@ void test_worker_pool(){
     }
     sleep(3);
 
-    log::info << "Second wave of sleeps (continued)" << log::endl;
+    log::info << "Second wave of sleeps (continued) : 6 sleeps notice how the workers";
+    log::info <<" are destroyed only after they received a message" << log::endl;
 
     for(int i=0; i<6; i++){
         int* one = new int(1);
@@ -222,7 +223,7 @@ void test_worker_pool(){
     }
     sleep(3);
 
-    log::info << "Third wave of sleeps" << log::endl;
+    log::info << "Third wave of sleeps : 6 posts after asking the pool to have 6 workers" << log::endl;
 
     p.setNumWorkers(6);
     for(int i=0; i<6; i++){

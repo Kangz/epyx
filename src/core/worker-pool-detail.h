@@ -17,12 +17,11 @@ namespace Epyx {
         std::list<Worker*> backup(this->workers);
         this->workers_mutex.unlock();
 
-        //Prevent the automatic destruction of the workers
-        this->workers_to_destroy_mutex.lock();
         for(int i=0; i<(int)backup.size(); i++){
             this->removeWorker();
         }
-        this->workers_to_destroy_mutex.unlock();
+
+        this->messages.close();
 
         for(typename std::list<Worker*>::iterator it = backup.begin(); it != backup.end(); ++it){
             Worker* w = *it;
@@ -74,6 +73,7 @@ namespace Epyx {
         w->running_mutex.lock();
         w->running = false;
         w->running_mutex.unlock();
+
         this->worker_count --;
     }
 
@@ -106,13 +106,10 @@ namespace Epyx {
 
             T* msg = this->pool->messages.pop();
 
-            if(msg == NULL){
-                this->running = false;
-            }else{
+            if(msg != NULL){
                 this->pool->treat(*msg);
+                delete msg;
             }
-
-            delete msg;
 
             this->running_mutex.lock();
         }
