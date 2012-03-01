@@ -1,5 +1,9 @@
-//You should never include this file directly
-
+/**
+ * @file worker-pool-detail.h
+ * @brief a worker pool implementation
+ *
+ * You should never include this file directly
+ */
 #ifndef EPYX_WORKER_POOL_DETAIL_H
 #define EPYX_WORKER_POOL_DETAIL_H
 
