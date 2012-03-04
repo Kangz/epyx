@@ -1,63 +1,59 @@
-#include"core/exception.h"
-#include"core/parser.h"
-#include<fstream>
-#include<iostream>
+#include "core/common.h"
+#include "parser/gttparser.h"
+#include <fstream>
 
-using std::ifstream;
-using std::ios_base;
-using std::ios;
-using std::cout;
-using namespace Epyx;
-const int MAXLENGTH=10000;
-int getFileLength(ifstream * ifs){
-	if(ifs){
-		ifs->seekg(0,ios::end);
-		int n=ifs->tellg();
-		ifs->seekg(ios::beg);
-		return n;
-	}
-	else 
-		throw Epyx::FailException("testParser","No such file exists!");
+// Maximum packet length
+static const int MAXLENGTH = 10000;
+
+int main(){
+    std::string msgName;
+    char message[MAXLENGTH];
+    Epyx::Thread::init();
+    Epyx::log::init(Epyx::log::CONSOLE, "");
+    try {
+        Epyx::GTTParser myParser;
+        // TODO: Use argc/argv to get msg.txt path
+        std::ifstream msgList("msg.txt");
+        if(!msgList) {
+            Epyx::log::fatal << "Please provide `msg.txt' to indicate all filenames of messages"
+                    << Epyx::log::endl;
+            throw Epyx::FailException("testParser", "No message list found");
+        }
+
+        while (!msgList.eof()) {
+            getline(msgList, msgName);
+            // Remove space characters
+            Epyx::String::trim(msgName);
+            if (msgName.empty())
+                continue;
+            Epyx::log::debug << "Read message `" << msgName << "'" << Epyx::log::endl;
+            std::ifstream msgInput(msgName.c_str(), std::ios_base::in|std::ios_base::binary);
+            if(!msgInput){
+                Epyx::log::fatal << "Unable to read `" << msgName << "'" << Epyx::log::endl;
+                throw Epyx::FailException("testParser", "Message error");
+            }
+
+            while (!msgInput.eof()) {
+                msgInput.read(message, sizeof message);
+                int size = msgInput.gcount();
+                if (size > 0)
+                    myParser.eat(message, size);
+                else {
+                    // A reading probleme MUST be because end of file happens
+                    EPYX_ASSERT(msgInput.eof());
+                }
+                Epyx::GTTPacket *pac;
+                while((pac = myParser.getPacket()) != NULL){
+                    Epyx::log::info << "here comes one packet:\n"
+                        << *pac << Epyx::log::endl;
+                }
+            }
+            msgInput.close();
+        }
+        msgList.close();
+    } catch (Epyx::Exception e) {
+        Epyx::log::fatal << e << Epyx::log::endl;
+    }
+    Epyx::log::flushAndQuit();
+    return 0;
 }
-	int main(){
-		char *str,*name;
-		try{
-		Epyx::parser test;
-		ifstream filenames("msg.txt");
-		if(!filenames)
-			throw Epyx::FailException("testParser","please provide \"msg.txt\" to indicate all filename of messages");
-		int length=getFileLength(&filenames);
-		name=new char[length+1];
-		while(filenames.getline(name,length)&&(name[0])){
-		//	filenames.getline(name,length);
-		ifstream input(name,ios_base::in|ios_base::binary);
-		if(!input){
-			string errmsg="No such msg File: ";
-			errmsg.append(name);
-			throw Epyx::FailException("testParser",errmsg.c_str());
-		}
-		int n=getFileLength(&input);
-		str=new char[n+1];
-		input.read(str,n);
-		str[n]='\0';
-		input.close();
-		test.eat(str,n);
-		string pac;
-		while((pac=test.getPacket())!=""){
-			cout<<"here comes one packet:\n"<<pac;
-		}
-		delete[] str;
-		}
-		delete []name;
-		filenames.close();
-return 0;
-		}
-		catch(Epyx::Exception e){
-			std::cerr<<e<<std::endl;
-			delete[] str;
-			delete []name;
-return 0;
-		//	exit(0);
-
-		}
-	}

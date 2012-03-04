@@ -7,6 +7,7 @@
 #define EPYX_CORE_COMMON_H
 
 #include "assert.h"
+#include "string.h"
 #include "exception.h"
 #include "log-worker.h"
 #include "tls-pointer.h"

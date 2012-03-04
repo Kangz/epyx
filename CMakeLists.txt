@@ -42,6 +42,12 @@ file(
     src/net/*
 )
 
+file(
+    GLOB_RECURSE
+    parser_sources
+    src/parser/*
+)
+
 # Test executables
 add_executable(
     test-thread
@@ -61,6 +67,17 @@ add_executable(
 )
 target_link_libraries(
     test-server
+    pthread
+)
+
+add_executable(
+    test-parser
+    ${core_sources}
+    ${parser_sources}
+    src/test-parser.cpp
+)
+target_link_libraries(
+    test-parser
     pthread
 )
 
