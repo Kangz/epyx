@@ -85,6 +85,7 @@ namespace Epyx {
         public:
             Worker(WorkerPool<T>* pool, int id);
             void run();
+            void tellStop();
 
         private:
             WorkerPool* pool;

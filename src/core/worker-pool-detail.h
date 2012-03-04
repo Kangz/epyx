@@ -74,9 +74,7 @@ namespace Epyx {
         workers.pop_front();
         this->workers_mutex.unlock();
 
-        w->running_mutex.lock();
-        w->running = false;
-        w->running_mutex.unlock();
+        w->tellStop();
 
         this->worker_count --;
     }
@@ -100,7 +98,7 @@ namespace Epyx {
 
 
     template<typename T> WorkerPool<T>::Worker::Worker(WorkerPool<T>* pool, int id)
-        :pool(pool), Thread(pool->name, id), running(true){
+        :Thread(pool->name, id), pool(pool), running(true){
     }
 
     template<typename T> void WorkerPool<T>::Worker::run(){
@@ -124,6 +122,11 @@ namespace Epyx {
         pool->workers_to_destroy_mutex.unlock();
     }
 
+    template<typename T> void WorkerPool<T>::Worker::tellStop(){
+        running_mutex.lock();
+        running = false;
+        running_mutex.unlock();
+    }
 }
 
 #endif /* EPYX_WORKER_POOL_DETAIL_H */
