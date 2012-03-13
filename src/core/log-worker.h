@@ -1,4 +1,6 @@
 /**
+ * @file log-worker.h
+ * @brief Used for the implementation of the logger
  */
 #ifndef EPYX_LOG_WORKER_H
 #define EPYX_LOG_WORKER_H

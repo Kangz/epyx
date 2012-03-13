@@ -1,5 +1,6 @@
 /**
- * Thread-safe logging system
+ * @file log.h
+ * @brief A thread safe logging system.
  */
 #ifndef EPYX_LOG_H
 #define EPYX_LOG_H
@@ -42,12 +43,22 @@ namespace log {
     //Defines a Stream class to handle << operators nicely
     //This Struct is the endLog struct that ends the log line (a log line can be multiple lines)
     struct EndlStruct{};
+    struct ErrstdStruct{};
+
+    /**
+     * @brief An agument to be passed to a log stream to finish a log entry (that can span across multiple lines)
+     */
     extern EndlStruct endl;
 
-    // Special token : error string to print errno nicely
-    struct ErrstdStruct{};
+    /**
+     * @brief An agument to be passed to a log stream to print the standard error code nicely
+     */
     extern ErrstdStruct errstd;
 
+    /**
+     * @class Stream
+     * @brief The definition of a logging stream to have a nice interface
+     */
     class Stream {
     private:
         std::ostringstream buffer;
@@ -59,16 +70,39 @@ namespace log {
     public:
         Stream(int prio);
         ~Stream();
+
+        /**
+         * @brief overloads << to accept almost anything
+         */
         template<typename T> Stream& operator<<(const T& arg);
         Stream& operator<<(const EndlStruct& f);
         Stream& operator<<(const ErrstdStruct& f);
     };
 
     //Here the definition of the different log streams
+    /**
+     * @brief The debug log stream
+     */
     static Stream debug(DEBUG);
+
+    /**
+     * @brief The info log stream
+     */
     static Stream info(INFO);
+
+    /**
+     * @brief The warn log stream
+     */
     static Stream warn(WARN);
+
+    /**
+     * @brief The error log stream
+     */
     static Stream error(ERROR);
+
+    /**
+     * @brief The fatal log stream
+     */
     static Stream fatal(FATAL);
 
     //End of the definition of Stream
@@ -86,9 +120,28 @@ namespace log {
         LOGFILE = 4
     };
 
+    /**
+     * @brief initializes the logger
+     * @param flags the initialisation flags
+     * @param file (optional) the file to log to
+     */
     void init(int flags, const std::string& file = "");
+
+    /**
+     * @brief Ask the logging system to flush the logs to the logfile and the log streams -- Non-blocking variant
+     *
+     * The flags are CONSOLE, ERRORCONSOLE and LOGFILE
+     */
     void flush();
+
+    /**
+     * @brief Ask the logging system to flush the logs to the logfile and the log streams -- Blocking variant
+     */
     void waitFlush();
+
+    /**
+     * @brief Quits the logger nicely
+     */
     void flushAndQuit();
 
 }
