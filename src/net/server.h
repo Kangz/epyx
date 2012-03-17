@@ -30,6 +30,14 @@ namespace Epyx
          */
         void close();
 
+        /**
+         * @brief Return internal file descriptor
+         */
+        inline int getFd()
+        {
+            return sockfd;
+        }
+
     protected:
         Address address;
         unsigned short port;

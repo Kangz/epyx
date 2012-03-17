@@ -1,4 +1,5 @@
 #include "udpsocket.h"
+#include "udpserver.h"
 #include "../core/common.h"
 
 namespace Epyx
@@ -37,9 +38,16 @@ namespace Epyx
 
     int UDPSocket::recv(void *data, int size) {
         int bytes;
+        EPYX_ASSERT(answerServ != NULL);
         EPYX_ASSERT(data != NULL);
         bytes = answerServ->recv(data, size);
         // TODO: Implement status error (ex. Conn closed, ...)
         return bytes;
+    }
+
+    int UDPSocket::getRecvFd()
+    {
+        EPYX_ASSERT(answerServ != NULL);
+        return answerServ->getFd();
     }
 }

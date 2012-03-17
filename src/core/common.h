@@ -16,5 +16,6 @@
 #include "condition.h"
 #include "blocking-queue.h"
 #include "thread.h"
+#include "worker-pool.h"
 
 #endif // EPYX_CORE_COMMON_H

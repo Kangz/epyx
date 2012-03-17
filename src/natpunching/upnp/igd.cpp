@@ -10,7 +10,7 @@
 
 #include "igd.h"
 #include "command.h"
-#include "../../net/socket.h"
+#include "../../net/tcpsocket.h"
 #include "../../net/httpheaders.h"
 #include <sstream>
 #include <queue>
@@ -77,7 +77,7 @@ namespace Epyx {
                    << "Host: "<< this->address << endl
                    << "Connection: Close" << endl
                    << "User-Agent: Epyx Natpunching FTW" << endl << endl;
-            Socket sock(address.ip(),address.getPort());
+            TCPSocket sock(address);
             sock.connect();
             sock.write(header.str());
             char data[BIG_SIZE];

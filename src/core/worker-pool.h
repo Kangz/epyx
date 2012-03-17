@@ -43,6 +43,11 @@ namespace Epyx {
         ~WorkerPool();
 
         /**
+         * @brief Stop WorkerPool (wait all children threads)
+         */
+        void stop();
+
+        /**
          * @brief Adds a message to be processed
          * @param message the message
          */

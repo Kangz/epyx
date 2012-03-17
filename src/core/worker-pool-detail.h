@@ -21,6 +21,10 @@ namespace Epyx {
     }
 
     template<typename T> WorkerPool<T>::~WorkerPool(){
+        this->stop();
+    }
+
+    template<typename T> void WorkerPool<T>::stop(){
         this->workers_mutex.lock();
         std::list<Worker*> backup(this->workers);
         this->workers_mutex.unlock();
@@ -37,7 +41,6 @@ namespace Epyx {
             delete w;
         }
     }
-
 
     template<typename T> void WorkerPool<T>::post(T& message){
         this->bookKeep();

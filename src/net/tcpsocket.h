@@ -7,9 +7,12 @@ namespace Epyx
 {
     class TCPSocket : public Socket
     {
-        public:
-            TCPSocket();
-            TCPSocket(Address&);
+    public:
+        TCPSocket();
+        TCPSocket(const Address&);
+        TCPSocket(int sock, const Address &addr);
+
+        int getRecvFd();
     };
 
 }

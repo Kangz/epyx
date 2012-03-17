@@ -13,7 +13,7 @@ namespace Epyx {
         class Natpunch {
             public:
                 Natpunch();
-                Socket OpenConnection(); //Opens a Listening Socket to receive a connection.
+                //Socket OpenConnection(); //Opens a Listening Socket to receive a connection.
             private :
                 void discover();
                 void openMapPort();

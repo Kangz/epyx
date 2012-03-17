@@ -2,7 +2,7 @@
 #define EPYX_UDPSERVER_H
 
 #include "server.h"
-#include "socket.h"
+#include "udpsocket.h"
 
 namespace Epyx
 {
@@ -20,7 +20,7 @@ namespace Epyx
         }
 
     private:
-        Socket sock;
+        UDPSocket sock;
     };
 }
 #endif /* EPYX_UDPSERVER_H */

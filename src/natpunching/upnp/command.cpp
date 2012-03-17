@@ -9,6 +9,7 @@
 #include "../../core/exception.h"
 #include <list>
 #include "../../net/httpheaders.h"
+#include "../../net/tcpsocket.h"
 
 
 #include <iostream>
@@ -213,7 +214,7 @@ namespace Epyx{
 
         void Command::send(){
             std::cout << "Received send Command" << std::endl;
-            Socket s(address.c_str(),(unsigned short)port);
+            TCPSocket s(Address(address.c_str(), (unsigned short)port));
             std::cout << "The socket has been initialized with address " << s.getAddress() << std::endl;
             std::cout << "Connecting ..." << std::endl;
             s.connect();

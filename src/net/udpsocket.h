@@ -2,9 +2,10 @@
 #define EPYX_UDPSOCKET_H
 
 #include "socket.h"
-#include "udpserver.h"
 
 namespace Epyx {
+    class UDPServer;
+
     class UDPSocket : public Socket
     {
     public:
@@ -12,6 +13,8 @@ namespace Epyx {
         void close();
         int recv(void*, int);
         bool connect();
+
+        int getRecvFd();
 
     private:
         // Use an UDP server to get answers, if they are waited

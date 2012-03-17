@@ -1,5 +1,6 @@
 #include "tcpserverthread.h"
 #include "../core/common.h"
+#include "tcpsocket.h"
 
 namespace Epyx
 {
@@ -81,7 +82,7 @@ namespace Epyx
 
                 // Encapsulate socket
                 try {
-                    newSock = new Socket(newfd, Address((struct sockaddr*)&clientAddr));
+                    newSock = new TCPSocket(newfd, Address((struct sockaddr*)&clientAddr));
                 } catch (Exception e) {
                     log::error << "Unable to setup the link:\n" << e << log::endl;
                     if (newSock)
