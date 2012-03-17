@@ -32,7 +32,8 @@ namespace Epyx {
          * @param num_workers the initial number of worker threads
          * @param name the prefix of the name of the worker threads in the logs
          */
-        WorkerPool(int num_workers, std::string name);
+        WorkerPool(int num_workers, const std::string name);
+        WorkerPool();
 
         /**
          * @brief The WorkerPool destructor
@@ -46,6 +47,12 @@ namespace Epyx {
          * @param message the message
          */
         void post(T& message);
+
+        /**
+         * @brief set the name of the workers
+         * Please call this functionto set a name BEFORE starting any worker
+         */
+        void setName(const std::string name);
 
         /**
          * @brief gets the number of workers

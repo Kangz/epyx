@@ -17,14 +17,14 @@ namespace log {
     }
 
     void Worker::write(const std::string& message, int prio) {
-        LogEntry initializer = {message, prio, time(NULL), Thread::getName(), Thread::getId(), NULL};
+        LogEntry initializer = {message, prio, time(NULL), Thread::getName(), NULL};
         LogEntry* entry = new LogEntry(initializer);
 
         this->entries.push(entry);
     }
 
     void Worker::flush(bool wait) {
-        LogEntry initializer = {"", FLUSH, 0, "", 0, NULL};
+        LogEntry initializer = {"", FLUSH, 0, "", NULL};
         LogEntry* entry = new LogEntry(initializer);
         Condition* cond = NULL;
 
@@ -45,7 +45,7 @@ namespace log {
     }
 
     void Worker::quit(){
-        LogEntry initializer = {"", QUIT, 0, "", 0, NULL};
+        LogEntry initializer = {"", QUIT, 0, "", NULL};
         LogEntry* entry = new LogEntry(initializer);
 
         this->entries.push(entry);
@@ -108,13 +108,8 @@ namespace log {
 
         //Make the part with the thread's name
         std::ostringstream info_buffer;
-        int id = entry->thread_id;
         info_buffer << "[" << logLevelNames[entry->prio] << "] ";
-        if(id < 0){
-            info_buffer << "[" << entry->thread_name << "]";
-        }else{
-            info_buffer << "[" << entry->thread_name << " " << id << "]";
-        }
+        info_buffer << "[" << entry->thread_name << "]";
 
         //TODO: Flush control commands
         //Do the actual IO

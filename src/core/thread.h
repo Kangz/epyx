@@ -14,7 +14,6 @@ namespace Epyx {
     namespace detail {
         struct ThreadInfo {
             std::string name;
-            int id;
         };
         extern TLSPointer<ThreadInfo>* thread_infos;
         extern bool thread_initialized;
@@ -34,7 +33,13 @@ namespace Epyx {
         /**
          * @brief The Thread constructor
          */
-        Thread(std::string name, int id = -1);
+        Thread();
+        Thread(const std::string name, int id = -1);
+
+        /**
+         * @brief Set name-id if thread was created without one
+         */
+        void setName(const std::string name, int id = -1);
 
         /**
          * @brief Start the thread
@@ -56,11 +61,6 @@ namespace Epyx {
          * @return [current thread]->name, not this->name
          */
         static std::string getName();
-        /**
-         * @brief Get the ID of the running thread
-         * @return [current thread]->id, not this->id
-         */
-        static int getId();
 
         /**
          * @brief Intialise the thread system

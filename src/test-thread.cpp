@@ -13,8 +13,6 @@ Mutex *my_mutex;
 int my_counter;
 
 class MutexThread : public Thread {
-public:
-    MutexThread(int i):Thread("Mutex", i){}
 protected:
     virtual void run(){
         int i;
@@ -45,7 +43,8 @@ void test_mutex() {
 
         for (int i = 0; i < threadNumber; i++) {
             log::info << "Spawn thread " << i << log::endl;
-            threads[i] = new MutexThread(i);
+            threads[i] = new MutexThread();
+            threads[i]->setName("Mutex", i);
             threads[i]->start();
         }
 
@@ -68,8 +67,6 @@ void test_mutex() {
 Condition *cond_condition;
 
 class ConditionThread : public Thread {
-public:
-    ConditionThread(int i):Thread("Condition", i) {}
 protected:
     virtual void run(){
         cond_condition->lock();
@@ -85,8 +82,6 @@ protected:
 };
 
 class ImpatientConditionThread : public Thread {
-public:
-    ImpatientConditionThread(int i):Thread("Impatient", i) {}
 protected:
     virtual void run(){
         cond_condition->lock();
@@ -112,9 +107,11 @@ void test_cond(){
         for (int i = 0; i < threadNumber; i++) {
             log::info << "Spawn thread " << i << log::endl;
             if(i == 0) {
-                threads[i] = new ImpatientConditionThread(i);
+                threads[i] = new ImpatientConditionThread();
+                threads[i]->setName("Impatient", i);
             } else {
-                threads[i] = new ConditionThread(i);
+                threads[i] = new ConditionThread();
+                threads[i]->setName("Condition", i);
             }
             threads[i]->start();
         }
@@ -151,8 +148,6 @@ void test_cond(){
 }
 
 class SpammingThread : public Thread {
-public:
-    SpammingThread(int i):Thread("Spamming", i) {}
 protected:
     virtual void run(){
         for(int i=0; i<10000; i++){
@@ -168,7 +163,8 @@ void stress_test_logger(){
     try {
         for (int i = 0; i < threadNumber; i++) {
             log::info << "Spawn thread " << i << log::endl;
-            threads[i] = new SpammingThread(i);
+            threads[i] = new SpammingThread();
+            threads[i]->setName("Spamming", i);
         }
         for (int i = 0; i < threadNumber; i++) {
             threads[i]->start();
@@ -187,7 +183,7 @@ void stress_test_logger(){
 
 class WaitingWorkerPool: public WorkerPool<int> {
 public:
-    WaitingWorkerPool():WorkerPool<int>(6, "WaitingWorker"){}
+    //WaitingWorkerPool():WorkerPool<int>(6, "WaitingWorker"){}
 
     virtual void treat(int& t){
         sleep(t);
@@ -197,8 +193,10 @@ public:
 
 void test_worker_pool(){
     WaitingWorkerPool p;
+    p.setName("WaitingWorker");
 
     log::info << "First wave of sleeps: 6 posts for 6 workers" << log::endl;
+    p.setNumWorkers(6);
     for(int i=0; i<6; i++){
         int* one = new int(1);
         p.post(*one);
@@ -206,7 +204,6 @@ void test_worker_pool(){
     sleep(2);
 
     log::info << "Second wave of sleeps: 6 sleeps and ask the pool have only 3 workers" << log::endl;
-
     p.setNumWorkers(3);
     for(int i=0; i<6; i++){
         int* one = new int(1);
@@ -216,7 +213,6 @@ void test_worker_pool(){
 
     log::info << "Second wave of sleeps (continued) : 6 sleeps notice how the workers";
     log::info <<" are destroyed only after they received a message" << log::endl;
-
     for(int i=0; i<6; i++){
         int* one = new int(1);
         p.post(*one);
@@ -224,7 +220,6 @@ void test_worker_pool(){
     sleep(3);
 
     log::info << "Third wave of sleeps : 6 posts after asking the pool to have 6 workers" << log::endl;
-
     p.setNumWorkers(6);
     for(int i=0; i<6; i++){
         int* one = new int(1);
@@ -237,9 +232,9 @@ int main(){
     Thread::init();
     log::init(log::CONSOLE | log::LOGFILE, "Test.log");
 
-    //test_mutex();
-    //test_cond();
-    //stress_test_logger();
+    test_mutex();
+    test_cond();
+    stress_test_logger();
     test_worker_pool();
 
     log::flushAndQuit();

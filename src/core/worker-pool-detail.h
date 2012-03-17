@@ -16,6 +16,10 @@ namespace Epyx {
         }
     }
 
+    template<typename T> WorkerPool<T>::WorkerPool()
+        :name(""), worker_name_counter(0), worker_count(0){
+    }
+
     template<typename T> WorkerPool<T>::~WorkerPool(){
         this->workers_mutex.lock();
         std::list<Worker*> backup(this->workers);
@@ -38,6 +42,11 @@ namespace Epyx {
     template<typename T> void WorkerPool<T>::post(T& message){
         this->bookKeep();
         this->messages.push(&message);
+    }
+
+    template<typename T> void  WorkerPool<T>::setName(const std::string name){
+        if (this->name.empty())
+            this->name = name;
     }
 
     template<typename T> int WorkerPool<T>::getNumWorkers(){

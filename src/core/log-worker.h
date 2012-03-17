@@ -24,7 +24,6 @@ namespace log {
             int prio;
             time_t time;
             std::string thread_name;
-            int thread_id;
             Condition* cond;
         };
 
