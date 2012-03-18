@@ -82,6 +82,11 @@ namespace Epyx
         return sock;
     }
 
+    bool Socket::isOpened()
+    {
+        return (sock >= 0);
+    }
+
     void Socket::setAddress(const Address& addr)
     {
         address = addr;

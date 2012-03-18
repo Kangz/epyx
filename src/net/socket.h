@@ -29,6 +29,7 @@ namespace Epyx
         void setFd(int sockfd);
         int getFd();
         virtual int getRecvFd() = 0;
+        bool isOpened();
         void setAddress(const Address& addr);
         Address getAddress();
         void setLocalAddress(const Address& addr);

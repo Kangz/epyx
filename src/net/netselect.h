@@ -12,6 +12,11 @@
 
 namespace Epyx
 {
+    /**
+     * @class NetSelect
+     *
+     * @brief Implement select() on multiple sockets using a WorkerPool
+     */
     class NetSelect : public Thread
     {
     public:

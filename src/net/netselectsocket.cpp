@@ -44,8 +44,15 @@ namespace Epyx
             return false;
 
         // Eat data
-        this->eat(data, recvSize);
-        return true;
+        try {
+            this->eat(data, recvSize);
+        } catch (Exception e) {
+            log::error << e << log::endl;
+            log::error << "Closing socket to " << sock->getAddress() <<
+                " due to an exception" << log::endl;
+            return false;
+        }
+        return sock->isOpened();
     }
 
     Socket& NetSelectSocket::socket()

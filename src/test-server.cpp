@@ -81,6 +81,13 @@ public:
     {
         Epyx::log::debug << "[" << socket().getAddress() << "] " <<
             "Incoming for " << socket().getLocalAddress() << Epyx::log::endl;
+
+        // Motd
+        std::ostringstream hello;
+        hello << "Hello, you address is " << socket().getAddress() << " !\n" <<
+            "Type EXIT or QUIT to exit the session\n" <<
+            "Type PAN to kill the session\n";
+        socket().write(hello.str());
     }
     ~TestNetSelectSocket()
     {
@@ -90,9 +97,25 @@ public:
 
     void eat(const char *data, long size)
     {
+        std::string strline(data, size);
+        Epyx::String::trim(strline);
         Epyx::log::debug << "[" << socket().getAddress() << "-RECV] " <<
-            std::string(data, size) << Epyx::log::endl;
-        socket().write("ACK");
+           strline << Epyx::log::endl;
+
+        const char *line = strline.c_str();
+
+        if (!strcasecmp(line, "quit") || !strcasecmp(line, "exit")) {
+            // Close socket
+            this->socket().close();
+        } else if (!strcasecmp(line, "pan")) {
+            throw Epyx::FailException("test-server", "A client tried to kill me");
+        } else if (!strcasecmp(line, "o<")) {
+            socket().write("PAN !\n");
+        } else {
+            // Mirror
+            socket().write("Mirror: ");
+            socket().sendAll(data, size);
+        }
     }
 };
 
@@ -103,16 +126,18 @@ int main()
     Epyx::Socket::init();
     try {
         // Start server thread
+        /*
         TestServerThread srvThread(4242);
         srvThread.setName("ServerThread");
         Epyx::log::debug << "Start " << srvThread.getThisName() << " at " <<
             srvThread.getAddress() << Epyx::log::endl;
         srvThread.start();
+        */
 
         // Start select() thread
         Epyx::NetSelect selectThread(20, "SelectWorker");
         // Do NOT delete tcpServer : it is deleted by NetSelectTCPServer
-        Epyx::TCPServer *tcpServer = new Epyx::TCPServer(4243, selectThread.getNumWorkers());
+        Epyx::TCPServer *tcpServer = new Epyx::TCPServer(4242, selectThread.getNumWorkers());
         Epyx::log::debug << "ServerWorker listening at " << tcpServer->getAddress() <<
             Epyx::log::endl;
         selectThread.add(new Epyx::NetSelectTCPServer<TestNetSelectSocket>(tcpServer));
@@ -122,7 +147,7 @@ int main()
         selectThread.start();
 
         // Wait threads
-        srvThread.wait();
+        //srvThread.wait();
         selectThread.wait();
         Epyx::log::debug << "Server thread has terminated" << Epyx::log::endl;
     } catch (Epyx::Exception e) {
