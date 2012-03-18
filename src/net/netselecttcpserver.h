@@ -1,6 +1,6 @@
 /**
- * @file netselecttcpsocket.h
- * @brief Implementation of NetSelectReader on sockets
+ * @file netselecttcpserver.h
+ * @brief Implementation of NetSelectReader on TCP server
  */
 
 #ifndef EPYX_NETSELECTTCPSERVER_H
@@ -12,25 +12,32 @@
 
 namespace Epyx
 {
-    class NetSelectTCPServer : public NetSelectReader
+    /**
+     * @class NetSelectTCPServer
+     *
+     * @brief Manage a TCPServer in NetSelect
+     *
+     * T is a class which derives from NetSelectSocket and which is intended to
+     * be instanced for each incomming connection.
+     */
+    template<typename T>class NetSelectTCPServer : public NetSelectReader
     {
     public:
-        NetSelectTCPServer(TCPServer &srv);
+        /**
+         * NOTE: TCPServer *srv is DELETED by the desctructor
+         */
+        NetSelectTCPServer(TCPServer *srv);
+        ~NetSelectTCPServer();
 
-        inline int getFileDescriptor()
-        {
-            return srv.getFd();
-        }
+        int getFileDescriptor();
 
         bool read();
 
-        /**
-         * @brief Create a new NetSelectSocket from an incomming connection
-         */
-        virtual NetSelectSocket* selectSocket(TCPSocket &sock) = 0;
-
-    private:
-        TCPServer &srv;
+    protected:
+        TCPServer *srv;
     };
 }
+
+#include "netselecttcpserver-detail.h"
+
 #endif /* EPYX_NETSELECTTCPSERVER_H */

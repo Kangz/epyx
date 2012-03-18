@@ -9,8 +9,7 @@ namespace Epyx
 {
     class TCPServerThread : public TCPServer, public Thread {
     public:
-        TCPServerThread(unsigned short port, unsigned int nbConn,
-            std::string name, int id = -1);
+        TCPServerThread(unsigned short port, unsigned int nbConn);
 
         /**
          * @brief communicate with a client

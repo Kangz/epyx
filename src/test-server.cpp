@@ -7,12 +7,20 @@
 #include <strings.h>
 #include "core/common.h"
 #include "net/tcpserverthread.h"
+#include "net/netselect.h"
+#include "net/netselectsocket.h"
+#include "net/netselecttcpserver.h"
 
-class TestServer : public Epyx::TCPServerThread
+/**
+ * @class TestServerThread
+ *
+ * @brief Test Epyx::TCPServerThread class
+ */
+class TestServerThread : public Epyx::TCPServerThread
 {
 public:
-    TestServer(int port, std::string threadname)
-    :TCPServerThread(port, 20, threadname)
+    TestServerThread(unsigned short port, unsigned int nbConn = 20)
+        :TCPServerThread(port, nbConn)
     {
     }
 
@@ -60,15 +68,33 @@ public:
     }
 };
 
-void test_server()
+/**
+ * @class TestNetSelectSocket
+ *
+ * @brief Test Epyx::NetSelectSocket class
+ */
+class TestNetSelectSocket : public Epyx::NetSelectSocket
 {
-    Epyx::log::debug << "Starting server at port 4242..." << Epyx::log::endl;
-    TestServer t(4242, "Server");
-    Epyx::log::debug << "(server) RUN!" << Epyx::log::endl;
-    t.start();
-    t.wait();
-    Epyx::log::debug << "Server thread has terminated" << Epyx::log::endl;
-}
+public:
+    TestNetSelectSocket(Epyx::Socket *sock)
+        :NetSelectSocket(sock)
+    {
+        Epyx::log::debug << "[" << socket().getAddress() << "] " <<
+            "Incoming for " << socket().getLocalAddress() << Epyx::log::endl;
+    }
+    ~TestNetSelectSocket()
+    {
+         Epyx::log::debug << "[" << socket().getAddress() << "] End" <<
+             Epyx::log::endl;
+    }
+
+    void eat(const char *data, long size)
+    {
+        Epyx::log::debug << "[" << socket().getAddress() << "-RECV] " <<
+            std::string(data, size) << Epyx::log::endl;
+        socket().write("ACK");
+    }
+};
 
 int main()
 {
@@ -76,7 +102,29 @@ int main()
     Epyx::log::init(Epyx::log::CONSOLE, "");
     Epyx::Socket::init();
     try {
-        test_server();
+        // Start server thread
+        TestServerThread srvThread(4242);
+        srvThread.setName("ServerThread");
+        Epyx::log::debug << "Start " << srvThread.getThisName() << " at " <<
+            srvThread.getAddress() << Epyx::log::endl;
+        srvThread.start();
+
+        // Start select() thread
+        Epyx::NetSelect selectThread(20, "SelectWorker");
+        // Do NOT delete tcpServer : it is deleted by NetSelectTCPServer
+        Epyx::TCPServer *tcpServer = new Epyx::TCPServer(4243, selectThread.getNumWorkers());
+        Epyx::log::debug << "ServerWorker listening at " << tcpServer->getAddress() <<
+            Epyx::log::endl;
+        selectThread.add(new Epyx::NetSelectTCPServer<TestNetSelectSocket>(tcpServer));
+        selectThread.setName("NetSelect");
+        Epyx::log::debug << "Start " << selectThread.getThisName() <<
+            Epyx::log::endl;
+        selectThread.start();
+
+        // Wait threads
+        srvThread.wait();
+        selectThread.wait();
+        Epyx::log::debug << "Server thread has terminated" << Epyx::log::endl;
     } catch (Epyx::Exception e) {
         Epyx::log::error << e << Epyx::log::endl;
     }

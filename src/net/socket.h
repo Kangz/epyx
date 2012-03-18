@@ -29,8 +29,10 @@ namespace Epyx
         void setFd(int sockfd);
         int getFd();
         virtual int getRecvFd() = 0;
-        void setAddress(Address& addr);
+        void setAddress(const Address& addr);
         Address getAddress();
+        void setLocalAddress(const Address& addr);
+        Address getLocalAddress();
 
         // Senders
         int send(const void *data, int size);
@@ -51,10 +53,17 @@ namespace Epyx
         // IP + port associated with the socket
         Address address;
 
+        // Local address for the socket or "*" if unknown
+        Address localAddress;
+
     private:
         // Global initialisation stuff
         static int is_init;
         static Mutex init_mutex;
+
+        // Disable copy
+        Socket(const Socket&);
+        const Socket& operator=(const Socket&);
 
         // Last end-of-line caracter (\r or \n)
         char last_eol;

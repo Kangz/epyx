@@ -14,6 +14,8 @@ namespace Epyx
     Address::Address(const char *ip, unsigned short port_, int ipVersion_)
         :port(port_), ipVersion(ipVersion_)
     {
+        if (ip == NULL)
+            ip = "*";
         strncpy(this->ipStr, ip, INET6_ADDRSTRLEN);
         this->ipStr[INET6_ADDRSTRLEN] = 0;
     }

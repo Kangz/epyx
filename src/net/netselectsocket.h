@@ -1,5 +1,5 @@
 /**
- * @file netselecttcpsocket.h
+ * @file netselectsocket.h
  * @brief Implementation of NetSelectReader on sockets
  */
 
@@ -16,10 +16,14 @@ namespace Epyx
     public:
         NetSelectSocket(Socket &sock);
 
-        inline int getFileDescriptor()
-        {
-            return sock.getRecvFd();
-        }
+        /**
+         * @brief Create a new NetSelectSocket with a dynamicaly allocated socket
+         */
+        NetSelectSocket(Socket *psock);
+
+        ~NetSelectSocket();
+
+        int getFileDescriptor();
 
         bool read();
 
@@ -28,8 +32,16 @@ namespace Epyx
          */
         virtual void eat(const char *data, long size) = 0;
 
+    protected:
+        /**
+         * @brief Get internal socket
+         */
+        Socket& socket();
+
     private:
-        Socket &sock;
+        // sock may be deleted by this object to prevent memory leak
+        Socket *sock;
+        bool dynamicSock;
     };
 }
 #endif /* EPYX_NETSELECTREADER_H */

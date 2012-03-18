@@ -8,6 +8,10 @@ namespace Epyx
     {
     }
 
+    NetSelectReader::~NetSelectReader()
+    {
+    }
+
     NetSelect* NetSelectReader::getOwner()
     {
         EPYX_ASSERT(owner != NULL);

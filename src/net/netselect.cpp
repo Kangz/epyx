@@ -3,10 +3,10 @@
 
 namespace Epyx
 {
-    NetSelect::NetSelect(int numworkers, const std::string name)
+    NetSelect::NetSelect(int numworkers, const std::string workerName)
         :running(true)
     {
-        workers.setName(name);
+        workers.setName(workerName);
         workers.setNumWorkers(numworkers);
     }
 
@@ -14,6 +14,9 @@ namespace Epyx
     {
         // Stop working pool
         workers.stop();
+
+        // Stop running thread
+        running = false;
 
         // Delete every selected stuff
         readersMutex.lock();
@@ -26,11 +29,12 @@ namespace Epyx
         readersMutex.unlock();
     }
 
-    void NetSelect::add(NetSelectReader &nsr)
+    void NetSelect::add(NetSelectReader *nsr)
     {
-        nsr.setOwner(this);
+        EPYX_ASSERT(nsr != NULL);
+        nsr->setOwner(this);
         readersMutex.lock();
-        readers[&nsr] = false;
+        readers[nsr] = false;
         readersMutex.unlock();
     }
 
@@ -50,6 +54,7 @@ namespace Epyx
                     NetSelectReader *nsr = i->first;
                     EPYX_ASSERT(nsr != NULL);
                     int fd = nsr->getFileDescriptor();
+                    EPYX_ASSERT(fd >= 0);
                     FD_SET(fd, &rfds);
                     if (fd > fdmax)
                         fdmax = fd;
@@ -74,26 +79,26 @@ namespace Epyx
                 if (!i->second && FD_ISSET(fd, &rfds))
                 {
                     i->second = true;
-                    workers.post(*nsr);
+                    workers.post(nsr);
                 }
             }
             readersMutex.unlock();
         }
     }
 
-    void NetSelect::Workers::treat(NetSelectReader& nsr)
+    void NetSelect::Workers::treat(NetSelectReader *nsr)
     {
-        NetSelect *ns = nsr.getOwner();
-        ns->readersMutex.lock();
-        ns->readers[&nsr] = false;
-        ns->readersMutex.unlock();
+        NetSelect *nsel = nsr->getOwner();
+        nsel->readersMutex.lock();
+        nsel->readers[nsr] = false;
+        nsel->readersMutex.unlock();
 
-        if (!nsr.read()) {
+        if (!nsr->read()) {
             // Destroy this reader
-            ns->readersMutex.lock();
-            ns->readers.erase(&nsr);
-            ns->readersMutex.unlock();
-            delete &nsr;
+            nsel->readersMutex.lock();
+            nsel->readers.erase(nsr);
+            nsel->readersMutex.unlock();
+            delete nsr;
         }
     }
 }

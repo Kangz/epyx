@@ -15,7 +15,7 @@ namespace Epyx
     class NetSelect : public Thread
     {
     public:
-        NetSelect(int numworkers, const std::string name);
+        NetSelect(int numworkers, const std::string workerName);
         ~NetSelect();
 
         /**
@@ -25,7 +25,7 @@ namespace Epyx
          * be used by the caller. Moreover, nsr needs to have been created with
          * new (because it is destroyed by delete)
          */
-        void add(NetSelectReader &nsr);
+        void add(NetSelectReader *nsr);
 
          /**
          * @brief gets the number of workers
@@ -57,10 +57,11 @@ namespace Epyx
         class Workers : public WorkerPool<NetSelectReader>
         {
         public:
-            void treat(NetSelectReader& nsr);
+            inline Workers() : WorkerPool(false) {}
+            void treat(NetSelectReader *nsr);
         } workers;
 
-        friend void Workers::treat(NetSelectReader& nsr);
+        friend void Workers::treat(NetSelectReader *nsr);
 
         bool running;
     };

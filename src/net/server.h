@@ -14,19 +14,24 @@ namespace Epyx
         Server(unsigned short port);
         ~Server();
 
-        inline void setPort(unsigned short port_)
-        {
-            this->port = port_;
-        }
+        void setPort(unsigned short port_);
         const Address& getAddress();
 
         /**
-         * Start the server (socket + bind + listen)
+         * @brief Start the server (socket + bind + listen)
          */
         virtual bool bind() = 0;
 
         /**
-         * Stop the server (shutdown + close)
+         * @brief Tell wether server is binded or not
+         */
+        inline bool isBinded()
+        {
+            return (sockfd >= 0);
+        }
+
+        /**
+         * @brief Stop the server (shutdown + close)
          */
         void close();
 
@@ -51,7 +56,12 @@ namespace Epyx
          * @return true on success
          */
         bool _internal_bind(int socktype);
-    };
+
+    private:
+         // Disable copy
+        Server(const Server&);
+        const Server& operator=(const Server&);
+   };
 
 }
 #endif // EPYX_SERVER_H

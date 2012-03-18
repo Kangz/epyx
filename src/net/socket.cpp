@@ -82,7 +82,7 @@ namespace Epyx
         return sock;
     }
 
-    void Socket::setAddress(Address& addr)
+    void Socket::setAddress(const Address& addr)
     {
         address = addr;
     }
@@ -90,6 +90,16 @@ namespace Epyx
     Address Socket::getAddress()
     {
         return address;
+    }
+
+    void Socket::setLocalAddress(const Address& addr)
+    {
+        localAddress = addr;
+    }
+
+    Address Socket::getLocalAddress()
+    {
+        return localAddress;
     }
 
     bool Socket::connect()

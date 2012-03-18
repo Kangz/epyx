@@ -42,9 +42,8 @@ namespace Epyx
         Socket *sock;
     };
 
-    TCPServerThread::TCPServerThread(unsigned short port, unsigned int nbConn,
-                                     std::string name, int id)
-    :TCPServer(port, nbConn), Thread(name, id)
+    TCPServerThread::TCPServerThread(unsigned short port, unsigned int nbConn)
+    :TCPServer(port, nbConn)
     {
     }
 
@@ -99,7 +98,7 @@ namespace Epyx
                 if (newSock != NULL) {
                     try {
                         sthread = new _TCPSocketThread(this, newSock,
-                            "client", spawnId++);
+                            this->getThisName(), spawnId++);
                         sthread->start();
                     } catch (Exception e) {
                         log::error << e << log::endl;

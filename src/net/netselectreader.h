@@ -14,6 +14,7 @@ namespace Epyx
     {
     public:
         NetSelectReader();
+        virtual ~NetSelectReader();
 
         /**
          * @brief Get the file descriptor of the socket which is select()'ed
@@ -37,6 +38,8 @@ namespace Epyx
          */
         void setOwner(NetSelect*);
     private:
+        NetSelectReader(const NetSelectReader&);
+        const NetSelectReader& operator=(const NetSelectReader&);
         NetSelect *owner;
     };
 }
