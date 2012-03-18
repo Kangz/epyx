@@ -1,5 +1,5 @@
 /**
- * @file tread.h
+ * @file thread.h
  * @brief Thread management astraction layer
  */
 #ifndef EPYX_THREAD_H
@@ -55,6 +55,12 @@ namespace Epyx {
          * @brief Terminate a thread
          */
         void term();
+
+        /**
+         * @brief Get the name of this thread
+         * @return this->name
+         */
+        const std::string& getThisName();
 
         /**
          * @brief Get the name of the running thread

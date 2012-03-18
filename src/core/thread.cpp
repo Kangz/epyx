@@ -34,6 +34,12 @@ namespace Epyx
         }
     }
 
+    const std::string& Thread::getThisName()
+    {
+        EPYX_ASSERT(info != NULL);
+        return info->name;
+    }
+
     bool Thread::start()
     {
         EPYX_ASSERT(info != NULL);
@@ -62,7 +68,6 @@ namespace Epyx
     {
         return detail::thread_infos->get()->name;
     }
-
 
     void Thread::init(std::string name, int id)
     {

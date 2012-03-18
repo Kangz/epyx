@@ -183,11 +183,12 @@ void stress_test_logger(){
 
 class WaitingWorkerPool: public WorkerPool<int> {
 public:
-    //WaitingWorkerPool():WorkerPool<int>(6, "WaitingWorker"){}
+    WaitingWorkerPool():WorkerPool<int>(true){}
 
-    virtual void treat(int& t){
-        sleep(t);
+    virtual void treat(int *t){
+        sleep(*t);
         log::info << "Worker finished" << log::endl;
+        // t is deleted by the caller
     }
 };
 
@@ -198,32 +199,28 @@ void test_worker_pool(){
     log::info << "First wave of sleeps: 6 posts for 6 workers" << log::endl;
     p.setNumWorkers(6);
     for(int i=0; i<6; i++){
-        int* one = new int(1);
-        p.post(*one);
+        p.post(new int(1));
     }
     sleep(2);
 
     log::info << "Second wave of sleeps: 6 sleeps and ask the pool have only 3 workers" << log::endl;
     p.setNumWorkers(3);
     for(int i=0; i<6; i++){
-        int* one = new int(1);
-        p.post(*one);
+        p.post(new int(1));
     }
     sleep(3);
 
     log::info << "Second wave of sleeps (continued) : 6 sleeps notice how the workers";
     log::info <<" are destroyed only after they received a message" << log::endl;
     for(int i=0; i<6; i++){
-        int* one = new int(1);
-        p.post(*one);
+        p.post(new int(1));
     }
     sleep(3);
 
     log::info << "Third wave of sleeps : 6 posts after asking the pool to have 6 workers" << log::endl;
     p.setNumWorkers(6);
     for(int i=0; i<6; i++){
-        int* one = new int(1);
-        p.post(*one);
+        p.post(new int(1));
     }
     sleep(2);
 }

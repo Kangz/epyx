@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
         //blih
     }
 
-    if ((toto == 2) || //Operateur booleen � la fin de la ligne.
+    if ((toto == 2) || //Operateur booleen à la fin de la ligne.
         (toto == 3))   //On reprend dessous, une case après la premiere parenthese
 
     switch (bar) {

@@ -9,15 +9,19 @@
 
 namespace Epyx {
 
-    template<typename T> WorkerPool<T>::WorkerPool(int num_workers, std::string name)
-        :name(name), worker_name_counter(0), worker_count(0){
+    template<typename T> WorkerPool<T>::WorkerPool(int num_workers, bool deleteMessages, std::string name)
+        :deleteMessages(deleteMessages), name(name),
+        worker_name_counter(0), worker_count(0)
+    {
         for(int i=0; i<num_workers; i++){
             this->addWorker();
         }
     }
 
-    template<typename T> WorkerPool<T>::WorkerPool()
-        :name(""), worker_name_counter(0), worker_count(0){
+    template<typename T> WorkerPool<T>::WorkerPool(bool deleteMessages)
+        :deleteMessages(deleteMessages), name(""),
+        worker_name_counter(0), worker_count(0)
+    {
     }
 
     template<typename T> WorkerPool<T>::~WorkerPool(){
@@ -42,9 +46,10 @@ namespace Epyx {
         }
     }
 
-    template<typename T> void WorkerPool<T>::post(T& message){
+    template<typename T> void WorkerPool<T>::post(T *message){
+        EPYX_ASSERT(message != NULL);
         this->bookKeep();
-        this->messages.push(&message);
+        this->messages.push(message);
     }
 
     template<typename T> void  WorkerPool<T>::setName(const std::string name){
@@ -121,8 +126,9 @@ namespace Epyx {
             T* msg = this->pool->messages.pop();
 
             if(msg != NULL){
-                this->pool->treat(*msg);
-                delete msg;
+                this->pool->treat(msg);
+                if (this->pool->deleteMessages)
+                    delete msg;
             }
 
             this->running_mutex.lock();

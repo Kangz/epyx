@@ -32,8 +32,8 @@ namespace Epyx {
          * @param num_workers the initial number of worker threads
          * @param name the prefix of the name of the worker threads in the logs
          */
-        WorkerPool(int num_workers, const std::string name);
-        WorkerPool();
+        WorkerPool(int num_workers, bool deleteMessages, const std::string name);
+        WorkerPool(bool deleteMessages);
 
         /**
          * @brief The WorkerPool destructor
@@ -51,7 +51,7 @@ namespace Epyx {
          * @brief Adds a message to be processed
          * @param message the message
          */
-        void post(T& message);
+        void post(T *message);
 
         /**
          * @brief set the name of the workers
@@ -75,22 +75,18 @@ namespace Epyx {
          * @brief this is the method to override
          * @param message the message to be processed
          */
-        virtual void treat(T& message) = 0;
+        virtual void treat(T *message) = 0;
 
     private:
         WorkerPool(const WorkerPool&);
         const WorkerPool& operator=(const WorkerPool&);
 
-        //Everything related to names
-        std::string name;
-        int worker_name_counter;
-
-        void internalPost(T& message);
         void addWorker();
         void removeWorker();
         void bookKeep();
 
         BlockingQueue<T> messages;
+        bool deleteMessages;
 
         //The Workers threads
         class Worker: public Thread{
@@ -104,6 +100,11 @@ namespace Epyx {
             Mutex running_mutex;
             bool running;
         };
+
+        //Everything related to names
+        std::string name;
+        int worker_name_counter;
+
         int worker_count;
         Mutex workers_mutex;
         std::list<Worker*> workers;
