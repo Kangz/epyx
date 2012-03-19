@@ -44,22 +44,22 @@ namespace Epyx
     }
 
     Socket::Socket()
-        :sock(-1), isConnected(false)
+        :sock(-1)
     {
     }
 
     Socket::Socket(const Address &addr)
-        :sock(-1), isConnected(false), address(addr)
+        :sock(-1), address(addr)
     {
     }
 
     Socket::Socket(const char* addr, unsigned short port)
-        :sock(-1), isConnected(false), address(addr, port)
+        :sock(-1), address(addr, port)
     {
     }
 
     Socket::Socket(int sock, const Address &addr)
-        :sock(sock), isConnected(true), address(addr)
+        :sock(sock), address(addr)
     {
         EPYX_ASSERT(sock >= 0);
     }
@@ -107,54 +107,20 @@ namespace Epyx
         return localAddress;
     }
 
-    bool Socket::connect()
-    {
-        EPYX_ASSERT(this->sock >= 0);
-        //TODO : Include Logger functionnality somewhere.
-        sockaddr_storage server;
-        this->address.getSockAddr((struct sockaddr*)&server);
-        int result = ::connect(this->sock, (sockaddr*)&server, sizeof(server));
-        if (result < 0) {
-            //Replace by error log.
-            Epyx::log::error << "Failed connecting to " << this->address << ": "
-                << strerror(errno) << Epyx::log::endl;
-            return false;
-        }
-        this->isConnected = true;
-        return true;
-    }
+   
 
     void Socket::close(){ //TODO Implement the tests.
         //Epyx::log::debug << "Closing Socket ..." << Epyx::log::endl;
         //Is Socket connected? If so,
         if (sock < 0)
             return;
-        if (isConnected)
-            ::shutdown(sock,SHUT_RDWR);
-        isConnected = false;
+        ::shutdown(sock,SHUT_RDWR);
         ::close(sock);
         sock = -1;
         //Epyx::log::debug << "Socket Closed" << Epyx::log::endl;
     }
 
-    /**
-     * Send bytes through the network
-     * return: number of sent bytes
-     */
-    int Socket::send(const void *data, int size)
-    {
-        int bytes;
-        EPYX_ASSERT(data != NULL);
-        EPYX_ASSERT(this->sock >= 0);
-        EPYX_ASSERT(this->isConnected);
-        bytes = ::send(this->sock, data, size, 0);
-        // TODO: Implement status error (ex. Conn closed, ...)
-
-        if (bytes == -1)
-            throw ErrException("Socket", "send");
-        return bytes;
-    }
-
+    
     /**
      * Send all bytes through the network
      * return: number of sent bytes
@@ -182,33 +148,7 @@ namespace Epyx
         this->sendAll(message.c_str(), message.length());
     }
 
-    /**
-     * Receive some bytes from the network in a buffer
-     * @data: buffer pointer
-     * @size: buffer size
-     * return: number of bytes received
-     */
-    int Socket::recv(void *data, int size)
-    {
-        int bytes;
-        EPYX_ASSERT(data != NULL);
-        EPYX_ASSERT(this->sock >= 0);
-        EPYX_ASSERT(this->isConnected);
-        bytes = ::recv(this->sock, data, size, 0);
-        // TODO: Implement status error (eg. Conn closed, ...)
-        if (bytes == -1)
-            throw ErrException("Socket", "recv");
-
-        /**
-         * recv doesn't set the after-the-last byte to zero. We must do it to
-         * avoid some issues.
-         * (writing into a prefilled longer data buffer fucks everything up)
-         */
-        if (bytes < size)
-            ((char*) data)[bytes] = 0;
-        return bytes;
-    }
-
+    
     /**
      * Receive exactly (size) bytes from the network
      * @data: buffer pointer

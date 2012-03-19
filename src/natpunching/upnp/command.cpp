@@ -216,8 +216,6 @@ namespace Epyx{
             std::cout << "Received send Command" << std::endl;
             TCPSocket s(Address(address.c_str(), (unsigned short)port));
             std::cout << "The socket has been initialized with address " << s.getAddress() << std::endl;
-            std::cout << "Connecting ..." << std::endl;
-            s.connect();
             std::cout << "Writing command "<<std::endl<< this->command <<std::endl;
             s.write(this->command);
         }

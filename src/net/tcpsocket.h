@@ -11,8 +11,12 @@ namespace Epyx
         TCPSocket();
         TCPSocket(const Address&);
         TCPSocket(int sock, const Address &addr);
-
-        int getRecvFd();
+        
+        int send(const void *data, int size);
+        int recv(void *data, int size);
+    private:
+        bool connect();
+        bool isConnected;
     };
 
 }

@@ -7,6 +7,7 @@
 #include "../../net/address.h"
 #include "igd.h"
 #include "../../core/exception.h"
+#include "../../core/common.h"
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -21,7 +22,11 @@ int main(int argc, char* argv[]){
     std::string endl ="\r\n";
     std::string address, service, path;
     unsigned short port;
+    Epyx::Thread::init();
+    Epyx::log::init(Epyx::log::CONSOLE, "");
+    Epyx::Socket::init();
 
+    /*
     std::cout << "Enter Address to connect with : " ;
     std::cin >> address;
     std::cout << "Enter Port : ";
@@ -53,7 +58,15 @@ int main(int argc, char* argv[]){
     catch(Epyx::FailException e){
         std::cerr << e << std::endl;
     }
-
+    */
+    try{
+        
+        Epyx::UPNP::Natpunch natpunch ;
+        natpunch.openMapPort(22,1337);
+    }catch(Epyx::FailException e){
+        Epyx::log::fatal << e << Epyx::log::endl;
+    }
+    Epyx::log::flushAndQuit();    
     return 0;
 
 }

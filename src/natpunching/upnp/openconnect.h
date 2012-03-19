@@ -3,6 +3,9 @@
 
 
 #include "../../net/socket.h"
+#include "../../net/netselect.h"
+#include "igd.h"
+#include "../../core/log.h"
 
 //#include <SFML/socket>
 #include <string>
@@ -13,18 +16,19 @@ namespace Epyx {
         class Natpunch {
             public:
                 Natpunch();
+                Address openMapPort(unsigned short localPort, unsigned short remotePort);
                 //Socket OpenConnection(); //Opens a Listening Socket to receive a connection.
             private :
                 void discover();
-                void openMapPort();
+                
                 void testConnection();
-
-
-                std::map<std::string,unsigned short> validIGD;
-                std::string address;
-                unsigned short port;
-                std::string service;
+                void closeMapPort();
+                
+                IGD igd;
+                Address addr;
+                std::string path;
                 std::string endl;
+                bool success;
         };
     }
 }

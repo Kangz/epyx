@@ -78,7 +78,6 @@ namespace Epyx {
                    << "Connection: Close" << endl
                    << "User-Agent: Epyx Natpunching FTW" << endl << endl;
             TCPSocket sock(address);
-            sock.connect();
             sock.write(header.str());
             char data[BIG_SIZE];
             int bytes = sock.recv(data, BIG_SIZE);

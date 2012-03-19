@@ -9,16 +9,15 @@ namespace Epyx {
     class UDPSocket : public Socket
     {
     public:
-        UDPSocket(bool reply = false);
-        void close();
+        UDPSocket(const Address &addr);
+        UDPSocket();
+        UDPSocket(int sockfd, const Address &addr);
         int recv(void*, int);
-        bool connect();
-
-        int getRecvFd();
-
+        int send(const void *data, int size);
+        Address getLastRecvAddr();
+        
     private:
-        // Use an UDP server to get answers, if they are waited
-        UDPServer *answerServ;
+        Address lastRecvAddr;
     };
 
 }

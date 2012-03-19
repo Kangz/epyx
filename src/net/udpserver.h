@@ -10,14 +10,13 @@ namespace Epyx
     {
     public:
         UDPServer(unsigned short port);
-        ~UDPServer();
-
+        //UDPServer(unsigned short port,int sockfd);
+ 
         bool bind();
 
-        inline int recv(void *data, int size)
-        {
-            return sock.recv(data, size);
-        }
+        int recv(void *data, int size);
+        int send(const void *data, int size);
+        
 
     private:
         UDPSocket sock;

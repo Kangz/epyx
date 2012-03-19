@@ -23,12 +23,10 @@ namespace Epyx
         Socket(int sock, const Address &addr);
         ~Socket();
 
-        virtual bool connect();
         void close();
 
         void setFd(int sockfd);
         int getFd();
-        virtual int getRecvFd() = 0;
         bool isOpened();
         void setAddress(const Address& addr);
         Address getAddress();
@@ -36,12 +34,12 @@ namespace Epyx
         Address getLocalAddress();
 
         // Senders
-        int send(const void *data, int size);
+        virtual int send(const void *data, int size) = 0;
         void sendAll(const void *data, int size);
         void write(std::string message);
 
         // Recevers
-        int recv(void *data, int size);
+        virtual int recv(void *data, int size) = 0;
         void recvAll(void *data, int size);
         bool recvLine(std::ostream& out);
         std::string read();
@@ -49,7 +47,7 @@ namespace Epyx
     protected:
         // Socket file descriptor
         int sock;
-        bool isConnected;
+        
 
         // IP + port associated with the socket
         Address address;
@@ -68,9 +66,6 @@ namespace Epyx
 
         // Last end-of-line caracter (\r or \n)
         char last_eol;
-
-    //    std::string outBuffer;
-    //    std::string inBuffer;
     };
 }
 #endif // EPYX_SOCKET_H_
