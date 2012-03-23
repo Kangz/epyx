@@ -26,7 +26,7 @@ namespace DHT
     std::ostream& operator<<(std::ostream& os, const Id& id);
 
     //A distance is just an Id but we want different types to add methods
-    class Distance:Id
+    class Distance: public Id
     {
         public:
             Distance(Id* const a, Id* const b);
