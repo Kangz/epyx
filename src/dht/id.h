@@ -4,22 +4,38 @@
 #ifndef EPYX_DHT_ID_H
 #define EPYX_DHT_ID_H
 
-#define ID_LENGTH 160
+#include <iostream>
 
-namespace Epyx{
-namespace DHT {
+#define ID_LENGTH 160
+#define ID_STORAGE_SIZE (ID_LENGTH/8)
+
+namespace Epyx
+{
+namespace DHT
+{
 
     class Distance;
 
     //Represents a DHT Id
-    class Id{
+    class Id
+    {
         public:
-            unsigned char data[ID_LENGTH/8];
-            distanceTo(Id* const a, Id* const b, Distance *d)
-    }; //TODO uint32_t ?
+            unsigned char data[ID_STORAGE_SIZE];
 
-    //A distance is just an Id but we want different types for readability
-    class Distance:Id{};
+    }; //TODO uint32_t ?
+    std::ostream& operator<<(std::ostream& os, const Id& id);
+
+    //A distance is just an Id but we want different types to add methods
+    class Distance:Id
+    {
+        public:
+            Distance(Id* const a, Id* const b);
+            int firstActiveBit() const;
+
+        private:
+            int firstActive;
+    };
+    std::ostream& operator<<(std::ostream& os, const Distance& d);
 
 
     //Some operators to work on Id as big numbers

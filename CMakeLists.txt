@@ -48,6 +48,12 @@ file(
     src/parser/*
 )
 
+file(
+    GLOB_RECURSE
+    dht_sources
+    src/dht/*
+)
+
 # Test executables
 add_executable(
     test-thread
@@ -103,5 +109,18 @@ add_executable(
 )
 target_link_libraries(
     test-n2np
+    pthread
+)
+
+add_executable(
+    test-dht
+    ${core_sources}
+    ${dht_sources}
+    ${net_sources}
+    ${localn2np_sources}
+    src/test-dht.cpp
+)
+target_link_libraries(
+    test-dht
     pthread
 )
