@@ -1,3 +1,36 @@
+/**
+ * @file convention.txt
+ * @brief convention de nommage
+ *
+ * Use Doxygen comments
+ */
+namespace Epyx
+{
+    /**
+     * @class MyBeautifulClass
+     * @brief A really beautiful description
+     */
+    class MyBeautifulClass : public BlahChombier
+    {
+    public:
+        /**
+         * @brief Really nice function
+         *
+         * Description blah blah blah
+         * continuation of the long long description
+         * ... which is VERY useful !
+         *
+         * @param foo Foo
+         * @return bar
+         */
+        std::string bar(int foo) {
+            return "bar";
+        }
+    private:
+        Mutex mutex;
+    }
+}
+
 int main(int argc, char** argv) {
     //4 espaces pour indentation
     if (foo == 1) {
