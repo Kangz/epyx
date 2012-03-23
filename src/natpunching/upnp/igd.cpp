@@ -96,7 +96,7 @@ namespace Epyx {
         }
 
         std::string IGD::getExtIPAdress(){
-            Command order (address.ip(), address.getPort());
+            Command order (address.getIp(), address.getPort());
             order.setOption(Epyx::UPNP::UPNP_ACTION_GET_EXT_IP);
             std::string WanIPConnService, WanIPConnCtl;
             for(std::map<std::string,std::string>::iterator it = services.begin(); it != services.end(); ++it ){
@@ -119,7 +119,7 @@ namespace Epyx {
             std::string returnedHeader ="";
             int i =0;
             do{
-                Command order (address.ip(), address.getPort());
+                Command order (address.getIp(), address.getPort());
                 order.setOption(Epyx::UPNP::UPNP_ACTION_GET_EXT_IP);
                 std::string WanIPConnService, WanIPConnCtl;
                 for(std::map<std::string,std::string>::iterator it = services.begin(); it != services.end(); ++it ){
@@ -164,7 +164,7 @@ namespace Epyx {
                     tmpAddrPtr=&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
                     char addressBuffer[INET_ADDRSTRLEN];
                     inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-                    if (memcmp(addressBuffer, this->address.ip(), 3) == 0) { // the condition is true is the first 3 bytes of addressBuffer are equal to the first 3 bytes of the ip address.
+                    if (memcmp(addressBuffer, this->address.getIp().c_str(), 3) == 0) { // the condition is true is the first 3 bytes of addressBuffer are equal to the first 3 bytes of the ip address.
                         //This is needed to change by comparing the address with netmasks. For example, first comparing the addresses with applied netmask, then, if ok, turn into string with the inet_top method.
                         IPAddress = addressBuffer;
                         break;
@@ -182,7 +182,7 @@ namespace Epyx {
             std::cout<< "Entering addPortMap("<<loc_port<<","<<prot<<","<<ext_port<<")"<<std::endl;
             std::string localIP = this->getLocalAdress();
             std::cout << "Local IP Address is " << localIP << std::endl;
-            Epyx::UPNP::Command order (this->address.ip(),this->address.getPort());
+            Epyx::UPNP::Command order (this->address.getIp(),this->address.getPort());
             order.setOption(Epyx::UPNP::UPNP_ACTION_ADDPORTMAP);
 
             char loc_portChar[10],ext_portChar[10];
@@ -224,7 +224,7 @@ namespace Epyx {
         }
         void IGD::delPortMap(Address addr, protocol proto){
             std::string prot = (proto == Epyx::UPNP::TCP)? "TCP" : "UDP";
-            Epyx::UPNP::Command order (this->address.ip(),this->address.getPort());
+            Epyx::UPNP::Command order (this->address.getIp(),this->address.getPort());
             order.setOption(Epyx::UPNP::UPNP_ACTION_DELPORTMAP);
 
             char portChar[10];

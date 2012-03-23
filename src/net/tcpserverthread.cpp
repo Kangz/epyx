@@ -5,7 +5,7 @@
 namespace Epyx
 {
     /**
-     * @class Internal thread class to spawn a new thread for each accepted connection
+     * Internal thread class to spawn a new thread for each accepted connection
      */
     class _TCPSocketThread : public Thread
     {

@@ -8,7 +8,7 @@
 namespace Epyx
 {
     Server::Server(unsigned short port)
-        :address(NULL, port), port(port), sockfd(-1)
+        :address("*", port), port(port), sockfd(-1)
     {
     }
 
@@ -21,7 +21,7 @@ namespace Epyx
     void Server::setPort(unsigned short port_)
     {
         port = port_;
-        address = Address(NULL, port_);
+        address = Address("*", port_);
     }
 
     const Address& Server::getAddress()

@@ -5,45 +5,32 @@
 
 namespace Epyx
 {
+
     Address::Address()
-        :port(0), ipVersion(0)
-    {
-        strcpy(this->ipStr, "*");
+    :ip("*"), port(0), ipVersion(0) {
     }
 
-    Address::Address(const char *ip, unsigned short port_, int ipVersion_)
-        :port(port_), ipVersion(ipVersion_)
-    {
-        if (ip == NULL)
-            ip = "*";
-        strncpy(this->ipStr, ip, INET6_ADDRSTRLEN);
-        this->ipStr[INET6_ADDRSTRLEN] = 0;
+    Address::Address(const std::string& ip, unsigned short port, int ipVersion)
+    :ip(ip), port(port), ipVersion(ipVersion) {
     }
 
-    Address::Address(const Address& addr)
-        :port(addr.port), ipVersion(addr.ipVersion)
-    {
-        strncpy(this->ipStr, addr.ipStr, INET6_ADDRSTRLEN);
-        this->ipStr[INET6_ADDRSTRLEN] = 0;
-    }
-
-    Address::Address(const struct sockaddr *saddr)
-    {
+    Address::Address(const struct sockaddr *saddr) {
         EPYX_ASSERT(saddr != NULL);
+        char ipBuffer[INET6_ADDRSTRLEN + 1];
 
         if (saddr->sa_family == AF_INET) {
             // IPv4
-            struct sockaddr_in *ipv4 = (struct sockaddr_in *)saddr;
+            struct sockaddr_in *ipv4 = (struct sockaddr_in *) saddr;
+            inet_ntop(AF_INET, &(ipv4->sin_addr), ipBuffer, sizeof (ipBuffer));
+            this->ip.assign(ipBuffer);
             this->port = ntohs(ipv4->sin_port);
-            inet_ntop(AF_INET, &(ipv4->sin_addr), this->ipStr,
-                      sizeof(this->ipStr));
             this->ipVersion = 4;
         } else if (saddr->sa_family == AF_INET6) {
             // IPv6
-            struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)saddr;
+            struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *) saddr;
+            inet_ntop(AF_INET6, &(ipv6->sin6_addr), ipBuffer, sizeof (ipBuffer));
+            this->ip.assign(ipBuffer);
             this->port = ntohs(ipv6->sin6_port);
-            inet_ntop(AF_INET6, &(ipv6->sin6_addr), this->ipStr,
-                      sizeof(this->ipStr));
             this->ipVersion = 6;
         } else {
             Epyx::log::fatal << "You have just invented a new IP version" \
@@ -56,70 +43,74 @@ namespace Epyx
         }
     }
 
-    const char* Address::ip(){
-        return this->ipStr;
+        Address::Address(const Address& addr)
+    :ip(addr.ip), port(addr.port), ipVersion(addr.ipVersion) {
     }
 
-    unsigned short Address::getPort(){
+    Address& Address::operator=(const Address& addr) {
+        if (this != &addr) {
+            this->ip = addr.ip;
+            this->port = addr.port;
+            this->ipVersion = addr.ipVersion;
+        }
+        return *this;
+    }
+
+    const std::string& Address::getIp() {
+        return ip;
+    }
+
+    unsigned short Address::getPort() {
         return this->port;
     }
 
-    void Address::getSockAddr(struct sockaddr *saddr)
-    {
+    void Address::getSockAddr(struct sockaddr *saddr) {
         EPYX_ASSERT(saddr != NULL);
         EPYX_ASSERT(this->ipVersion > 0);
         if (this->ipVersion == 4) {
             // IPv4
-            struct sockaddr_in *ipv4 = (struct sockaddr_in *)saddr;
+            struct sockaddr_in *ipv4 = (struct sockaddr_in *) saddr;
+            memset(&(ipv4->sin_zero), 0, sizeof (ipv4->sin_zero));
             ipv4->sin_family = AF_INET;
-            inet_pton(AF_INET, this->ipStr, &(ipv4->sin_addr));
+            inet_pton(AF_INET, ip.c_str(), &(ipv4->sin_addr));
             ipv4->sin_port = htons(this->port);
-            memset(&(ipv4->sin_zero), 0, sizeof(ipv4->sin_zero));
         } else if (this->ipVersion == 6) {
             // IPv6
-            struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)saddr;
+            struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *) saddr;
             ipv6->sin6_family = AF_INET6;
             ipv6->sin6_flowinfo = 0;
             ipv6->sin6_scope_id = 0;
-            inet_pton(AF_INET6, this->ipStr, &(ipv6->sin6_addr));
+            inet_pton(AF_INET6, ip.c_str(), &(ipv6->sin6_addr));
             ipv6->sin6_port = htons(this->port);
         } else {
             throw FailException("Address", "Bad IP Version");
         }
     }
 
-    std::ostream& operator<<(std::ostream& os, const Address& addr)
-    {
+    std::ostream& operator<<(std::ostream& os, const Address& addr) {
         if (addr.ipVersion == 6)
-            os << '[' << addr.ipStr << ']';
+            os << '[' << addr.ip << ']';
         else
-            os << addr.ipStr;
+            os << addr.ip;
 
         if (addr.port)
             os << ':' << addr.port;
         return os;
     }
 
-    std::ostream& operator<<(std::ostream& os, const Address *addr)
-    {
-        if (!addr)
-            return os << "(null)";
-        else
-            return os << (*addr);
-    }
-
-    std::string Address::toString()
-    {
+    std::string Address::toString() {
         std::ostringstream stream;
         stream << *this;
         return stream.str();
     }
 
-
-    bool operator==(const Address& addr1, const Address& addr2)
-    {
+    bool operator==(const Address& addr1, const Address& addr2) {
         return (addr1.port == addr2.port)
             && (addr1.ipVersion == addr2.ipVersion)
-            && !strncmp(addr1.ipStr, addr2.ipStr, INET6_ADDRSTRLEN);
+            && !addr1.ip.compare(addr2.ip);
+    }
+
+    bool operator!=(const Address& addr1, const Address& addr2) {
+        return !(addr1 == addr2);
     }
 }
