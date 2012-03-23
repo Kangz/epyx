@@ -7,6 +7,7 @@
 #define EPYX_GTTPARSER_H
 
 #include "gttpacket.h"
+#include "lineparser.h"
 #include <ctype.h>
 #include <string>
 
@@ -19,29 +20,13 @@ namespace Epyx
      */
     class GTTParser {
     public:
-        enum TokenType {
-            start,
-            protocol_name,
-            method,
-            method_line,
-            flag_name,
-            flag_indicator,
-            flag_value,
-            flag_line,
-            newline,
-            body,
-            other
-        };
         /**
-         * @brief a Token is a string with a specfic type
+         * @brief Constructor
          */
-        struct Token
-        {
-            TokenType type;
-            std::string str;
-        };
-
         GTTParser();
+        /**
+         * @brief Destructor
+         */
         ~GTTParser();
 
         /**
@@ -78,15 +63,21 @@ namespace Epyx
             const char *message;
         };
         GTTPacket *currentPkt;
-        char *reminded;
-        long remindedSize;
         std::string errorMessage;
         bool hasError;
-        TokenType currentType;
-        std::string currentString;
-        TokenType flagType;
-        std::string currentFlagName;
-        long bodyCounter; // Internal counter
+
+        // Use LineParser to parse lines
+        LineParser lineParser;
+
+        // Position in data
+        enum DataPosition {
+            dataposFirstLine,
+            dataposHeaders,
+            dataposContent
+        } datapos;
+
+        // First line
+        std::string firstline;
 
         /**
          * @brief start a new packet, without cleaning read data
@@ -95,7 +86,19 @@ namespace Epyx
 
         void setError(const char *msg);
 
-        bool processChar(char c);
+        /**
+         * @brief Parse the first line of GTT
+         * @param line first line
+         * @throw ParserException on errors
+         */
+        void parseFirstLine(const std::string& line);
+
+        /**
+         * @brief Parse a header line of GTT
+         * @param line header line
+         * @throw ParserException on errors
+         */
+        void parseHeaderLine(const std::string& line);
 
     };
 }

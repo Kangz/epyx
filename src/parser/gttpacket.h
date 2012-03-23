@@ -12,6 +12,11 @@
 
 namespace Epyx
 {
+    /**
+     * @class GTTPacket
+     *
+     * @brief Packet for Generic Text Template
+     */
     class GTTPacket
     {
     public:

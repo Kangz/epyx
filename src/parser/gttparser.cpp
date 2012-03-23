@@ -4,43 +4,35 @@
 
 namespace Epyx
 {
+
     GTTParser::GTTParser()
-    :currentPkt(NULL), reminded(NULL), remindedSize(0), hasError(false)
-    {
+    :currentPkt(NULL), hasError(false) {
         this->reset();
     }
 
-    GTTParser::~GTTParser()
-    {
+    GTTParser::~GTTParser() {
         this->reset();
     }
 
-    void GTTParser::reset()
-    {
+    void GTTParser::reset() {
         // Discard previous data
-        if (reminded != NULL) {
-            delete[] reminded;
-            reminded = NULL;
-        }
-        remindedSize = 0;
+        lineParser.reset();
         this->startPacket();
     }
 
-    void GTTParser::startPacket()
-    {
+    void GTTParser::startPacket() {
         // Set up inernal state
         if (currentPkt != NULL) {
             delete currentPkt;
             currentPkt = NULL;
         }
-        currentType = start;
-        currentString = "";
+        datapos = dataposFirstLine;
+        firstline = "";
         hasError = false;
         errorMessage = "";
     }
 
-    bool GTTParser::getError(std::string& userErr)
-    {
+    bool GTTParser::getError(std::string& userErr) {
         if (!hasError) {
             userErr.assign("");
             return false;
@@ -50,203 +42,133 @@ namespace Epyx
         }
     }
 
-    void GTTParser::eat(const char *data, long size)
-    {
+    void GTTParser::eat(const char *data, long size) {
         EPYX_ASSERT(data != NULL && size > 0);
-
-        // Append data to reminded
-        if (reminded != NULL) {
-            char *tmp = new char[remindedSize + size + 1];
-            memcpy(tmp, reminded, remindedSize);
-            memcpy(tmp + remindedSize, data, size);
-            delete[] reminded;
-            reminded = tmp;
-            remindedSize += size;
-        } else {
-            reminded = new char[size + 1];
-            remindedSize = size;
-            memcpy(reminded, data, size);
-        }
-        // Add a zero at the end to be sure string terminates
-        reminded[remindedSize] = 0;
+        lineParser.push(data, size);
     }
 
-    GTTPacket* GTTParser::getPacket()
-    {
-        bool endedPacket;
-        char *peek = reminded;
-        while (remindedSize > 0) {
-            try {
-                endedPacket = this->processChar(*peek);
-            } catch (ParserException e) {
-                log::error << "An error occured in GTTParser while processing '" << *peek << "':\n"
-                        << e.message;
-                errorMessage = e.message;
-                hasError = true;
-                return NULL;
-            }
-            remindedSize--;
-            peek++;
-            if (endedPacket) {
-                // Remember the remainder
-                if (reminded != NULL) {
-                    char *tmp = new char[remindedSize + 1];
-                    memcpy(tmp, peek, remindedSize);
-                    delete[] reminded;
-                    reminded = tmp;
-                } else {
-                    delete[] reminded;
-                    reminded = NULL;
-                }
-                GTTPacket* pkt = currentPkt;
-                currentPkt = NULL;
-                this->startPacket();
-                return pkt;
-            }
-        }
+    GTTPacket* GTTParser::getPacket() {
+        std::string line;
+        try {
+            while (true) {
+                switch (datapos) {
+                    case dataposFirstLine:
+                        // Allocate a new packet
+                        if (currentPkt == NULL)
+                            currentPkt = new GTTPacket();
 
-        // We have eaten everything we have
-        if (reminded != NULL) {
-            delete[] reminded;
-            reminded = NULL;
+                        // Read first line
+                        if (!lineParser.popLine(line))
+                            return NULL;
+
+                        this->parseFirstLine(line);
+
+                        datapos = dataposHeaders;
+                        /* Go through */
+                    case dataposHeaders:
+                        // Return lines
+                        if (!lineParser.popLine(line))
+                            return NULL;
+                        if (line.length() != 0) {
+                            this->parseHeaderLine(line);
+                            break;
+                        }
+                        // Empty line
+                        datapos = dataposContent;
+                        /* Go through */
+                    case dataposContent:
+                        if (currentPkt->size > 0 &&
+                            !lineParser.popData(currentPkt->body, currentPkt->size)) {
+                            return NULL;
+                        }
+                        GTTPacket* pkt = currentPkt;
+                        currentPkt = NULL;
+                        this->startPacket();
+                        return pkt;
+                }
+            }
+        } catch (ParserException e) {
+            log::error << "An error occured in GTTParser while processing a packet:\n" <<
+                e.message << log::endl;
+            errorMessage = e.message;
+            hasError = true;
+            return NULL;
         }
         return NULL;
     }
 
-    /**
-     * @brief sInternal function, only called by GTTParser::getPacket
-     *
-     * @throw ParserException on errors
-     */
-    bool GTTParser::processChar(char c)
-    {
-        // Create a nw packet if we does not have anyone yet
-        if (currentPkt == NULL)
-            currentPkt = new GTTPacket();
+    void GTTParser::parseFirstLine(const std::string& line) {
+        const char *l = line.c_str();
+        int i = 0, iMethod = 0;
+        EPYX_ASSERT(line.length() != 0);
 
-        switch(currentType) {
-            case start:
-                // Start a new packet
-                if (!isupper(c))
-                    throw ParserException("protocol name should begin with capital letters");
-                currentString = c;
-                currentType = protocol_name;
-                flagType = other;
-                break;
-            case protocol_name:
-                if(isupper(c) || isdigit(c) || (c == '_')) {
-                    currentString += c;
-                } else if(c == ' ') {
-                    currentPkt->protocol = currentString;
-                    currentString = "";
-                    currentType = method;
-                    flagType = start;
-                }
-                else
-                    throw ParserException("protocol name should continue with [A-Z0-9]* or end with a space");
-                break;
-            case method:
-                if (flagType == start){
-                    if (!isupper(c))
-                        throw ParserException("method should begin with capital letters");
-                    currentString = c;
-                    flagType = other;
-                }
-                else if (isupper(c) || isdigit(c) || (c == '_'))
-                    currentString += c;
-                else if (c == '\r') {
-                    currentPkt->method = currentString;
-                    currentString = "";
-                    currentType = method_line;
-                } else
-                    throw ParserException("method should continue with [A-Z0-9_] or end with CRLF");
-                break;
-            case method_line:
-                if (c != '\n')
-                    throw ParserException("newline should be CRLF");
-                currentType = flag_name;
-                flagType = start;
-                break;
-            case flag_name:
-                if(flagType == start){
-                    if (isalpha(c))
-                        currentString = c;
-                    else if (c == '\r') {
-                        // New line at the end of the headers
-                        currentType = newline;
-                    } else
-                        throw ParserException("flag_name should begin with [a-zA-Z] or we should add newline to end the header");
-                    flagType = other;
-                } else if(isalnum(c) || (c == '_') || (c == '-')) {
-                    currentString += c;
-                } else if(c == ':') {
-                    currentFlagName = currentString;
-                    currentString = "";
-                    currentType = flag_indicator;
-                    /*
-                    if(!strcasecmp(currentString.c_str(), "content-length")) {
-                        if(currentPkt->size > 0)
-                            throw FailException("Parser", "content-length flag has already appeared");
-                        else
-                            hasBody=true;
-
-                    }*/
-                } else
-                    throw ParserException("flag_name should continue with [a-zA-Z0-9_-] or end with :");
-                break;
-            case flag_indicator:
-                // Skip spaces
-                if(c == ' ')
-                    break;
-                /* Walk through */
-            case flag_value:
-                if (32 <= c && c < 126) {
-                    // Printable ASCII characters
-                    currentString += c;
-                } else if(c == '\r') {
-                    if(!strcasecmp(currentFlagName.c_str(), "content-length")) {
-                        if(currentPkt->size > 0)
-                            throw FailException("Parser", "content-length flag has already appeared");
-                        currentPkt->size = String::toInt(currentString.c_str());
-                        if (currentPkt->size <= 0)
-                            throw FailException("Parser", "not valid body size, body size should be a positive integer");
-                        currentPkt->body = new char[currentPkt->size];
-                    } else
-                        currentPkt->headers[currentFlagName] = currentString;
-                    currentString = "";
-                    currentFlagName = "";
-                    currentType = flag_line;
-                } else
-                    throw ParserException("flag_value should consist of printable characters or just end with CRLF");
-                break;
-            case flag_line:
-                if (c != '\n')
-                    throw ParserException("newline should be CRLF");
-                currentType = flag_name;
-                flagType = start;
-                break;
-            case newline:
-                if (c != '\n')
-                    throw ParserException("newline should be CRLF");
-                if (currentPkt->size == 0) {
-                    // No body
-                    return true;
-                }
-                bodyCounter = 0;
-                currentType = body;
-                break;
-            case body:
-                EPYX_ASSERT(bodyCounter < currentPkt->size);
-                currentPkt->body[bodyCounter] = c;
-                bodyCounter ++;
-                if (bodyCounter == currentPkt->size) {
-                    // Return there is a new packet
-                    return true;
-                }
-                break;
-            case other:
-                throw ParserException("Unreachable state");
+        // Read protocol name
+        if (!isupper(l[i]))
+            throw ParserException("protocol name should begin with capital letters");
+        i++;
+        while (l[i] != ' ') {
+            if (!(isupper(l[i]) || isdigit(l[i]) || (l[i] == '_')))
+                throw ParserException("protocol name should continue with [A-Z0-9]* or end with a space");
+            i++;
         }
-        return false;
+        currentPkt->protocol = std::string(l, i);
+        i++;
+
+        // Read method name
+        iMethod = i;
+        if (!isupper(l[i]))
+            throw ParserException("protocol name should begin with capital letters");
+        i++;
+        while (l[i] != 0) {
+            if (!(isupper(l[i]) || isdigit(l[i]) || (l[i] == '_')))
+                throw ParserException("protocol name should continue with [A-Z0-9]* or end with a space");
+            i++;
+        }
+        currentPkt->method = std::string(l + iMethod, i - iMethod);
+    }
+
+    void GTTParser::parseHeaderLine(const std::string& line) {
+        const char *l = line.c_str();
+        int i = 0, iValue = 0;
+        EPYX_ASSERT(line.length() != 0);
+
+        // Read flag name
+        if (!isalpha(l[i]))
+            throw ParserException("flag_name should begin with [a-zA-Z] or we should add newline to end the header");
+        i++;
+        while (l[i] != ':') {
+            if (!(isalnum(l[i]) || (l[i] == '_') || (l[i] == '-')))
+                throw ParserException("flag name should continue with [A-Za-z0-9-_]* or end with a space");
+            i++;
+        }
+        std::string flagName(l, i);
+        i++;
+
+        // Skip spaces
+        while (l[i] == ' ')
+            i++;
+        if (l[i] == 0)
+            throw ParserException("flag without value");
+
+        // Read value
+        iValue = i;
+        while (l[i] != 0) {
+            if (!(l[i] >= 32 && l[i] < 126))
+                throw ParserException("flag_value should consist of printable characters or just end with CRLF");
+            i++;
+        }
+        std::string flagValue(l + iValue, i - iValue);
+
+        // Content length
+        if (!strcasecmp(flagName.c_str(), "content-length")) {
+            if (currentPkt->size > 0)
+                throw ParserException("content-length flag has already appeared");
+            currentPkt->size = String::toInt(flagValue.c_str());
+            if (currentPkt->size <= 0)
+                throw ParserException("not valid body size, body size should be a positive integer");
+            currentPkt->body = new char[currentPkt->size];
+        } else {
+            currentPkt->headers[flagName] = flagValue;
+        }
     }
 }
