@@ -53,7 +53,7 @@ namespace Epyx
          */
         GTTPacket* getPacket();
 
-    private:
+    protected:
         class ParserException
         {
         public:
@@ -63,6 +63,22 @@ namespace Epyx
             const char *message;
         };
         GTTPacket *currentPkt;
+
+        /**
+         * @brief Parse the first line of GTT
+         * @param line first line
+         * @throw ParserException on errors
+         */
+        virtual void parseFirstLine(const std::string& line);
+
+        /**
+         * @brief Parse a header line of GTT
+         * @param line header line
+         * @throw ParserException on errors
+         */
+        virtual void parseHeaderLine(const std::string& line);
+
+    private:
         std::string errorMessage;
         bool hasError;
 
@@ -76,30 +92,12 @@ namespace Epyx
             dataposContent
         } datapos;
 
-        // First line
-        std::string firstline;
-
         /**
          * @brief start a new packet, without cleaning read data
          */
         void startPacket();
 
         void setError(const char *msg);
-
-        /**
-         * @brief Parse the first line of GTT
-         * @param line first line
-         * @throw ParserException on errors
-         */
-        void parseFirstLine(const std::string& line);
-
-        /**
-         * @brief Parse a header line of GTT
-         * @param line header line
-         * @throw ParserException on errors
-         */
-        void parseHeaderLine(const std::string& line);
-
     };
 }
 

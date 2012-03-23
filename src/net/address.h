@@ -1,5 +1,6 @@
 /**
- * IP addresses and ports management
+ * @file address.h
+ * @brief IP addresses and ports management
  */
 #ifndef EPYX_ADDRESS_H
 #define EPYX_ADDRESS_H
@@ -42,10 +43,10 @@ namespace Epyx
          */
         Address(const Address& addr);
         /**
-        * @brief Address from ip:port string
-        **/
+         * @brief Address from ip:port string
+         **/
         Address(const std::string& addressFormat);
-          
+
         /**
          * @brief Assignment constructor
          */

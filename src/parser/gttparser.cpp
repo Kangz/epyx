@@ -27,7 +27,6 @@ namespace Epyx
             currentPkt = NULL;
         }
         datapos = dataposFirstLine;
-        firstline = "";
         hasError = false;
         errorMessage = "";
     }

@@ -28,27 +28,32 @@ namespace Epyx
          *
          * @return The input parameter, without spaces on its left
          */
-        static inline std::string& ltrim(std::string& str) {
-            str.erase(0, str.find_first_not_of(spaces));
-            return str;
-        }
+        static std::string& ltrim(std::string& str);
         /**
          * @brief Remove right spaces
          *
          * @return The input parameter, without spaces on its right
          */
-        static inline std::string& rtrim(std::string& str) {
-            str.erase(str.find_last_not_of(spaces) + 1);
-            return str;
-        }
+        static std::string& rtrim(std::string& str);
         /**
          * @brief Remove spaces on both sides of the string
          *
          * @return The input parameter, without spaces on its bounds
          */
-        static inline std::string& trim(std::string& str) {
-            return ltrim(rtrim(str));
-        }
+        static std::string& trim(std::string& str);
+
+        /**
+         * @brief Transform a string to uppercase
+         * @param str reference to a string
+         * @return str
+         */
+        static std::string& toUpper(std::string& str);
+        /**
+         * @brief Transform a string to lowercase
+         * @param str reference to a string
+         * @return str
+         */
+        static std::string& toLower(std::string& str);
 
         /**
          * @brief Convert a string to an integer
