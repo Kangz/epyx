@@ -59,6 +59,11 @@ namespace Epyx
         std::map<NetSelectReader*, bool> readers;
         Mutex readersMutex;
 
+        /**
+         * @class Workers
+         *
+         * @brief Workers for NetSelect
+         */
         class Workers : public WorkerPool<NetSelectReader>
         {
         public:

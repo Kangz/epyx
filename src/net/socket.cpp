@@ -107,105 +107,54 @@ namespace Epyx
         return localAddress;
     }
 
-   
-
-    void Socket::close(){ //TODO Implement the tests.
-        //Epyx::log::debug << "Closing Socket ..." << Epyx::log::endl;
-        //Is Socket connected? If so,
+    void Socket::close(){
+        //TODO Implement sanity checks on returned values of shutdown and close.
+        // Do nothing if the socket is already closed
         if (sock < 0)
             return;
         ::shutdown(sock,SHUT_RDWR);
         ::close(sock);
         sock = -1;
-        //Epyx::log::debug << "Socket Closed" << Epyx::log::endl;
     }
 
-    
-    /**
-     * Send all bytes through the network
-     * return: number of sent bytes
-     */
-    void Socket::sendAll(const void *data, int size)
+    bool Socket::sendAll(const void *data, int size)
     {
         int sentBytes;
         EPYX_ASSERT(data != NULL);
         while (size > 0) {
             sentBytes = this->send(data, size);
-            if (!sentBytes)
-                throw FailException("Socket", "Unable to send data");
+            if (!sentBytes) {
+                log::error << "Socket::sendAll was unable to send " << size <<
+                    " bytes" << log::endl;
+                return false;
+            }
             EPYX_ASSERT(sentBytes <= size);
             size -= sentBytes;
         }
+        return true;
     }
 
-    /**
-     * Send text through the network
-     */
-    void Socket::write(std::string message)
+    bool Socket::write(std::string message)
     {
-        // The c_str contains one more character than the length of the string : \0
-        // but we do not want to send \0 character through the network
-        this->sendAll(message.c_str(), message.length());
+        // Do not send \0 character through the network
+        return this->sendAll(message.c_str(), message.length());
     }
 
-    
-    /**
-     * Receive exactly (size) bytes from the network
-     * @data: buffer pointer
-     * @size: buffer size
-     */
-    void Socket::recvAll(void *data, int size)
+    bool Socket::recvAll(void *data, int size)
     {
         int recvBytes;
         EPYX_ASSERT(data != NULL);
-        // TODO: feof !
+        // TODO: stop on feof !
         while (size > 0) {
             recvBytes = this->recv(data, size);
-            if (!recvBytes)
-                throw FailException("Socket", "Unable to recv data");
+            if (!recvBytes) {
+                log::error << "Socket::recvAll was unable to receive " << size <<
+                    " bytes" << log::endl;
+                return false;
+            }
             EPYX_ASSERT(recvBytes <= size);
             size -= recvBytes;
         }
-    }
-
-    /**
-     * Receive a line from the network
-     * @out: output stream where data are written
-     * return: true if a line was written, false otherwise
-     *
-     * TODO: Use an internal buffer instead of read one character each time
-     */
-    bool Socket::recvLine(std::ostream& out)
-    {
-        char c;
-        while (this->recv(&c, 1)) {
-            // Socket may receive \r\n end-of-line
-            if (this->last_eol == '\r' && c == '\n')
-                continue;
-
-            // Detect line end character
-            if (c == '\n' || c == '\r') {
-                this->last_eol = c;
-                return true;
-            }
-
-            // Reset EOL if a normal character is received
-            if (this->last_eol)
-                this->last_eol = 0;
-
-            out << c;
-        }
-        return false;
-    }
-
-    /**
-     * Read a line into a string
-     */
-    std::string Socket::read()
-    {
-        std::ostringstream out;
-        if (!this->recvLine(out))
-            return "";
-        return out.str();
+        return true;
     }
 }

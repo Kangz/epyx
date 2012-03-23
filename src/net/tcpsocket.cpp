@@ -7,7 +7,7 @@ namespace Epyx{
     {
     }
     TCPSocket::TCPSocket(const Address& addr)
-        :Socket(addr),isConnected(false)
+        :Socket(addr), isConnected(false)
     {
     }
     TCPSocket::TCPSocket(int sock, const Address &addr)
@@ -19,8 +19,8 @@ namespace Epyx{
         if (this->sock == -1){
             this->sock = ::socket(AF_INET, SOCK_STREAM, 0);
             if (this->sock == -1) {
-                log::error << "Failed TCPSocket::socket to " << this->address << ": "
-                    << log::errstd << log::endl;
+                log::error << "Unable to create a new TCPSocket to " <<
+                    this->address << ": " << log::errstd << log::endl;
                 return false;
             }
         }
@@ -36,16 +36,16 @@ namespace Epyx{
         this->isConnected = true;
         return true;
     }
-    /**
-     * Send bytes through the network
-     * return: number of sent bytes
-     */
+
     int TCPSocket::send(const void *data, int size)
     {
         int bytes;
         EPYX_ASSERT(data != NULL);
-        if (!this->isConnected)
-            this->connect();
+        if (!this->isConnected) {
+            if (!this->connect()) {
+                return 0;
+            }
+        }
         EPYX_ASSERT(this->sock >= 0);
         EPYX_ASSERT(this->isConnected);
         bytes = ::send(this->sock, data, size, 0);
@@ -55,12 +55,7 @@ namespace Epyx{
             throw ErrException("Socket", "send");
         return bytes;
     }
-    /**
-     * Receive some bytes from the network in a buffer
-     * @data: buffer pointer
-     * @size: buffer size
-     * return: number of bytes received
-     */
+
     int TCPSocket::recv(void *data, int size)
     {
         int bytes;
@@ -81,6 +76,6 @@ namespace Epyx{
             ((char*) data)[bytes] = 0;
         return bytes;
     }
-    
+
 
 }

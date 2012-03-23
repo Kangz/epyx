@@ -10,6 +10,11 @@ namespace Epyx
 {
     class NetSelect;
 
+    /**
+     * @class NetSelectReader
+     *
+     * @brief Container used by NetSelect to remember watched sockets
+     */
     class NetSelectReader
     {
     public:

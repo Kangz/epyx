@@ -10,7 +10,7 @@ namespace Epyx
     }
 /*    UDPServer::UDPServer(unsigned short port, int sockfd)
         :Server(port), sockfd(sockfd)
-    {        
+    {
     }
 */
 

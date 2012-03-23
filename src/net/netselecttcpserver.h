@@ -24,6 +24,7 @@ namespace Epyx
     {
     public:
         /**
+         * @brief Create a NetSelectTCPServer with a new TCPServer
          * NOTE: TCPServer *srv is DELETED by the desctructor
          */
         NetSelectTCPServer(TCPServer *srv);
@@ -34,6 +35,9 @@ namespace Epyx
         bool read();
 
     protected:
+        /**
+         * @brief Monitored TCPServer
+         */
         TCPServer *srv;
     };
 }
