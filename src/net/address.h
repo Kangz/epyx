@@ -68,6 +68,8 @@ namespace Epyx
 
         /**
          * @brief Print the address in an output stream
+         * @param os output stream
+         * @param addr
          */
         friend std::ostream& operator<<(std::ostream& os, const Address& addr);
 
@@ -78,11 +80,15 @@ namespace Epyx
 
         /**
          * @brief Equality test
+         * @param addr1
+         * @param addr2
          */
         friend bool operator==(const Address& addr1, const Address& addr2);
 
         /**
          * @brief Inequality test
+         * @param addr1
+         * @param addr2
          */
         friend bool operator!=(const Address& addr1, const Address& addr2);
     private:

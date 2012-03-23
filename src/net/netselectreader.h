@@ -34,17 +34,20 @@ namespace Epyx
         virtual bool read() = 0;
 
         /**
-         * @brief Get the NetSelect objects which has this object
+         * @brief Get the NetSelect objects which owns this object
          */
         NetSelect* getOwner();
 
         /**
          * @brief Set owner, only once
          */
-        void setOwner(NetSelect*);
+        void setOwner(NetSelect *ns);
     private:
+        // Disable copy
         NetSelectReader(const NetSelectReader&);
         const NetSelectReader& operator=(const NetSelectReader&);
+
+        // NetSelect which owns this reader
         NetSelect *owner;
     };
 }

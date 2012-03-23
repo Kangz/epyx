@@ -1,9 +1,14 @@
+/**
+ * @file udpsocket.h
+ * @brief UDP socket abstraction layer
+ */
 #ifndef EPYX_UDPSOCKET_H
 #define EPYX_UDPSOCKET_H
 
 #include "socket.h"
 
-namespace Epyx {
+namespace Epyx
+{
     class UDPServer;
 
     /**
@@ -13,9 +18,18 @@ namespace Epyx {
     class UDPSocket : public Socket
     {
     public:
+        /**
+         * @brief Initialise an empty TCP socket
+         */
         UDPSocket();
-        UDPSocket(const Address &addr);
-        UDPSocket(int sockfd, const Address &addr);
+        /**
+         * @brief Initialise a TCP socket with a remote address
+         */
+        UDPSocket(const Address& addr);
+        /**
+         * @brief Build a new Socket object from an existing connection
+         */
+        UDPSocket(int sock, const Address &addr);
 
         /**
          * @brief Send data through the socket
@@ -46,4 +60,4 @@ namespace Epyx {
     };
 
 }
-#endif // EPYX_UDPSOCKET_H
+#endif /* EPYX_UDPSOCKET_H */

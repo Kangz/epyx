@@ -7,19 +7,11 @@
 
 namespace Epyx
 {
+
     TCPServer::TCPServer(unsigned short port, unsigned int nbConn)
-        :Server(port), nbConn(nbConn)
-    {
-    }
-
-    TCPServer::~TCPServer()
-    {
-    }
-
-    bool TCPServer::bind()
-    {
+    :Server(port) {
         if (!this->_internal_bind(SOCK_STREAM))
-            return false;
+            return;
 
         // Now there is a socket, listen to nbConn connections
         EPYX_ASSERT(sockfd >= 0);
@@ -27,8 +19,7 @@ namespace Epyx
         if (status < 0) {
             log::error << "listen: " << log::errstd << log::endl;
             this->close();
-            return false;
+            return;
         }
-        return true;
     }
 }

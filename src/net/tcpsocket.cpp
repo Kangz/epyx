@@ -1,22 +1,23 @@
 #include "tcpsocket.h"
 #include "../core/common.h"
 
-namespace Epyx{
+namespace Epyx
+{
+
     TCPSocket::TCPSocket()
-        :isConnected(false)
-    {
+    :isConnected(false) {
     }
+
     TCPSocket::TCPSocket(const Address& addr)
-        :Socket(addr), isConnected(false)
-    {
+    :Socket(addr), isConnected(false) {
     }
+
     TCPSocket::TCPSocket(int sock, const Address &addr)
-        :Socket(sock, addr), isConnected(true)
-    {
+    :Socket(sock, addr), isConnected(true) {
     }
-    bool TCPSocket::connect()
-    {
-        if (this->sock == -1){
+
+    bool TCPSocket::connect() {
+        if (this->sock == -1) {
             this->sock = ::socket(AF_INET, SOCK_STREAM, 0);
             if (this->sock == -1) {
                 log::error << "Unable to create a new TCPSocket to " <<
@@ -25,8 +26,8 @@ namespace Epyx{
             }
         }
         sockaddr_storage server;
-        this->address.getSockAddr((struct sockaddr*)&server);
-        int result = ::connect(this->sock, (sockaddr*)&server, sizeof(server));
+        this->address.getSockAddr((struct sockaddr*) &server);
+        int result = ::connect(this->sock, (sockaddr*) & server, sizeof (server));
         if (result < 0) {
             //Replace by error log.
             log::error << "Failed connecting to " << this->address << ": "
@@ -37,8 +38,7 @@ namespace Epyx{
         return true;
     }
 
-    int TCPSocket::send(const void *data, int size)
-    {
+    int TCPSocket::send(const void *data, int size) {
         int bytes;
         EPYX_ASSERT(data != NULL);
         if (!this->isConnected) {
@@ -56,8 +56,7 @@ namespace Epyx{
         return bytes;
     }
 
-    int TCPSocket::recv(void *data, int size)
-    {
+    int TCPSocket::recv(void *data, int size) {
         int bytes;
         EPYX_ASSERT(data != NULL);
         EPYX_ASSERT(this->sock >= 0);

@@ -12,15 +12,26 @@
 
 namespace Epyx
 {
+
     /**
      * @class NetSelect
      *
      * @brief Implement select() on multiple sockets using a WorkerPool
+     *
+     * Use NetSelect.start() to start this thread
      */
     class NetSelect : public Thread
     {
     public:
+        /**
+         * @brief Constructor
+         * @param numworkers Initial workers number
+         * @param workerName Name of workers
+         */
         NetSelect(int numworkers, const std::string workerName);
+        /**
+         * @brief Desctructor
+         */
         ~NetSelect();
 
         /**
@@ -32,12 +43,11 @@ namespace Epyx
          */
         void add(NetSelectReader *nsr);
 
-         /**
+        /**
          * @brief gets the number of workers
          * @return the current number of workers
          */
-        inline int getNumWorkers()
-        {
+        inline int getNumWorkers() {
             return workers.getNumWorkers();
         }
 
@@ -45,8 +55,7 @@ namespace Epyx
          * @brief sets the number of workers
          * @param n the number of workers needed
          */
-        void setNumWorkers(int n)
-        {
+        void setNumWorkers(int n) {
             workers.setNumWorkers(n);
         }
 
@@ -59,15 +68,11 @@ namespace Epyx
         std::map<NetSelectReader*, bool> readers;
         Mutex readersMutex;
 
-        /**
-         * @class Workers
-         *
-         * @brief Workers for NetSelect
-         */
         class Workers : public WorkerPool<NetSelectReader>
         {
         public:
-            inline Workers() : WorkerPool(false) {}
+            inline Workers() : WorkerPool(false) {
+            }
             void treat(NetSelectReader *nsr);
         } workers;
 

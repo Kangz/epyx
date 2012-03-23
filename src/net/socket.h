@@ -2,8 +2,8 @@
  * Socket astraction layer
  */
 
-#ifndef EPYX_SOCKET_H_
-#define EPYX_SOCKET_H_
+#ifndef EPYX_SOCKET_H
+#define EPYX_SOCKET_H
 
 #include "../core/mutex.h"
 #include "address.h"
@@ -11,6 +11,7 @@
 
 namespace Epyx
 {
+
     /**
      * @class Socket
      *
@@ -37,10 +38,6 @@ namespace Epyx
          * @brief Initialise a socket with a remote address
          */
         Socket(const Address& addr);
-        /**
-         * @brief Initialise a socket with a remote IP address and port
-         */
-        Socket(const char* addr, unsigned short port);
         /**
          * @brief Build a new Socket object from an existing connection
          */
@@ -146,4 +143,4 @@ namespace Epyx
         char last_eol;
     };
 }
-#endif // EPYX_SOCKET_H_
+#endif /* EPYX_SOCKET_H */

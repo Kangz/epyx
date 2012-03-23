@@ -3,19 +3,19 @@
 
 namespace Epyx
 {
-    UDPSocket::UDPSocket()
-    {
-    }
-    UDPSocket::UDPSocket(const Address& addr)
-        :Socket(addr)
-    {
-    }
-    UDPSocket::UDPSocket(int sock, const Address &addr)
-        :Socket(sock, addr)
-    {
+
+    UDPSocket::UDPSocket() {
     }
 
-    int UDPSocket::send(const void *data, int size){
+    UDPSocket::UDPSocket(const Address& addr)
+    :Socket(addr) {
+    }
+
+    UDPSocket::UDPSocket(int sock, const Address &addr)
+    :Socket(sock, addr) {
+    }
+
+    int UDPSocket::send(const void *data, int size) {
         int bytes;
         struct sockaddr_storage saddr;
 
@@ -27,7 +27,7 @@ namespace Epyx
                 throw ErrException("UDPSocket", "socket");
         }
         address.getSockAddr((struct sockaddr *) &saddr);
-        bytes = ::sendto(this->sock, data, size, 0, (const struct sockaddr *) &saddr, sizeof(saddr));
+        bytes = ::sendto(this->sock, data, size, 0, (const struct sockaddr *) &saddr, sizeof (saddr));
         // TODO: Implement status error (ex. Conn closed, ...)
 
         if (bytes < 0)
@@ -35,10 +35,10 @@ namespace Epyx
         return bytes;
     }
 
-    int UDPSocket::recv(void * data, int size){
+    int UDPSocket::recv(void * data, int size) {
         int bytes;
         struct sockaddr_storage saddr;
-        socklen_t length=sizeof(saddr);
+        socklen_t length = sizeof (saddr);
         EPYX_ASSERT(data != NULL);
         EPYX_ASSERT(this->sock >= 0);
         bytes = ::recvfrom(this->sock, data, size, 0, (struct sockaddr *) &saddr, &length);
@@ -57,7 +57,7 @@ namespace Epyx
         return bytes;
     }
 
-    Address UDPSocket::getLastRecvAddr(){
+    Address UDPSocket::getLastRecvAddr() {
         return this->lastRecvAddr;
     }
 

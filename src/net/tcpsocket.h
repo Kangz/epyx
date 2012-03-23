@@ -1,3 +1,7 @@
+/**
+ * @file tcpsocket.h
+ * @brief TCP socket abstraction layer
+ */
 #ifndef EPYX_TCPSOCKET_H
 #define EPYX_TCPSOCKET_H
 
@@ -5,6 +9,7 @@
 
 namespace Epyx
 {
+
     /**
      * @class TCPSocket
      *
@@ -13,8 +18,17 @@ namespace Epyx
     class TCPSocket : public Socket
     {
     public:
+        /**
+         * @brief Initialise an empty TCP socket
+         */
         TCPSocket();
-        TCPSocket(const Address&);
+        /**
+         * @brief Initialise a TCP socket with a remote address
+         */
+        TCPSocket(const Address& addr);
+        /**
+         * @brief Build a new Socket object from an existing connection
+         */
         TCPSocket(int sock, const Address &addr);
 
         /**
@@ -40,4 +54,4 @@ namespace Epyx
     };
 
 }
-#endif // EPYX_UDPSOCKET_H
+#endif /* EPYX_UDPSOCKET_H */

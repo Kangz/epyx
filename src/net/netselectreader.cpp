@@ -3,23 +3,20 @@
 
 namespace Epyx
 {
+
     NetSelectReader::NetSelectReader()
-        :owner(NULL)
-    {
+    :owner(NULL) {
     }
 
-    NetSelectReader::~NetSelectReader()
-    {
+    NetSelectReader::~NetSelectReader() {
     }
 
-    NetSelect* NetSelectReader::getOwner()
-    {
+    NetSelect* NetSelectReader::getOwner() {
         EPYX_ASSERT(owner != NULL);
         return owner;
     }
 
-    void NetSelectReader::setOwner(NetSelect *ns)
-    {
+    void NetSelectReader::setOwner(NetSelect *ns) {
         EPYX_ASSERT(owner == NULL);
         owner = ns;
     }

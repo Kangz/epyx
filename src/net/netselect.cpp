@@ -3,15 +3,14 @@
 
 namespace Epyx
 {
+
     NetSelect::NetSelect(int numworkers, const std::string workerName)
-        :running(true)
-    {
+    :running(true) {
         workers.setName(workerName);
         workers.setNumWorkers(numworkers);
     }
 
-    NetSelect::~NetSelect()
-    {
+    NetSelect::~NetSelect() {
         // Stop working pool
         workers.stop();
 
@@ -20,8 +19,8 @@ namespace Epyx
 
         // Delete every selected stuff
         readersMutex.lock();
-        for (std::map<NetSelectReader*, bool>::iterator i = readers.begin();
-             i != readers.end(); i++) {
+        for (std::map < NetSelectReader*, bool>::iterator i = readers.begin();
+            i != readers.end(); i++) {
             if (i->first != NULL)
                 delete(i->first);
         }
@@ -29,8 +28,7 @@ namespace Epyx
         readersMutex.unlock();
     }
 
-    void NetSelect::add(NetSelectReader *nsr)
-    {
+    void NetSelect::add(NetSelectReader *nsr) {
         EPYX_ASSERT(nsr != NULL);
         nsr->setOwner(this);
         readersMutex.lock();
@@ -38,8 +36,7 @@ namespace Epyx
         readersMutex.unlock();
     }
 
-    void NetSelect::run()
-    {
+    void NetSelect::run() {
         fd_set rfds;
         struct timeval tv;
         int fdmax;
@@ -48,8 +45,8 @@ namespace Epyx
             FD_ZERO(&rfds);
             fdmax = 0;
             readersMutex.lock();
-            for (std::map<NetSelectReader*, bool>::iterator i = readers.begin();
-                 i != readers.end(); i++) {
+            for (std::map < NetSelectReader*, bool>::iterator i = readers.begin();
+                i != readers.end(); i++) {
                 if (!i->second) {
                     NetSelectReader *nsr = i->first;
                     EPYX_ASSERT(nsr != NULL);
@@ -71,13 +68,12 @@ namespace Epyx
 
             // Add each FD to the blocking queue
             readersMutex.lock();
-            for (std::map<NetSelectReader*, bool>::iterator i = readers.begin();
-                 i != readers.end(); i++) {
+            for (std::map < NetSelectReader*, bool>::iterator i = readers.begin();
+                i != readers.end(); i++) {
                 NetSelectReader *nsr = i->first;
                 EPYX_ASSERT(nsr != NULL);
                 int fd = nsr->getFileDescriptor();
-                if (!i->second && FD_ISSET(fd, &rfds))
-                {
+                if (!i->second && FD_ISSET(fd, &rfds)) {
                     i->second = true;
                     workers.post(nsr);
                 }
@@ -86,15 +82,15 @@ namespace Epyx
         }
     }
 
-    void NetSelect::Workers::treat(NetSelectReader *nsr)
-    {
+    void NetSelect::Workers::treat(NetSelectReader *nsr) {
+        // Tell this reader is treated
         NetSelect *nsel = nsr->getOwner();
         nsel->readersMutex.lock();
         nsel->readers[nsr] = false;
         nsel->readersMutex.unlock();
 
         if (!nsr->read()) {
-            // Destroy this reader
+            // Destroy this reader on false return
             nsel->readersMutex.lock();
             nsel->readers.erase(nsr);
             nsel->readersMutex.unlock();

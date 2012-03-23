@@ -6,7 +6,6 @@
 #include <sstream>
 #include <strings.h>
 #include "core/common.h"
-#include "net/tcpserverthread.h"
 #include "net/netselect.h"
 #include "net/netselectsocket.h"
 #include "net/netselecttcpserver.h"

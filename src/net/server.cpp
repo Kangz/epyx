@@ -7,30 +7,31 @@
 
 namespace Epyx
 {
+
     Server::Server(unsigned short port)
-        :address("*", port), port(port), sockfd(-1)
-    {
+    :address("*", port), port(port), sockfd(-1) {
     }
 
-    Server::~Server()
-    {
+    Server::~Server() {
+        log::debug << "close server" << log::endl;
         // Close socket
-       this->close();
+        this->close();
     }
 
-    void Server::setPort(unsigned short port_)
-    {
+    bool Server::isBinded() {
+        return (sockfd >= 0);
+    }
+
+    void Server::setPort(unsigned short port_) {
         port = port_;
         address = Address("*", port_);
     }
 
-    const Address& Server::getAddress()
-    {
+    const Address& Server::getAddress() {
         return address;
     }
 
-    void Server::close()
-    {
+    void Server::close() {
         if (sockfd >= 0) {
             ::shutdown(sockfd, SHUT_RDWR);
             ::close(sockfd);
@@ -39,15 +40,18 @@ namespace Epyx
         running = false;
     }
 
-    bool Server::_internal_bind(int socktype)
-    {
+    int Server::getFd() {
+        return sockfd;
+    }
+
+    bool Server::_internal_bind(int socktype) {
         //EPYX_ASSERT(port < 65536);
         char charport[10];
         struct addrinfo hints, *addrAll, *pai;
         int status, flag;
 
         // Convert port to char* to find address hints
-        snprintf(charport, sizeof(charport), "%u", port);
+        snprintf(charport, sizeof (charport), "%u", port);
         memset(&hints, 0, sizeof hints);
         // AF_INET or AF_INET6 to force IP version
         hints.ai_family = AF_UNSPEC;
@@ -73,7 +77,7 @@ namespace Epyx
 
             // Allow reusing the address (ignore failure)
             flag = 1;
-            setsockopt(this->sockfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(int));
+            setsockopt(this->sockfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof (int));
 
             // Bind to a listening address/port
             status = ::bind(this->sockfd, pai->ai_addr, pai->ai_addrlen);

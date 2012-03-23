@@ -1,3 +1,8 @@
+/**
+ * @file tcpserver.h
+ * @brief TCP server implementation
+ */
+
 #ifndef EPYX_TCPSERVER_H
 #define EPYX_TCPSERVER_H
 
@@ -5,16 +10,19 @@
 
 namespace Epyx
 {
+    /**
+     * @class TCPServer
+     * @brief TCP Server implementation
+     */
     class TCPServer : public Server
     {
     public:
+        /**
+         * @brief Create a new TCP server
+         * @param port TCP port to bind to
+         * @param nbConn maximum connection number
+         */
         TCPServer(unsigned short port, unsigned int nbConn);
-        ~TCPServer();
-
-        bool bind();
-
-    private:
-        unsigned int nbConn;
     };
 
 }
