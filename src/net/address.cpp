@@ -6,6 +6,18 @@
 namespace Epyx
 {
 
+    Address::Address(const std::string &addressFormat){ 
+        if (addressFormat.at(0) == '[') { //Case if IPv6
+            unsigned int n = addressFormat.find(']');
+            unsigned short port = (unsigned short) String::toInt(addressFormat.substr(n+2).c_str());
+            Address(addressFormat.substr(1,n),port);
+        }else{ //If not IPv6, it's IPv4, obviously :P
+            unsigned int n = addressFormat.find(':');
+            unsigned short port = (unsigned short) String::toInt(addressFormat.substr(n+1).c_str());
+            Address(addressFormat.substr(0,n),port);
+        }
+    }
+
     Address::Address()
     :ip("*"), port(0), ipVersion(0) {
     }

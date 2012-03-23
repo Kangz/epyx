@@ -42,6 +42,11 @@ namespace Epyx
          */
         Address(const Address& addr);
         /**
+        * @brief Address from ip:port string
+        **/
+        Address(const std::string& addressFormat);
+          
+        /**
          * @brief Assignment constructor
          */
         Address& operator=(const Address& addr);
