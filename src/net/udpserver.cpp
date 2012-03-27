@@ -21,8 +21,10 @@ namespace Epyx
         return r;
     }
 
+    /*
     int UDPServer::send(const void *data, int size) {
         throw FailException("UDPServer", "UDPServer::send is not yet implemented");
         return sock.send(data, size);
     }
+    */
 }

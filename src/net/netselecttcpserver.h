@@ -31,7 +31,7 @@ namespace Epyx
         NetSelectTCPServer(TCPServer *srv);
         ~NetSelectTCPServer();
 
-        int getFileDescriptor();
+        int getFileDescriptor() const;
 
         bool read();
 

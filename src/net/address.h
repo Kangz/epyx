@@ -56,12 +56,12 @@ namespace Epyx
          * @brief Get IP address
          * @return ip
          */
-        const std::string& getIp();
+        const std::string& getIp() const;
         /**
          * @brief Get port
          * @return port
          */
-        unsigned short getPort();
+        unsigned short getPort() const;
 
         /**
          * @brief Create a sockaddr structure from the address
@@ -70,7 +70,7 @@ namespace Epyx
          * @note Use a sockaddr_storage stucture to get information for IPv4
          * and IPv6 addresses
          */
-        void getSockAddr(struct sockaddr *saddr);
+        void getSockAddr(struct sockaddr *saddr) const;
 
         /**
          * @brief Print the address in an output stream

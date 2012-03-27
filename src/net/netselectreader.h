@@ -25,7 +25,7 @@ namespace Epyx
          * @brief Get the file descriptor of the socket which is select()'ed
          * @return socket_fd
          */
-        virtual int getFileDescriptor() = 0;
+        virtual int getFileDescriptor() const = 0;
 
         /**
          * @brief Read everything it can read and returns
@@ -36,7 +36,7 @@ namespace Epyx
         /**
          * @brief Get the NetSelect objects which owns this object
          */
-        NetSelect* getOwner();
+        NetSelect* getOwner() const;
 
         /**
          * @brief Set owner, only once

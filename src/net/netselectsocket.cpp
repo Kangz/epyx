@@ -20,7 +20,7 @@ namespace Epyx
         }
     }
 
-    int NetSelectSocket::getFileDescriptor() {
+    int NetSelectSocket::getFileDescriptor() const {
         EPYX_ASSERT(sock != NULL);
         int fd = sock->getFd();
         EPYX_ASSERT(fd >= 0);
@@ -49,7 +49,7 @@ namespace Epyx
         return sock->isOpened();
     }
 
-    Socket& NetSelectSocket::socket() {
+    Socket& NetSelectSocket::socket() const {
         EPYX_ASSERT(sock != NULL);
         return *sock;
     }

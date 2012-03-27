@@ -9,26 +9,13 @@ namespace Epyx
 {
 
     Server::Server(unsigned short port)
-    :address("*", port), port(port), sockfd(-1) {
+    :port(port), address("*", port), sockfd(-1) {
     }
 
     Server::~Server() {
-        log::debug << "close server" << log::endl;
+        //log::debug << "close server" << log::endl;
         // Close socket
         this->close();
-    }
-
-    bool Server::isBinded() {
-        return (sockfd >= 0);
-    }
-
-    void Server::setPort(unsigned short port_) {
-        port = port_;
-        address = Address("*", port_);
-    }
-
-    const Address& Server::getAddress() {
-        return address;
     }
 
     void Server::close() {
@@ -37,10 +24,17 @@ namespace Epyx
             ::close(sockfd);
             sockfd = -1;
         }
-        running = false;
     }
 
-    int Server::getFd() {
+    bool Server::isBinded() const {
+        return (sockfd >= 0);
+    }
+
+    const Address& Server::getAddress() const {
+        return address;
+    }
+
+    int Server::getFd() const {
         return sockfd;
     }
 

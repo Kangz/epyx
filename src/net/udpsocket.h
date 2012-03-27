@@ -53,7 +53,7 @@ namespace Epyx
          * @brief Get the remote address from which the last packet was received
          * @return remote address
          */
-        Address getLastRecvAddr();
+        Address getLastRecvAddr() const;
 
     private:
         Address lastRecvAddr;

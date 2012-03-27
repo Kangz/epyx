@@ -15,16 +15,12 @@ namespace Epyx
     class Server
     {
     public:
+        /**
+         * @brief Create a new generic unbinded server
+         * @param port
+         */
         Server(unsigned short port);
         ~Server();
-
-        void setPort(unsigned short port_);
-        const Address& getAddress();
-
-        /**
-         * @brief Tell wether server is binded or not
-         */
-        bool isBinded();
 
         /**
          * @brief Stop the server (shutdown + close)
@@ -32,16 +28,36 @@ namespace Epyx
         void close();
 
         /**
+         * @brief Tell wether server is binded or not
+         * @return true if server is binded
+         */
+        bool isBinded() const;
+
+        /**
+         * @brief get server address
+         * @return aserver Address object
+         */
+        const Address& getAddress() const;
+
+
+        /**
          * @brief Return internal file descriptor
          */
-        int getFd();
+        int getFd() const;
 
     protected:
-        Address address;
+        /**
+         * @brief Server listening port
+         */
         unsigned short port;
+        /**
+         * @brief Server binded address
+         */
+        Address address;
+        /**
+         * @brief Server socket file descriptor
+         */
         int sockfd;
-        // Another thread tells the server to shut down
-        bool running;
 
         /**
          * @brief Common code for TCP and UDP bind

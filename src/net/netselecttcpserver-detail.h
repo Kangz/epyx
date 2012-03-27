@@ -19,7 +19,7 @@ namespace Epyx
         }
     }
 
-    template<typename T> int NetSelectTCPServer<T>::getFileDescriptor() {
+    template<typename T> int NetSelectTCPServer<T>::getFileDescriptor() const {
         EPYX_ASSERT(srv != NULL);
         return srv->getFd();
     }

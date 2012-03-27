@@ -42,7 +42,7 @@ namespace Epyx
 
         ~NetSelectSocket();
 
-        int getFileDescriptor();
+        int getFileDescriptor() const;
 
         bool read();
 
@@ -55,7 +55,7 @@ namespace Epyx
         /**
          * @brief Get internal socket
          */
-        Socket& socket();
+        Socket& socket() const;
 
     private:
         // sock may be deleted by this object to prevent memory leak

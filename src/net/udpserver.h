@@ -17,10 +17,23 @@ namespace Epyx
     class UDPServer : public Server
     {
     public:
+        /**
+         * @brief Create a new UDP server
+         * @param port UDP port to bind to
+         */
         UDPServer(unsigned short port);
 
+        /**
+         * @brief Receive data for the server
+         *
+         * @param data received data buffer
+         * @param size size of data buffer
+         * @return number of received bytes
+         */
         int recv(void *data, int size);
-        int send(const void *data, int size);
+
+        // send is not implemented yet
+        //int send(const void *data, int size);
 
     private:
         UDPSocket sock;

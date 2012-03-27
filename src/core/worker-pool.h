@@ -63,7 +63,7 @@ namespace Epyx {
          * @brief gets the number of workers
          * @return the current number of workers
          */
-        int getNumWorkers();
+        int getNumWorkers() const;
 
         /**
          * @brief sets the number of workers

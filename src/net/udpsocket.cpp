@@ -57,8 +57,8 @@ namespace Epyx
         return bytes;
     }
 
-    Address UDPSocket::getLastRecvAddr() {
-        return this->lastRecvAddr;
+    Address UDPSocket::getLastRecvAddr() const {
+        return lastRecvAddr;
     }
 
 }

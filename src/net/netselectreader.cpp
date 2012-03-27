@@ -11,7 +11,7 @@ namespace Epyx
     NetSelectReader::~NetSelectReader() {
     }
 
-    NetSelect* NetSelectReader::getOwner() {
+    NetSelect* NetSelectReader::getOwner() const {
         EPYX_ASSERT(owner != NULL);
         return owner;
     }

@@ -57,7 +57,7 @@ namespace Epyx {
             this->name = name;
     }
 
-    template<typename T> int WorkerPool<T>::getNumWorkers(){
+    template<typename T> int WorkerPool<T>::getNumWorkers() const {
         return this->worker_count;
     }
 

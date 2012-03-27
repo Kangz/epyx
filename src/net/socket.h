@@ -56,11 +56,11 @@ namespace Epyx
         /**
          * @brief Get the internal file descriptor
          */
-        int getFd();
+        int getFd() const;
         /**
          * @brief Tell wether the socket is opened or closed
          */
-        bool isOpened();
+        bool isOpened() const;
 
         /**
          * @brief Set the remote address
@@ -69,7 +69,7 @@ namespace Epyx
         /**
          * @brief Get the remote address
          */
-        Address getAddress();
+        Address getAddress() const;
         /**
          * @brief Set the local address
          */
@@ -77,7 +77,7 @@ namespace Epyx
         /**
          * @brief Get the local address
          */
-        Address getLocalAddress();
+        Address getLocalAddress() const;
 
         /**
          * @brief Shutdown and close the socket
@@ -121,13 +121,19 @@ namespace Epyx
         bool recvAll(void *data, int size);
 
     protected:
-        // Socket file descriptor
+        /**
+         * @brief Socket file descriptor
+         */
         int sock;
 
-        // IP + port associated with the socket
+        /**
+         * @brief IP + port associated with the socket
+         */
         Address address;
 
-        // Local address for the socket or "*" if unknown
+        /**
+         * @brief Local address for the socket or "*" if unknown
+         */
         Address localAddress;
 
     private:

@@ -49,7 +49,7 @@ void test_command(Epyx::LocalNode& node, const Epyx::Address& addr) {
 }
 
 /**
- * @biref Receive callback for every node
+ * @brief Receive callback for every node
  */
 bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_) {
     Epyx::N2npPacketType pongType("pong");

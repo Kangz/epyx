@@ -36,6 +36,14 @@ namespace Epyx
         readersMutex.unlock();
     }
 
+    int NetSelect::getNumWorkers() const {
+        return workers.getNumWorkers();
+    }
+
+    void NetSelect::setNumWorkers(int n) {
+        workers.setNumWorkers(n);
+    }
+
     void NetSelect::run() {
         fd_set rfds;
         struct timeval tv;

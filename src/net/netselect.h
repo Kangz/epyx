@@ -47,17 +47,13 @@ namespace Epyx
          * @brief gets the number of workers
          * @return the current number of workers
          */
-        inline int getNumWorkers() {
-            return workers.getNumWorkers();
-        }
+        int getNumWorkers() const;
 
         /**
          * @brief sets the number of workers
          * @param n the number of workers needed
          */
-        void setNumWorkers(int n) {
-            workers.setNumWorkers(n);
-        }
+        void setNumWorkers(int n);
 
     protected:
         void run();

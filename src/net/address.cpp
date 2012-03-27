@@ -68,15 +68,15 @@ namespace Epyx
         return *this;
     }
 
-    const std::string& Address::getIp() {
+    const std::string& Address::getIp() const {
         return ip;
     }
 
-    unsigned short Address::getPort() {
+    unsigned short Address::getPort() const {
         return this->port;
     }
 
-    void Address::getSockAddr(struct sockaddr *saddr) {
+    void Address::getSockAddr(struct sockaddr *saddr) const {
         EPYX_ASSERT(saddr != NULL);
         EPYX_ASSERT(this->ipVersion > 0);
         if (this->ipVersion == 4) {

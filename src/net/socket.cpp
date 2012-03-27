@@ -66,12 +66,12 @@ namespace Epyx
         this->sock = sockfd;
     }
 
-    int Socket::getFd() {
+    int Socket::getFd() const {
         EPYX_ASSERT(sock >= 0);
         return sock;
     }
 
-    bool Socket::isOpened() {
+    bool Socket::isOpened() const {
         return (sock >= 0);
     }
 
@@ -79,7 +79,7 @@ namespace Epyx
         address = addr;
     }
 
-    Address Socket::getAddress() {
+    Address Socket::getAddress() const {
         return address;
     }
 
@@ -87,7 +87,7 @@ namespace Epyx
         localAddress = addr;
     }
 
-    Address Socket::getLocalAddress() {
+    Address Socket::getLocalAddress() const {
         return localAddress;
     }
 
