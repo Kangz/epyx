@@ -41,7 +41,7 @@ namespace Epyx
             && (nodeId1.relay == nodeId2.relay);
     }
 
-    std::string N2npNodeId::getName(void)
+    std::string N2npNodeId::getName(void) const
     {
         std::string s(this->name);
         return s;

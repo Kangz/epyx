@@ -6,26 +6,16 @@
 
 namespace Epyx
 {
-    LocalRelay::LocalRelay(Address addr)
-        :Thread("Relay" + addr.toString()), addr(addr), id(addr), lastNodeId(0)
-    {
+
+    LocalRelay::LocalRelay(const Address& addr)
+    :WorkerPool(1, true, "Relay" + addr.toString()), addr(addr), id(addr), lastNodeId(0) {
     }
 
-    std::ostream& operator<<(std::ostream& os, const LocalRelay& relay)
-    {
+    std::ostream& operator<<(std::ostream& os, const LocalRelay& relay) {
         return os << relay.id;
     }
 
-    std::ostream& operator<<(std::ostream& os, const LocalRelay *relay)
-    {
-        if (!relay)
-            return os << "(null)";
-        else
-            return os << (*relay);
-    }
-
-    N2npNodeId LocalRelay::attachNode(LocalNode *node)
-    {
+    N2npNodeId LocalRelay::attachNode(LocalNode *node) {
         std::string nodeName;
 
         // Make this thread-safe
@@ -53,35 +43,29 @@ namespace Epyx
         return nodeId;
     }
 
-    void LocalRelay::run()
-    {
-        log::debug << "[Relay " << this << "] Running" << log::endl;
-        while (true) {
-            N2npPacket *pkt =  this->packetQueue.pop();
-            // Null packet means the queue is closed
-            if (pkt == NULL)
-                return;
+    void LocalRelay::treat(N2npPacket *pkt) {
+        EPYX_ASSERT(pkt != NULL);
 
-            // Find the node
-            std::string nodeName = pkt->to.getName();
-            LocalNode *node = NULL;
-            this->nodesMutex.lock();
-            if (this->nodes.count(nodeName))
-                node = (*(this->nodes.find(nodeName))).second;
-            this->nodesMutex.unlock();
+        // Find the node
+        std::string nodeName = pkt->to.getName();
+        LocalNode *node = NULL;
+        this->nodesMutex.lock();
+        if (this->nodes.count(nodeName))
+            node = (*(this->nodes.find(nodeName))).second;
+        this->nodesMutex.unlock();
 
-            // Send to the node if found
-            if (node == NULL) {
-                log::debug << "[Relay " << this << "] Destination not found: "
-                    << pkt->to << log::endl;
-                continue;
-            }
-            // Debug
-            //log::debug << "[Relay " << this << "] Send from " << pkt.from
-            //    << " to " << node << log::debug ;
-
-            //Post
-            node->post(*pkt);
+        // Send to the node if found
+        if (node == NULL) {
+            log::debug << "[Relay " << *this << "] Destination not found: "
+                << pkt->to << log::endl;
+            return;
         }
+
+        // Debug
+        //log::debug << "[Relay " << *this << "] Send from " << pkt->from
+        //    << " to " << node << log::debug ;
+
+        //Post, with a copy because pkt is deleted after this function
+        node->post(new N2npPacket(*pkt));
     }
 }

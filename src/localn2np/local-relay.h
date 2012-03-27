@@ -1,5 +1,7 @@
 /**
- * Local Relay management
+ * @file local-relay.h
+ * @brief Local Relay management
+ *
  * Simulation of N2NP
  */
 
@@ -9,8 +11,7 @@
 #include "../n2np/n2np-packet.h"
 #include "../net/address.h"
 #include "../core/mutex.h"
-#include "../core/thread.h"
-#include "../core/blocking-queue.h"
+#include "../core/worker-pool.h"
 #include <ostream>
 #include <map>
 
@@ -18,54 +19,51 @@ namespace Epyx
 {
     class LocalNode;
 
-    class LocalRelay : public Thread
+    /**
+     * @class LocalRelay
+     * @brief Implement local N2NP relay simulation with a worker pool
+     */
+    class LocalRelay : public WorkerPool<N2npPacket>
     {
+    public:
+        /**
+         * @brief Constructor
+         * @param addr Relay address
+         */
+        LocalRelay(const Address& addr);
+
+        /**
+         * @brief Display a node in an output stream
+         * @param os Output stream
+         * @param relay
+         */
+        friend std::ostream& operator<<(std::ostream& os, const LocalRelay& relay);
+
+        /**
+         * @brief A node called this function to be attached with this relay
+         * @param node new node
+         * @return new node ID
+         */
+        N2npNodeId attachNode(LocalNode *node);
+
+    protected:
+        /**
+         * @brief Treat a N2NP packet
+         * @param pkt the packet to be processed
+         */
+        void treat(N2npPacket *pkt);
+
     private:
         Address addr;
         N2npNodeId id;
+
         std::map<std::string, LocalNode*> nodes;
         unsigned int lastNodeId;
         Mutex nodesMutex;
 
-        // Packet queue
-        BlockingQueue<N2npPacket> packetQueue;
-
         // Disable copy
         LocalRelay(const LocalRelay&);
         const LocalRelay& operator=(const LocalRelay&);
-
-    public:
-        LocalRelay(Address addr_);
-
-        friend std::ostream& operator<<(std::ostream& os, const LocalRelay& relay);
-        friend std::ostream& operator<<(std::ostream& os, const LocalRelay *relay);
-
-        /**
-         * @brief Return the new node ID
-         */
-        N2npNodeId attachNode(LocalNode *node);
-
-        /**
-         * @brief Another thread post a packet
-         */
-        inline void post(const N2npPacket& pkt)
-        {
-            packetQueue.push(new N2npPacket(pkt));
-        }
-
-        /**
-         * @brief Close packet queue
-         */
-        inline void close()
-        {
-            packetQueue.close();
-        }
-
-    protected:
-        /**
-         * @brief Internal loop
-         */
-        void run();
     };
 }
 

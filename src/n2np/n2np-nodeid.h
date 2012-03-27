@@ -32,7 +32,7 @@ namespace Epyx
             return !(nodeId1 == nodeId2);
         }
 
-        std::string getName(void);
+        std::string getName(void) const;
     };
 }
 

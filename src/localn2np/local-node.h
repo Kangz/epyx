@@ -1,5 +1,7 @@
 /**
- * Local Node management
+ * @file local-node.h
+ * @brief Local Node management
+ *
  * Simulation of N2NP
  * Each "local node" only can communicate with their neighboors
  */
@@ -9,46 +11,37 @@
 
 #include "../core/mutex.h"
 #include "../n2np/n2np-packet.h"
-#include "../core/blocking-queue.h"
-#include "../core/thread.h"
+#include "../core/worker-pool.h"
 #include "local-relay.h"
-#include <list>
 #include <map>
 
 namespace Epyx
 {
-    // Recv callback
+    // For the recv callback
     class LocalNode;
 
-    class LocalNode : public Thread
+    /**
+     * @class LocalNode
+     * @brief Implement local N2NP node simulation with a worker pool
+     */
+    class LocalNode : public WorkerPool<N2npPacket>
     {
     private:
-
         //Internal definition used for the callback
-        typedef bool (ReceiveCb)(LocalNode&, const N2npPacket&, void* cbData);
-        typedef struct{
-            ReceiveCb* cb;
-            void* arg;
-        }ReceiveCbData;
-
-        N2npNodeId id;
-        LocalRelay *relay;
-
-        // Packet queue
-        BlockingQueue<N2npPacket> packetQueue;
-
-        // Callbacks for Recv
-        std::map<N2npPacketType, ReceiveCbData> recvCallbacks;
-        Mutex recvCallbacksMutex;
-
-        // Disable copy
-        LocalNode(const LocalNode&);
-        const LocalNode& operator=(const LocalNode&);
-
+        typedef bool (ReceiveCb) (LocalNode&, const N2npPacket&, void* cbData);
     public:
-        LocalNode(const std::string& threadname, int threadid);
+        /**
+         * @brief Constructor
+         * @param name Name of the WorkerPool thread
+         */
+        LocalNode(const std::string& name);
+
+        /**
+         * @brief Display a node in an output stream
+         * @param os Output stream
+         * @param node
+         */
         friend std::ostream& operator<<(std::ostream& os, const LocalNode& node);
-        friend std::ostream& operator<<(std::ostream& os, const LocalNode *node);
 
         /**
          * @brief Attach the node to another relay
@@ -65,27 +58,32 @@ namespace Epyx
          */
         void registerRecv(const N2npPacketType& type, ReceiveCb *cb, void* cbData);
 
-        /**
-         * @brief Another thread post a packet
-         */
-        inline void post(const N2npPacket& pkt)
-        {
-            packetQueue.push(new N2npPacket(pkt));
-        }
-
-        /**
-         * @brief Close packet queue
-         */
-        inline void close()
-        {
-            packetQueue.close();
-        }
-
     protected:
         /**
-         * @brief Internal loop
+         * @brief Treat a N2NP packet
+         * @param pkt the packet to be processed
          */
-        void run();
+        void treat(N2npPacket *pkt);
+
+    private:
+
+        typedef struct
+        {
+            ReceiveCb* cb;
+            void* arg;
+        } ReceiveCbData;
+
+        N2npNodeId id;
+        LocalRelay *relay;
+
+        // Callbacks for Recv
+        std::map<N2npPacketType, ReceiveCbData> recvCallbacks;
+        Mutex recvCallbacksMutex;
+
+        // Disable copy
+        LocalNode(const LocalNode&);
+        const LocalNode& operator=(const LocalNode&);
+
     };
 }
 

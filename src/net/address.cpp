@@ -110,7 +110,7 @@ namespace Epyx
         return os;
     }
 
-    std::string Address::toString() {
+    std::string Address::toString() const {
         std::ostringstream stream;
         stream << *this;
         return stream.str();

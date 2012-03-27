@@ -1,5 +1,6 @@
 /**
- * This program tests Node to Node Protocol
+ * @file test-n2np.cpp
+ * @brief This program tests Node to Node Protocol
  */
 
 #include <iostream>
@@ -9,10 +10,9 @@
 #include "localn2np/local-node.h"
 
 /**
- * Command-line interface to send packets
+ * @brief Command-line interface to send packets
  */
-void test_command(Epyx::LocalNode *node, const Epyx::Address& addr)
-{
+void test_command(Epyx::LocalNode& node, const Epyx::Address& addr) {
     unsigned int id;
     std::string msg;
     Epyx::N2npPacketType type("test");
@@ -20,20 +20,19 @@ void test_command(Epyx::LocalNode *node, const Epyx::Address& addr)
     // Waiting for other threads
     usleep(10);
 
-    Epyx::log::debug << "[Cli:motd] Command-line interface\n";
-    Epyx::log::debug << "[Cli:motd] You are on " << node << "\n";
-    Epyx::log::debug << "[Cli:motd] 2 Hello sends `Hello' to node 2\n";
-    Epyx::log::debug << "[Cli:motd] 0 quits.\n";
-    Epyx::log::debug << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] Command-line interface" << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] You are on " << node << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] 2 Hello sends `Hello' to node 2" << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] 0 quits." << Epyx::log::endl;
 
     while (true) {
         std::cin >> id;
         if (id <= 0) {
-             Epyx::log::debug << "[Cli] Bye :)" << Epyx::log::endl;
+            Epyx::log::debug << "[Cli] Bye :)" << Epyx::log::endl;
             return;
         } else {
             std::cin >> msg;
-             Epyx::log::debug << "[Cli] Sending " << msg << " to " << id << Epyx::log::endl;
+            Epyx::log::debug << "[Cli] Sending " << msg << " to " << id << Epyx::log::endl;
 
             // Convert id to a node name
             std::ostringstream idStream;
@@ -44,16 +43,15 @@ void test_command(Epyx::LocalNode *node, const Epyx::Address& addr)
             Epyx::N2npPacket pkt(type, msg.size() + 1, msg.c_str());
 
             // Send !
-            node->send(nodeTo, pkt);
+            node.send(nodeTo, pkt);
         }
     }
 }
 
 /**
- * Receive callback for every node
+ * @biref Receive callback for every node
  */
-bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_)
-{
+bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_) {
     Epyx::N2npPacketType pongType("pong");
     Epyx::log::debug << "[Node " << node << "] Recv from " << pkt.from << ": `"
         << pkt.data << "'" << Epyx::log::endl;
@@ -74,17 +72,21 @@ bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_)
     return true;
 }
 
-bool nodeRecvPong(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_)
-{
+/**
+ * @brief Receive callback for Pong messages
+ */
+bool nodeRecvPong(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_) {
     Epyx::log::debug << "[Node " << node << "] Pong from " << pkt.from << ": `"
         << pkt.data << "'" << Epyx::log::endl;
     return true;
 }
 
-void test_n2np()
-{
+/**
+ * @brief Test N2NP implementation
+ */
+void test_n2np() {
     const int nodeNum = 42;
-    Epyx::LocalNode* nodes[nodeNum];
+    Epyx::LocalNode *nodes[nodeNum];
     Epyx::LocalRelay *relay = NULL;
     try {
         Epyx::Address addr("L0C4L", 0, 0);
@@ -93,37 +95,38 @@ void test_n2np()
 
         // Create a relay
         relay = new Epyx::LocalRelay(addr);
-        relay->start();
+        Epyx::log::debug << "Created relay " << *relay << Epyx::log::endl;
 
         // Create nodes
         for (int i = 0; i < nodeNum; i++) {
-            nodes[i] = new Epyx::LocalNode("node", i+1);
-            nodes[i]->attach(relay);
+            std::ostringstream strid;
+            strid << "node-" << (i + 1);
+            nodes[i] = new Epyx::LocalNode(strid.str());
             nodes[i]->registerRecv(type, nodeRecv, NULL);
             nodes[i]->registerRecv(pongType, nodeRecvPong, NULL);
-            nodes[i]->start();
+            nodes[i]->attach(relay);
         }
-
-        test_command(nodes[0], addr);
+        Epyx::log::debug << "Created nodes 1.." << nodeNum << Epyx::log::endl;
+        test_command(*(nodes[0]), addr);
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }
     if (relay) {
-        relay->close();
-        relay->wait();
+        relay->stop();
         delete relay;
     }
     for (int i = 0; i < nodeNum; i++) {
         if (nodes[i]) {
-            nodes[i]->close();
-            nodes[i]->wait();
+            nodes[i]->stop();
             delete nodes[i];
         }
     }
 }
 
-int main()
-{
+/**
+ * @brief Setup environment and invoke test_n2np()
+ */
+int main() {
     try {
         Epyx::Thread::init();
         Epyx::log::init(Epyx::log::CONSOLE, "");

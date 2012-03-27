@@ -82,7 +82,7 @@ namespace Epyx
         /**
          * @brief get a std::string representation of the address
          */
-        std::string toString();
+        std::string toString() const;
 
         /**
          * @brief Equality test

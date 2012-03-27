@@ -3,99 +3,81 @@
 
 namespace Epyx
 {
-    LocalNode::LocalNode(const std::string& threadname, int threadid)
-        :Thread(threadname, threadid), id(), relay(NULL)
-    {
+
+    LocalNode::LocalNode(const std::string& name)
+    :WorkerPool(1, true, name), id(), relay(NULL) {
     }
 
-    std::ostream& operator<<(std::ostream& os, const LocalNode& node)
-    {
+    std::ostream& operator<<(std::ostream& os, const LocalNode& node) {
         return os << node.id;
     }
 
-    std::ostream& operator<<(std::ostream& os, const LocalNode *node)
-    {
-        if (!node)
-            return os << "(null)";
-        else
-            return os << (*node);
+    void LocalNode::attach(LocalRelay *rel) {
+        EPYX_ASSERT(rel != NULL);
+        this->id = rel->attachNode(this);
+        this->relay = rel;
     }
 
-    void LocalNode::attach(LocalRelay *relay_)
-    {
-        EPYX_ASSERT(relay_ != NULL);
-        this->id = relay_->attachNode(this);
-        this->relay = relay_;
-    }
-
-    void LocalNode::send(const N2npNodeId& to, const N2npPacket& pkt_)
-    {
+    void LocalNode::send(const N2npNodeId& to, const N2npPacket& pkt) {
         EPYX_ASSERT(this->relay != NULL);
 
-        // Copy packet and forward it by the relay
-        N2npPacket pkt(pkt_);
-        pkt.from = this->id;
-        pkt.to = to;
-        this->relay->post(pkt);
+        // Allocate a new packet and forward it by the relay
+        // (Note: packet is destroyed by Relay::treat())
+        N2npPacket *real_pkt = new N2npPacket(pkt);
+        real_pkt->from = this->id;
+        real_pkt->to = to;
+        relay->post(real_pkt);
     }
 
-    void LocalNode::registerRecv(const N2npPacketType& type, ReceiveCb *cb, void* cbData)
-    {
+    void LocalNode::registerRecv(const N2npPacketType& type, ReceiveCb *cb, void* cbData) {
         ReceiveCbData cbEntry = {cb, cbData};
-        this->recvCallbacksMutex.lock();
-        this->recvCallbacks.insert(std::make_pair(type, cbEntry));
-        this->recvCallbacksMutex.unlock();
+        recvCallbacksMutex.lock();
+        recvCallbacks.insert(std::make_pair(type, cbEntry));
+        recvCallbacksMutex.unlock();
     }
 
-    void LocalNode::run()
-    {
-        log::debug << "[Node " << this << "] Running" << log::endl;
-        while (true) {
-            N2npPacket *pkt = this->packetQueue.pop();
-            // Null packet means the queue is closed
-            if (pkt == NULL)
-                return;
+    void LocalNode::treat(N2npPacket *pkt) {
+        EPYX_ASSERT(pkt != NULL);
 
-            // Ensure I am the destination
-            if (pkt->to != this->id) {
-                log::error << "[Node " << this << "] "
-                    << "Bad routing, I received a message for " << pkt->to << log::endl;
-                continue;
-            }
+        // Ensure I am the destination
+        if (pkt->to != this->id) {
+            log::error << "[Node " << *this << "] "
+                << "Bad routing, I received a message for " << pkt->to << log::endl;
+            return;
+        }
 
-            // Debug
-            //log::debug << "[Node " << this << "] Recv from " << pkt->from
-            //    << " type " << pkt->type << log::endl;
+        // Debug
+        //log::debug << "[Node " << *this << "] Recv from " << pkt->from
+        //    << " type " << pkt->type << log::endl;
 
-            // Find the recv callback
-            bool foundCallback = false;
-            ReceiveCbData recvCbData;
+        // Find the recv callback
+        bool foundCallback = false;
+        ReceiveCbData recvCbData;
 
-            this->recvCallbacksMutex.lock();
-            if (this->recvCallbacks.count(pkt->type)){
-                recvCbData = (*(this->recvCallbacks.find(pkt->type))).second;
-                foundCallback = true;
-            }
-            this->recvCallbacksMutex.unlock();
+        this->recvCallbacksMutex.lock();
+        if (this->recvCallbacks.count(pkt->type)) {
+            recvCbData = (*(this->recvCallbacks.find(pkt->type))).second;
+            foundCallback = true;
+        }
+        this->recvCallbacksMutex.unlock();
 
-            if (!foundCallback) {
-                log::error << "[Node " << this << "] Unknown type " << pkt->type << log::endl;
-                continue;
-            }
+        if (!foundCallback) {
+            log::error << "[Node " << *this << "] Unknown type " << pkt->type << log::endl;
+            return;
+        }
 
-            // Call the callback
-            bool result = false;
-            try {
-                result = (*recvCbData.cb)(*this, *pkt, recvCbData.arg);
-            } catch (Exception e) {
-                log::error << "[Node " << this << "] Exception " << e << log::endl;
-                result = false;
-            }
-            if (!result) {
-                log::error << "[Node " << this << "] Problem with message"
-                    << " from " << pkt->from
-                    << " type " << pkt->type << log::endl;
-            }
+        // Call the callback
+        bool result = false;
+        try {
+            result = (*recvCbData.cb)(*this, *pkt, recvCbData.arg);
+        } catch (Exception e) {
+            log::error << "[Node " << *this << "] Exception " << e << log::endl;
+            result = false;
+        }
+        if (!result) {
+            log::error << "[Node " << *this << "] Problem with message"
+                << " from " << pkt->from
+                << " type " << pkt->type << log::endl;
         }
     }
 }
