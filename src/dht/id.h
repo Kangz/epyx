@@ -39,8 +39,8 @@ namespace DHT
 
 
     //Some operators to work on Id as big numbers
-    int operator<(const Id &a, const Id &b);
-    int operator==(const Id &a, const Id &b);
+    bool operator<(const Id &a, const Id &b);
+    bool operator==(const Id &a, const Id &b);
 }
 }
 

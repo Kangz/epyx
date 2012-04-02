@@ -63,35 +63,35 @@ namespace DHT {
         return os;
     };
 
-    int operator<(const Id &a, const Id &b){
+    bool operator<(const Id &a, const Id &b){
         uint8_t *a_data = (uint8_t *) a.data;
         uint8_t *b_data = (uint8_t *) b.data;
 
         for(int i = 0; i < ID_STORAGE_SIZE; i++) {
             if (*a_data < *b_data) {
-                return 1;
+                return true;
             } else if (*a_data > *b_data) {
-                return 0;
+                return false;
             }
             a_data++;
             b_data++;
         }
-        return 0;
+        return false;
     }
 
 
-    int operator==(const Id &a, const Id &b){
+    bool operator==(const Id &a, const Id &b){
         uint8_t *a_data = (uint8_t *) a.data;
         uint8_t *b_data = (uint8_t *) b.data;
 
         for(int i = 0; i < ID_STORAGE_SIZE; i++){
             if (*a_data != *b_data) {
-                return 0;
+                return false;
             }
             a_data++;
             b_data++;
         }
-        return 1;
+        return true;
     }
 }
 }
