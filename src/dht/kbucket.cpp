@@ -1,7 +1,9 @@
 #include "kbucket.h"
+#include "../core/common.h"
+#include <queue>
 
 #define NODES_PER_BUCKET 20
-#define  MAX_INACTIVE_PERIOD 15000
+#define MAX_INACTIVE_PERIOD 15000
 
 namespace Epyx {
 namespace DHT {
@@ -53,46 +55,35 @@ namespace DHT {
         }
     }
 
+    void KBucket::findNearestNodes(Id* const id, std::multimap<Distance,Id> &nearest,int n){
+        std::priority_queue<std::pair<Distance,Id> > closest;
 
-    //We need to have the farthest Id first to be able to remove it easily
-    struct ReverseDistanceComparator{
-        bool operator()(const Distance& d1, const Distance& d2){
-            return ! (d1 < d2);
-        }
-    };
-
-    void KBucket::findNearestNodes(Id* const id,std::multimap<Distance,Id> &nearest,int n){
-        std::multimap<Distance,Id, ReverseDistanceComparator> closest;
-        std::multimap<Distance,Id, ReverseDistanceComparator>::iterator mapit;
-
-        std::vector<Bucket>::iterator bucket;
-        std::list<Peer*>::iterator peer;
-
-        //Insert EVERY node in the map with it's distance associated
+        //Insert EVERY node in the priority_queue with it's distance associated
         //This is very inefficient, we will change this
         //Optimization n°1 : Never store more than n nodes in the map
+        std::vector<Bucket>::iterator bucket;
+        std::list<Peer*>::iterator peer;
         for( bucket=buckets.begin(); bucket!=buckets.end(); bucket++ ){
-            for( peer=bucket->peers.begin(); peer!=bucket->peers.end(); peer++){
+            for( peer=bucket->peers.begin(); peer!=bucket->peers.end(); peer++ ){
 
                 Distance dist(id, &((*peer)->peerId));
 
-                if(closest.size() >= (unsigned long)n-1){
-                    std::pair<Distance,Id> farthest = *(closest.begin());
-                    if(farthest.first < dist){
-                        closest.erase(closest.begin());
+                if(closest.size() >= (unsigned long)n){
+                    std::pair<Distance,Id> farthest = closest.top();
+                    if(dist < farthest.first){
+                        closest.pop();
                     }
                 }
 
-                if(closest.size() < (unsigned long)n-1){
-                    closest.insert(std::pair<Distance,Id>(dist,(*peer)->peerId));
+                if(closest.size() < (unsigned long)n){
+                    closest.push(std::pair<Distance,Id>(dist,(*peer)->peerId));
                 }
             }
         }
 
-        int i=0;
-        //The map iterator will return the peers sorted by distance
-        for(mapit=closest.begin(); mapit!=closest.end() && i<n; mapit++,i++){
-            nearest.insert(*mapit);
+        while(closest.size() > 0){
+            nearest.insert(closest.top());
+            closest.pop();
         }
     }
 
