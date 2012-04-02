@@ -14,7 +14,7 @@ namespace DHT {
     class KBucket {
         public:
             KBucket(Id* const self);
-            void addPeer(Id* const peerId);
+            void seenPeer(Id* const peerId);
             void findNearestNodes(Id* const id,std::multimap<Distance,Id> &nearest,int n);
 
         private:

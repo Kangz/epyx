@@ -9,7 +9,7 @@ namespace DHT {
         buckets.resize(ID_LENGTH);
     }
 
-    void KBucket::addPeer(Id* const peerId){
+    void KBucket::seenPeer(Id* const peerId){
         bool add =false;
         time_t now=time(NULL);
 
@@ -18,14 +18,14 @@ namespace DHT {
         //Find the bucket the peer belongs to
         Bucket& bucket = buckets[d.firstActiveBit()];
 
-        std::list<Peer*>::iterator peer;
+        std::list<Peer*>::iterator peer_it;
 
         //Search for the peer in the bucket to update its lastReceiveTime
-        for(peer = bucket.peers.begin(); peer != bucket.peers.end(); peer++){
-            Peer* p = *peer;
-            if(*peerId == p->peerId){
-                Peer* temp = p;
-                peer = bucket.peers.erase(peer);
+        for(peer_it = bucket.peers.begin(); peer_it != bucket.peers.end(); peer_it++){
+            Peer* peer = *peer_it;
+            if(*peerId == peer->peerId){
+                Peer* temp = peer;
+                peer_it = bucket.peers.erase(peer_it);
                 temp->lastReceiveTime = now;
                 bucket.peers.push_back(temp);
                 return;
@@ -40,8 +40,8 @@ namespace DHT {
             if(now - peerFront->lastReceiveTime>MAX_INACTIVE_PERIOD){
                 bucket.peers.pop_front();
                 add=true;
+                delete peerFront;
             }
-            delete *peer;
         }
 
         //Finally add the peer to the KBucket
@@ -54,22 +54,38 @@ namespace DHT {
     }
 
 
-    void KBucket::findNearestNodes(Id* const id,std::multimap<Distance,Id> &nearest,int n){
-        std::multimap<Distance,Id> closest;
-        std::multimap<Distance,Id>::iterator mapit;
+    //We need to have the farthest Id first to be able to remove it easily
+    struct ReverseDistanceComparator{
+        bool operator()(const Distance& d1, const Distance& d2){
+            return ! (d1 < d2);
+        }
+    };
 
-        Distance* dist;
+    void KBucket::findNearestNodes(Id* const id,std::multimap<Distance,Id> &nearest,int n){
+        std::multimap<Distance,Id, ReverseDistanceComparator> closest;
+        std::multimap<Distance,Id, ReverseDistanceComparator>::iterator mapit;
 
         std::vector<Bucket>::iterator bucket;
         std::list<Peer*>::iterator peer;
 
         //Insert EVERY node in the map with it's distance associated
         //This is very inefficient, we will change this
+        //Optimization n°1 : Never store more than n nodes in the map
         for( bucket=buckets.begin(); bucket!=buckets.end(); bucket++ ){
             for( peer=bucket->peers.begin(); peer!=bucket->peers.end(); peer++){
-                dist = new Distance(id, &((*peer)->peerId));
-                closest.insert(std::pair<Distance,Id>(*dist,(*peer)->peerId));
-                delete dist;
+
+                Distance dist(id, &((*peer)->peerId));
+
+                if(closest.size() >= (unsigned long)n-1){
+                    std::pair<Distance,Id> farthest = *(closest.begin());
+                    if(farthest.first < dist){
+                        closest.erase(closest.begin());
+                    }
+                }
+
+                if(closest.size() < (unsigned long)n-1){
+                    closest.insert(std::pair<Distance,Id>(dist,(*peer)->peerId));
+                }
             }
         }
 
