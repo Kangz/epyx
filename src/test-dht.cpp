@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include "core/common.h"
 #include "dht/id.h"
-//#include "dht/kbucket.h"
+#include "dht/kbucket.h"
 
 using namespace Epyx;
 
@@ -29,13 +29,13 @@ void test_id_distance(){
     Id a, b;
     random_id(a);
     random_id(b);
-    log::debug<<"     a: "<<a<<log::endl;
-    log::debug<<"     b: "<<b<<log::endl;
+    log::info<<"     a: "<<a<<log::endl;
+    log::info<<"     b: "<<b<<log::endl;
     Distance d(&a, &b);
-    log::debug<<"d(a,b): "<<d<<log::endl;
+    log::info<<"d(a,b): "<<d<<log::endl;
 
 
-    log::debug<<"Modifying random bits"<<log::endl;
+    log::info<<"Modifying random bits"<<log::endl;
 
     for(int i=0; i<6; i++) {
         Id a;
@@ -43,18 +43,49 @@ void test_id_distance(){
         Id b = a;
         int bit = rand()%ID_LENGTH;
         b.data[bit/8] ^= 1 << (7 - (bit%8));
-        log::debug<<"     a: "<<a<<log::endl;
-        log::debug<<"     b: "<<b<<log::endl;
+        log::info<<"     a: "<<a<<log::endl;
+        log::info<<"     b: "<<b<<log::endl;
         Distance d(&a, &b);
-        log::debug<<"d(a,b): "<<d<<log::endl;
+        log::info<<"d(a,b): "<<d<<log::endl;
     }
+}
+
+void test_kbucket(){
+    Id self;
+    random_id(self);
+
+    KBucket kb(&self);
+
+    log::info<<"Inserting 500.000 nodes in the routing table"<<log::endl;
+
+    for(int i=500000; i-->0;){
+        Id a;
+        random_id(a);
+
+        kb.seenPeer(&a);
+    }
+
+    log::info<<"Making 10.000 lookups in the routing table"<<log::endl;
+
+    for(int i=10000; i-->0;){
+        Id a;
+        random_id(a);
+
+        std::multimap<Distance,Id> nearest;
+
+        kb.findNearestNodes(&a, nearest, 20);
+    }
+
+    log::info<<"Making done making 10.000 lookups in the routing table"<<log::endl;
+
 }
 
 int main(){
     Thread::init();
     log::init(log::CONSOLE | log::LOGFILE, "Test.log");
 
-    test_id_distance();
+    //test_id_distance();
+    test_kbucket();
 
     log::flushAndQuit();
     return 0;
