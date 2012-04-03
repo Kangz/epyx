@@ -24,8 +24,6 @@ void random_id(Id& id){
 }
 
 void test_id_distance(){
-    srand ( time(NULL) );
-
     Id a, b;
     random_id(a);
     random_id(b);
@@ -54,6 +52,8 @@ void test_kbucket(){
     Id self;
     random_id(self);
 
+    log::info<<"I am at Id: "<<self<<log::endl;
+
     KBucket kb(&self);
 
     log::info<<"Inserting 500.000 nodes in the routing table"<<log::endl;
@@ -76,13 +76,28 @@ void test_kbucket(){
         kb.findNearestNodes(&a, nearest, 20);
     }
 
-    log::info<<"Making done making 10.000 lookups in the routing table"<<log::endl;
+    log::info<<"Done making 10.000 lookups in the routing table"<<log::endl;
 
+    Id a;
+    random_id(a);
+    std::multimap<Distance,Id> nearest;
+    kb.findNearestNodes(&a, nearest, 20);
+
+    std::multimap<Distance, Id>::iterator it = nearest.begin();
+
+    log::info<<"Searching for a: "<<a<<log::endl;
+    for(int i=0; i<20; it++, i++){
+        Distance d = (*it).first;
+        Id id = (*it).second;
+        log::info<<"      id: "<<id<<log::endl;
+        log::info<<"d(id, a): "<<d<<log::endl;
+    }
 }
 
 int main(){
     Thread::init();
     log::init(log::CONSOLE | log::LOGFILE, "Test.log");
+    srand ( time(NULL) );
 
     //test_id_distance();
     test_kbucket();
