@@ -11,20 +11,23 @@ namespace Epyx
 {
 namespace DHT
 {
+    int str2int(const std::string& str);
+    std::string int2str(const int& n);
 
     class DHTPacket
     {
     public:
-        DHTPacket(const GTTPacket& pkt);
+        DHTPacket(GTTPacket& pkt);
         ~DHTPacket();
+        GTTPacket toGTTPacket();
 
         std::string method;
         int idConnection;
         int status;
         int n;
-        vector<Id> idFound;
-        string value;
-        string key;
+        std::vector<Id> idFound;
+        std::string value;
+        std::string key;
         Id idToFind;
     };
 
