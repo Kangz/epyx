@@ -24,12 +24,12 @@ namespace DHT
 
     }; //TODO uint32_t ?
     std::ostream& operator<<(std::ostream& os, const Id& id);
-    std::istream& operator>>(std::istream& in, const Id& id);
+    std::istream& operator>>(std::istream& in, Id& id);
     //A distance is just an Id but we want different types to add methods
     class Distance: public Id
     {
         public:
-            Distance(Id* const a, Id* const b);
+            Distance(const Id* a, const Id* b);
             int firstActiveBit() const;
 
         private:
