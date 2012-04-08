@@ -13,6 +13,12 @@ namespace Epyx
             delete[] body;
     }
 
+    char* GTTPacket::acquireBody(){
+        char* temp = body;
+        body = NULL;
+        return temp;
+    }
+
     std::ostream& operator<<(std::ostream& os, const GTTPacket& pkt)
     {
         os << "Proto " << pkt.protocol << " method " << pkt.method << std::endl;

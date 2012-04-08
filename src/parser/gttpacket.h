@@ -22,6 +22,12 @@ namespace Epyx
     public:
         GTTPacket();
         ~GTTPacket();
+
+        /**
+         * @brief Transfer the ownership of the data to the caller
+         */
+        char* acquireBody();
+
         friend std::ostream& operator<<(std::ostream& os, const GTTPacket& pkt);
 
         /**
@@ -31,7 +37,7 @@ namespace Epyx
         std::string method;
         std::map<std::string, std::string> headers;
         long size;
-        char *body;
+        char* body;
     };
 }
 
