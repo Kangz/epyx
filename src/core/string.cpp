@@ -35,7 +35,11 @@ namespace Epyx
         return str;
     }
 
-    long String::toInt(const char *str) {
+    long String::toInt(const std::string& s){
+        return String::toInt(s.c_str());
+    }
+
+    long String::toInt(const char* str) {
         char *endptr = NULL;
         long l = strtol(str, &endptr, 10);
         EPYX_ASSERT(endptr != NULL);
@@ -46,5 +50,11 @@ namespace Epyx
         if (endptr == str && l == 0)
             throw new ErrException("String::toInt", "strtol");
         throw new FailException("String::toInt", "Invalid characters");
+    }
+
+    std::string String::fromInt(int n){
+        std::stringstream out;
+        out << n;
+        return out.str();
     }
 }
