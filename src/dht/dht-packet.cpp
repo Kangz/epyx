@@ -9,6 +9,9 @@ namespace Epyx
 {
 namespace DHT
 {
+    DHTPacket::DHTPacket(){}
+    DHTPacket::~DHTPacket(){}
+
     DHTPacket::DHTPacket(GTTPacket& pkt){
         //TODO: what should we do if a packet is not valid ?
         if(pkt.headers.count("From")==0){
@@ -83,13 +86,16 @@ namespace DHT
 
         }else if(pkt.method == "FOUND"){
             method = M_FOUND;
-            if(pkt.headers.count("ConnectionId") == 0 || pkt.headers.count("Count") == 0i || !pkt.body){
+            if(pkt.headers.count("ConnectionId") == 0 || pkt.headers.count("Count") == 0 ||
+               pkt.headers.count("Status") == 0 || !pkt.body){
                 throw;
             }
             connectionId = String::toInt(pkt.headers["ConnectionId"]);
+            count = String::toInt(pkt.headers["Count"]);
+            status = String::toInt(pkt.headers["Status"]);
 
             if(pkt.size != count*49){ //HACK: this is the size of the hexadecimal representation of an Id
-                throw;
+                return;//throw;
             }
 
             Id id;
@@ -126,7 +132,7 @@ namespace DHT
             case M_STORE:
                 pkt->method = "STORE";
 
-                oss << idToFind;
+                oss << key;
                 pkt->headers["Key"] = oss.str();
                 oss.str("");
 
@@ -141,6 +147,7 @@ namespace DHT
                 pkt->method = "STORED";
                 pkt->headers["ConnectionId"] = String::fromInt(connectionId);
                 pkt->headers["Status"] = String::fromInt(status);
+                break;
 
             case M_GET:
                 pkt->method = "GET";
@@ -187,6 +194,7 @@ namespace DHT
                 std::string data = oss.str();
                 pkt->body = new char[data.size()];
                 memcpy(pkt->body, data.c_str(), data.size());
+                pkt->size = data.size();
                 oss.str("");
                 break;
         }

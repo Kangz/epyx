@@ -30,6 +30,7 @@ namespace DHT
     {
     public:
         DHTPacket(GTTPacket& pkt);
+        DHTPacket();
         ~DHTPacket();
         GTTPacket* toGTTPacket();
 
