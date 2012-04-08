@@ -1,6 +1,7 @@
 #include "id.h"
 #include <stdint.h>
 
+
 namespace Epyx {
 namespace DHT {
 
@@ -22,18 +23,28 @@ namespace DHT {
     }
 
     std::istream& operator>>(std::istream& in, Id& id){
-        uint8_t* dist = (uint8_t*) id.data;
-        char temp; char temp_bis;
-        for (int i = 0; i < ID_STORAGE_SIZE; i++) {
-            in >> temp >> temp_bis;
-            if(temp > '9') temp = temp - '9' + 'A' - 1;
-            if(temp_bis > '9') temp_bis = temp_bis - '9' + 'A' - 1;
-            *dist = (uint8_t)((temp-'0')*16 + temp_bis-'0');
-            dist ++;
-            in >> temp; // get the ':'
+        uint8_t* pointer = (uint8_t*) id.data;
+        uint8_t n1, n2;
+        for(int i = 0; i<ID_STORAGE_SIZE; i++){
+            n1 = in.get();
+            n2 = in.get();
+
+            uint8_t value = 0;
+
+            n1 = n1>'9' ? (n1-'a'+10) : (n1-'0');
+            n2 = n2>'9' ? (n2-'a'+10) : (n2-'0');
+
+            value = 16*n1 + n2;
+
+            *pointer = value;
+            pointer ++;
+            if(i != ID_STORAGE_SIZE-1 && i%2 ==1){
+                 in.get(); //delete the :
+            }
         }
         return in;
     }
+
 
     Distance::Distance(const Id* a, const Id* b) {
         uint8_t *a_data = (uint8_t *) a->data;
