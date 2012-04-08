@@ -28,7 +28,7 @@ namespace Epyx
         }
         if (pkt.size > 0) {
             os << "Content-length: " << pkt.size << std::endl;
-            os << pkt.body;
+            //os << pkt.body; //Logging this is not a good idea as it could contain anything
         }
         return os;
     }
