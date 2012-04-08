@@ -2,7 +2,7 @@
 #define EPYX_DHT_DHTPACKET_H
 
 #include <string>
-#include <vector>
+#include <list>
 
 #include "id.h"
 #include "../parser/gttpacket.h"
@@ -11,23 +11,38 @@ namespace Epyx
 {
 namespace DHT
 {
-    int str2int(const std::string& str);
-    std::string int2str(const int& n);
+    enum DHTMethod
+    {
+        M_PING,
+        M_PONG,
+
+        M_GET,
+        M_GOT,
+
+        M_FIND,
+        M_FOUND,
+
+        M_STORE,
+        M_STORED
+    };
 
     class DHTPacket
     {
     public:
         DHTPacket(GTTPacket& pkt);
         ~DHTPacket();
-        GTTPacket toGTTPacket();
+        GTTPacket* toGTTPacket();
 
-        std::string method;
-        int idConnection;
+        DHTMethod method;
+        Id from;
+        int connectionId;
         int status;
-        int n;
-        std::vector<Id> idFound;
-        std::string value;
-        std::string key;
+        int count;
+        std::list<Id> foundIds;
+
+        int valueSize;
+        char* value;
+        Id key;
         Id idToFind;
     };
 
