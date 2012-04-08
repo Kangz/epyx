@@ -10,6 +10,7 @@
 #include "core/common.h"
 #include "dht/id.h"
 #include "dht/kbucket.h"
+#include "dht/dht-packet.h"
 
 using namespace Epyx;
 
@@ -46,6 +47,17 @@ void test_id_distance(){
         Distance d(&a, &b);
         log::info<<"d(a,b): "<<d<<log::endl;
     }
+
+    log::info << "Converting to string and back:" << log::endl;
+    log::info << a << log::endl;
+
+    std::stringstream o;
+    o<<  a; //<-PAN
+    Id c;
+    o>>c;
+
+    log::info << c << log::endl;
+
 }
 
 void test_kbucket(){
@@ -94,13 +106,83 @@ void test_kbucket(){
     }
 }
 
+void double_print(DHTPacket& pkt){
+    GTTPacket* pkt1 = pkt.toGTTPacket();
+    DHTPacket pkt2(*pkt1);
+    GTTPacket* pkt3 = pkt2.toGTTPacket();
+    log::info << "dht -> gtt\n" << *pkt1 << log::endl;
+    log::info << "dht -> gtt -> dht -> gtt\n" << *pkt3 << log::endl;
+}
+
+void test_dhtpacket(){
+    DHTPacket pkt;
+    random_id(pkt.from);
+
+    log::info<<"Testing PING"<<log::endl;
+    pkt.method = M_PING;
+    double_print(pkt);
+
+    log::info<<"Testing PONG"<<log::endl;
+    pkt.method = M_PONG;
+    double_print(pkt);
+
+    log::info<<"Testing STORE"<<log::endl;
+    pkt.method = M_STORE;
+    pkt.connectionId = 42;
+    random_id(pkt.key);
+    pkt.value = new char[34];
+    pkt.valueSize = 34;
+    double_print(pkt);
+
+    log::info<<"Testing STORED"<<log::endl;
+    pkt.method = M_STORED;
+    pkt.connectionId = 42;
+    pkt.status = 0;
+    double_print(pkt);
+
+    log::info<<"Testing GET"<<log::endl;
+    pkt.method = M_GET;
+    pkt.connectionId = 42;
+    random_id(pkt.key);
+    double_print(pkt);
+
+    log::info<<"Testing GOT"<<log::endl;
+    pkt.method = M_GOT;
+    pkt.connectionId = 42;
+    pkt.value = new char[34];
+    pkt.valueSize = 34;
+    double_print(pkt);
+
+    log::info<<"Testing FIND"<<log::endl;
+    pkt.method = M_FIND;
+    pkt.connectionId = 42;
+    pkt.count = 20;
+    random_id(pkt.idToFind);
+    double_print(pkt);
+
+    log::info<<"Testing FOUND"<<log::endl;
+    pkt.method = M_FOUND;
+    pkt.connectionId = 42;
+    pkt.status = 0;
+    for(int i=0; i<20; i++){
+        Id temp;
+        random_id(temp);
+        pkt.foundIds.push_back(temp);
+    }
+    random_id(pkt.idToFind);
+    double_print(pkt);
+
+
+}
+
 int main(){
     Thread::init();
     log::init(log::CONSOLE | log::LOGFILE, "Test.log");
     srand ( time(NULL) );
 
     //test_id_distance();
-    test_kbucket();
+    //test_kbucket();
+    test_dhtpacket();
 
     log::flushAndQuit();
     return 0;
