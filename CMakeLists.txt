@@ -7,7 +7,7 @@ project(Epyx)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
-SET(CMAKE_CXX_FLAGS "-g -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable")
+SET(CMAKE_CXX_FLAGS "-g -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable -Wno-delete-non-virtual-dtor")
 
 # Make some sets of files
 
@@ -117,6 +117,7 @@ add_executable(
     ${core_sources}
     ${dht_sources}
     ${net_sources}
+    ${parser_sources}
     ${localn2np_sources}
     src/test-dht.cpp
 )
