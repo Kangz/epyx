@@ -21,19 +21,21 @@ namespace DHT {
         return os;
     }
 
-    std::istream& operator>>(std::istream& in, const Id& id){
-        uint8_t *dist = (uint8_t *) id.data;
+    std::istream& operator>>(std::istream& in, Id& id){
+        uint8_t* dist = (uint8_t*) id.data;
         char temp; char temp_bis;
         for (int i = 0; i < ID_STORAGE_SIZE; i++) {
             in >> temp >> temp_bis;
-            *dist = (temp-'0')*16 + temp_bis-'0';
+            if(temp > '9') temp = temp - '9' + 'A' - 1;
+            if(temp_bis > '9') temp_bis = temp_bis - '9' + 'A' - 1;
+            *dist = (uint8_t)((temp-'0')*16 + temp_bis-'0');
             dist ++;
             in >> temp; // get the ':'
         }
         return in;
     }
 
-    Distance::Distance(Id* const a, Id* const b) {
+    Distance::Distance(const Id* a, const Id* b) {
         uint8_t *a_data = (uint8_t *) a->data;
         uint8_t *b_data = (uint8_t *) b->data;
         uint8_t *dist = (uint8_t *) this->data;
