@@ -24,6 +24,14 @@ void random_id(Id& id){
     }
 }
 
+void random_id(std::string& s){
+    std::stringstream ss;
+    Id id;
+    random_id(id);
+    ss << id;
+    s = ss.str();
+}
+
 void test_id_distance(){
     Id a, b;
     random_id(a);
@@ -130,8 +138,7 @@ void test_dhtpacket(){
     pkt.method = M_STORE;
     pkt.connectionId = 42;
     random_id(pkt.key);
-    pkt.value = new char[34];
-    pkt.valueSize = 34;
+    pkt.value = std::string(34, 'c');
     double_print(pkt);
 
     log::info<<"Testing STORED"<<log::endl;
@@ -148,9 +155,9 @@ void test_dhtpacket(){
 
     log::info<<"Testing GOT"<<log::endl;
     pkt.method = M_GOT;
+    pkt.value = std::string(34, 'c');
+    log::info << pkt.value.size() << log::endl;
     pkt.connectionId = 42;
-    pkt.value = new char[34];
-    pkt.valueSize = 34;
     double_print(pkt);
 
     log::info<<"Testing FIND"<<log::endl;

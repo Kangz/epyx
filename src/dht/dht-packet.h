@@ -41,9 +41,8 @@ namespace DHT
         int count;
         std::list<Id> foundIds;
 
-        int valueSize;
-        char* value;
-        Id key;
+        std::string value;
+        std::string key;
         Id idToFind;
     };
 
