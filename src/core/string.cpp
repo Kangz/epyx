@@ -1,4 +1,5 @@
 #include "string.h"
+#include "cstring"
 #include "assert.h"
 #include "log.h"
 #include <stdlib.h>
@@ -57,4 +58,11 @@ namespace Epyx
         out << n;
         return out.str();
     }
+
+    char* String::toNewChar(const std::string& s){
+        char* res = new char[s.length()];
+        memcpy(res, s.c_str(), s.length());
+        return res;
+    }
+
 }
