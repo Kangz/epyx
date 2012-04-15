@@ -14,7 +14,8 @@ namespace Epyx
         } else { //If not IPv6, it's IPv4, obviously :P
             unsigned int n = addressFormat.find(':');
             unsigned short port = (unsigned short) String::toInt(addressFormat.substr(n + 1).c_str());
-            Address(addressFormat.substr(0, n), port);
+            this->ip = addressFormat.substr(0, n);
+            this->port = port;
         }
     }
 

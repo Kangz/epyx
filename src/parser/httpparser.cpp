@@ -60,9 +60,11 @@ namespace Epyx
         // Skip spaces
         while (l[i] == ' ')
             i++;
-        if (l[i] == 0)
-            throw ParserException("flag without value");
-
+        if (l[i] == 0){
+            //throw ParserException("flag without value"); // Why should it bug?
+            currentPkt->headers[flagName]="";
+            return;
+        }
         // Read value
         iValue = i;
         while (l[i] != 0) {

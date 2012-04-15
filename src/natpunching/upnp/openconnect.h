@@ -6,6 +6,8 @@
 #include "../../net/netselect.h"
 #include "igd.h"
 #include "../../core/log.h"
+#include "discovery.h"
+
 
 //#include <SFML/socket>
 #include <string>
