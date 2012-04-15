@@ -93,6 +93,7 @@ add_executable(
     ${net_sources}
     ${natpunching_sources}
     ${tinyxml_sources}
+    ${parser_sources}
 )
 
 target_link_libraries(

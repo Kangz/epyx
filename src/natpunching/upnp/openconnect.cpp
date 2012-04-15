@@ -15,7 +15,7 @@ namespace Epyx {
         }
 
         void Natpunch::discover(){
-            char data[BUF_SIZE];
+            /*char data[BUF_SIZE];
             Epyx::UDPSocket sock;
             //UDPSocket is preparing to multicast on port 1900 For UPnP discover
             Address multicastAddr("239.255.255.250", 1900);
@@ -56,7 +56,18 @@ namespace Epyx {
             }
             if (foundGoodIGD)
                 success = true;
-            sock.close();
+            sock.close();*/
+            NetSelect discoverSelect (1,"UPNPDiscovery");
+            UDPSocket usock;
+            Discovery *listener = new Discovery(usock);
+            discoverSelect.add(listener);
+            discoverSelect.setName("Let's listen in HTTPU");
+            discoverSelect.start();
+            sleep(10);
+            Address addr = listener->getAddress();
+            std::string rootPath = listener->getPath();
+            discoverSelect.term();
+            log::debug << "Address : " << addr << log::endl << "Path : " << rootPath << log::endl;
         }
 
         Address Natpunch::openMapPort(unsigned short localPort, unsigned short remotePort){
