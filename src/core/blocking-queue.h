@@ -10,7 +10,8 @@
 #include "assert.h"
 #include "condition.h"
 
-namespace Epyx {
+namespace Epyx
+{
     /**
      * @class BlockingQueue
      *
@@ -25,7 +26,8 @@ namespace Epyx {
      * @tparam T the base type of the pointers contained in the BlockingQueue
      */
 
-    template<typename T> class BlockingQueue {
+    template<typename T> class BlockingQueue
+    {
     public:
 
         /**

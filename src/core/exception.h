@@ -1,5 +1,6 @@
 /**
- * Epyx exceptions
+ * @file exception.h
+ * @brief Epyx exceptions
  */
 #ifndef EPYX_EXCEPTION_H
 #define EPYX_EXCEPTION_H
@@ -8,48 +9,77 @@
 
 namespace Epyx
 {
+    /**
+     * @class Exception
+     * @brief Epyx raw exception
+     */
     class Exception
     {
-    public:// FIXME: private ?
-        std::string type;
-
-        /**
-         * Module where the exception was thrown
-         */
-        std::string module;
-
-        std::string message;
-
     public:
-        Exception(const char *type_, const char *module_, const char *message_);
+        /**
+         * @brief Build an exception
+         * @param type
+         * @param module
+         * @param message
+         */
+        Exception(const char *type, const char *module, const char *message);
 
         /**
-         * Append to message
+         * @brief Append text to the message
+         * @param txt text to append
          */
         void append(const std::string& txt);
 
         /**
-         * Print an exception
+         * @brief Print an exception
+         * @param os output stream
+         * @param e
          */
         friend std::ostream& operator<<(std::ostream& os, const Exception& e);
-    };
 
+    protected:
+        /**
+         * @brief Exception type
+         */
+        std::string type;
+
+        /**
+         * @brief Module which throws the exception
+         */
+        std::string module;
+
+        /**
+         * @brief Exception text
+         */
+        std::string message;
+    };
     /**
-     * Epyx failure
+     * @class FailException
+     * @brief Epyx failure
      */
     class FailException : public Exception
     {
     public:
-        FailException(const char *module_, const char *message_);
+        /**
+         * @brief Build an "Epyx fails" exception
+         * @param module
+         * @param message
+         */
+        FailException(const char *module, const char *message);
     };
-
     /**
-     * View errno (standard errors)
+     * @class ErrException
+     * @brief View standard errors (errno and errstr) in an exception
      */
     class ErrException : public FailException
     {
     public:
-        ErrException(const char *module_, const char *fct);
+        /**
+         * @brief Build an standard error exception
+         * @param module
+         * @param fct failed function name
+         */
+        ErrException(const char *module, const char *fct);
     };
 }
 

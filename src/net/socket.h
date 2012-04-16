@@ -45,7 +45,7 @@ namespace Epyx
         /**
          * @brief Destructor
          */
-        ~Socket();
+        virtual ~Socket();
 
         /**
          * @brief Set a new file descriptor

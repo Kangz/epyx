@@ -6,22 +6,32 @@
 #define EPYX_LOG_WORKER_H
 
 #include <fstream>
-//#include <sstream>
 #include <string>
 #include "thread.h"
 #include "blocking-queue.h"
 #include "condition.h"
-#include "log.h"
 
-namespace Epyx {
-namespace log {
+namespace Epyx
+{
+namespace log
+{
+    class Worker : public Thread
+    {
+    public:
+        Worker(int flags, const std::string& file);
+        void write(const std::string& message, int prio);
+        void flush(bool wait);
+        void quit();
 
-    class Worker : public Thread {
+    protected:
+        virtual void run();
+
     private:
         Worker(const Worker&);
         const Worker& operator=(const Worker&);
 
-        struct LogEntry {
+        struct LogEntry
+        {
             std::string str;
             int prio;
             time_t time;
@@ -35,13 +45,6 @@ namespace log {
 
         void printEntry(LogEntry* entry);
 
-    public:
-        Worker(int flags, const std::string& file);
-        void write(const std::string& message, int prio);
-        void flush(bool wait);
-        void quit();
-
-        virtual void run();
     };
 
 }

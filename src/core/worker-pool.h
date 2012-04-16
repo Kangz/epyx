@@ -10,11 +10,12 @@
 #include <sstream>
 #include "common.h"
 
-namespace Epyx {
+namespace Epyx
+{
     /**
      * @class WorkerPool
      *
-     * @brief A mean to distrubute work between several threads easily
+     * @brief A mean to distribute work between several threads easily
      *
      * A WorkerPool allows you to distribute a work on several threads by
      * passing "messages" that are in facts function arguments. To use it
@@ -23,24 +24,30 @@ namespace Epyx {
      *
      * @tparam T the base type of the messages passed to the workers
      */
-
-    template<typename T>class WorkerPool{
+    template<typename T>class WorkerPool
+    {
     public:
 
         /**
          * @brief The WorkerPool constructor
          * @param num_workers the initial number of worker threads
+         * @param deleteMessages tell to delete messages afer a post if set
          * @param name the prefix of the name of the worker threads in the logs
          */
-        WorkerPool(int num_workers, bool deleteMessages, const std::string name);
+        WorkerPool(int num_workers, bool deleteMessages, const std::string& name);
+
+        /**
+         * @brief The WorkerPool other constructor
+         * @param deleteMessages tell to delete messages afer a post if set
+         */
         WorkerPool(bool deleteMessages);
 
         /**
          * @brief The WorkerPool destructor
          *
-         * What will happen with the messages that are still to be processed ?
+         * @todo What will happen with the messages that are still to be processed ?
          */
-        ~WorkerPool();
+        virtual ~WorkerPool();
 
         /**
          * @brief Stop WorkerPool (wait all children threads)
@@ -57,7 +64,7 @@ namespace Epyx {
          * @brief set the name of the workers
          * Please call this functionto set a name BEFORE starting any worker
          */
-        void setName(const std::string name);
+        void setName(const std::string& name);
 
         /**
          * @brief gets the number of workers
@@ -71,6 +78,7 @@ namespace Epyx {
          */
         void setNumWorkers(int n);
 
+    protected:
         /**
          * @brief this is the method to override
          * @param message the message to be processed
@@ -78,6 +86,7 @@ namespace Epyx {
         virtual void treat(T *message) = 0;
 
     private:
+        // No copy
         WorkerPool(const WorkerPool&);
         const WorkerPool& operator=(const WorkerPool&);
 
@@ -88,8 +97,9 @@ namespace Epyx {
         BlockingQueue<T> messages;
         bool deleteMessages;
 
-        //The Workers threads
-        class Worker: public Thread{
+        // Worker threads
+        class Worker : public Thread
+        {
         public:
             Worker(WorkerPool<T>* pool, int id);
             void run();
@@ -101,7 +111,7 @@ namespace Epyx {
             bool running;
         };
 
-        //Everything related to names
+        // Everything related to names
         std::string name;
         int worker_name_counter;
 

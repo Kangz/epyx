@@ -7,51 +7,59 @@
 #ifndef EPYX_TLS_POINTER_DETAIL_H
 #define EPYX_TLS_POINTER_DETAIL_H
 
-namespace Epyx {
+#include "tls-pointer.h"
 
-    template<typename T> void TLSPointer<T>::_default_destructor(T* object){
+
+namespace Epyx
+{
+
+    template<typename T> void TLSPointer<T>::_default_destructor(T* object) {
         delete object;
     }
 
-    template<typename T> TLSPointer<T>::TLSPointer(void (*destructor_)(T*))
-        :destructor(destructor_), constructor(NULL), key(new pthread_key_t) {
-        int key_create_status = pthread_key_create(this->key,
-            reinterpret_cast<void_destructor_func*>(this->destructor));
+    template<typename T> TLSPointer<T>::TLSPointer(void (*destructor)(T*))
+    : destructor(destructor), constructor(NULL) {
+        int key_create_status = pthread_key_create(&key,
+                reinterpret_cast<void_destructor_func*> (this->destructor));
         EPYX_ASSERT_NO_LOG(key_create_status == 0);
     }
 
     template<typename T> TLSPointer<T>::TLSPointer(T* (*constructor_)(), void (*destructor_)(T*))
-        :destructor(destructor_), constructor(constructor_), key(new pthread_key_t){
-        int key_create_status = pthread_key_create(this->key,
-            reinterpret_cast<void_destructor_func*>(this->destructor));
+    : destructor(destructor_), constructor(constructor_) {
+        int key_create_status = pthread_key_create(&key,
+                reinterpret_cast<void_destructor_func*> (this->destructor));
         EPYX_ASSERT_NO_LOG(key_create_status == 0);
     }
 
-    template<typename T> TLSPointer<T>::~TLSPointer(){//TODO
-    };
+    template<typename T> TLSPointer<T>::~TLSPointer() {
+        pthread_key_delete(key);
+    }
 
-    template<typename T> T* TLSPointer<T>::get(){
-        T* result = static_cast<T*>(pthread_getspecific(*this->key));
+    template<typename T> T* TLSPointer<T>::get() {
+        T* result = static_cast<T*> (pthread_getspecific(key));
 
-        if(result == NULL && this->constructor != NULL){
+        if (result == NULL && this->constructor != NULL) {
             result = this->constructor();
-            pthread_setspecific(*this->key, static_cast<void *>(result));
+            pthread_setspecific(key, static_cast<void *> (result));
         }
 
         return result;
     }
 
-    template<typename T> void TLSPointer<T>::reset(T* new_value){
-        T* current = static_cast<T*>(pthread_getspecific(*this->key));
+    template<typename T> void TLSPointer<T>::reset(T* new_value) {
+        T* current = static_cast<T*> (pthread_getspecific(key));
 
-        if(new_value != current){
-            pthread_setspecific(*this->key, static_cast<void *>(new_value));
+        if (new_value != current) {
+            // Destroy old value
+            if (current != NULL && this->destructor != NULL)
+                this->destructor(current);
+            pthread_setspecific(key, static_cast<void *> (new_value));
         }
     }
 
-    template<typename T> T* TLSPointer<T>::release(){
-        T* temp = static_cast<T*>(pthread_getspecific(*this->key));
-        pthread_setspecific(*this->key, NULL);
+    template<typename T> T* TLSPointer<T>::release() {
+        T* temp = static_cast<T*> (pthread_getspecific(key));
+        pthread_setspecific(key, NULL);
         return temp;
     }
 }

@@ -11,9 +11,8 @@
 #include <pthread.h>
 #include "mutex.h"
 
-//TODO: add documentation
-
-namespace Epyx {
+namespace Epyx
+{
     /**
      * @class Condition
      *
@@ -26,7 +25,8 @@ namespace Epyx {
      * when notified and exactly when you are notified. For those not convinced,
      * try to see how you could make a blocking queue without this mechanism.
      */
-    class Condition {
+    class Condition
+    {
     public:
 
         /**
