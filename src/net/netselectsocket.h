@@ -46,12 +46,12 @@ namespace Epyx
 
         bool read();
 
+    protected:
         /**
          * @brief Eat read data
          */
         virtual void eat(const char *data, long size) = 0;
 
-    protected:
         /**
          * @brief Get internal socket
          */

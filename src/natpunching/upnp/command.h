@@ -1,8 +1,6 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
-/*
- * epyx
- * Copyright (C) Aniem 2012 <jeremy.buet@polytechnique.org>
- *
+/**
+ * @file command.h
+ * @brief UPnP Commands
  */
 
 #ifndef EPYX_COMMAND_H_
@@ -13,23 +11,30 @@
 #include "../../../include/tinyxml/tinyxml.h"
 #include "../../net/socket.h"
 
-namespace Epyx{
-namespace UPNP{
-typedef struct UPNP_Arg{std::string name; std::string value; }UPNP_Arg;
-typedef enum UPNP_Action_type{
-    UPNP_ACTION_CONNTYPE,
-    UPNP_ACTION_GET_EXT_IP,
-    UPNP_ACTION_ADDPORTMAP,
-    UPNP_ACTION_DELPORTMAP,
-    UPNP_ACTION_NUMENTRIES_PORTMAP,
-    UPNP_ACTION_SPECIFICPORTMAP,
-    UPNP_ACTION_GET_GEN_PORTMAP,
-    UPNP_ACTION_LIST_PORTMAP,
-    UPNP_ACTION_GET_STATINFO
-}UPNP_Action;
-    class Command
+namespace Epyx
+{
+    namespace UPNP
     {
-    public:
+        typedef struct UPNP_Arg
+        {
+            std::string name;
+            std::string value;
+        } UPNP_Arg;
+        typedef enum UPNP_Action_type
+        {
+            UPNP_ACTION_CONNTYPE,
+            UPNP_ACTION_GET_EXT_IP,
+            UPNP_ACTION_ADDPORTMAP,
+            UPNP_ACTION_DELPORTMAP,
+            UPNP_ACTION_NUMENTRIES_PORTMAP,
+            UPNP_ACTION_SPECIFICPORTMAP,
+            UPNP_ACTION_GET_GEN_PORTMAP,
+            UPNP_ACTION_LIST_PORTMAP,
+            UPNP_ACTION_GET_STATINFO
+        } UPNP_Action;
+        class Command
+        {
+        public:
             Command();
             Command(std::string addr, unsigned short port);
             Command(std::string filename);
@@ -46,7 +51,7 @@ typedef enum UPNP_Action_type{
             void setService(std::string service);
             std::string getService();
             std::string getOrder();
-            std::map<std::string,std::string> getResult();
+            std::map<std::string, std::string> getResult();
 
 
             void setPath(std::string);
@@ -54,8 +59,8 @@ typedef enum UPNP_Action_type{
 
 
             void setOption(UPNP_Action_type type);
-            void setOption(UPNP_Action_type type, std::map<std::string,std::string> args);
-            void setArguments(std::map<std::string,std::string> args);
+            void setOption(UPNP_Action_type type, std::map<std::string, std::string> args);
+            void setArguments(std::map<std::string, std::string> args);
             void addArgument(std::string name, std::string value);
 
             void buildCommand();
@@ -63,17 +68,17 @@ typedef enum UPNP_Action_type{
             void Receive();
             void Parse();
             void send();
-    protected:
+        protected:
 
-    private:
+        private:
             std::string command;
             std::string raw_answer;
             TiXmlDocument dom_command;
             TiXmlDocument dom_answer;
 
             UPNP_Action type;
-            std::map<std::string,std::string> args;
-            std::map<std::string,std::string> answers;
+            std::map<std::string, std::string> args;
+            std::map<std::string, std::string> answers;
 
             std::string action;
             std::string service;
@@ -87,7 +92,7 @@ typedef enum UPNP_Action_type{
             std::string findAction();
             Socket *s;
             std::string endl;
-    };
-}
+        };
+    }
 }
 #endif // EPYX_COMMAND_H_

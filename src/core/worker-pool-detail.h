@@ -53,7 +53,7 @@ namespace Epyx
     }
 
     template<typename T> void WorkerPool<T>::setName(const std::string& name) {
-        EPYX_ASSERT(!this->name.empty());
+        EPYX_ASSERT(this->name.empty());
         this->name = name;
     }
 

@@ -57,9 +57,12 @@ namespace Epyx
     }
 
     void Thread::term() {
-        int thread_cancel_status = pthread_cancel(this->thread);
-        EPYX_ASSERT(thread_cancel_status == 0);
-        this->thread = 0;
+        if (this->thread != 0) {
+            int thread_cancel_status = pthread_cancel(this->thread);
+            // Thread may have disappeared
+            EPYX_ASSERT(thread_cancel_status == 0 || thread_cancel_status == ESRCH);
+            this->thread = 0;
+        }
     }
 
     std::string Thread::getName() {
