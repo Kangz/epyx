@@ -24,6 +24,11 @@ namespace Epyx
         static const char spaces[];
 
         /**
+         * @brief ASCII CR LF
+         */
+        static const char crlf[];
+
+        /**
          * @brief Removes left spaces
          *
          * @return The input parameter, without spaces on its left
@@ -82,6 +87,10 @@ namespace Epyx
          * @return A copy of the content of the argument
          */
         static char* toNewChar(const std::string& str);
+
+    private:
+        // Forbid instanciation
+        String();
     };
 }
 

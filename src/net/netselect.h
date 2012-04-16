@@ -28,7 +28,7 @@ namespace Epyx
          * @param numworkers Initial workers number
          * @param workerName Name of workers
          */
-        NetSelect(int numworkers, const std::string workerName);
+        NetSelect(int numworkers, const std::string& workerName);
         /**
          * @brief Desctructor
          */

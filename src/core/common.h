@@ -1,11 +1,11 @@
 /**
  * @file common.h
- * @brief This header file regroups all the files in core, which is a good base for
- * multi-threaded applications
+ * @brief This header file includes all the files in core
  */
 #ifndef EPYX_CORE_COMMON_H
 #define EPYX_CORE_COMMON_H
 
+#include <unistd.h>
 #include "assert.h"
 #include "string.h"
 #include "exception.h"
@@ -18,4 +18,4 @@
 #include "thread.h"
 #include "worker-pool.h"
 
-#endif // EPYX_CORE_COMMON_H
+#endif /* EPYX_CORE_COMMON_H */

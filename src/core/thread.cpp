@@ -9,18 +9,20 @@ namespace Epyx
     bool detail::thread_initialized = false;
 
     Thread::Thread()
-        :thread(0), info(NULL)
-    {
+    :thread(0), info(NULL) {
     }
 
-    Thread::Thread(const std::string name, int id)
-        :thread(0), info(NULL)
-    {
+    Thread::Thread(const std::string& name, int id)
+    :thread(0), info(NULL) {
         this->setName(name, id);
     }
 
-    void Thread::setName(const std::string name, int id)
-    {
+    Thread::~Thread() {
+        if (this->thread != 0)
+            this->term();
+    }
+
+    void Thread::setName(const std::string& name, int id) {
         //Set up oly once the thread info for this thread
         EPYX_ASSERT(info == NULL);
         info = new detail::ThreadInfo();
@@ -34,44 +36,38 @@ namespace Epyx
         }
     }
 
-    const std::string& Thread::getThisName()
-    {
+    const std::string& Thread::getThisName() {
         EPYX_ASSERT(info != NULL);
         return info->name;
     }
 
-    bool Thread::start()
-    {
+    bool Thread::start() {
         EPYX_ASSERT(info != NULL);
         int thread_create_status = pthread_create(&(this->thread), NULL,
-                                                  Thread::_thread_start, this);
+            Thread::_thread_start, this);
         EPYX_ASSERT(thread_create_status == 0);
         EPYX_ASSERT(this->thread != 0);
         return true;
     }
 
-    void Thread::wait()
-    {
+    void Thread::wait() {
         EPYX_ASSERT(this->thread != 0);
         int thread_join_status = pthread_join(this->thread, NULL);
         EPYX_ASSERT(thread_join_status == 0);
     }
 
-    void Thread::term()
-    {
+    void Thread::term() {
         int thread_cancel_status = pthread_cancel(this->thread);
         EPYX_ASSERT(thread_cancel_status == 0);
         this->thread = 0;
     }
 
-    std::string Thread::getName()
-    {
+    std::string Thread::getName() {
         return detail::thread_infos->get()->name;
     }
 
-    void Thread::init(std::string name, int id)
-    {
-        detail::thread_infos = new TLSPointer<detail::ThreadInfo>();
+    void Thread::init(const std::string& name, int id) {
+        detail::thread_infos = new TLSPointer<detail::ThreadInfo > ();
 
         //Add the main thread's info
         detail::ThreadInfo* main_ti = new detail::ThreadInfo();
@@ -81,13 +77,11 @@ namespace Epyx
         detail::thread_initialized = true;
     }
 
-    bool Thread::isInitialized()
-    {
+    bool Thread::isInitialized() {
         return detail::thread_initialized;
     }
 
-    void* Thread::_thread_start(void *arg)
-    {
+    void* Thread::_thread_start(void *arg) {
         try {
             // Call Thread::run()
             Epyx::Thread *self = (Epyx::Thread*) arg;

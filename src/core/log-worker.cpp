@@ -1,13 +1,14 @@
-#include "log-worker.h"
+#include "log.h"
 #include <string>
 
-namespace Epyx {
-namespace log {
+namespace Epyx
+{
+namespace log
+{
 
-    Worker::Worker(int flags_, const std::string& file)
-    :Thread("Logging Worker"), flags(flags_)
-    {
-        if(!file.empty() && (this->flags & LOGFILE)) {
+    Worker::Worker(int flags, const std::string& file)
+    :Thread("Logging Worker"), flags(flags) {
+        if (!file.empty() && (this->flags & LOGFILE)) {
             //TODO: Close it
             this->logFile.open(file.c_str());
             EPYX_ASSERT_NO_LOG(logFile.is_open())
@@ -28,7 +29,7 @@ namespace log {
         LogEntry* entry = new LogEntry(initializer);
         Condition* cond = NULL;
 
-        if(wait) {
+        if (wait) {
             entry->cond = new Condition();
             entry->cond->lock();
             cond = entry->cond;
@@ -37,14 +38,14 @@ namespace log {
         this->entries.push(entry);
 
         //The entry will get destroyed but not the condition
-        if(wait) {
+        if (wait) {
             cond->wait();
             cond->unlock();
             delete cond;
         }
     }
 
-    void Worker::quit(){
+    void Worker::quit() {
         LogEntry initializer = {"", QUIT, 0, "", NULL};
         LogEntry* entry = new LogEntry(initializer);
 
@@ -61,26 +62,25 @@ namespace log {
         "FATAL"
     };
 
-
     void Worker::run() {
-        while(1){
+        while (1) {
             //Take all the elements from the queue with only one call
             std::deque<LogEntry*>* entries = this->entries.flush();
-            if(entries == NULL) continue;
+            if (entries == NULL) continue;
 
-            while(!entries->empty()){
+            while (!entries->empty()) {
                 LogEntry* entry = entries->front();
 
-                if(entry->prio == FLUSH || entry->prio == QUIT) {
-                    if(this->flags & CONSOLE) std::cout << std::flush;
-                    if(this->flags & ERRORCONSOLE) std::cerr << std::flush;
-                    if(this->flags & LOGFILE) logFile << std::flush;
+                if (entry->prio == FLUSH || entry->prio == QUIT) {
+                    if (this->flags & CONSOLE) std::cout << std::flush;
+                    if (this->flags & ERRORCONSOLE) std::cerr << std::flush;
+                    if (this->flags & LOGFILE) logFile << std::flush;
 
-                    if(entry->cond != NULL) {
+                    if (entry->cond != NULL) {
                         entry->cond->notify();
                     }
 
-                    if(entry->prio == QUIT) {
+                    if (entry->prio == QUIT) {
                         //TODO clean up
                         return;
                     }
@@ -113,13 +113,13 @@ namespace log {
 
         //TODO: Flush control commands
         //Do the actual IO
-        if(this->flags & CONSOLE) {
+        if (this->flags & CONSOLE) {
             std::cout << "[" << time_buffer << "] " << info_buffer.str() << " " << entry->str << "\n";
         }
-        if(this->flags & ERRORCONSOLE) {
+        if (this->flags & ERRORCONSOLE) {
             std::cerr << "[" << time_buffer << "] " << info_buffer.str() << " " << entry->str << "\n";
         }
-        if(this->flags & LOGFILE) {
+        if (this->flags & LOGFILE) {
             logFile << "[" << date_buffer << " " << time_buffer << "] " << info_buffer.str() << " " << entry->str << "\n";
         }
     }

@@ -4,7 +4,7 @@
 namespace Epyx
 {
 
-    NetSelect::NetSelect(int numworkers, const std::string workerName)
+    NetSelect::NetSelect(int numworkers, const std::string& workerName)
     :running(true) {
         workers.setName(workerName);
         workers.setNumWorkers(numworkers);

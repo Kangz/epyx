@@ -9,16 +9,17 @@
 #include <pthread.h>
 #include "tls-pointer.h"
 
-namespace Epyx {
-
-    namespace detail {
-        struct ThreadInfo {
+namespace Epyx
+{
+    namespace detail
+    {
+        struct ThreadInfo
+        {
             std::string name;
         };
         extern TLSPointer<ThreadInfo>* thread_infos;
         extern bool thread_initialized;
     }
-
 
     /**
      * @class Thread
@@ -27,19 +28,33 @@ namespace Epyx {
      *
      * To define a thread, you should inherit from this abstract class.
      */
-    class Thread {
+    class Thread
+    {
     public:
 
         /**
-         * @brief The Thread constructor
+         * @brief Thread constructor
          */
         Thread();
-        Thread(const std::string name, int id = -1);
+
+        /**
+         * @brief Give a name in the constructor
+         * @param name given name
+         * @param id Thread ID
+         */
+        Thread(const std::string& name, int id = -1);
+
+        /**
+         * @brief Basic destructor, which terminates the thread
+         */
+        virtual ~Thread();
 
         /**
          * @brief Set name-id if thread was created without one
+         * @param name given name
+         * @param id Thread ID
          */
-        void setName(const std::string name, int id = -1);
+        void setName(const std::string& name, int id = -1);
 
         /**
          * @brief Start the thread
@@ -73,7 +88,7 @@ namespace Epyx {
          * @param name Name of the main thread
          * @param id ID of the main thread
          */
-        static void init(std::string name = "Main", int id = -1);
+        static void init(const std::string& name = "Main", int id = -1);
         /**
          * @brief Tell wether the thread system is initialised
          * @return true if Thread::init() was called
@@ -87,13 +102,21 @@ namespace Epyx {
         virtual void run() = 0;
 
     private:
+        // Disable copy construction and assignment.
+        Thread(const Thread&);
+        const Thread& operator=(const Thread&);
+
+        /**
+         * @brief Thread entry point
+         * @param Thread object
+         * @return NULL
+         */
         static void* _thread_start(void*);
 
         //And this is the ofstream of each stream
         pthread_t thread;
         detail::ThreadInfo* info;
     };
-
 }
 
 #endif /* EPYX_THREAD_H */

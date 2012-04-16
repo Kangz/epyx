@@ -9,6 +9,7 @@
 namespace Epyx
 {
     const char String::spaces[] = " \t\n\v\f\r";
+    const char String::crlf[] = "\r\n";
 
     std::string& String::ltrim(std::string& str) {
         str.erase(0, str.find_first_not_of(spaces));
@@ -36,7 +37,7 @@ namespace Epyx
         return str;
     }
 
-    long String::toInt(const std::string& s){
+    long String::toInt(const std::string& s) {
         return String::toInt(s.c_str());
     }
 
@@ -53,16 +54,15 @@ namespace Epyx
         throw new FailException("String::toInt", "Invalid characters");
     }
 
-    std::string String::fromInt(int n){
+    std::string String::fromInt(int n) {
         std::stringstream out;
         out << n;
         return out.str();
     }
 
-    char* String::toNewChar(const std::string& s){
+    char* String::toNewChar(const std::string& s) {
         char* res = new char[s.length()];
         memcpy(res, s.c_str(), s.length());
         return res;
     }
-
 }

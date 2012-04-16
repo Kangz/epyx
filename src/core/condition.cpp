@@ -4,7 +4,9 @@
 #include <errno.h>
 #include <sys/time.h>
 
-namespace Epyx {
+namespace Epyx
+{
+
     Condition::Condition() {
         //The mutex is automatically initialized
         int cond_init_status = pthread_cond_init(&(this->cond), NULL);
@@ -54,7 +56,7 @@ namespace Epyx {
     }
 
     bool Condition::timedWait(int ms) {
-        return this->timedWait(ms/1000, (ms%1000)*1000000);
+        return this->timedWait(ms / 1000, (ms % 1000)*1000000);
     }
 
     void Condition::notify() {

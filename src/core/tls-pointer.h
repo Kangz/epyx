@@ -10,8 +10,8 @@
 #include "exception.h"
 
 
-namespace Epyx {
-
+namespace Epyx
+{
     /**
      * @class TLSPointer
      *
@@ -27,11 +27,9 @@ namespace Epyx {
      *
      * @tparam T the base type of the pointers contained in the TLSPointer
      */
-    template<typename T> class TLSPointer {
+    template<typename T> class TLSPointer
+    {
     public:
-
-        static void _default_destructor(T* object);
-
         /**
          * @brief A TLSPointer constructor
          * @param destructor (optional) a pointer to a destructor function
@@ -60,7 +58,7 @@ namespace Epyx {
          * @brief sets the value of the pointer
          * @param new_value (optional) the new value of the pointer, null if omitted
          */
-        void reset(T* new_value=NULL);
+        void reset(T* new_value = NULL);
 
         /**
          * @brief equivalent to {temp = tls.get(); tls.reset(); return temp}
@@ -75,9 +73,12 @@ namespace Epyx {
 
         void (*destructor)(T*);
         T* (*constructor)();
-        pthread_key_t* key;
+        pthread_key_t key;
 
-        typedef void(void_destructor_func)(void*);
+        // Destructor type with void*
+        typedef void(void_destructor_func) (void*);
+
+        static void _default_destructor(T* object);
     };
 
 }
