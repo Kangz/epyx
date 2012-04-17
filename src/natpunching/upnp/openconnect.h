@@ -7,6 +7,7 @@
 
 #include "../../net/socket.h"
 #include "../../net/netselect.h"
+#include "../../net/uri.h"
 #include "../../core/log.h"
 #include "igd.h"
 #include "discovery.h"
@@ -43,8 +44,7 @@ namespace Epyx
             void closeMapPort();
 
             IGD igd;
-            Address addr;
-            std::string path;
+            URI uri;
             bool success;
         };
     }

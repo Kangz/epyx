@@ -97,6 +97,7 @@ namespace Epyx
          * @param addr2
          */
         friend bool operator!=(const Address& addr1, const Address& addr2);
+
     private:
         // IP string
         std::string ip;

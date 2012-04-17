@@ -32,13 +32,11 @@ namespace Epyx
             }
 
             // Get answer (note: listener is deleted when discoverSelect is)
-            Address addr = listener->getAddress();
-            std::string rootPath = listener->getPath();
+            uri = listener->getURI();
             discoverSelect.term();
 
             // Now use addr and path
-            log::debug << "Address : " << addr << log::endl;
-            log::debug << "Path : " << rootPath << log::endl;
+            log::debug << "URI : " << uri << log::endl;
             success = true;
 
             /*if (success) {
@@ -54,7 +52,7 @@ namespace Epyx
             }
             return addr;
              */
-            return addr;
+            return uri.getAddress();
         }
     }
 }
