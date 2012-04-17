@@ -94,6 +94,7 @@ add_executable(
     ${natpunching_sources}
     ${tinyxml_sources}
     ${parser_sources}
+    src/test-natpunching.cpp
 )
 
 target_link_libraries(

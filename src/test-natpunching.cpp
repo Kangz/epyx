@@ -1,14 +1,17 @@
+#include "core/common.h"
+#include "natpunching/upnp/openconnect.h"
+/*
 #include <iostream>
 #include <sstream>
 #include <map>
-#include "command.h"
-#include "openconnect.h"
-#include "../../net/socket.h"
-#include "../../net/address.h"
-#include "igd.h"
-#include "../../core/exception.h"
-#include "../../core/common.h"
-
+#include "core/common.h"
+#include "net/socket.h"
+#include "net/address.h"
+#include "natpunching/upnp/command.h"
+#include "natpunching/upnp/openconnect.h"
+#include "natpunching/upnp/igd.h"
+*/
+/*
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -16,10 +19,11 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 #define SOCKET_ERROR (-1)
+*/
 
 int main(int argc, char* argv[]) {
-    std::string address, service, path;
-    unsigned short port;
+    //std::string address, service, path;
+    //unsigned short port;
     Epyx::Thread::init();
     Epyx::log::init(Epyx::log::CONSOLE, "");
     Epyx::Socket::init();
