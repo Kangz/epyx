@@ -7,6 +7,7 @@
 
 #include "../../core/condition.h"
 #include "../../net/netselectsocket.h"
+#include "../../net/uri.h"
 #include "../../parser/httpparser.h"
 
 namespace Epyx
@@ -33,16 +34,10 @@ namespace Epyx
             bool waitAnswer(int timeout);
 
             /**
-             * @brief Get address (IP:port) of the answer
-             * @return a copy of this->addr
+             * @brief Get answer URI
+             * @return URI
              */
-            Address getAddress() const;
-
-            /**
-             * @brief Get absolute path of the answer
-             * @return a copy of this->path
-             */
-            std::string getPath() const;
+            const URI& getURI() const;
 
         protected:
             void eat(const char *data, long size);
@@ -53,6 +48,7 @@ namespace Epyx
             bool hasAnswer;
             Condition answerCond;
             HTTPParser htpars;
+            URI discoveredURI;
         };
 
     } // namespace UPNP

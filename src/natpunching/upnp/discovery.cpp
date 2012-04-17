@@ -29,28 +29,29 @@ namespace Epyx
             // Eat data with HTTP parser
             htpars.eat(data, size);
             GTTPacket *pkt = htpars.getPacket();
-            if (pkt == NULL && htpars.getError(error)) {
-                log::error << "HTTP Parser error during discovery:\n"
-                    << error << log::endl;
+            if (pkt == NULL) {
+                // Incomplete packet, there may be an error
+                if (htpars.getError(error)) {
+                    log::error << "HTTP Parser error during discovery:\n"
+                        << error << log::endl;
+                }
+                return;
             }
 
-            // Parse a full HTTP packet
-            if ((pkt != NULL) && (pkt->headers["usn"]).find("InternetGateway")) {
-                std::string location = pkt->headers["location"];
-                if ((n = location.find("http://")) != std::string::npos) {
-                    location = location.substr(n + 7);
-                }
-                log::debug << location << log::endl;
-                n = location.find('/');
-                log::debug << location.substr(0, n) << log::endl;
-                addr = Address(location.substr(0, n));
-                rootPath = location.substr(n);
-                htpars.reset();
-                log::debug << "Address : " << addr << log::endl << "Path : " << rootPath << log::endl;
-                log::flush();
-                hasAnswer = true;
-                answerCond.notifyAll();
-            }
+            // Here, pkt is an HTTP packet.
+            // Filter in Internet Gateways
+            if (!pkt->headers["usn"].find("InternetGateway"))
+                return;
+
+            std::string location = pkt->headers["location"];
+            discoveredURI = URI(location);
+            htpars.reset();
+            log::debug << "Location : " << location << log::endl;
+            log::debug << "URI : " << discoveredURI << log::endl;
+
+            // We have an answer !
+            hasAnswer = true;
+            answerCond.notifyAll();
         }
 
         bool Discovery::waitAnswer(int timeout) {
@@ -59,12 +60,8 @@ namespace Epyx
             return hasAnswer;
         }
 
-        Address Discovery::getAddress() const {
-            return addr;
-        }
-
-        std::string Discovery::getPath() const {
-            return rootPath;
+        const URI& Discovery::getURI() const {
+            return discoveredURI;
         }
     } // namespace UPNP
 } // namespace Epyx

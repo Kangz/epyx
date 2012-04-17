@@ -7,18 +7,34 @@ namespace Epyx
 {
 
     Address::Address(const std::string& addressFormat) {
+        // portstr may be a ":port" suffix
+        std::string portstr;
         if (addressFormat.at(0) == '[') {
             //Case if IPv6
-            unsigned int n = addressFormat.find(']');
+            size_t n = addressFormat.find(']');
+            if (n == std::string::npos) {
+                // TODO: Better sanity checks
+                log::fatal << "Unknown address " << addressFormat << log::endl;
+                throw FailException("Address", "Invalid IPv6 address");
+            }
             ip = addressFormat.substr(1, n);
-            port = (unsigned short) String::toInt(addressFormat.substr(n + 2).c_str());
-            ipVersion = 6;
+            portstr = addressFormat.substr(n + 1);
+             ipVersion = 6;
         } else {
             //If not IPv6, it's IPv4, obviously :P
-            unsigned int n = addressFormat.find(':');
-            this->ip = addressFormat.substr(0, n);
-            port = (unsigned short) String::toInt(addressFormat.substr(n + 1).c_str());
+            size_t n = addressFormat.find(':');
+            if (n == std::string::npos) {
+                ip = addressFormat;
+            } else {
+                ip = addressFormat.substr(0, n);
+                portstr = addressFormat.substr(n);
+            }
+            // TODO: write here some sanity check about an IP address
             ipVersion = 4;
+        }
+        // Use port
+        if (!portstr.empty() && portstr[0] == ':') {
+           port = (unsigned short) String::toInt(portstr.substr(1));
         }
     }
 
@@ -77,7 +93,7 @@ namespace Epyx
     }
 
     unsigned short Address::getPort() const {
-        return this->port;
+        return port;
     }
 
     void Address::getSockAddr(struct sockaddr *saddr) const {
