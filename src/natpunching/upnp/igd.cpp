@@ -1,5 +1,6 @@
 #include "igd.h"
 #include "command.h"
+#include "rootdesc.h"
 #include "../../net/tcpsocket.h"
 #include "../../net/httpheaders.h"
 #include "../../core/common.h"
@@ -14,7 +15,6 @@
 #include <ifaddrs.h>
 #define SOCKET_ERROR (-1)
 
-#define BIG_SIZE 4096
 #define EPYX_MSG "Epyx Going Through your Nat with UPnP IGD Protocol"
 
 namespace Epyx
@@ -22,67 +22,20 @@ namespace Epyx
     namespace UPNP
     {
 
-        IGD::IGD(const std::string& rootDescPath)
-        :address(), rootDescPath(rootDescPath) {
+        IGD::IGD(const URI& rootDescURI)
+        :rootDescURI(rootDescURI), address(rootDescURI.getAddress()), services() {
         }
 
-        IGD::IGD(const Address& address, const std::string& rootDescPath)
-        :address(address), rootDescPath(rootDescPath) {
-        }
-
-        void IGD::setAddress(const Address& address) {
-            this->address = address;
-        }
-
-        void IGD::setRootDescPath(const std::string& rootDescPath) {
-            this->rootDescPath = rootDescPath;
-        }
-
-        void IGD::parseRootDescFile(TiXmlElement * actualNode) {
-            //If true, actualNode->Value() == "service"
-            if (strcmp(actualNode->Value(), "service") == 0)  {
-                const char *type = actualNode->FirstChildElement("seriveType")->GetText();
-                const char *ctrlUrl = actualNode->FirstChildElement("controlURL")->GetText();
-                services[type] = ctrlUrl;
+        bool IGD::getServices() {
+            RootDesc netRootDesc(rootDescURI);
+            if (!netRootDesc.queryAnswerIn(10, &services)) {
+                log::error << "Unable to load UPnP services" << log::endl;
+                return false;
             }
-            else if (strcmp(actualNode->Value(), "serviceList") == 0)
-                parseRootDescFile(actualNode->FirstChildElement());
-            else if (strcmp(actualNode->Value(), "deviceList") == 0)
-                parseRootDescFile(actualNode->FirstChildElement());
-            else if (strcmp(actualNode->Value(), "device") == 0)
-                parseRootDescFile(actualNode->FirstChildElement());
-
-            if (actualNode->NextSiblingElement() != NULL)
-                parseRootDescFile(actualNode->NextSiblingElement());
-        }
-
-        void IGD::getServices() {
-            std::stringstream header;
-            header << "GET " << rootDescPath << " HTTP/1.1" << String::crlf
-                << "Host: " << this->address << String::crlf
-                << "Connection: Close" << String::crlf
-                << "User-Agent: Epyx Natpunching FTW" << String::crlf << String::crlf;
-            TCPSocket sock(address);
-            sock.write(header.str());
-            char data[BIG_SIZE];
-            int bytes = sock.recv(data, BIG_SIZE);
-            std::string reply = data;
-            int packetSize = HTTPHeaders::getlength(HTTPHeaders::getHeaders(reply));
-            while (bytes < packetSize) {
-                memset(data, '\0', BIG_SIZE); // Needed for the working of sock.recv()
-                bytes += sock.recv((void *) data, BIG_SIZE);
-                reply.append(data);
-            }
-            std::string rootDesc = HTTPHeaders::stripHeaders(reply);
-            //We got the rootDesc data. We now need to parse it to find all the available services.
-            TiXmlDocument domRootDesc;
-            domRootDesc.Parse(rootDesc.c_str());
-            parseRootDescFile(domRootDesc.FirstChildElement()->FirstChildElement());
+            return true;
         }
 
         std::string IGD::getExtIPAdress() {
-            Command order(address.getIp(), address.getPort());
-            order.setOption(Epyx::UPNP::UPNP_ACTION_GET_EXT_IP);
             std::string WanIPConnService, WanIPConnCtl;
             for (std::map<std::string, std::string>::iterator it = services.begin(); it != services.end(); ++it) {
                 if (it->first.find("WANIPConn")) {
@@ -90,48 +43,50 @@ namespace Epyx
                     WanIPConnCtl = it->second;
                 }
             }
-            order.setService(WanIPConnService);
-            order.setPath(WanIPConnCtl);
-            order.buildCommand();
-            order.send();
-            order.Receive();
-            order.Parse();
-            return order.getResult()["NewExternalIPAddress"];
+            Command order(address, WanIPConnService, WanIPConnCtl);
+            order.setAction(UPNP::UPNP_ACTION_GET_EXT_IP);
+            CommandResult *res = order.queryAnswer(10);
+            if (res == NULL) {
+                log::error << "UPnP: Unable to get external IP address" << log::endl;
+                return "";
+            }
+            std::string ip = res->vars["NewExternalIPAddress"];
+            delete res;
+            return ip;
         }
 
         std::list<portMap> IGD::getListPortMap() {
-            std::list<portMap> res;
-            std::string returnedHeader = "";
-            int i = 0;
-            do {
-                Command order(address.getIp(), address.getPort());
-                order.setOption(Epyx::UPNP::UPNP_ACTION_GET_EXT_IP);
-                std::string WanIPConnService, WanIPConnCtl;
-                for (std::map<std::string, std::string>::iterator it = services.begin(); it != services.end(); ++it) {
-                    if (it->first.find("WANIPConn")) {
-                        WanIPConnService = it->first;
-                        WanIPConnCtl = it->second;
-                    }
+            std::list<portMap> portMapList;
+            std::string WanIPConnService, WanIPConnCtl;
+            for (std::map<std::string, std::string>::iterator it = services.begin(); it != services.end(); ++it) {
+                if (it->first.find("WANIPConn")) {
+                    WanIPConnService = it->first;
+                    WanIPConnCtl = it->second;
                 }
-                order.setService(WanIPConnService);
-                order.setPath(WanIPConnCtl);
-                order.buildCommand();
-                order.send();
-                order.Receive();
-                returnedHeader = HTTPHeaders::getHeaders(order.getAnswer());
-                order.Parse();
-                std::map<std::string, std::string> parsedResult = order.getResult();
-                unsigned short extPort = (unsigned short) atoi(parsedResult["NewExternalPort"].c_str());
-                unsigned short intPort = (unsigned short) atoi(parsedResult["NewInternalPort"].c_str());
-                Epyx::Address newInternalAddress(parsedResult["NewInternalClient"].c_str(), intPort, 4);
-                portMap tmp = {(parsedResult["NewEnabled"] != "0"),
+            }
+            int httpStatus = 0;
+            do {
+                Command order(address, WanIPConnService, WanIPConnCtl);
+                order.setAction(Epyx::UPNP::UPNP_ACTION_GET_EXT_IP); // FIXME: Is it a bug ?
+                CommandResult *res = order.queryAnswer(10);
+                if (res == NULL) {
+                    log::error << "UPnP: Unable to get portmap list" << log::endl;
+                    break;
+                }
+                unsigned short extPort = (unsigned short) String::toInt(res->vars["NewExternalPort"]);
+                unsigned short intPort = (unsigned short) String::toInt(res->vars["NewInternalPort"]);
+                Epyx::Address newInternalAddress(res->vars["NewInternalClient"], intPort, 4);
+                portMap tmp = {!!strcmp(res->vars["NewEnabled"].c_str(), "0"),
                     newInternalAddress,
                     extPort,
-                    parsedResult["NewProtocol"],
-                    parsedResult["NewPortMappingDescription"]};
-                res.push_back(tmp);
-            } while (!returnedHeader.find("500 Internal"));
-            return res;
+                    res->vars["NewProtocol"],
+                    res->vars["NewPortMappingDescription"]};
+                portMapList.push_back(tmp);
+                httpStatus = res->http_status;
+                delete res;
+                res = NULL;
+            } while (httpStatus != 500);
+            return portMapList;
         }
 
         std::string IGD::getLocalAdress() {
@@ -159,68 +114,52 @@ namespace Epyx
             return IPAddress;
         }
 
-        const Epyx::Address IGD::addPortMap(unsigned short port, protocol proto) {
+        const Address IGD::addPortMap(unsigned short port, protocol proto) {
             return this->addPortMap(port, proto, port);
         }
 
-        const Epyx::Address IGD::addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port) {
+        const Address IGD::addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port) {
             std::string prot = (proto == Epyx::UPNP::TCP) ? "TCP" : "UDP";
-            std::cout << "Entering addPortMap(" << loc_port << "," << prot << "," << ext_port << ")" << std::endl;
+            log::debug << "Entering addPortMap(" << loc_port << "," << prot << "," << ext_port << ")" << log::endl;
             std::string localIP = this->getLocalAdress();
-            std::cout << "Local IP Address is " << localIP << std::endl;
-            Epyx::UPNP::Command order(this->address.getIp(), this->address.getPort());
-            order.setOption(Epyx::UPNP::UPNP_ACTION_ADDPORTMAP);
+            log::debug << "Local IP Address is " << localIP << log::endl;
 
-            char loc_portChar[10], ext_portChar[10];
-            sprintf(loc_portChar, "%d", loc_port);
-            sprintf(ext_portChar, "%d", ext_port);
+            std::string WanIPConnService, WanIPConnCtl;
+            for (std::map<std::string, std::string>::iterator it = services.begin(); it != services.end(); ++it) {
+                if (it->first.find("WANIPConn")) {
+                    WanIPConnService = it->first;
+                    WanIPConnCtl = it->second;
+                }
+            }
+            log::debug << "Selected service is " << WanIPConnService
+                << " His Control Remote path is " << WanIPConnCtl << log::endl;
+            Command order(address, WanIPConnService, WanIPConnCtl);
+            order.setAction(Epyx::UPNP::UPNP_ACTION_ADDPORTMAP);
+
+            std::string loc_portStr = String::fromInt(loc_port);
+            std::string ext_portStr = String::fromInt(ext_port);
 
             order.addArgument("NewRemoteHost", "");
-            order.addArgument("NewExternalPort", ext_portChar);
+            order.addArgument("NewExternalPort", ext_portStr);
             order.addArgument("NewProtocol", prot);
-            order.addArgument("NewInternalPort", loc_portChar);
+            order.addArgument("NewInternalPort", loc_portStr);
             order.addArgument("NewInternalClient", localIP);
             order.addArgument("NewEnabled", "1");
             order.addArgument("NewPortMappingDescription", EPYX_MSG);
             order.addArgument("NewLeaseDuration", "0");
-
-
-            std::string WanIPConnService, WanIPConnCtl;
-            for (std::map<std::string, std::string>::iterator it = services.begin(); it != services.end(); ++it) {
-                if (it->first.find("WANIPConn")) {
-                    WanIPConnService = it->first;
-                    WanIPConnCtl = it->second;
-                }
+            CommandResult *res = order.queryAnswer(30);
+            if (res == NULL) {
+                log::error << "IGD: Unable to add a port map" << log::endl;
+                return Address();
             }
-            std::cout << "Selected service is " << WanIPConnService << " His Control Remote path is " << WanIPConnCtl << std::endl;
-            order.setService(WanIPConnService);
-            order.setPath(WanIPConnCtl);
-            order.buildCommand();
-            std::cout << "Sending ..." << std::endl;
-            order.send();
-            std::cout << "Sent!" << std::endl << "Waiting for answer" << std::endl;
-            order.Receive();
-            std::cout << "Answer received ! : " << order.getAnswer() << std::endl;
-            if (HTTPHeaders::getHeaders(order.getAnswer()).find("500 Internal") != std::string::npos) {
-                std::cerr << "IGD : Couldn't add port map" << std::endl;
-                throw FailException("IGD", "Couldn't add requested Port Map");
+            if (res->http_status == 500) {
+                log::error << "IGD: Couldn't add requested port map" << log::endl;
+                return Address();
             }
-            const Epyx::Address extAddress(this->getExtIPAdress().c_str(), ext_port, 4);
-            return extAddress;
+            return Address(this->getExtIPAdress(), ext_port, 4);
         }
 
-        void IGD::delPortMap(Address addr, protocol proto) {
-            std::string prot = (proto == Epyx::UPNP::TCP) ? "TCP" : "UDP";
-            Epyx::UPNP::Command order(this->address.getIp(), this->address.getPort());
-            order.setOption(Epyx::UPNP::UPNP_ACTION_DELPORTMAP);
-
-            char portChar[10];
-            sprintf(portChar, "%d", addr.getPort());
-
-            order.addArgument("NewRemoteHost", "");
-            order.addArgument("NewExternalPort", portChar);
-            order.addArgument("NewProtocol", prot);
-
+        bool IGD::delPortMap(const Address& addr, protocol proto) {
             std::string WanIPConnService, WanIPConnCtl;
             for (std::map<std::string, std::string>::iterator it = services.begin(); it != services.end(); ++it) {
                 if (it->first.find("WANIPConn")) {
@@ -228,17 +167,30 @@ namespace Epyx
                     WanIPConnCtl = it->second;
                 }
             }
-            order.setService(WanIPConnService);
-            order.setPath(WanIPConnCtl);
-            order.buildCommand();
-            order.send();
-            order.Receive();
-            if (HTTPHeaders::getHeaders(order.getAnswer()).find("500 Internal") != std::string::npos)
-                throw FailException("IGD", "Couldn't delete requested Port Map");
+            Command order(address, WanIPConnService, WanIPConnCtl);
+            order.setAction(Epyx::UPNP::UPNP_ACTION_DELPORTMAP);
+
+            std::string prot = (proto == Epyx::UPNP::TCP) ? "TCP" : "UDP";
+
+            std::string portString = String::fromInt(addr.getPort());
+            order.addArgument("NewRemoteHost", "");
+            order.addArgument("NewExternalPort", portString);
+            order.addArgument("NewProtocol", prot);
+
+            CommandResult *res = order.queryAnswer(30);
+            if (res == NULL) {
+                log::error << "IGD: Unable to delete a port map" << log::endl;
+                return false;
+            }
+            if (res->http_status == 500) {
+                log::error << "IGD: Couldn't delete requested Port Map" << log::endl;
+                return false;
+            }
+            return true;
         }
 
         std::map<std::string, std::string> IGD::getServiceList() {
-            return this->services;
+            return services;
         }
     }
 }

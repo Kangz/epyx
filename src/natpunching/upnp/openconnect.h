@@ -10,7 +10,6 @@
 #include "../../net/uri.h"
 #include "../../core/log.h"
 #include "igd.h"
-#include "discovery.h"
 
 #include <string>
 #include <map>
@@ -30,6 +29,10 @@ namespace Epyx
              * @brief constructor
              */
             Natpunch();
+            /**
+             * @brief destructor
+             */
+            ~Natpunch();
 
             /**
              * @brief creating a port mapping behind a NAT
@@ -43,7 +46,7 @@ namespace Epyx
             void testConnection();
             void closeMapPort();
 
-            IGD igd;
+            IGD *igd;
             URI uri;
             bool success;
         };

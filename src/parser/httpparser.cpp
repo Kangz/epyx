@@ -36,7 +36,6 @@ namespace Epyx
             i++;
         }
         currentPkt->headers["HTTP-code"] = std::string(l + iDesc, i - iDesc);
-
     }
 
     void HTTPParser::parseHeaderLine(const std::string& line) {

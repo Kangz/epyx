@@ -18,12 +18,12 @@ namespace Epyx
                 << "HOST: 239.255.255.250:1900" << String::crlf
                 << "ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1" << String::crlf
                 << "MAN: \"ssdp:discover\"" << String::crlf
-                << "MX: 2" << String::crlf << String::crlf;
+                << "MX: 2" << String::crlf
+                << String::crlf;
             return socket().write(message.str());
         }
 
         URI* Discovery::eat(const char *data, long size) {
-            int n;
             std::string error;
             //log::debug << "Eating : " << size << " bytes" << log::endl;
             //log::debug << data << log::endl;
@@ -41,12 +41,15 @@ namespace Epyx
             }
 
             // Here, pkt is an HTTP packet.
-            // Filter in Internet Gateways
-            if (!pkt->headers["usn"].find("InternetGateway"))
-                return NULL;
+            URI *uri = NULL;
 
-            // Return location
-            return new URI(pkt->headers["location"]);
+            // Filter in Internet Gateways
+            if (pkt->headers["usn"].find("InternetGateway")) {
+                // Return location
+                uri = new URI(pkt->headers["location"]);
+            }
+            delete pkt;
+            return uri;
         }
     }
 }

@@ -1,4 +1,5 @@
 #include "openconnect.h"
+#include "discovery.h"
 #include "../../net/udpsocket.h"
 #include <sstream>
 #include <iostream>
@@ -16,40 +17,34 @@ namespace Epyx
         :success(false) {
         }
 
+        Natpunch::~Natpunch(){
+            if (igd != NULL) {
+                delete igd;
+                igd = NULL;
+            }
+        }
+
         const Address Natpunch::openMapPort(unsigned short localPort,
             unsigned short remotePort) {
             // Discovery UDP socket
             Discovery disco;
-            if (!disco.query()) {
-                log::error << "Unable to send discovery query" << log::endl;
+            if (!disco.queryAnswerIn(10, &uri)) {
+                log::error << "UPnP discovery failed" << log::endl;
                 return Address();
             }
-            URI *puri = disco.answer(10);
-            if (puri == NULL) {
-                log::error << "No answer was received for UPnP discovery" << log::endl;
-                return Address();
-            }
-            uri = *puri;
-            delete puri;
 
-            // Now use addr and path
+            // Now use IGD
             log::debug << "URI : " << uri << log::endl;
-            success = true;
-
-            /*if (success) {
-                igd.setAddress(this->addr);
-                igd.setRootDescPath(path);
-                igd.getServices();
-                try {
-                    addr = igd.addPortMap(localPort, Epyx::UPNP::TCP, remotePort);
-
-                } catch (Epyx::FailException e) {
-                    std::cerr << e << std::endl; //replace by Logger.
-                }
+            igd = new IGD(uri);
+            if (!igd->getServices()) {
+                log::error << "Unable to get IGD services" << log::endl;
+                return Address();
             }
+
+            log::debug << "IP addr : " << igd->getExtIPAdress() << log::endl;
+
+            Address addr = igd->addPortMap(localPort, Epyx::UPNP::TCP, remotePort);
             return addr;
-             */
-            return uri.getAddress();
         }
     }
 }

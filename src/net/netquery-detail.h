@@ -93,6 +93,31 @@ namespace Epyx
         }
     }
 
+    template<typename T> bool NetQuery<T>::answerIn(int timeout, T *ans) {
+        T *result = this->answer(timeout);
+        if (result == NULL)
+            return false;
+        if (ans != NULL)
+            *ans = *result;
+        delete result;
+        return true;
+    }
+
+    template<typename T> T* NetQuery<T>::queryAnswer(int timeout) {
+        if (!this->query()) {
+            log::error << "NetQuery: Unable to send query" << log::endl;
+            return NULL;
+        }
+        return this->answer(timeout);
+    }
+
+    template<typename T> bool NetQuery<T>::queryAnswerIn(int timeout, T *ans) {
+        if (!this->query()) {
+            log::error << "NetQuery: Unable to send query" << log::endl;
+            return false;
+        }
+        return this->answerIn(timeout, ans);
+    }
     template<typename T> Socket& NetQuery<T>::socket() const {
         EPYX_ASSERT(sock != NULL);
         return *sock;
