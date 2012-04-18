@@ -9,7 +9,7 @@
 #include <map>
 #include <string>
 #include <list>
-#include "../../net/address.h"
+#include "../../net/uri.h"
 #include "../../../include/tinyxml/tinyxml.h"
 
 namespace Epyx
@@ -36,33 +36,33 @@ namespace Epyx
         } protocol;
         /**
          * @class IGD
-         * @brieg=f Internet Gateway Device Protocol implementation
+         * @brief Internet Gateway Device Protocol implementation
          */
         class IGD
         {
         public:
             /**
              * @brief constructor
-             * @param rootDescPath
+             * @param rootDescURI URI to rootDesc.xml
              */
-            IGD(const std::string& rootDescPath = "");
+            IGD(const URI& rootDescURI);
+
             /**
-             * @brief constructor
-             * @param address
-             * @param rootDescPath
+             * @brief Load services list
+             * @return true if successful, false otherwise
              */
-            IGD(const Epyx::Address& address, const std::string& rootDescPath = "");
+            bool getServices();
+
             /**
-             * @brief Set address (IP:port)
-             * @param address
+             * @brief Get external IP address
+             * @return string
              */
-            void setAddress(const Address& address);
-            /**
-             * @brief Set root description path
-             * @param rootDescPath
-             */
-            void setRootDescPath(const std::string& rootDescPath);
             std::string getExtIPAdress();
+
+            /**
+             * @brief Get list of port map
+             * @return
+             */
             std::list<portMap> getListPortMap();
 
             /**
@@ -70,24 +70,49 @@ namespace Epyx
              * the internet. For compatibility reasons the remote Port must
              * be the same as the local port
              */
-            const Epyx::Address addPortMap(unsigned short port, protocol proto);
-            const Epyx::Address addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port);
-            void getServices();
-            std::string getLocalAdress(); //Gets the local IP adress which communicates with the IGD.
-            void delPortMap(Epyx::Address addr, protocol proto); //Addr must be the IP TCP/UDP coordinates for access to user machine through IGD NAT Device. (Ex the return value of addPortMap)
+            const Address addPortMap(unsigned short port, protocol proto);
+            const Address addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port);
+
+            /**
+             * @brief Gets the local IP adress which communicates with the IGD.
+             * @return
+             */
+            std::string getLocalAdress();
+
+            /**
+             * @brief Delete a port map
+             * @param addr
+             * @param proto TCP or UDP
+             *
+             * Addr must be the IP TCP/UDP coordinates for access to user machine
+             * through IGD NAT Device. (Ex the return value of addPortMap)
+             */
+            bool delPortMap(const Address& addr, protocol proto);
+
+            /**
+             * @brief Get list of services
+             */
             std::map<std::string, std::string> getServiceList();
 
         private:
             /**
+             * @brief URI to rootDesc.xml file
+             */
+            URI rootDescURI;
+
+            /**
+             * @brief IGD address
+             */
+            Address address;
+
+            /**
+             * @brief IGD services
+             *
              * First : Name of service.
              * Second : Control Path.
              * Let's Assume all commands of a service are always supported...
              */
             std::map<std::string, std::string> services;
-
-            Address address;
-            std::string rootDescPath;
-            void parseRootDescFile(TiXmlElement *actualNode);
         };
     }
 }

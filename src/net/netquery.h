@@ -85,6 +85,28 @@ namespace Epyx
          */
         T* answer(int timeout);
 
+        /**
+         * @brief Same as answer(), but modify the given reference
+         * @param timeout
+         * @param ans pointer wher answer is copied
+         * @return true on success
+         */
+        bool answerIn(int timeout, T *ans);
+
+        /**
+         * @brief query() and answer() in one call
+         * @param timeout
+         * @return answer
+         */
+        T* queryAnswer(int timeout);
+        /**
+         * @brief query() and answerIn() in one call
+         * @param timeout
+         * @param ans
+         * @return answer
+         */
+        bool queryAnswerIn(int timeout, T *ans);
+
     protected:
         /**
          * @brief Get internal socket

@@ -3,96 +3,95 @@
  * @brief UPnP Commands
  */
 
-#ifndef EPYX_COMMAND_H_
-#define EPYX_COMMAND_H_
+#ifndef EPYX_UPNP_COMMAND_H
+#define EPYX_UPNP_COMMAND_H
 
 #include <string>
 #include <map>
 #include "../../../include/tinyxml/tinyxml.h"
-#include "../../net/socket.h"
+#include "../../net/netquery.h"
+#include "action.h"
+#include "../../parser/httpparser.h"
 
 namespace Epyx
 {
     namespace UPNP
     {
-        typedef struct UPNP_Arg
+        /**
+         * @brief Result of an UPnP command
+         */
+        typedef struct CommandResult
         {
-            std::string name;
-            std::string value;
-        } UPNP_Arg;
-        typedef enum UPNP_Action_type
-        {
-            UPNP_ACTION_CONNTYPE,
-            UPNP_ACTION_GET_EXT_IP,
-            UPNP_ACTION_ADDPORTMAP,
-            UPNP_ACTION_DELPORTMAP,
-            UPNP_ACTION_NUMENTRIES_PORTMAP,
-            UPNP_ACTION_SPECIFICPORTMAP,
-            UPNP_ACTION_GET_GEN_PORTMAP,
-            UPNP_ACTION_LIST_PORTMAP,
-            UPNP_ACTION_GET_STATINFO
-        } UPNP_Action;
-        class Command
+            // HTTP status code
+            int http_status;
+            // Result HTTP headers
+            std::map<std::string, std::string> headers;
+            // Result variables
+            std::map<std::string, std::string> vars;
+        } CommandResult;
+        /**
+         * @class Command
+         * @brief UPnP command interface
+         */
+        class Command : public NetQuery<CommandResult>
         {
         public:
+            /**
+             * @brief Basic constructor
+             */
             Command();
-            Command(std::string addr, unsigned short port);
-            Command(std::string filename);
-            ~Command();
+            /**
+             * @brief Set remote options in the constructor
+             * @param addr
+             * @param path
+             * @param service
+             */
+            Command(const Address& addr, const std::string& service, const std::string& path);
 
-            static UPNP_Arg buildArg(std::string name, std::string value);
+            /**
+             * @brief Set remote options
+             * @param addr IP address
+             * @param path absolute POST path for requests
+             * @param service name of queried service
+             */
+            void setRemote(const Address& addr, const std::string& service, const std::string& path);
 
+            /**
+             * @brief Set action
+             * @param action
+             */
+            void setAction(const ActionType action);
 
-            void setAddress(std::string addr);
-            std::string getAddress();
-            void setPort(unsigned short port);
-            unsigned short getPort();
-            std::string getAnswer();
-            void setService(std::string service);
-            std::string getService();
-            std::string getOrder();
-            std::map<std::string, std::string> getResult();
+            /**
+             * @brief Set arguments for the action
+             * @param args map of arguments
+             */
+            void setArguments(const std::map<std::string, std::string>& args);
 
+            /**
+             * @brief Add an argument for the action
+             * @param name
+             * @param value
+             */
+            void addArgument(const std::string& name, const std::string& value);
 
-            void setPath(std::string);
-            std::string getPath();
-
-
-            void setOption(UPNP_Action_type type);
-            void setOption(UPNP_Action_type type, std::map<std::string, std::string> args);
-            void setArguments(std::map<std::string, std::string> args);
-            void addArgument(std::string name, std::string value);
-
-            void buildCommand();
-
-            void Receive();
-            void Parse();
-            void send();
+            bool query();
         protected:
+            CommandResult* eat(const char *data, long size);
 
         private:
-            std::string command;
-            std::string raw_answer;
-            TiXmlDocument dom_command;
-            TiXmlDocument dom_answer;
-
-            UPNP_Action type;
-            std::map<std::string, std::string> args;
-            std::map<std::string, std::string> answers;
-
-            std::string action;
+            // Remote variables
+            Address address;
+            std::string path;
             std::string service;
 
-            std::string path;
+            // Query
+            ActionType action;
+            std::map<std::string, std::string> args;
 
-            std::string address;
-            unsigned short port;
-
-            bool needArgs;
-            std::string findAction();
-            Socket *s;
-            std::string endl;
+            // HTTP parser for answer
+            HTTPParser htpars;
         };
     }
 }
-#endif // EPYX_COMMAND_H_
+#endif /* EPYX_UPNP_COMMAND_H */
