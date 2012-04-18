@@ -31,7 +31,7 @@ namespace Epyx
         URI();
         /**
          * @brief Full constructor
-         * @param shema
+         * @param scheme
          * @param addr
          * @param path
          */

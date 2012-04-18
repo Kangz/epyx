@@ -6,7 +6,7 @@
 #define EPYX_UPNP_DISCOVERY_H
 
 #include "../../core/condition.h"
-#include "../../net/netselectsocket.h"
+#include "../../net/netquery.h"
 #include "../../net/uri.h"
 #include "../../parser/httpparser.h"
 
@@ -18,40 +18,26 @@ namespace Epyx
          * @class Discovery
          * @brief UPnP discovery implementation with NetSelectSocket
          */
-        class Discovery : public NetSelectSocket
+        class Discovery : public NetQuery<URI>
         {
         public:
             /**
-             * @brief Constructor, send a search request through a UDP socket
+             * @brief Constructor
              */
             Discovery();
 
             /**
-             * @brief Wait for an answer
-             * @param t timeout in seconds
-             * @return true if there is an answer, false if time out happened
+             * @brief Send a search request through a UDP socket
              */
-            bool waitAnswer(int timeout);
-
-            /**
-             * @brief Get answer URI
-             * @return URI
-             */
-            const URI& getURI() const;
+            bool query();
 
         protected:
-            void eat(const char *data, long size);
+            URI* eat(const char *data, long size);
 
         private:
-            Address addr;
-            std::string rootPath;
-            bool hasAnswer;
-            Condition answerCond;
             HTTPParser htpars;
-            URI discoveredURI;
         };
+    }
+}
 
-    } // namespace UPNP
-} // namespace Epyx
-
-#endif // EPYX_UPNP_DISCOVERY_H
+#endif /* EPYX_UPNP_DISCOVERY_H */
