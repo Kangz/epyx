@@ -18,22 +18,19 @@ namespace Epyx
 
         const Address Natpunch::openMapPort(unsigned short localPort,
             unsigned short remotePort) {
-            // Build a new NetSelect for discovery
-            NetSelect discoverSelect(1, "UPNPDiscovery");
-            discoverSelect.setName("Let's listen in HTTPU");
-
             // Discovery UDP socket
-            Discovery *listener = new Discovery();
-            discoverSelect.add(listener);
-            discoverSelect.start();
-            if (!listener->waitAnswer(10)) {
+            Discovery disco;
+            if (!disco.query()) {
+                log::error << "Unable to send discovery query" << log::endl;
+                return Address();
+            }
+            URI *puri = disco.answer(10);
+            if (puri == NULL) {
                 log::error << "No answer was received for UPnP discovery" << log::endl;
                 return Address();
             }
-
-            // Get answer (note: listener is deleted when discoverSelect is)
-            uri = listener->getURI();
-            discoverSelect.term();
+            uri = *puri;
+            delete puri;
 
             // Now use addr and path
             log::debug << "URI : " << uri << log::endl;

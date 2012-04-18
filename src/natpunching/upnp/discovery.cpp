@@ -9,22 +9,24 @@ namespace Epyx
     {
 
         Discovery::Discovery()
-        :NetSelectSocket(new UDPSocket(Address("239.255.255.250", 1900))),
-        hasAnswer(false) {
+        :NetQuery(new UDPSocket(Address("239.255.255.250", 1900))) {
+        }
+
+        bool Discovery::query() {
             std::stringstream message;
             message << "M-SEARCH * HTTP/1.1" << String::crlf
                 << "HOST: 239.255.255.250:1900" << String::crlf
                 << "ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1" << String::crlf
                 << "MAN: \"ssdp:discover\"" << String::crlf
                 << "MX: 2" << String::crlf << String::crlf;
-            socket().write(message.str());
+            return socket().write(message.str());
         }
 
-        void Discovery::eat(const char *data, long size) {
+        URI* Discovery::eat(const char *data, long size) {
             int n;
             std::string error;
-            log::debug << "Eating : " << size << " bytes" << log::endl;
-            log::debug << data << log::endl;
+            //log::debug << "Eating : " << size << " bytes" << log::endl;
+            //log::debug << data << log::endl;
 
             // Eat data with HTTP parser
             htpars.eat(data, size);
@@ -35,33 +37,16 @@ namespace Epyx
                     log::error << "HTTP Parser error during discovery:\n"
                         << error << log::endl;
                 }
-                return;
+                return NULL;
             }
 
             // Here, pkt is an HTTP packet.
             // Filter in Internet Gateways
             if (!pkt->headers["usn"].find("InternetGateway"))
-                return;
+                return NULL;
 
-            std::string location = pkt->headers["location"];
-            discoveredURI = URI(location);
-            htpars.reset();
-            log::debug << "Location : " << location << log::endl;
-            log::debug << "URI : " << discoveredURI << log::endl;
-
-            // We have an answer !
-            hasAnswer = true;
-            answerCond.notifyAll();
+            // Return location
+            return new URI(pkt->headers["location"]);
         }
-
-        bool Discovery::waitAnswer(int timeout) {
-            if (!hasAnswer)
-                answerCond.timedWait(timeout, 0);
-            return hasAnswer;
-        }
-
-        const URI& Discovery::getURI() const {
-            return discoveredURI;
-        }
-    } // namespace UPNP
-} // namespace Epyx
+    }
+}
