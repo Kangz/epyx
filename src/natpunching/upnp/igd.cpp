@@ -2,7 +2,6 @@
 #include "command.h"
 #include "rootdesc.h"
 #include "../../net/tcpsocket.h"
-#include "../../net/httpheaders.h"
 #include "../../core/common.h"
 #include <sstream>
 #include <queue>

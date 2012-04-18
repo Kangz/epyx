@@ -1,6 +1,5 @@
 #include "command.h"
 #include "../../core/common.h"
-#include "../../net/httpheaders.h"
 #include "../../net/tcpsocket.h"
 #include <list>
 #include <sstream>
