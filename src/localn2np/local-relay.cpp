@@ -15,7 +15,7 @@ namespace Epyx
         return os << relay.id;
     }
 
-    N2npNodeId LocalRelay::attachNode(LocalNode *node) {
+    N2NP::NodeId LocalRelay::attachNode(LocalNode *node) {
         std::string nodeName;
 
         // Make this thread-safe
@@ -31,7 +31,7 @@ namespace Epyx
         }
         this->nodesMutex.unlock();
 
-        N2npNodeId nodeId(nodeName.c_str(), this->addr);
+        N2NP::NodeId nodeId(nodeName.c_str(), this->addr);
 
         // This may not happen, as this is an auto-increment index
         EPYX_ASSERT(this->nodes.count(nodeName) == 0);
@@ -43,7 +43,7 @@ namespace Epyx
         return nodeId;
     }
 
-    void LocalRelay::treat(N2npPacket *pkt) {
+    void LocalRelay::treat(N2NP::Packet *pkt) {
         EPYX_ASSERT(pkt != NULL);
 
         // Find the node
@@ -66,6 +66,6 @@ namespace Epyx
         //    << " to " << node << log::debug ;
 
         //Post, with a copy because pkt is deleted after this function
-        node->post(new N2npPacket(*pkt));
+        node->post(new N2NP::Packet(*pkt));
     }
 }

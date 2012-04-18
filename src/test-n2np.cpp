@@ -15,7 +15,7 @@
 void test_command(Epyx::LocalNode& node, const Epyx::Address& addr) {
     unsigned int id;
     std::string msg;
-    Epyx::N2npPacketType type("test");
+    Epyx::N2NP::PacketType type("test");
 
     // Waiting for other threads
     usleep(10);
@@ -37,10 +37,10 @@ void test_command(Epyx::LocalNode& node, const Epyx::Address& addr) {
             // Convert id to a node name
             std::ostringstream idStream;
             idStream << id;
-            Epyx::N2npNodeId nodeTo(idStream.str().c_str(), addr);
+            Epyx::N2NP::NodeId nodeTo(idStream.str().c_str(), addr);
 
             // Build a new packet
-            Epyx::N2npPacket pkt(type, msg.size() + 1, msg.c_str());
+            Epyx::N2NP::Packet pkt(type, msg.size() + 1, msg.c_str());
 
             // Send !
             node.send(nodeTo, pkt);
@@ -51,8 +51,8 @@ void test_command(Epyx::LocalNode& node, const Epyx::Address& addr) {
 /**
  * @brief Receive callback for every node
  */
-bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_) {
-    Epyx::N2npPacketType pongType("pong");
+bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2NP::Packet& pkt, void* arg_) {
+    Epyx::N2NP::PacketType pongType("pong");
     Epyx::log::debug << "[Node " << node << "] Recv from " << pkt.from << ": `"
         << pkt.data << "'" << Epyx::log::endl;
     // Send a pong with the same data
@@ -67,7 +67,7 @@ bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_) {
     if (data != pkt.data)
         size = strlen(data) + 1;
 
-    Epyx::N2npPacket pongPkt(pongType, size, data);
+    Epyx::N2NP::Packet pongPkt(pongType, size, data);
     node.send(pkt.from, pongPkt);
     return true;
 }
@@ -75,7 +75,7 @@ bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_) {
 /**
  * @brief Receive callback for Pong messages
  */
-bool nodeRecvPong(Epyx::LocalNode& node, const Epyx::N2npPacket& pkt, void* arg_) {
+bool nodeRecvPong(Epyx::LocalNode& node, const Epyx::N2NP::Packet& pkt, void* arg_) {
     Epyx::log::debug << "[Node " << node << "] Pong from " << pkt.from << ": `"
         << pkt.data << "'" << Epyx::log::endl;
     return true;
@@ -90,8 +90,8 @@ void test_n2np() {
     Epyx::LocalRelay *relay = NULL;
     try {
         Epyx::Address addr("L0C4L", 0, 0);
-        Epyx::N2npPacketType type("test");
-        Epyx::N2npPacketType pongType("pong");
+        Epyx::N2NP::PacketType type("test");
+        Epyx::N2NP::PacketType pongType("pong");
 
         // Create a relay
         relay = new Epyx::LocalRelay(addr);

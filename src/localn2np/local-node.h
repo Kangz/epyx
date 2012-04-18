@@ -10,7 +10,7 @@
 #define EPYX_LOCAL_NODE_H
 
 #include "../core/mutex.h"
-#include "../n2np/n2np-packet.h"
+#include "../n2np/packet.h"
 #include "../core/worker-pool.h"
 #include "local-relay.h"
 #include <map>
@@ -24,11 +24,11 @@ namespace Epyx
      * @class LocalNode
      * @brief Implement local N2NP node simulation with a worker pool
      */
-    class LocalNode : public WorkerPool<N2npPacket>
+    class LocalNode : public WorkerPool<N2NP::Packet>
     {
     private:
         //Internal definition used for the callback
-        typedef bool (ReceiveCb) (LocalNode&, const N2npPacket&, void* cbData);
+        typedef bool (ReceiveCb) (LocalNode&, const N2NP::Packet&, void* cbData);
     public:
         /**
          * @brief Constructor
@@ -51,19 +51,19 @@ namespace Epyx
         /**
          * @brief Send packet to another node
          */
-        void send(const N2npNodeId& to, const N2npPacket& pkt);
+        void send(const N2NP::NodeId& to, const N2NP::Packet& pkt);
 
         /**
          * @brief Register a receive callback
          */
-        void registerRecv(const N2npPacketType& type, ReceiveCb *cb, void* cbData);
+        void registerRecv(const N2NP::PacketType& type, ReceiveCb *cb, void* cbData);
 
     protected:
         /**
          * @brief Treat a N2NP packet
          * @param pkt the packet to be processed
          */
-        void treat(N2npPacket *pkt);
+        void treat(N2NP::Packet *pkt);
 
     private:
 
@@ -73,11 +73,11 @@ namespace Epyx
             void* arg;
         } ReceiveCbData;
 
-        N2npNodeId id;
+        N2NP::NodeId id;
         LocalRelay *relay;
 
         // Callbacks for Recv
-        std::map<N2npPacketType, ReceiveCbData> recvCallbacks;
+        std::map<N2NP::PacketType, ReceiveCbData> recvCallbacks;
         Mutex recvCallbacksMutex;
 
         // Disable copy
