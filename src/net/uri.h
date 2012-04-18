@@ -87,6 +87,5 @@ namespace Epyx
     };
 }
 
-
 #endif /* EPYX_URI_H */
 

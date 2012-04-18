@@ -62,6 +62,12 @@ namespace Epyx
             {}
             const char *message;
         };
+
+        /**
+         * @brief Current GTT Packet
+         *
+         * This is protected to allow children parsers to fill this structure.
+         */
         GTTPacket *currentPkt;
 
         /**

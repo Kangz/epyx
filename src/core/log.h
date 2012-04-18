@@ -41,12 +41,15 @@ namespace log {
     };
 
     //Defines a Stream class to handle << operators nicely
-    //This Struct is the endLog struct that ends the log line (a log line can be multiple lines)
+    //This Struct is the endLog struct that ends the log line
+    // (a log line can be multiple lines)
     struct EndlStruct{};
     struct ErrstdStruct{};
 
     /**
-     * @brief An agument to be passed to a log stream to finish a log entry (that can span across multiple lines)
+     * @brief An agument to be passed to a log stream to finish a log entry
+     *
+     * A log entry can span across multiple lines
      */
     extern EndlStruct endl;
 
@@ -68,14 +71,32 @@ namespace log {
         const Stream& operator=(const Stream&);
 
     public:
+        /**
+         * @brief Constructor
+         * @param prio stream priority
+         */
         Stream(int prio);
+
+        /**
+         * @brief Destructor
+         */
         ~Stream();
 
         /**
          * @brief overloads << to accept almost anything
          */
         template<typename T> Stream& operator<<(const T& arg);
+        /**
+         * @brief Message terminator
+         * @param f EndlStruct
+         * @return this
+         */
         Stream& operator<<(const EndlStruct& f);
+        /**
+         * @brief Add standard error to log message
+         * @param f ErrstdStruct
+         * @return this
+         */
         Stream& operator<<(const ErrstdStruct& f);
     };
 

@@ -1,5 +1,6 @@
 /**
- * Basic Internet server class
+ * @file server.h
+ * @brief Basic Internet server class
  */
 #ifndef EPYX_SERVER_H
 #define EPYX_SERVER_H

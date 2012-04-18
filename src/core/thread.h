@@ -17,10 +17,15 @@ namespace Epyx
         {
             std::string name;
         };
+        /**
+         * @private thread_infos
+         */
         extern TLSPointer<ThreadInfo>* thread_infos;
+        /**
+         * @private thread_initialized
+         */
         extern bool thread_initialized;
     }
-
     /**
      * @class Thread
      *
