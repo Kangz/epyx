@@ -18,25 +18,25 @@ namespace Epyx
         this->relay = rel;
     }
 
-    void LocalNode::send(const N2npNodeId& to, const N2npPacket& pkt) {
+    void LocalNode::send(const N2NP::NodeId& to, const N2NP::Packet& pkt) {
         EPYX_ASSERT(this->relay != NULL);
 
         // Allocate a new packet and forward it by the relay
         // (Note: packet is destroyed by Relay::treat())
-        N2npPacket *real_pkt = new N2npPacket(pkt);
+        N2NP::Packet *real_pkt = new N2NP::Packet(pkt);
         real_pkt->from = this->id;
         real_pkt->to = to;
         relay->post(real_pkt);
     }
 
-    void LocalNode::registerRecv(const N2npPacketType& type, ReceiveCb *cb, void* cbData) {
+    void LocalNode::registerRecv(const N2NP::PacketType& type, ReceiveCb *cb, void* cbData) {
         ReceiveCbData cbEntry = {cb, cbData};
         recvCallbacksMutex.lock();
         recvCallbacks.insert(std::make_pair(type, cbEntry));
         recvCallbacksMutex.unlock();
     }
 
-    void LocalNode::treat(N2npPacket *pkt) {
+    void LocalNode::treat(N2NP::Packet *pkt) {
         EPYX_ASSERT(pkt != NULL);
 
         // Ensure I am the destination
