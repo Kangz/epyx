@@ -8,7 +8,7 @@ namespace Epyx
 
     Address::Address(const std::string& addressFormat) {
         // portstr may be a ":port" suffix
-        std::string portstr;
+        std::string portstr = "";
         if (addressFormat.at(0) == '[') {
             //Case if IPv6
             size_t n = addressFormat.find(']');
@@ -17,9 +17,9 @@ namespace Epyx
                 log::fatal << "Unknown address " << addressFormat << log::endl;
                 throw FailException("Address", "Invalid IPv6 address");
             }
-            ip = addressFormat.substr(1, n);
+            ip = addressFormat.substr(1, n - 1);
             portstr = addressFormat.substr(n + 1);
-             ipVersion = 6;
+            ipVersion = 6;
         } else {
             //If not IPv6, it's IPv4, obviously :P
             size_t n = addressFormat.find(':');
@@ -33,9 +33,10 @@ namespace Epyx
             ipVersion = 4;
         }
         // Use port
-        if (!portstr.empty() && portstr[0] == ':') {
-           port = (unsigned short) String::toInt(portstr.substr(1));
-        }
+        if (!portstr.empty() && portstr[0] == ':')
+            port = (unsigned short) String::toInt(portstr.substr(1));
+        else
+            port = 0;
     }
 
     Address::Address()

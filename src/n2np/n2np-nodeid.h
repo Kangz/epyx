@@ -1,5 +1,6 @@
 /**
- * N2NP Node Identifier
+ * @file n2np-nodeid.h
+ * @brief N2NP Node Identifier
  */
 
 #ifndef EPYX_N2NP_NODE_ID_H
@@ -11,28 +12,84 @@
 namespace Epyx
 {
     const size_t N2npNodeNameMaxLen = 200;
-
+    /**
+     * @class NodeId
+     * @brief Manage node ID
+     */
     class N2npNodeId
     {
-    private:
-        char name[N2npNodeNameMaxLen + 1];
-        Address relay;
-
     public:
+        /**
+         * @brief empty constructor
+         */
         N2npNodeId();
-        N2npNodeId(const Address relay_);
-        N2npNodeId(const char *name_, const Address relay_);
-        friend std::ostream& operator<<(std::ostream& os, const N2npNodeId nodeid);
-        friend std::ostream& operator<<(std::ostream& os, const N2npNodeId *nodeid);
+        /**
+         * @brief Build a relay ID
+         * @param relay relay Address
+         */
+        N2npNodeId(const Address& relay);
+        /**
+         * @brief Build a node ID (with a name and a relay)
+         * @param name
+         * @param relay
+         */
+        N2npNodeId(const std::string& name, const Address& relay);
+        /**
+         * @brief Build a node ID from "node@relay" expression
+         * @param str string "node@relay"
+         */
+        N2npNodeId(const std::string& str);
+        /**
+         * @brief Copy constructor
+         */
+        N2npNodeId(const N2npNodeId& nodeid);
+        /**
+         * @brief Assignment
+         */
+        N2npNodeId& operator=(const N2npNodeId& nodeid);
 
-        friend bool operator==(const N2npNodeId& nodeId1, const N2npNodeId& nodeId2);
+        /**
+         * @brief Print the node ID in an output stream
+         * @param os output stream
+         * @param addr
+         */
+        friend std::ostream& operator<<(std::ostream& os, const N2npNodeId& nodeid);
 
-        friend inline bool operator!=(const N2npNodeId& nodeId1, const N2npNodeId& nodeId2)
-        {
-            return !(nodeId1 == nodeId2);
-        }
+        /**
+         * @brief Return a std::string representation of the address
+         * @return std::string
+         */
+        std::string toString() const;
 
-        std::string getName(void) const;
+        /**
+         * @brief Equality test
+         * @param nodeid1
+         * @param nodeid2
+         */
+        friend bool operator==(const N2npNodeId& nodeid1, const N2npNodeId& nodeid2);
+
+        /**
+         * @brief Inequality test
+         * @param nodeid1
+         * @param nodeid2
+         */
+        friend bool operator!=(const N2npNodeId& nodeid1, const N2npNodeId& nodeid2);
+
+        /**
+         * @brief Get Node name
+         * @return this->name
+         */
+        const std::string& getName() const;
+
+        /**
+         * @brief Get relay address
+         * @return this->relay
+         */
+        const Address& getRelay() const;
+
+    private:
+        std::string name;
+        Address relay;
     };
 }
 
