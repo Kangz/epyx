@@ -1,5 +1,6 @@
 /**
  * @file lineparser.h
+ * @brief Parse a stream line by line
  */
 
 #ifndef EPYX_LINEPARSER_H

@@ -1,5 +1,6 @@
 /**
- * Socket astraction layer
+ * @file socket.h
+ * @brief Socket astraction layer
  */
 
 #ifndef EPYX_SOCKET_H
