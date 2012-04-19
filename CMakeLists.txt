@@ -55,64 +55,62 @@ file(
 )
 
 # Test executables
-add_executable(
-    test-thread
-    ${core_sources}
-    src/test-thread.cpp
-)
-target_link_libraries(
-    test-thread
-    pthread
-)
-
-add_executable(
-    test-server
-    ${core_sources}
-    ${net_sources}
-    src/test-server.cpp
-)
-target_link_libraries(
-    test-server
-    pthread
-)
-
-add_executable(
-    test-parser
-    ${core_sources}
-    ${parser_sources}
-    src/test-parser.cpp
-)
-target_link_libraries(
-    test-parser
-    pthread
-)
-
-add_executable(
-    test-natpunching
-    ${core_sources}
-    ${net_sources}
-    ${natpunching_sources}
-    ${tinyxml_sources}
-    ${parser_sources}
-    src/test-natpunching.cpp
-)
-
-target_link_libraries(
-    test-natpunching
-    pthread
-)
-
-add_executable(
-    test-n2np
-    ${core_sources}
-    ${net_sources}
-    ${localn2np_sources}
-    src/test-n2np.cpp
-)
-target_link_libraries(
-    test-n2np
-    pthread
-)
+#add_executable(
+#    test-thread
+#    ${core_sources}
+#    src/test-thread.cpp
+#)
+#target_link_libraries(
+#    test-thread
+#    pthread
+#)
+#
+#add_executable(
+#    test-server
+#    ${core_sources}
+#    ${net_sources}
+#    src/test-server.cpp
+#)
+#target_link_libraries(
+#    test-server
+#    pthread
+#)
+#
+#add_executable(
+#    test-parser
+#    ${core_sources}
+#    ${parser_sources}
+#    src/test-parser.cpp
+#)
+#target_link_libraries(
+#    test-parser
+#    pthread
+#)
+#
+#add_executable(
+#    test-natpunching
+#    ${core_sources}
+#    ${net_sources}
+#    ${natpunching_sources}
+#    ${tinyxml_sources}
+#)
+#
+#target_link_libraries(
+#    test-natpunching
+#    pthread
+#)
+#
+#add_executable(
+#    test-n2np
+#    ${core_sources}
+#    ${net_sources}
+#    ${localn2np_sources}
+#    src/test-n2np.cpp
+#)
+#target_link_libraries(
+#    test-n2np
+#    pthread
+#)
 
 add_executable(
     test-dht

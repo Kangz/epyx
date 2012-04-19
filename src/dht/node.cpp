@@ -70,6 +70,8 @@ namespace DHT
     void Node::send(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget){
         pkt.from = this->id;
         GTTPacket* gtt = pkt.toGTTPacket();
+        log::debug << "Sending a GTT Packet :\n" << *gtt << log::endl;
+
         //std::string& raw_data = gtt->serialize();
         //this->n2np.send(n2npTarget, "dht", raw_data.c_str(), raw_data.length());
     }
@@ -84,12 +86,12 @@ namespace DHT
         DHTPacket answer;
         answer.connectionId = pkt.connectionId;
         answer.method = M_GOT;
-        /*if (this->storage.has(pkt.key) {
+        if (this->storage.has(pkt.key)) {
             answer.value = this->storage.get(pkt.key);
             answer.status = 0; 
         }else{
             answer.status = 1;//TODO: Provide further details
-        }*/
+        }
         this->send(answer, target, n2npTarget);
     }
 
@@ -102,7 +104,7 @@ namespace DHT
         answer.method = M_STORED;
         answer.status = 0;
         //TODO check many things
-        //this->storage.set(pkt.key, pkt.data);
+        this->storage.set(pkt.key, pkt.value);
         this->send(answer, target, n2npTarget);
     }
 

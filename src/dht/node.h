@@ -8,6 +8,7 @@
 #include "../parser/gttparser.h"
 #include "../n2np/nodeid.h"
 #include "kbucket.h"
+#include "storage.h"
 #include "dht-packet.h"
 
 namespace Epyx
@@ -26,6 +27,7 @@ namespace DHT
         Id id;
         KBucket* kbucket;
         GTTParser gttParser;
+        Storage storage;
 
         void send(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget);
 
