@@ -27,6 +27,11 @@ file(
     GLOB_RECURSE
     localn2np_sources
     src/localn2np/*
+)
+
+file(
+    GLOB_RECURSE
+    n2np_sources
     src/n2np/*
 )
 
@@ -80,6 +85,8 @@ add_executable(
     test-parser
     ${core_sources}
     ${parser_sources}
+    ${n2np_sources}
+    ${net_sources}
     src/test-parser.cpp
 )
 target_link_libraries(
@@ -107,6 +114,8 @@ add_executable(
     ${core_sources}
     ${net_sources}
     ${localn2np_sources}
+    ${n2np_sources}
+    ${parser_sources}
     src/test-n2np.cpp
 )
 target_link_libraries(
@@ -120,6 +129,8 @@ add_executable(
     ${dht_sources}
     ${net_sources}
     ${localn2np_sources}
+    ${n2np_sources}
+    ${parser_sources}
     src/test-dht.cpp
 )
 target_link_libraries(

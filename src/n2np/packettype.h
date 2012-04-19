@@ -46,6 +46,13 @@ namespace Epyx
             friend std::ostream& operator<<(std::ostream& os, const PacketType& pkttype);
 
             /**
+             * @brief Return a std::string representation of the packet type
+             * @return std::string
+             */
+            std::string toString() const;
+
+
+            /**
              *  @brief Comparator, to be able to index types in a map
              */
             friend bool operator<(const PacketType& pkttype1, const PacketType& pkttype2);

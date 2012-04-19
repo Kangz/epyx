@@ -18,7 +18,8 @@ namespace Epyx
      *
      * @brief GTT implementation
      */
-    class GTTParser {
+    class GTTParser
+    {
     public:
         /**
          * @brief Constructor
@@ -57,9 +58,10 @@ namespace Epyx
         class ParserException
         {
         public:
+
             ParserException(const char *message)
-            :message(message)
-            {}
+            : message(message) {
+            }
             const char *message;
         };
 
@@ -92,7 +94,8 @@ namespace Epyx
         LineParser lineParser;
 
         // Position in data
-        enum DataPosition {
+        enum DataPosition
+        {
             dataposFirstLine,
             dataposHeaders,
             dataposContent

@@ -76,9 +76,15 @@ namespace Epyx
                         datapos = dataposContent;
                         /* Go through */
                     case dataposContent:
-                        if (currentPkt->size > 0 &&
-                            !lineParser.popData(currentPkt->body, currentPkt->size)) {
-                            return NULL;
+                        if (currentPkt->size > 0) {
+                            // Read body
+                            char *body = new char[currentPkt->size];
+                            if (!lineParser.popData(body, currentPkt->size)) {
+                                delete[] body;
+                                return NULL;
+                            }
+                            currentPkt->body = body;
+                            body = NULL;
                         }
                         GTTPacket* pkt = currentPkt;
                         currentPkt = NULL;
@@ -165,7 +171,6 @@ namespace Epyx
             currentPkt->size = String::toInt(flagValue.c_str());
             if (currentPkt->size <= 0)
                 throw ParserException("not valid body size, body size should be a positive integer");
-            currentPkt->body = new char[currentPkt->size];
         } else {
             currentPkt->headers[flagName] = flagValue;
         }

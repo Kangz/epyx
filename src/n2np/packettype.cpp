@@ -4,6 +4,7 @@ namespace Epyx
 {
     namespace N2NP
     {
+
         PacketType::PacketType()
         :type() {
         }
@@ -14,6 +15,10 @@ namespace Epyx
 
         std::ostream& operator<<(std::ostream& os, const PacketType& pkttype) {
             return os << pkttype.type;
+        }
+
+        std::string PacketType::toString() const {
+            return type;
         }
 
         bool operator<(const PacketType& pkttype1, const PacketType& pkttype2) {

@@ -61,6 +61,18 @@ namespace Epyx
             friend std::ostream& operator<<(std::ostream& os, const Packet& pkt);
 
             /**
+             * @brief Build the raw text query for this N2NP Packet
+             * @param newData newly-allocated buffer with ready-to-send data
+             * @return size of *data
+             */
+            unsigned long build(char **newData) const;
+
+            /**
+             * @brief GTT Method
+             */
+            std::string method;
+
+            /**
              * @brief Source node ID
              */
             NodeId from;

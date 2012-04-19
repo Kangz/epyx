@@ -18,15 +18,15 @@ namespace Epyx
 
     std::ostream& operator<<(std::ostream& os, const GTTPacket& pkt)
     {
-        os << "Proto " << pkt.protocol << " method " << pkt.method << std::endl;
+        os << "[Proto " << pkt.protocol << " method " << pkt.method << std::endl;
         for (std::map<std::string, std::string>::const_iterator i = pkt.headers.begin();
              i != pkt.headers.end(); ++i) {
-            os << (*i).first << ": " << (*i).second << std::endl;
+            os << "  " << (*i).first << ": " << (*i).second << std::endl;
         }
         if (pkt.size > 0) {
-            os << "Content-length: " << pkt.size << std::endl;
-            os << pkt.body;
+            os << "  Content-length: " << pkt.size << std::endl;
         }
+        os << "]";
         return os;
     }
 
