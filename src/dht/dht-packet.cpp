@@ -4,6 +4,7 @@
 #include <sstream>
 #include <cstring>
 #include "../core/string.h"
+#include "../core/common.h"
 
 namespace Epyx
 {
@@ -107,6 +108,7 @@ namespace DHT
             }
             this->getValueFromGTT(pkt);
             connectionId = String::toInt(pkt.headers["connectionid"]);
+            count = String::toInt(pkt.headers["count"]);
 
             Peer p;
             std::istringstream ssdata(value);
@@ -190,7 +192,7 @@ namespace DHT
                 for(std::vector<Peer>::iterator i=foundPeers.begin(); i != foundPeers.end(); ++i){
                     (*i).serialize(oss);
                 }
-                std::string data = oss.str();
+                value = oss.str();
                 this->setValueForGTT(pkt);
                 break;
         }

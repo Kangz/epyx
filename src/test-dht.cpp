@@ -11,7 +11,7 @@
 #include "dht/id.h"
 #include "dht/kbucket.h"
 #include "dht/dht-packet.h"
-#include "n2np/n2np-nodeid.h"
+#include "n2np/nodeid.h"
 
 using namespace Epyx;
 
@@ -72,7 +72,7 @@ void test_id_distance(){
 void test_kbucket(){
     Id self;
     random_id(self);
-    N2npNodeId n2npId;
+    N2NP::NodeId n2npId;
 
     log::info<<"I am at Id: "<<self<<log::endl;
 
@@ -121,7 +121,9 @@ void double_print(DHTPacket& pkt){
     DHTPacket pkt2(*pkt1);
     GTTPacket* pkt3 = pkt2.toGTTPacket();
     log::info << "dht -> gtt\n" << *pkt1 << log::endl;
+    if(pkt.method == M_FOUND) log::info << pkt.value << log::endl;
     log::info << "dht -> gtt -> dht -> gtt\n" << *pkt3 << log::endl;
+    if(pkt.method == M_FOUND) log::info << pkt2.value << log::endl;
 }
 
 void test_dhtpacket(){

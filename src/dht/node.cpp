@@ -6,7 +6,7 @@ namespace DHT
 {
 
     Node::Node(){
-        this->id = id;
+        this->id = id; //TODO build the id somewhere
         this->kbucket = new KBucket(&id);
     }
 
