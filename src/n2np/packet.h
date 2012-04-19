@@ -8,6 +8,7 @@
 
 #include "nodeid.h"
 #include "packettype.h"
+#include "../parser/gttpacket.h"
 
 namespace Epyx
 {
@@ -42,6 +43,24 @@ namespace Epyx
             const Packet& operator=(const Packet& pkt);
 
             /**
+             * @brief Build a N2NP packet from a GTT Packet
+             * @param pkt GTTPacket
+             *
+             * Note: data is copied, so you may destroy the GTT packet after
+             * this constructor
+             */
+            Packet(const GTTPacket& pkt);
+
+            ~Packet();
+
+            /**
+             * @brief Print a short packet desciption in an output stream
+             * @param os output stream
+             * @param pkt
+             */
+            friend std::ostream& operator<<(std::ostream& os, const Packet& pkt);
+
+            /**
              * @brief Source node ID
              */
             NodeId from;
@@ -50,7 +69,16 @@ namespace Epyx
              */
             NodeId to;
 
-            // TODO: Version
+            /**
+             * @brief Protocol version
+             * @todo a proper class
+             */
+            std::string version;
+
+            /**
+             * @brief Packet ID
+             */
+            unsigned long pktID;
 
             /**
              * @brief Content type

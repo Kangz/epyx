@@ -4,6 +4,9 @@ namespace Epyx
 {
     namespace N2NP
     {
+        PacketType::PacketType()
+        :type() {
+        }
 
         PacketType::PacketType(const std::string& type)
         :type(type) {

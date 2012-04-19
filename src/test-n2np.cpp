@@ -51,7 +51,7 @@ void test_command(Epyx::LocalNode& node, const Epyx::Address& addr) {
 /**
  * @brief Receive callback for every node
  */
-bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2NP::Packet& pkt, void* arg_) {
+bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2NP::Packet& pkt, void* arg) {
     Epyx::N2NP::PacketType pongType("pong");
     Epyx::log::debug << "[Node " << node << "] Recv from " << pkt.from << ": `"
         << pkt.data << "'" << Epyx::log::endl;
@@ -75,7 +75,7 @@ bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2NP::Packet& pkt, void* arg_) 
 /**
  * @brief Receive callback for Pong messages
  */
-bool nodeRecvPong(Epyx::LocalNode& node, const Epyx::N2NP::Packet& pkt, void* arg_) {
+bool nodeRecvPong(Epyx::LocalNode& node, const Epyx::N2NP::Packet& pkt, void* arg) {
     Epyx::log::debug << "[Node " << node << "] Pong from " << pkt.from << ": `"
         << pkt.data << "'" << Epyx::log::endl;
     return true;

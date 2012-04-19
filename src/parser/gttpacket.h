@@ -49,7 +49,7 @@ namespace Epyx
         /**
          * @brief Content size
          */
-        long size;
+        unsigned long size;
         /**
          * @brief Content body
          */

@@ -28,6 +28,11 @@ namespace Epyx
         {
         public:
             /**
+             * @brief Empty constructor
+             */
+            PacketType();
+
+            /**
              * @brief Constructor
              * @param type packet type
              */
