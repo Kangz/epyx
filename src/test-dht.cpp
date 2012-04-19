@@ -11,6 +11,7 @@
 #include "dht/id.h"
 #include "dht/kbucket.h"
 #include "dht/dht-packet.h"
+#include "n2np/n2np-nodeid.h"
 
 using namespace Epyx;
 
@@ -71,6 +72,7 @@ void test_id_distance(){
 void test_kbucket(){
     Id self;
     random_id(self);
+    N2npNodeId n2npId;
 
     log::info<<"I am at Id: "<<self<<log::endl;
 
@@ -82,7 +84,7 @@ void test_kbucket(){
         Id a;
         random_id(a);
 
-        kb.seenPeer(&a);
+        kb.seenPeer(&a, n2npId);
     }
 
     log::info<<"Making 10.000 lookups in the routing table"<<log::endl;
@@ -91,24 +93,24 @@ void test_kbucket(){
         Id a;
         random_id(a);
 
-        std::multimap<Distance,Id> nearest;
+        std::vector<Peer> nearest;
 
-        kb.findNearestNodes(&a, nearest, 20);
+        kb.findNearestNodes(a, nearest, 20);
     }
 
     log::info<<"Done making 10.000 lookups in the routing table"<<log::endl;
 
     Id a;
     random_id(a);
-    std::multimap<Distance,Id> nearest;
-    kb.findNearestNodes(&a, nearest, 20);
+    std::vector<Peer> nearest;
+    kb.findNearestNodes(a, nearest, 20);
 
-    std::multimap<Distance, Id>::iterator it = nearest.begin();
+    std::vector<Peer>::iterator it = nearest.begin();
 
     log::info<<"Searching for a: "<<a<<log::endl;
     for(int i=0; i<20; it++, i++){
-        Distance d = (*it).first;
-        Id id = (*it).second;
+        Id id = (*it).id;
+        Distance d(&a, &id);
         log::info<<"      id: "<<id<<log::endl;
         log::info<<"d(id, a): "<<d<<log::endl;
     }
@@ -172,9 +174,9 @@ void test_dhtpacket(){
     pkt.connectionId = 42;
     pkt.status = 0;
     for(int i=0; i<20; i++){
-        Id temp;
-        random_id(temp);
-        pkt.foundIds.push_back(temp);
+        Peer temp;
+        random_id(temp.id);
+        pkt.foundPeers.push_back(temp);
     }
     random_id(pkt.idToFind);
     double_print(pkt);
