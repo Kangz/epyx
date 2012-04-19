@@ -2,9 +2,10 @@
 #define EPYX_DHT_DHTPACKET_H
 
 #include <string>
-#include <list>
+#include <vector>
 
 #include "id.h"
+#include "peer.h"
 #include "../parser/gttpacket.h"
 
 namespace Epyx
@@ -29,6 +30,8 @@ namespace DHT
     class DHTPacket
     {
     public:
+        void getValueFromGTT(GTTPacket& pkt);
+        void setValueForGTT(GTTPacket* pkt);
         DHTPacket(GTTPacket& pkt);
         DHTPacket();
         ~DHTPacket();
@@ -39,7 +42,7 @@ namespace DHT
         int connectionId;
         int status;
         int count;
-        std::list<Id> foundIds;
+        std::vector<Peer> foundPeers;
 
         std::string value;
         std::string key;

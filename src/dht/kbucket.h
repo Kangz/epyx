@@ -4,28 +4,23 @@
 #include <list>
 #include <vector>
 #include <map>
+#include "../n2np/n2np-nodeid.h"
 #include "id.h"
+#include "peer.h"
 
 namespace Epyx{
 namespace DHT {
-    class Peer;
     class Bucket;
 
     class KBucket {
         public:
             KBucket(Id* const self);
-            void seenPeer(Id* const peerId);
-            void findNearestNodes(Id* const id,std::multimap<Distance,Id> &nearest,int n);
+            void seenPeer(Id* const peerId, N2npNodeId& n2npId);
+            void findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n);
 
         private:
             std::vector<Bucket> buckets;
             Id ownId;
-    };
-
-    class Peer{
-        public:
-            Id peerId;
-            time_t lastReceiveTime;
     };
 
     class Bucket{

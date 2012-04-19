@@ -12,6 +12,26 @@ namespace DHT
     DHTPacket::DHTPacket(){}
     DHTPacket::~DHTPacket(){}
 
+    void DHTPacket::getValueFromGTT(GTTPacket& pkt){
+        status = String::toInt(pkt.headers["status"]);
+        if(status == 0){
+            value = std::string(pkt.acquireBody(), pkt.size);
+        }else{
+            value = std::string("");
+        }
+    }
+
+    void DHTPacket::setValueForGTT(GTTPacket* pkt){
+        pkt->headers["status"] = String::fromInt(status);
+        if (status == 0) {
+            pkt->body = String::toNewChar(value);
+            pkt->size = value.size();
+        } else {
+            pkt->body = NULL;
+            pkt->size = 0;
+        }
+    }
+
     DHTPacket::DHTPacket(GTTPacket& pkt){
         //TODO: what should we do if a packet is not valid ?
         if(pkt.headers.count("from")==0){
@@ -54,7 +74,7 @@ namespace DHT
 
             connectionId = String::toInt(pkt.headers["connectionid"]);
 
-            key = pkt.headers["Key"];
+            key = pkt.headers["key"];
 
 
         }else if(pkt.method == "GOT"){
@@ -63,8 +83,8 @@ namespace DHT
                 throw;
             }
 
-            value = std::string(pkt.body, pkt.size);
             connectionId = String::toInt(pkt.headers["connectionid"]);
+            this->getValueFromGTT(pkt);
 
         }else if(pkt.method == "FIND"){
             method = M_FIND;
@@ -85,20 +105,14 @@ namespace DHT
                pkt.headers.count("status") == 0 || !pkt.body){
                 throw;
             }
+            this->getValueFromGTT(pkt);
             connectionId = String::toInt(pkt.headers["connectionid"]);
-            count = String::toInt(pkt.headers["count"]);
-            status = String::toInt(pkt.headers["status"]);
 
-            if(pkt.size != count*49){ //HACK: this is the size of the hexadecimal representation of an Id
-                return;//throw;
-            }
-
-            Id id;
-            std::string data(pkt.body, pkt.size);
-            std::istringstream ssdata(data);
+            Peer p;
+            std::istringstream ssdata(value);
             for(int i=0; i<count; i++){
-                ssdata >> id;
-                foundIds.push_back(id);
+                p.unserialize(ssdata);
+                foundPeers.push_back(p);
             }
 
         }else{
@@ -153,10 +167,7 @@ namespace DHT
                 pkt->method = "GOT";
 
                 pkt->headers["connectionid"] = String::fromInt(connectionId);
-                pkt->headers["status"] = String::fromInt(status);
-
-                pkt->body = String::toNewChar(value);
-                pkt->size = value.size();
+                this->setValueForGTT(pkt);
                 break;
 
             case M_FIND:
@@ -174,17 +185,13 @@ namespace DHT
                 pkt->method = "FOUND";
 
                 pkt->headers["connectionid"] = String::fromInt(connectionId);
-                pkt->headers["status"] = String::fromInt(status);
-                pkt->headers["count"] = String::fromInt(foundIds.size());
+                pkt->headers["count"] = String::fromInt(foundPeers.size());
 
-                for(std::list<Id>::iterator i=foundIds.begin(); i != foundIds.end(); ++i){
-                    oss << *i;
+                for(std::vector<Peer>::iterator i=foundPeers.begin(); i != foundPeers.end(); ++i){
+                    (*i).serialize(oss);
                 }
                 std::string data = oss.str();
-                pkt->body = new char[data.size()];
-                memcpy(pkt->body, data.c_str(), data.size());
-                pkt->size = data.size();
-                oss.str("");
+                this->setValueForGTT(pkt);
                 break;
         }
 

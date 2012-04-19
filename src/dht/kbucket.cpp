@@ -11,7 +11,7 @@ namespace DHT {
         buckets.resize(ID_LENGTH);
     }
 
-    void KBucket::seenPeer(Id* const peerId){
+    void KBucket::seenPeer(Id* const peerId, N2npNodeId& n2npId){
         bool add =false;
         time_t now=time(NULL);
 
@@ -25,10 +25,11 @@ namespace DHT {
         //Search for the peer in the bucket to update its lastReceiveTime
         for(peer_it = bucket.peers.begin(); peer_it != bucket.peers.end(); peer_it++){
             Peer* peer = *peer_it;
-            if(*peerId == peer->peerId){
+            if(*peerId == peer->id){
                 Peer* temp = peer;
                 peer_it = bucket.peers.erase(peer_it);
                 temp->lastReceiveTime = now;
+                temp->n2npId = n2npId;
                 bucket.peers.push_back(temp);
                 return;
             }
@@ -49,40 +50,51 @@ namespace DHT {
         //Finally add the peer to the KBucket
         if(add){
             Peer* newPeer = new Peer();
-            newPeer->peerId=*peerId;
+            newPeer->id=*peerId;
             newPeer->lastReceiveTime=now;
+            newPeer->n2npId = n2npId;
             bucket.peers.push_back(newPeer);
         }
     }
 
-    void KBucket::findNearestNodes(Id* const id, std::multimap<Distance,Id> &nearest,int n){
-        std::priority_queue<std::pair<Distance,Id> > closest;
+    struct FindNearestComparator {
+        bool operator()(const std::pair<Distance, Peer> a, const std::pair<Distance, Peer> b) const{
+            return a.first < b.first;
+        }
+    };
+
+
+    void KBucket::findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n){
+        std::priority_queue<std::pair<Distance,Peer>, std::vector<std::pair<Distance, Peer> >,
+                FindNearestComparator> closest;
 
         //Insert EVERY node in the priority_queue with it's distance associated
         //This is very inefficient, we will change this
         //Optimization n°1 : Never store more than n nodes in the map
+        //TODO opti2 : split kbuckets when they are full
+        //TODO opti3: with split buckets restrain the search
         std::vector<Bucket>::iterator bucket;
         std::list<Peer*>::iterator peer;
         for( bucket=buckets.begin(); bucket!=buckets.end(); bucket++ ){
             for( peer=bucket->peers.begin(); peer!=bucket->peers.end(); peer++ ){
 
-                Distance dist(id, &((*peer)->peerId));
+                Distance dist(&id, &((*peer)->id));
 
                 if(closest.size() >= (unsigned long)n){
-                    std::pair<Distance,Id> farthest = closest.top();
+                    std::pair<Distance,Peer> farthest = closest.top();
                     if(dist < farthest.first){
                         closest.pop();
                     }
                 }
 
                 if(closest.size() < (unsigned long)n){
-                    closest.push(std::pair<Distance,Id>(dist,(*peer)->peerId));
+                    closest.push(std::pair<Distance,Peer>(dist,*(*peer)));
                 }
             }
         }
 
         while(closest.size() > 0){
-            nearest.insert(closest.top());
+            nearest.push_back(closest.top().second);
             closest.pop();
         }
     }
