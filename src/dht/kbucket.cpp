@@ -11,7 +11,7 @@ namespace DHT {
         buckets.resize(ID_LENGTH);
     }
 
-    void KBucket::seenPeer(Id* const peerId, N2npNodeId& n2npId){
+    void KBucket::seenPeer(Id* const peerId, N2NP::NodeId& n2npId){
         bool add =false;
         time_t now=time(NULL);
 

@@ -6,7 +6,7 @@
 #include "../core/common.h"
 #include "../parser/gttpacket.h"
 #include "../parser/gttparser.h"
-#include "../n2np/n2np-nodeid.h"
+#include "../n2np/nodeid.h"
 #include "kbucket.h"
 #include "dht-packet.h"
 
@@ -21,20 +21,20 @@ namespace DHT
         Node();
         ~Node();
 
-        void eatN2NP(N2npNodeId senderId, N2npNodeId myself, char* data, int dataSize);
+        void eatN2NP(N2NP::NodeId senderId, N2NP::NodeId myself, char* data, int dataSize);
     private:
         Id id;
         KBucket* kbucket;
         GTTParser gttParser;
 
-        void send(DHTPacket& pkt, Id target, N2npNodeId n2npTarget);
+        void send(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget);
 
-        void sendPong(Id target, N2npNodeId n2npTarget);
-        void sendGot(DHTPacket& pkt, Id target, N2npNodeId n2npTarget);
+        void sendPong(Id target, N2NP::NodeId n2npTarget);
+        void sendGot(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget);
         void handleGot(DHTPacket& pkt);
-        void sendStored(DHTPacket& pkt, Id target, N2npNodeId n2npTarget);
+        void sendStored(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget);
         void handleStored(DHTPacket& pkt);
-        void sendFound(DHTPacket& pkt, Id target, N2npNodeId n2npTarget);
+        void sendFound(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget);
         void handleFound(DHTPacket& pkt);
 
    };

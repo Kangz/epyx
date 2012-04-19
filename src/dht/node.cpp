@@ -13,7 +13,8 @@ namespace DHT
     Node::~Node(){
     }
 
-    void Node::eatN2NP(N2npNodeId senderId, N2npNodeId myself, char* data, int dataSize){
+    void Node::eatN2NP(N2NP::NodeId senderId, N2NP::NodeId myself, char* data, int dataSize){
+        //TODO: Make it non blocking
         gttParser.eat(data, dataSize);
         GTTPacket* gtt_packet = gttParser.getPacket();
         gttParser.reset();
@@ -66,20 +67,20 @@ namespace DHT
         }
     }
 
-    void Node::send(DHTPacket& pkt, Id target, N2npNodeId n2npTarget){
+    void Node::send(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget){
         pkt.from = this->id;
         GTTPacket* gtt = pkt.toGTTPacket();
         //std::string& raw_data = gtt->serialize();
         //this->n2np.send(n2npTarget, "dht", raw_data.c_str(), raw_data.length());
     }
 
-    void Node::sendPong(Id target, N2npNodeId n2npTarget){
+    void Node::sendPong(Id target, N2NP::NodeId n2npTarget){
         DHTPacket pkt;
         pkt.method = M_PONG;
         this->send(pkt, target, n2npTarget);
     } 
 
-    void Node::sendGot(DHTPacket& pkt, Id target, N2npNodeId n2npTarget){
+    void Node::sendGot(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget){
         DHTPacket answer;
         answer.connectionId = pkt.connectionId;
         answer.method = M_GOT;
@@ -95,7 +96,7 @@ namespace DHT
     void Node::handleGot(DHTPacket& pkt){
     }
 
-    void Node::sendStored(DHTPacket& pkt, Id target, N2npNodeId n2npTarget){
+    void Node::sendStored(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget){
         DHTPacket answer;
         answer.connectionId = pkt.connectionId;
         answer.method = M_STORED;
@@ -108,7 +109,7 @@ namespace DHT
     void Node::handleStored(DHTPacket& pkt){
     }
 
-    void Node::sendFound(DHTPacket& pkt, Id target, N2npNodeId n2npTarget){
+    void Node::sendFound(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget){
         DHTPacket answer;
         answer.connectionId = pkt.connectionId;
         answer.method = M_FOUND;
