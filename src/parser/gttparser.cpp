@@ -116,11 +116,11 @@ namespace Epyx
         // Read method name
         iMethod = i;
         if (!isupper(l[i]))
-            throw ParserException("protocol name should begin with capital letters");
+            throw ParserException("method name should begin with capital letters");
         i++;
         while (l[i] != 0) {
             if (!(isupper(l[i]) || isdigit(l[i]) || (l[i] == '_')))
-                throw ParserException("protocol name should continue with [A-Z0-9]* or end with a space");
+                throw ParserException("method name should continue with [A-Z0-9]* or end with a space");
             i++;
         }
         currentPkt->method = std::string(l + iMethod, i - iMethod);

@@ -46,6 +46,12 @@ int main(){
                 while((pac = myParser.getPacket()) != NULL){
                     Epyx::log::info << "here comes one packet:\n"
                         << *pac << Epyx::log::endl;
+                    char *rebuilt;
+                    unsigned long size = pac->build(&rebuilt);
+                    Epyx::log::info << "Rebuilt packet:\n"
+                        << std::string(rebuilt, size) << Epyx::log::endl;
+                    delete pac;
+                    pac = NULL;
                 }
             }
             msgInput.close();

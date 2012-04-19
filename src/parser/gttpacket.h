@@ -35,6 +35,13 @@ namespace Epyx
         friend std::ostream& operator<<(std::ostream& os, const GTTPacket& pkt);
 
         /**
+         * @brief Build the raw text query for this GTT Packet
+         * @param rawData newly-allocated buffer with ready-to-send data
+         * @return size of *data
+         */
+        unsigned long build(char **newData) const;
+
+        /**
          * @brief Protocol name
          */
         std::string protocol;

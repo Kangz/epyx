@@ -1,4 +1,7 @@
 #include "gttpacket.h"
+#include "../core/common.h"
+#include <sstream>
+#include <string.h>
 
 namespace Epyx
 {
@@ -25,5 +28,32 @@ namespace Epyx
             os << pkt.body;
         }
         return os;
+    }
+
+    unsigned long GTTPacket::build(char **newData) const {
+        EPYX_ASSERT(newData != NULL);
+        std::stringstream head;
+        std::map<std::string, std::string>::const_iterator it;
+
+        // First line
+        head << protocol << " " << method << String::crlf;
+
+        // Headers
+        for (it = headers.begin(); it != headers.end(); it++) {
+            head << it->first << ": " << it->second << String::crlf;
+        }
+        if (size > 0) {
+            head << "content-length: " << size << String::crlf;
+        }
+        head << String::crlf;
+
+        // Concatenate headers and content
+        const std::string str = head.str();
+        unsigned long strSize = str.length();
+        char *data = new char[strSize + size];
+        strncpy(data, str.c_str(), strSize);
+        memcpy(data + strSize, body, size);
+        *newData = data;
+        return strSize + size;
     }
 }
