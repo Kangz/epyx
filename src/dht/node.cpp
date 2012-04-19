@@ -14,7 +14,6 @@ namespace DHT
     }
 
     void Node::eatN2NP(N2NP::NodeId senderId, N2NP::NodeId myself, char* data, int dataSize){
-        //TODO: Make it non blocking
         gttParser.eat(data, dataSize);
         GTTPacket* gtt_packet = gttParser.getPacket();
         gttParser.reset();
@@ -24,9 +23,15 @@ namespace DHT
             return;
         }
 
+        //TODO: check that the packet is well-formed
+        //DHTPacket* pkt = new DHTPacket(*gtt_packet);
         DHTPacket pkt(*gtt_packet);
         delete gtt_packet;
+        
+      //  this->dispatcher.post(new std::pair<N2NP::NodeId, DHTPacket*>(senderId, pkt));
+    //}
 
+    
         this->kbucket->seenPeer(&pkt.from, senderId);
 
         switch(pkt.method){

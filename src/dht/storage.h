@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include "../core/common.h"
 
 namespace Epyx
 {
@@ -19,6 +20,7 @@ namespace DHT
             void set(const std::string& key, const std::string& data);
 
         private:
+            Mutex lock;
             std::map<std::string, std::string> data;
     };
 
