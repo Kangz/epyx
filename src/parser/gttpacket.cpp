@@ -5,26 +5,24 @@
 
 namespace Epyx
 {
+
     GTTPacket::GTTPacket()
-    :size(0), body(NULL)
-    {
+    :size(0), body(NULL) {
     }
 
-    GTTPacket::~GTTPacket()
-    {
+    GTTPacket::~GTTPacket() {
         if (body)
             delete[] body;
     }
 
-    std::ostream& operator<<(std::ostream& os, const GTTPacket& pkt)
-    {
+    std::ostream& operator<<(std::ostream& os, const GTTPacket& pkt) {
         os << "[Proto " << pkt.protocol << " method " << pkt.method << std::endl;
         for (std::map<std::string, std::string>::const_iterator i = pkt.headers.begin();
-             i != pkt.headers.end(); ++i) {
+            i != pkt.headers.end(); ++i) {
             os << "  " << (*i).first << ": " << (*i).second << std::endl;
         }
         if (pkt.size > 0) {
-            os << "  Content-length: " << pkt.size << std::endl;
+            os << "  content-length: " << pkt.size << std::endl;
         }
         os << "]";
         return os;

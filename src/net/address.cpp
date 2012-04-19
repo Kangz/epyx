@@ -6,9 +6,12 @@
 namespace Epyx
 {
 
-    Address::Address(const std::string& addressFormat) {
+    Address::Address(const std::string& addressFormat)
+    :ip(), port(0), ipVersion(0) {
         // portstr may be a ":port" suffix
         std::string portstr = "";
+        if (addressFormat.empty())
+            return;
         if (addressFormat.at(0) == '[') {
             //Case if IPv6
             size_t n = addressFormat.find(']');
@@ -40,7 +43,7 @@ namespace Epyx
     }
 
     Address::Address()
-    :ip("*"), port(0), ipVersion(0) {
+    :ip(), port(0), ipVersion(0) {
     }
 
     Address::Address(const std::string& ip, unsigned short port, int ipVersion)
@@ -123,8 +126,10 @@ namespace Epyx
     std::ostream& operator<<(std::ostream& os, const Address& addr) {
         if (addr.ipVersion == 6)
             os << '[' << addr.ip << ']';
-        else
+        else if (addr.ip.length())
             os << addr.ip;
+        else
+            os << '*';
 
         if (addr.port)
             os << ':' << addr.port;

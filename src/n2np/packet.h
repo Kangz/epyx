@@ -64,6 +64,8 @@ namespace Epyx
              * @brief Build the raw text query for this N2NP Packet
              * @param newData newly-allocated buffer with ready-to-send data
              * @return size of *data
+             *
+             * Note: Please delete *newData with delete[]
              */
             unsigned long build(char **newData) const;
 
