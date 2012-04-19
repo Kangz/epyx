@@ -51,9 +51,10 @@ namespace Epyx
              */
             std::string toString() const;
 
-
             /**
-             *  @brief Comparator, to be able to index types in a map
+             * @brief Comparator, to be able to index types in a map
+             * @param pkttype1
+             * @param pkttype2
              */
             friend bool operator<(const PacketType& pkttype1, const PacketType& pkttype2);
 

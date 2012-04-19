@@ -91,21 +91,35 @@ namespace Epyx
         unsigned long Packet::build(char **newData) const {
             EPYX_ASSERT(newData != NULL);
             // Build a GTT Packet to build
-            GTTPacket gtt;
-            gtt.protocol = "N2NP";
-            gtt.method = method;
-            gtt.headers["From"] = from.toString();
-            gtt.headers["To"] = to.toString();
-            gtt.headers["Version"] = version;
-            gtt.headers["Type"] = type.toString();
-            gtt.headers["ID"] = String::fromInt(pktID);
-            gtt.size = size;
-            gtt.body = data;
-            unsigned long ret = gtt.build(newData);
+            GTTPacket gttpkt;
+            this->fillGTTPacket(gttpkt);
+            unsigned long ret = gttpkt.build(newData);
             // Do not free data
-            gtt.size = 0;
-            gtt.body = NULL;
+            gttpkt.size = 0;
+            gttpkt.body = NULL;
             return ret;
+        }
+
+        bool Packet::send(Socket& sock) const {
+            GTTPacket gttpkt;
+            this->fillGTTPacket(gttpkt);
+            bool ret = gttpkt.send(sock);
+            // Do not free data
+            gttpkt.size = 0;
+            gttpkt.body = NULL;
+            return ret;
+        }
+
+        void Packet::fillGTTPacket(GTTPacket &gttpkt) const {
+            gttpkt.protocol = "N2NP";
+            gttpkt.method = method;
+            gttpkt.headers["From"] = from.toString();
+            gttpkt.headers["To"] = to.toString();
+            gttpkt.headers["Version"] = version;
+            gttpkt.headers["Type"] = type.toString();
+            gttpkt.headers["ID"] = String::fromInt(pktID);
+            gttpkt.size = size;
+            gttpkt.body = data;
         }
     }
 }

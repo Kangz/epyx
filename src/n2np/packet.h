@@ -8,6 +8,7 @@
 
 #include "nodeid.h"
 #include "packettype.h"
+#include "../net/socket.h"
 #include "../parser/gttpacket.h"
 
 namespace Epyx
@@ -70,6 +71,13 @@ namespace Epyx
             unsigned long build(char **newData) const;
 
             /**
+             * @brief Send packet with a Socket
+             * @param sock
+             * @return true if it succeeded
+             */
+            bool send(Socket& sock) const;
+
+            /**
              * @brief GTT Method
              */
             std::string method;
@@ -106,6 +114,16 @@ namespace Epyx
              * @brief Content
              */
             const char *data;
+
+        private:
+            /**
+             * @brief Private function to get a GTT packet from a N2NP packet
+             * @param gttpkt (out) GTT packet
+             *
+             * Use this function with care: as this->data = gttpkt.body, you need
+             * to reset gttpkt.body to NULL before destroying it
+             */
+            void fillGTTPacket(GTTPacket &gttpkt) const;
         };
     }
 }

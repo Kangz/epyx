@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <ostream>
+#include "../net/socket.h"
 
 namespace Epyx
 {
@@ -42,6 +43,13 @@ namespace Epyx
          * Note: Please delete *newData with delete[]
          */
         unsigned long build(char **newData) const;
+
+        /**
+         * @brief Send packet with a Socket
+         * @param sock
+         * @return true if it succeeded
+         */
+        bool send(Socket& sock) const;
 
         /**
          * @brief Protocol name

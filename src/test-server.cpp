@@ -21,8 +21,9 @@ public:
     /**
      * @brief Welcome an incomming connection
      * @param sock Incomming
+     * @param unused
      */
-    TestNetSelectSocket(Epyx::Socket *sock)
+    TestNetSelectSocket(Epyx::Socket *sock, void *unused)
         :NetSelectSocket(sock)
     {
         Epyx::log::debug << "[" << socket().getAddress() << "] " <<
@@ -83,7 +84,7 @@ int main()
         Epyx::TCPServer *tcpServer = new Epyx::TCPServer(4242, selectThread.getNumWorkers());
         Epyx::log::debug << "ServerWorker listening at " << tcpServer->getAddress() <<
             Epyx::log::endl;
-        selectThread.add(new Epyx::NetSelectTCPServer<TestNetSelectSocket>(tcpServer));
+        selectThread.add(new Epyx::NetSelectTCPServer<TestNetSelectSocket, void>(tcpServer, NULL));
         selectThread.setName("NetSelect");
         Epyx::log::debug << "Start " << selectThread.getThisName() <<
             Epyx::log::endl;

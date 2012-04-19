@@ -4,27 +4,28 @@
 namespace Epyx
 {
 
-    template<typename T> NetSelectTCPServer<T>::NetSelectTCPServer(TCPServer *srv)
-    : srv(srv) {
+    template<class T, typename TP>
+    NetSelectTCPServer<T, TP>::NetSelectTCPServer(TCPServer *srv, TP *param)
+    : srv(srv), param(param) {
         EPYX_ASSERT(srv != NULL);
         // Force bind
         if (!srv->isBinded())
             throw FailException("NetSelectTCPServer", "Unbinded server");
     }
 
-    template<typename T> NetSelectTCPServer<T>::~NetSelectTCPServer() {
+    template<class T, typename TP> NetSelectTCPServer<T, TP>::~NetSelectTCPServer() {
         if (srv != NULL) {
             delete srv;
             srv = NULL;
         }
     }
 
-    template<typename T> int NetSelectTCPServer<T>::getFileDescriptor() const {
+    template<class T, typename TP> int NetSelectTCPServer<T, TP>::getFileDescriptor() const {
         EPYX_ASSERT(srv != NULL);
         return srv->getFd();
     }
 
-    template<typename T> bool NetSelectTCPServer<T>::read() {
+    template<class T, typename TP> bool NetSelectTCPServer<T, TP>::read() {
         EPYX_ASSERT(srv != NULL);
         struct sockaddr_storage clientAddr;
         socklen_t clientAddrLen;
@@ -41,7 +42,7 @@ namespace Epyx
         try {
             newSock = new TCPSocket(newfd, Address((struct sockaddr*) &clientAddr));
             newSock->setLocalAddress(srv->getAddress());
-            T *nsSocket = new T(newSock);
+            T *nsSocket = new T(newSock, param);
             this->getOwner()->add(nsSocket);
         } catch (Exception e) {
             log::error << "Unable to setup the link:\n" << e << log::endl;

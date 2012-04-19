@@ -18,28 +18,37 @@ namespace Epyx
      *
      * @brief Manage a TCPServer in NetSelect
      *
-     * T is a class which derives from NetSelectSocket and which is intended to
-     * be instanced for each incomming connection.
+     * @param T is a class which derives from NetSelectSocket and which is
+     * intended to be instanced for each incomming connection.
+     *
+     * @param TP (for param) is the type the second argument of the constructor
+     * of TSelSock
+     *
+     * TSelSock needs to have a constructor TSelSock(Socket *sock, TParam *param)
      */
-    template<typename T>class NetSelectTCPServer : public NetSelectReader
+    template<class T ,typename TP>class NetSelectTCPServer : public NetSelectReader
     {
     public:
         /**
          * @brief Create a NetSelectTCPServer with a new TCPServer
+         *
          * NOTE: TCPServer *srv is DELETED by the desctructor
          */
-        NetSelectTCPServer(TCPServer *srv);
+        NetSelectTCPServer(TCPServer *srv, TP *param);
         ~NetSelectTCPServer();
 
         int getFileDescriptor() const;
 
         bool read();
 
-    protected:
+    private:
         /**
          * @brief Monitored TCPServer
          */
         TCPServer *srv;
+
+        // Constructor parameter
+        TP *param;
     };
 }
 
