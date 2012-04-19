@@ -40,7 +40,7 @@ namespace Epyx
          */
         NetSelectSocket(Socket *psock);
 
-        ~NetSelectSocket();
+        virtual ~NetSelectSocket();
 
         int getFileDescriptor() const;
 

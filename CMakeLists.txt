@@ -110,10 +110,23 @@ target_link_libraries(
 )
 
 add_executable(
-    test-n2np
+    test-local-n2np
     ${core_sources}
     ${net_sources}
     ${localn2np_sources}
+    ${n2np_sources}
+    ${parser_sources}
+    src/test-local-n2np.cpp
+)
+target_link_libraries(
+    test-local-n2np
+    pthread
+)
+
+add_executable(
+    test-n2np
+    ${core_sources}
+    ${net_sources}
     ${n2np_sources}
     ${parser_sources}
     src/test-n2np.cpp

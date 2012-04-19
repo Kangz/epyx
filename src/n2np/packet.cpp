@@ -11,9 +11,11 @@ namespace Epyx
         Packet::Packet(const PacketType& type, unsigned int size,
             const char *data)
         :from(), to(), pktID(0), type(type), size(size), data(NULL) {
-            char *newData = new char[size];
-            memcpy(newData, data, size);
-            this->data = newData;
+            if (data != NULL) {
+                char *newData = new char[size];
+                memcpy(newData, data, size);
+                this->data = newData;
+            }
         }
 
         Packet::Packet(const Packet& pkt)
