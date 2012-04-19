@@ -12,6 +12,8 @@ namespace DHT {
     }
 
     void KBucket::seenPeer(Id* const peerId, N2NP::NodeId& n2npId){
+        lock.lock();
+
         bool add =false;
         time_t now=time(NULL);
 
@@ -31,6 +33,7 @@ namespace DHT {
                 temp->lastReceiveTime = now;
                 temp->n2npId = n2npId;
                 bucket.peers.push_back(temp);
+                lock.unlock();
                 return;
             }
         }
@@ -55,6 +58,8 @@ namespace DHT {
             newPeer->n2npId = n2npId;
             bucket.peers.push_back(newPeer);
         }
+
+        lock.unlock();
     }
 
     struct FindNearestComparator {
@@ -65,6 +70,8 @@ namespace DHT {
 
 
     void KBucket::findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n){
+        lock.lock();
+
         std::priority_queue<std::pair<Distance,Peer>, std::vector<std::pair<Distance, Peer> >,
                 FindNearestComparator> closest;
 
@@ -97,6 +104,7 @@ namespace DHT {
             nearest.push_back(closest.top().second);
             closest.pop();
         }
+        lock.unlock();
     }
 
 }

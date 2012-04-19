@@ -7,6 +7,7 @@
 #include "../n2np/nodeid.h"
 #include "id.h"
 #include "peer.h"
+#include "../core/common.h"
 
 namespace Epyx{
 namespace DHT {
@@ -19,6 +20,7 @@ namespace DHT {
             void findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n);
 
         private:
+            Mutex lock;
             std::vector<Bucket> buckets;
             Id ownId;
     };
