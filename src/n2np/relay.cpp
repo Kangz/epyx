@@ -31,8 +31,6 @@ namespace Epyx
             // Build a random unique node name
             std::ostringstream nodeNameStream;
             nodeNameStream << sock->getAddress()
-                << '-' << String::fromInt(rand() % 10000)
-                << '-' << String::fromInt(rand() % 10000)
                 << '-' << String::fromInt(rand() % 10000);
             const std::string nodeName = nodeNameStream.str();
             const NodeId nodeid(nodeName.c_str(), relayAddr);
@@ -77,7 +75,7 @@ namespace Epyx
             return relayId;
         }
 
-        void Relay::treat(N2NP::Packet *pkt) {
+        void Relay::treat(Packet *pkt) {
             EPYX_ASSERT(pkt != NULL);
             // TODO: Send a message back to from node when an error happens
 
@@ -85,7 +83,7 @@ namespace Epyx
             const Address toAddr = pkt->to.getRelay();
             if (toAddr != relayAddr) {
                 TCPSocket toSock(toAddr);
-                log::info << "Relay " << relayId << ": Transmit " << *pkt << log::endl;
+                //log::info << "Relay " << relayId << ": Transmit " << *pkt << log::endl;
                 if (!pkt->send(toSock)) {
                     log::error << "[Relay " << relayId << "] Unable to transmit packet "
                         << *pkt << log::endl;
@@ -104,16 +102,16 @@ namespace Epyx
             this->nodesMutex.unlock();
 
             if (node == NULL) {
-                log::debug << "[Relay " << relayId << "] Destination not found: "
+                log::error << "[Relay " << relayId << "] Destination not found: "
                     << *pkt << log::endl;
                 return;
             }
 
             // Send packet
-            log::info << "Relay " << relayId << ": Send " << *pkt << log::endl;
+            //log::info << "Relay " << relayId << ": Send " << *pkt << log::endl;
             EPYX_ASSERT(node->sock != NULL);
             if (!pkt->send(*(node->sock))) {
-                log::debug << "[Relay " << relayId << "] Unable to send packet "
+                log::error << "[Relay " << relayId << "] Unable to send packet "
                     << *pkt << log::endl;
                 return;
             }

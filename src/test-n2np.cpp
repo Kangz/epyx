@@ -5,24 +5,124 @@
 
 #include "core/common.h"
 #include "n2np/relay.h"
+#include "n2np/node.h"
+#include <strings.h>
+
+/**
+ * @brief Command-line interface to send packets
+ */
+void test_command(Epyx::N2NP::Node* nodes[], unsigned int nodeNum) {
+    unsigned int nodeIndex;
+    std::string msg;
+
+    Epyx::log::debug << "[Cli:motd] Command-line interface" << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] You are on " << nodes[0]->getId() << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] There are " << nodeNum << " nodes" << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] 2 Hello sends `Hello' to node 2" << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] 0 quits." << Epyx::log::endl;
+
+    while (true) {
+        std::cin >> nodeIndex;
+        if (nodeIndex <= 0) {
+            Epyx::log::debug << "[Cli] Bye :)" << Epyx::log::endl;
+            return;
+        } else {
+            std::cin >> msg;
+            if (nodeIndex > nodeNum) {
+                Epyx::log::debug << "[Cli] Too high index. Max is "
+                    << nodeNum << Epyx::log::endl;
+                continue;
+            }
+            const Epyx::N2NP::NodeId& nodeid = nodes[nodeIndex - 1]->getId();
+            Epyx::log::debug << "[Cli] Sending " << msg << " to " << nodeid << Epyx::log::endl;
+
+            // Send !
+            nodes[0]->send(nodeid, "TEST", msg.length() + 1, msg.c_str());
+        }
+    }
+}
+
+/**
+ * @brief Receive callback for every node
+ */
+bool nodeRecv(Epyx::N2NP::Node& node, const Epyx::N2NP::Packet& pkt, void* arg) {
+    Epyx::log::debug << "[Node " << node.getId() << "] Recv from " << pkt.from << ": `"
+        << pkt.data << "'" << Epyx::log::endl;
+    // Send a pong with the same data
+    // .. or not
+    std::string pongstr(pkt.data, pkt.size);
+
+    if (!strcasecmp(pkt.data, "o<"))
+        pongstr = "PAN !";
+    else if (!strcasecmp(pkt.data, "Question?"))
+        pongstr = "The answer is 42.";
+
+    node.send(pkt.from, "PONG", pongstr.length() + 1, pongstr.c_str());
+    return true;
+}
+
+/**
+ * @brief Receive callback for Pong messages
+ */
+bool nodeRecvPong(Epyx::N2NP::Node& node, const Epyx::N2NP::Packet& pkt, void* arg) {
+    Epyx::log::debug << "[Node " << node.getId() << "] Pong from " << pkt.from << ": `"
+        << pkt.data << "'" << Epyx::log::endl;
+    return true;
+}
 
 /**
  * @brief Test local N2NP implementation
  */
 void test_n2np() {
-    // Create Net Select
-    Epyx::NetSelect selectThread(20, "SelectWorker");
-    selectThread.setName("NetSelect");
-    selectThread.start();
+    // Create Net Select for relay
+    Epyx::NetSelect *selectRelay = new Epyx::NetSelect(10, "WRelay");
+    selectRelay->setName("NetSelectRelay");
+    selectRelay->start();
 
     // Create relay
     Epyx::Address addr("127.0.0.1:4242");
-    Epyx::N2NP::Relay relay(addr);
-    selectThread.add(new Epyx::N2NP::RelayServer(new Epyx::TCPServer(addr.getPort(), 50), &relay));
-    Epyx::log::info << "Start Relay " << relay.getId() << Epyx::log::endl;
+    Epyx::N2NP::Relay *relay = new Epyx::N2NP::Relay(addr);
+    selectRelay->add(new Epyx::N2NP::RelayServer(new Epyx::TCPServer(addr.getPort(), 50), relay));
+    Epyx::log::info << "Start Relay " << relay->getId() << Epyx::log::endl;
 
-    // Wait select
-    selectThread.wait();
+    // Create Net Select for nodes
+    Epyx::NetSelect *selectNodes = new Epyx::NetSelect(10, "WNodes");
+    selectNodes->setName("NetSelectNodes");
+    selectNodes->start();
+
+    // Create nodes
+    const int nodeNum = 43;
+    Epyx::N2NP::Node * nodes[nodeNum];
+    Epyx::N2NP::PacketType type("TEST");
+    Epyx::N2NP::PacketType pongType("PONG");
+    Epyx::log::info << "Create nodes..." << Epyx::log::endl;
+    for (int i = 0; i < nodeNum; i++) {
+        nodes[i] = new Epyx::N2NP::Node(addr);
+        nodes[i]->registerRecv(type, nodeRecv, NULL);
+        nodes[i]->registerRecv(pongType, nodeRecvPong, NULL);
+        selectNodes->add(nodes[i]);
+    }
+
+    // Wait...
+    Epyx::log::info << "Waiting for nodes..." << Epyx::log::endl;
+    bool isReady = false;
+    while (!isReady) {
+        isReady = true;
+        for (int i = 0; i < nodeNum; i++) {
+            if (!nodes[i]->isReady()) {
+                isReady = false;
+                usleep(100);
+                continue;
+            }
+        }
+    }
+
+    test_command(nodes, nodeNum);
+
+    // Everything stops at destruction, but nodes first !
+    delete selectNodes;
+    delete selectRelay;
+    delete relay;
 }
 
 /**

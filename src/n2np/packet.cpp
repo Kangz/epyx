@@ -10,7 +10,8 @@ namespace Epyx
 
         Packet::Packet(const PacketType& type, unsigned int size,
             const char *data)
-        :from(), to(), pktID(0), type(type), size(size), data(NULL) {
+        :method(type.toString()), from(), to(), version(""), pktID(0),
+        type(type), size(size), data(NULL) {
             if (data != NULL) {
                 char *newData = new char[size];
                 memcpy(newData, data, size);
@@ -19,8 +20,8 @@ namespace Epyx
         }
 
         Packet::Packet(const Packet& pkt)
-        :from(pkt.from), to(pkt.to), version(pkt.version), pktID(pkt.pktID),
-        type(pkt.type), size(pkt.size) {
+        :method(pkt.method), from(pkt.from), to(pkt.to), version(pkt.version),
+        pktID(pkt.pktID), type(pkt.type), size(pkt.size) {
             char *newData = new char[pkt.size];
             memcpy(newData, pkt.data, pkt.size);
             data = newData;
@@ -117,7 +118,7 @@ namespace Epyx
             gttpkt.method = method;
             gttpkt.headers["From"] = from.toString();
             gttpkt.headers["To"] = to.toString();
-            gttpkt.headers["Version"] = version;
+            gttpkt.headers["Version"] = (version.empty() ? "0" : version);
             gttpkt.headers["Type"] = type.toString();
             gttpkt.headers["ID"] = String::fromInt(pktID);
             gttpkt.size = size;

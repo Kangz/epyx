@@ -10,6 +10,7 @@ namespace Epyx
 
     TCPSocket::TCPSocket(const Address& addr)
     :Socket(addr), isConnected(false) {
+        this->connect();
     }
 
     TCPSocket::TCPSocket(int sock, const Address &addr)

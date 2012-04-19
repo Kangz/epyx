@@ -43,7 +43,7 @@ namespace Epyx
 
             /**
              * @brief Detach a node
-             * @param id Node ID
+             * @param nodeid Node ID
              * @return true on success
              */
             bool detachNode(const NodeId& nodeid);
@@ -59,7 +59,7 @@ namespace Epyx
              * @brief Treat a N2NP packet
              * @param pkt the packet to be processed
              */
-            void treat(N2NP::Packet *pkt);
+            void treat(Packet *pkt);
 
         private:
             // Relay address and ID
@@ -76,6 +76,10 @@ namespace Epyx
             // Map of known nodes (with its Mutex)
             std::map<std::string, NodeInfo*> nodes;
             Mutex nodesMutex;
+
+            // Disable copy
+            Relay(const Relay&);
+            const Relay& operator=(const Relay&);
         };
     }
 }

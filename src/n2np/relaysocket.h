@@ -41,6 +41,9 @@ namespace Epyx
             GTTParser gttparser;
         };
 
+        /**
+         * @brief NetSelectTCPServer for relay
+         */
         typedef NetSelectTCPServer<RelaySocket, Relay> RelayServer;
     }
 }
