@@ -4,7 +4,7 @@
 #include <list>
 #include <vector>
 #include <map>
-#include "../n2np/n2np-nodeid.h"
+#include "../n2np/nodeid.h"
 #include "id.h"
 #include "peer.h"
 
@@ -15,7 +15,7 @@ namespace DHT {
     class KBucket {
         public:
             KBucket(Id* const self);
-            void seenPeer(Id* const peerId, N2npNodeId& n2npId);
+            void seenPeer(Id* const peerId, N2NP::NodeId& n2npId);
             void findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n);
 
         private:
