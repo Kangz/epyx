@@ -236,6 +236,17 @@ public:
     }
 };
 
+class TimeoutActor: public Actor<int>{
+public:
+    virtual void treat(int& n){
+        log::info << "Timeout actor did not time out" << log::endl;
+    }
+    virtual void timeout(){
+        log::info << "Argh! I timed out, I'll just this.kill()" << log::endl;
+        this->kill();
+    }
+};
+
 void test_actors(){
     ActorManager manager(5, "Actors");
 
@@ -245,6 +256,7 @@ void test_actors(){
         simple.post(*(new int(18)));
         simple.kill();
     }
+    log::info<<log::endl;
     {
         log::info<<"Making a simple actor and send it a message and destroy it after some time"<<log::endl;
         ActorId<int> simple = manager.add(new SimpleActor);
@@ -252,6 +264,16 @@ void test_actors(){
         usleep(10000);
         simple.kill();
     }
+    log::info<<log::endl;
+    {
+        log::info<<"Making a timeout actor and send it a message then wait it's timeout before sending it another message"<<log::endl;
+        ActorId<int> timeout = manager.add(new TimeoutActor, 0);
+        timeout.post(*(new int(18)));
+        usleep(100000);
+        timeout.post(*(new int(18)));
+    }
+    log::info<<log::endl;
+
 }
 
 int main(){
