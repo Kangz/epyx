@@ -11,12 +11,12 @@
 /**
  * @brief Command-line interface to send packets
  */
-void test_command(Epyx::N2NP::Node* nodes[], unsigned int nodeNum) {
+void test_command(Epyx::N2NP::Node& myNode, Epyx::N2NP::NodeId nodeids[], unsigned int nodeNum) {
     unsigned int nodeIndex;
     std::string msg;
 
     Epyx::log::debug << "[Cli:motd] Command-line interface" << Epyx::log::endl;
-    Epyx::log::debug << "[Cli:motd] You are on " << nodes[0]->getId() << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] You are on " << myNode.getId() << Epyx::log::endl;
     Epyx::log::debug << "[Cli:motd] There are " << nodeNum << " nodes" << Epyx::log::endl;
     Epyx::log::debug << "[Cli:motd] 2 Hello sends `Hello' to node 2" << Epyx::log::endl;
     Epyx::log::debug << "[Cli:motd] 0 quits." << Epyx::log::endl;
@@ -33,11 +33,11 @@ void test_command(Epyx::N2NP::Node* nodes[], unsigned int nodeNum) {
                     << nodeNum << Epyx::log::endl;
                 continue;
             }
-            const Epyx::N2NP::NodeId& nodeid = nodes[nodeIndex - 1]->getId();
+            const Epyx::N2NP::NodeId& nodeid = nodeids[nodeIndex - 1];
             Epyx::log::debug << "[Cli] Sending " << msg << " to " << nodeid << Epyx::log::endl;
 
             // Send !
-            nodes[0]->send(nodeid, "TEST", msg.length() + 1, msg.c_str());
+            myNode.send(nodeid, "TEST", msg.length() + 1, msg.c_str());
         }
     }
 }
@@ -91,7 +91,7 @@ void test_n2np() {
     selectNodes->start();
 
     // Create nodes
-    const int nodeNum = 43;
+    const int nodeNum = 42;
     Epyx::N2NP::Node * nodes[nodeNum];
     Epyx::N2NP::PacketType type("TEST");
     Epyx::N2NP::PacketType pongType("PONG");
@@ -103,24 +103,24 @@ void test_n2np() {
         selectNodes->add(nodes[i]);
     }
 
-    // Wait...
+    // Wait for node IDs
     Epyx::log::info << "Waiting for nodes..." << Epyx::log::endl;
-    bool isReady = false;
-    while (!isReady) {
-        isReady = true;
-        for (int i = 0; i < nodeNum; i++) {
-            if (!nodes[i]->isReady()) {
-                isReady = false;
-                usleep(100);
-                continue;
-            }
-        }
+    Epyx::N2NP::NodeId nodeids[nodeNum];
+    for (int i = 0; i < nodeNum; i++) {
+        while (!nodes[i]->isReady())
+            usleep(100);
+        nodeids[i] = nodes[i]->getId();
     }
 
-    test_command(nodes, nodeNum);
+    test_command(*(nodes[0]), nodeids, nodeNum);
 
     // Everything stops at destruction, but nodes first !
     delete selectNodes;
+    Epyx::log::info << "Waiting for nodes to be detached..." << Epyx::log::endl;
+    if (!relay->waitForAllDetach(2)) {
+        Epyx::log::info << "Detach remaining nodes" << Epyx::log::endl;
+        relay->detachAllNodes();
+    }
     delete selectRelay;
     delete relay;
 }

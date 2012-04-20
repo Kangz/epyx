@@ -1,6 +1,7 @@
 #include "relay.h"
 #include "../net/tcpsocket.h"
 #include <stdlib.h>
+#include <sys/time.h>
 
 namespace Epyx
 {
@@ -13,16 +14,7 @@ namespace Epyx
         }
 
         Relay::~Relay() {
-            // Delete every Node information
-            nodesMutex.lock();
-            for (std::map<std::string, NodeInfo*>::iterator i = nodes.begin();
-                i != nodes.end(); i++) {
-                if (i->second != NULL) {
-                    delete(i->second);
-                    i->second = NULL;
-                }
-            }
-            nodesMutex.unlock();
+            this->detachAllNodes();
         }
 
         NodeId Relay::attachNode(Socket *sock) {
@@ -36,9 +28,7 @@ namespace Epyx
             const NodeId nodeid(nodeName.c_str(), relayAddr);
 
             // Make node information
-            NodeInfo *node = new NodeInfo();
-            node->id = nodeid;
-            node->sock = sock;
+            NodeInfo *node = new NodeInfo(nodeid, sock);
 
             // Insert node
             nodesMutex.lock();
@@ -66,9 +56,49 @@ namespace Epyx
             log::info << "Relay: Detach node " << nodeid << log::endl;
 
             nodesMutex.lock();
+            NodeInfo *node = nodes[nodeid.getName()];
             nodes.erase(nodeid.getName());
             nodesMutex.unlock();
+            if (node != NULL) {
+                delete node;
+            }
             return true;
+        }
+
+        bool Relay::waitForAllDetach(int timeout) {
+            // TODO: better timeout management
+            time_t timemax;
+            struct timeval tv;
+            int gettimeofday_status = gettimeofday(&tv, NULL);
+            EPYX_ASSERT(gettimeofday_status == 0);
+            timemax = tv.tv_sec + timeout;
+
+            while (true) {
+                gettimeofday_status = gettimeofday(&tv, NULL);
+                EPYX_ASSERT(gettimeofday_status == 0);
+                // Timeout
+                if (timemax <= tv.tv_sec)
+                    return false;
+
+                nodesMutex.lock();
+                bool isEmpty = nodes.empty();
+                nodesMutex.unlock();
+                if (isEmpty)
+                    return true;
+            }
+        }
+
+        void Relay::detachAllNodes() {
+            // Delete every Node information
+            nodesMutex.lock();
+            for (std::map<std::string, NodeInfo*>::iterator i = nodes.begin();
+                i != nodes.end(); i++) {
+                if (i->second != NULL) {
+                    delete(i->second);
+                    i->second = NULL;
+                }
+            }
+            nodesMutex.unlock();
         }
 
         const NodeId& Relay::getId() const {
@@ -114,6 +144,18 @@ namespace Epyx
                 log::error << "[Relay " << relayId << "] Unable to send packet "
                     << *pkt << log::endl;
                 return;
+            }
+        }
+
+        Relay::NodeInfo::NodeInfo(const NodeId& id, Socket *sock)
+        :id(id), sock(sock) {
+        }
+
+        Relay::NodeInfo::~NodeInfo() {
+            if (sock) {
+                // NEVER DELETE THIS SOCKET, but you may close it
+                sock->close();
+                sock = NULL;
             }
         }
     }

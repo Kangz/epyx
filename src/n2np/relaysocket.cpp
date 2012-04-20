@@ -15,7 +15,9 @@ namespace Epyx
 
         RelaySocket::~RelaySocket() {
             // Dettach node
+            EPYX_ASSERT(relay != NULL);
             relay->detachNode(nodeid);
+            relay = NULL;
         }
 
         void RelaySocket::eat(const char *data, long size) {

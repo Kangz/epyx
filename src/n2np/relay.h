@@ -49,6 +49,18 @@ namespace Epyx
             bool detachNode(const NodeId& nodeid);
 
             /**
+             * @brief Wait for all nodes to close connections
+             * @param timeout maximum number of seconds to wait
+             * @return true if there are no more node
+             */
+            bool waitForAllDetach(int timeout);
+
+            /**
+             * @brief Force to dettach all nodes
+             */
+            void detachAllNodes();
+
+            /**
              * @brief Get relay ID
              * @return this->relayId
              */
@@ -70,7 +82,11 @@ namespace Epyx
             typedef struct NodeInfo
             {
                 NodeId id;
+                // Important: NEVER delete this socket as it is managed by
+                // RelaySocket (and NetSelect)
                 Socket *sock;
+                NodeInfo(const NodeId& id, Socket * sock);
+                ~NodeInfo();
             } NodeInfo;
 
             // Map of known nodes (with its Mutex)
