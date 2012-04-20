@@ -38,7 +38,7 @@ namespace DHT
          * @param peerId the DHT Id of this peer
          * @param n2npId the N2NP Id of this peer
          */
-        void seenPeer(const Id& peerId, N2NP::NodeId& n2npId);
+        void seenPeer(const Id& peerId, const N2NP::NodeId& n2npId);
 
         /**
          * @brief finds the nodes closest to an Id

@@ -16,7 +16,7 @@ namespace DHT
         buckets.resize(Id::LENGTH);
     }
 
-    void KBucket::seenPeer(const Id& peerId, N2NP::NodeId& n2npId) {
+    void KBucket::seenPeer(const Id& peerId, const N2NP::NodeId& n2npId) {
         lock.lock();
 
         bool add =false;
