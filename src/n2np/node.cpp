@@ -9,11 +9,13 @@ namespace Epyx
 
         Node::Node(const Address& addr)
         :NetSelectSocket(new TCPSocket(addr)), hasId(false) {
+            this->send(NodeId("",addr),"ID",0,NULL);
         }
 
         bool Node::send(const NodeId& to, const std::string& method,
             unsigned long size, const char *data) {
-            EPYX_ASSERT(hasId);
+            if(method != "ID")
+                EPYX_ASSERT(hasId);
 
             // Send packet to the relay by default
             Packet n2npPkt(method, size, data);

@@ -8,9 +8,6 @@ namespace Epyx
 
         RelaySocket::RelaySocket(Socket *sock, Relay *relay)
         :NetSelectSocket(sock), relay(relay) {
-            // Attache to relay
-            EPYX_ASSERT(relay != NULL);
-            nodeid = relay->attachNode(sock);
         }
 
         RelaySocket::~RelaySocket() {
@@ -29,7 +26,11 @@ namespace Epyx
             while ((gttpkt = gttparser.getPacket()) != NULL) {
                 // Build a N2NP packet and post it to the Relay
                 Packet *n2nppkt = new Packet(*gttpkt);
-                relay->post(n2nppkt);
+                //There is a special packet that we must treat here
+                if(n2nppkt->method == "ID" && n2nppkt->to == relay->getId())
+                    relay->attachNode(&this->socket());
+                else
+                    relay->post(n2nppkt);
                 delete gttpkt;
             }
             std::string error;
