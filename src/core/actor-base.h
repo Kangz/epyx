@@ -35,6 +35,8 @@ namespace Epyx
          */
         void unlock();
 
+        bool alive;
+
     private:
         Mutex mutex;
 

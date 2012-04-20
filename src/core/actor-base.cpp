@@ -9,6 +9,7 @@ namespace Epyx
 {
 
     Actor_base::Actor_base() {
+        alive = true;
     }
 
     Actor_base::~Actor_base() {

@@ -9,6 +9,7 @@
 #include "actor-base.h"
 #include "actor-manager.h"
 
+#include "common.h"
 namespace Epyx
 {
     template<typename T>struct ActorId;
@@ -19,8 +20,7 @@ namespace Epyx
      * @brief A way to implement you own actors
      *
      * Basically an actor can do only 2 things: receiving messages and timing out.
-     * To do this overrride the two methods treat and timeout. self is a member
-     * variable representing this actor Id, you can kill post() and kill() on it.
+     * To do this overrride the two methods treat and timeout.
      *
      * @tparam T the base type of the messages the actor can receive
      */
@@ -41,21 +41,38 @@ namespace Epyx
          * @brief the method called when the actor times out
          */
         virtual void timeout();
+
+
+        /**
+         * @brief kills the actor (it won't timeout or receive other messages)
+         */
+        void kill();
+
+    private:
         ActorId<T> self;
 
     };
 
+
     template<typename T> void Actor<T>::_internal_treat(void* msg) {
-        T* message = static_cast<T*> (msg);
-        this->treat(*message);
-        delete message;
+        if (msg == NULL) {
+            this->timeout();
+        } else {
+            T* message = static_cast<T*> (msg);
+            this->treat(*message);
+            delete message;
+        }
     }
 
     template<typename T> void Actor<T>::setId(ActorId<T> id) {
         self = id;
     }
 
-    template<typename T> void Actor<T>::timeout() {
+    template<typename T> void Actor<T>::timeout() {}
+
+    template<typename T> void Actor<T>::kill() {
+        this->alive = false;
+        this->self.manager->post(this->self.id, NULL);//Send a message to make sure the actor is destroyed
     }
 }
 #endif //EPYX_CORE_ACTOR_H

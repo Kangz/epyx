@@ -51,7 +51,12 @@ namespace Epyx
         return tv;
     }
 
-    bool operator<(const Timeout& t1, const Timeout& t2){
+    int Timeout::remainingMsec() const {
+        struct timeval tv = this->remainingTimeval();
+        return tv.tv_sec * 1000 + tv.tv_usec % 1000;
+    }
+
+    bool operator<(const Timeout t1, const Timeout t2){
         if (t1.maxTime.tv_sec < t2.maxTime.tv_sec) return true;
         if (t1.maxTime.tv_sec > t2.maxTime.tv_sec) return false;
         return t1.maxTime.tv_usec < t2.maxTime.tv_usec;

@@ -26,6 +26,18 @@ namespace Epyx
         return res;
     }
 
+    template<typename T> ActorId<T> ActorManager::add(Actor<T>* a, Timeout t) {
+        EPYX_ASSERT(a != NULL);
+        return this->add(*a, t);
+    }
+
+    template<typename T> ActorId<T> ActorManager::add(Actor<T>& a, Timeout t) {
+        ActorId<T> res = this->add(a);
+        this->timeouts.addTimeout(t, res.id);
+        return res;
+    }
+
+
     template<typename T> ActorId<T>::ActorId() {
         manager = NULL;
         id = -1;

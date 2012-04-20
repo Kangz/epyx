@@ -35,7 +35,13 @@ namespace Epyx
          */
         struct timeval remainingTimeval() const;
 
-        friend bool operator<(const Timeout& t1, const Timeout& t2);
+        /**
+         * @brief Get remaining time in msec
+         * @return int msec
+         */
+        int remainingMsec() const;
+
+        friend bool operator<(const Timeout t1, const Timeout t2);
 
     private:
         struct timeval maxTime;
@@ -45,7 +51,7 @@ namespace Epyx
      * @brief compares 2 timeout to know which one is the closest
      * @return true if t1's due date is before t2's
      */
-    bool operator<(const Timeout& t1, const Timeout& t2);
+    bool operator<(const Timeout t1, const Timeout t2);
 }
 
 #endif /* EPYX_TIMEOUT_H */

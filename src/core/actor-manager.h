@@ -11,8 +11,10 @@
 #include "mutex.h"
 #include "worker-pool.h"
 #include "atom/counter.h"
+#include "timeout.h"
 #include <string>
 #include <map>
+#include <vector>
 
 namespace Epyx
 {
@@ -54,7 +56,7 @@ namespace Epyx
         void has(ActorId_base id);
 
         /**
-         * @brief Adds an Actor (pointer version)
+         * @brief Adds an Actor (pointer no-timeout version)
          * @param a the actor to be added
          * @return An ActorId for this Actor
          *
@@ -62,9 +64,38 @@ namespace Epyx
          * give commands to your actor.
          */
         template<typename T> ActorId<T> add(Actor<T>* a);
+
+        /**
+         * @brief Adds an Actor (reference no-timeout version)
+         * @param a the actor to be added
+         * @return An ActorId for this Actor
+         *
+         * Note: After this call you should only use the ActorId to
+         * give commands to your actor.
+         */
         template<typename T> ActorId<T> add(Actor<T>& a);
 
-        //template<typename T> ActorId<T> register(Actor<T> a, int timeout);
+        /**
+         * @brief Adds an Actor (pointer timeout version)
+         * @param a the actor to be added
+         * @param t int the time before the timeout in msec
+         * @return An ActorId for this Actor
+         *
+         * Note: After this call you should only use the ActorId to
+         * give commands to your actor.
+         */
+        template<typename T> ActorId<T> add(Actor<T>* a, Timeout t);
+
+        /**
+         * @brief Adds an Actor (reference timeout version)
+         * @param a the actor to be added
+         * @param t int the time before the timeout in msec
+         * @return An ActorId for this Actor
+         *
+         * Note: After this call you should only use the ActorId to
+         * give commands to your actor.
+         */
+        template<typename T> ActorId<T> add(Actor<T>& a, Timeout t);
 
         /**
          * @brief Kills an Actor contained in this manager, it won't receive anmore messges
@@ -90,6 +121,30 @@ namespace Epyx
         std::map<int, Actor_base*> actors;
         Mutex actorsLock;
         atom::Counter actorCount;
+
+        //The thread used to fire timeouts
+        struct ActorTimeoutComparator
+        {
+            bool operator()(const std::pair<Timeout, int> a, const std::pair<Timeout, int> b);
+        };
+
+        class TimeoutLauncher: public Thread
+        {
+        public:
+            TimeoutLauncher(ActorManager* m, const std::string& name);
+            ~TimeoutLauncher();
+            void addTimeout(Timeout t, int id);
+
+        protected:
+            virtual void run();
+
+        private:
+            ActorManager* manager;
+            std::priority_queue<std::pair<Timeout, int>, std::vector<std::pair<Timeout, int> >, ActorTimeoutComparator > timeouts;
+            BlockingQueue<std::pair<Timeout, int> > incoming;
+        };
+
+        TimeoutLauncher timeouts;
     };
     /**
      * @struct ActorId_base
