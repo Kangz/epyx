@@ -28,7 +28,7 @@ namespace Epyx
             unsigned short remotePort) {
             // Discovery UDP socket
             Discovery disco;
-            if (!disco.queryAnswerIn(10, &uri)) {
+            if (!disco.queryAnswerIn(10000, &uri)) {
                 log::error << "UPnP discovery failed" << log::endl;
                 return Address();
             }

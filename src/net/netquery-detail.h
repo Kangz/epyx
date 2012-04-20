@@ -35,33 +35,20 @@ namespace Epyx
         }
     }
 
-    template<typename T> T* NetQuery<T>::answer(int timeout) {
+    template<typename T> T* NetQuery<T>::answer(const Timeout& timeout) {
         struct timeval tv;
-        time_t timemax;
         fd_set rfds;
         const int size = 4096;
         char data[size];
         EPYX_ASSERT(sock != NULL);
         int sockfd = sock->getFd();
 
-        // Get current time
-        int gettimeofday_status = gettimeofday(&tv, NULL);
-        EPYX_ASSERT(gettimeofday_status == 0);
-        timemax = tv.tv_sec + timeout;
-
         // select() loop
-        while (true) {
-            gettimeofday_status = gettimeofday(&tv, NULL);
-            EPYX_ASSERT(gettimeofday_status == 0);
-            // Timeout
-            if (timemax <= tv.tv_sec)
-                return NULL;
-
+        while (!timeout.hasExpired()) {
             // Wait with select()
             FD_ZERO(&rfds);
             FD_SET(sockfd, &rfds);
-            tv.tv_sec = timemax - tv.tv_sec;
-            tv.tv_usec = 0;
+            tv = timeout.remainingTimeval();
             int status = select(sockfd + 1, &rfds, NULL, NULL, &tv);
             if (status < -1)
                 throw ErrException("NetSelect", "select");
@@ -91,9 +78,10 @@ namespace Epyx
                 }
             }
         }
+        return NULL;
     }
 
-    template<typename T> bool NetQuery<T>::answerIn(int timeout, T *ans) {
+    template<typename T> bool NetQuery<T>::answerIn(const Timeout& timeout, T *ans) {
         T *result = this->answer(timeout);
         if (result == NULL)
             return false;
@@ -103,7 +91,7 @@ namespace Epyx
         return true;
     }
 
-    template<typename T> T* NetQuery<T>::queryAnswer(int timeout) {
+    template<typename T> T* NetQuery<T>::queryAnswer(const Timeout& timeout) {
         if (!this->query()) {
             log::error << "NetQuery: Unable to send query" << log::endl;
             return NULL;
@@ -111,13 +99,14 @@ namespace Epyx
         return this->answer(timeout);
     }
 
-    template<typename T> bool NetQuery<T>::queryAnswerIn(int timeout, T *ans) {
+    template<typename T> bool NetQuery<T>::queryAnswerIn(const Timeout& timeout, T *ans) {
         if (!this->query()) {
             log::error << "NetQuery: Unable to send query" << log::endl;
             return false;
         }
         return this->answerIn(timeout, ans);
     }
+
     template<typename T> Socket& NetQuery<T>::socket() const {
         EPYX_ASSERT(sock != NULL);
         return *sock;

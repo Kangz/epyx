@@ -27,7 +27,7 @@ namespace Epyx
 
         bool IGD::getServices() {
             RootDesc netRootDesc(rootDescURI);
-            if (!netRootDesc.queryAnswerIn(10, &services)) {
+            if (!netRootDesc.queryAnswerIn(10000, &services)) {
                 log::error << "Unable to load UPnP services" << log::endl;
                 return false;
             }
@@ -44,7 +44,7 @@ namespace Epyx
             }
             Command order(address, WanIPConnService, WanIPConnCtl);
             order.setAction(UPNP::UPNP_ACTION_GET_EXT_IP);
-            CommandResult *res = order.queryAnswer(10);
+            CommandResult *res = order.queryAnswer(10000);
             if (res == NULL) {
                 log::error << "UPnP: Unable to get external IP address" << log::endl;
                 return "";
@@ -67,7 +67,7 @@ namespace Epyx
             do {
                 Command order(address, WanIPConnService, WanIPConnCtl);
                 order.setAction(Epyx::UPNP::UPNP_ACTION_GET_EXT_IP); // FIXME: Is it a bug ?
-                CommandResult *res = order.queryAnswer(10);
+                CommandResult *res = order.queryAnswer(10000);
                 if (res == NULL) {
                     log::error << "UPnP: Unable to get portmap list" << log::endl;
                     break;
@@ -146,7 +146,7 @@ namespace Epyx
             order.addArgument("NewEnabled", "1");
             order.addArgument("NewPortMappingDescription", EPYX_MSG);
             order.addArgument("NewLeaseDuration", "0");
-            CommandResult *res = order.queryAnswer(30);
+            CommandResult *res = order.queryAnswer(30000);
             if (res == NULL) {
                 log::error << "IGD: Unable to add a port map" << log::endl;
                 return Address();
@@ -176,7 +176,7 @@ namespace Epyx
             order.addArgument("NewExternalPort", portString);
             order.addArgument("NewProtocol", prot);
 
-            CommandResult *res = order.queryAnswer(30);
+            CommandResult *res = order.queryAnswer(30000);
             if (res == NULL) {
                 log::error << "IGD: Unable to delete a port map" << log::endl;
                 return false;

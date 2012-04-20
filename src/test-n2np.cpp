@@ -117,7 +117,7 @@ void test_n2np() {
     // Everything stops at destruction, but nodes first !
     delete selectNodes;
     Epyx::log::info << "Waiting for nodes to be detached..." << Epyx::log::endl;
-    if (!relay->waitForAllDetach(2)) {
+    if (!relay->waitForAllDetach(Epyx::Timeout(2000))) {
         Epyx::log::info << "Detach remaining nodes" << Epyx::log::endl;
         relay->detachAllNodes();
     }

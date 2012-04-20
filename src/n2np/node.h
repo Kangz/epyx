@@ -36,7 +36,9 @@ namespace Epyx
             /**
              * @brief Send packet to another node
              * @param to destination Node ID
-             * @param pkt Packet
+             * @param method
+             * @param size
+             * @param body
              * @return true on success
              */
             bool send(const NodeId& to, const std::string& method,

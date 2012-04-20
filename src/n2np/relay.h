@@ -8,6 +8,7 @@
 
 #include "../core/mutex.h"
 #include "../core/worker-pool.h"
+#include "../core/timeout.h"
 #include "../net/address.h"
 #include "../net/socket.h"
 #include "../net/netselecttcpserver.h"
@@ -53,7 +54,7 @@ namespace Epyx
              * @param timeout maximum number of seconds to wait
              * @return true if there are no more node
              */
-            bool waitForAllDetach(int timeout);
+            bool waitForAllDetach(const Timeout& timeout);
 
             /**
              * @brief Force to dettach all nodes

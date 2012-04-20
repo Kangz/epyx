@@ -7,6 +7,7 @@
 #define EPYX_NETQUERY_H
 
 #include "socket.h"
+#include "../core/timeout.h"
 
 namespace Epyx
 {
@@ -29,7 +30,8 @@ namespace Epyx
      *     each received data.
      *  5- Destructor or close()
      */
-    template<typename T>class NetQuery {
+    template<typename T>class NetQuery
+    {
     public:
         /**
          * @brief Empty constructor
@@ -83,7 +85,7 @@ namespace Epyx
          * @param timeout maximum number of seconds to wait for an answer
          * @return the answer, or NULL if there is a timeout or an error
          */
-        T* answer(int timeout);
+        T* answer(const Timeout& timeout);
 
         /**
          * @brief Same as answer(), but modify the given reference
@@ -91,21 +93,21 @@ namespace Epyx
          * @param ans pointer wher answer is copied
          * @return true on success
          */
-        bool answerIn(int timeout, T *ans);
+        bool answerIn(const Timeout& timeout, T *ans);
 
         /**
          * @brief query() and answer() in one call
          * @param timeout
          * @return answer
          */
-        T* queryAnswer(int timeout);
+        T* queryAnswer(const Timeout& timeout);
         /**
          * @brief query() and answerIn() in one call
          * @param timeout
          * @param ans
          * @return answer
          */
-        bool queryAnswerIn(int timeout, T *ans);
+        bool queryAnswerIn(const Timeout& timeout, T *ans);
 
     protected:
         /**

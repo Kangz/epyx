@@ -1,7 +1,7 @@
 #include "relay.h"
 #include "../net/tcpsocket.h"
+#include "../core/timeout.h"
 #include <stdlib.h>
-#include <sys/time.h>
 
 namespace Epyx
 {
@@ -65,27 +65,15 @@ namespace Epyx
             return true;
         }
 
-        bool Relay::waitForAllDetach(int timeout) {
-            // TODO: better timeout management
-            time_t timemax;
-            struct timeval tv;
-            int gettimeofday_status = gettimeofday(&tv, NULL);
-            EPYX_ASSERT(gettimeofday_status == 0);
-            timemax = tv.tv_sec + timeout;
-
-            while (true) {
-                gettimeofday_status = gettimeofday(&tv, NULL);
-                EPYX_ASSERT(gettimeofday_status == 0);
-                // Timeout
-                if (timemax <= tv.tv_sec)
-                    return false;
-
+        bool Relay::waitForAllDetach(const Timeout& timeout) {
+            while (!timeout.hasExpired()) {
                 nodesMutex.lock();
                 bool isEmpty = nodes.empty();
                 nodesMutex.unlock();
                 if (isEmpty)
                     return true;
             }
+            return false;
         }
 
         void Relay::detachAllNodes() {

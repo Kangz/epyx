@@ -27,7 +27,7 @@ bool test_IGD() {
     // Discover IGD
     Epyx::URI uri;
     Epyx::UPNP::Discovery disco;
-    if (!disco.queryAnswerIn(10, &uri)) {
+    if (!disco.queryAnswerIn(10000, &uri)) {
         Epyx::log::error << "UPnP discovery failed" << Epyx::log::endl;
         return false;
     }
