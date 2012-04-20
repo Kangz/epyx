@@ -7,12 +7,12 @@
 #define EPYX_NETSELECT_H
 
 #include "../core/common.h"
+#include "../core/atom/map.h"
 #include "netselectreader.h"
-#include <map>
 
 namespace Epyx
 {
-
+    class NetSelect;
     /**
      * @class NetSelect
      *
@@ -61,15 +61,14 @@ namespace Epyx
     private:
         // For each reader, tell wether it is already in the blocking queue
         // waiting to be read, to prevent useless select
-        std::map<NetSelectReader*, bool> readers;
-        Mutex readersMutex;
-
+        atom::Map<NetSelectReader*, bool> readers;
         class Workers : public WorkerPool<NetSelectReader>
         {
         public:
-            inline Workers() : WorkerPool(false) {
-            }
+            Workers(NetSelect *owner);
             void treat(NetSelectReader *nsr);
+        private:
+            NetSelect *owner;
         } workers;
 
         friend void Workers::treat(NetSelectReader *nsr);

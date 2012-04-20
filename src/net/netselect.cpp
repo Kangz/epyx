@@ -5,7 +5,7 @@ namespace Epyx
 {
 
     NetSelect::NetSelect(int numworkers, const std::string& workerName)
-    :running(true) {
+    :workers(this), running(true) {
         workers.setName(workerName);
         workers.setNumWorkers(numworkers);
     }
@@ -17,23 +17,31 @@ namespace Epyx
         // Stop running thread
         running = false;
 
-        // Delete every selected stuff
-        readersMutex.lock();
-        for (std::map < NetSelectReader*, bool>::iterator i = readers.begin();
-            i != readers.end(); i++) {
-            if (i->first != NULL)
-                delete(i->first);
+        // Save NetSelectReaders before destroying the map
+        std::list<NetSelectReader*> nsrBackup;
+        for (atom::Map < NetSelectReader*, bool>::iterator i = readers.beginLock();
+            !readers.isEnd(i); i++) {
+            NetSelectReader *nsr = i->first;
+            //log::debug << "NetSelect: About to destroy " << nsr << log::endl;
+            if (nsr != NULL)
+                nsrBackup.push_back(nsr);
         }
-        readers.clear();
-        readersMutex.unlock();
+        readers.endUnlock();
+
+        // Delete every selected stuff
+        readers.clearForEver();
+        while (!nsrBackup.empty()) {
+            NetSelectReader *nsr = nsrBackup.front();
+            nsrBackup.pop_front();
+            //log::debug << "NetSelect: Destroy " << nsr << log::endl;
+            delete nsr;
+        }
     }
 
     void NetSelect::add(NetSelectReader *nsr) {
         EPYX_ASSERT(nsr != NULL);
         nsr->setOwner(this);
-        readersMutex.lock();
-        readers[nsr] = false;
-        readersMutex.unlock();
+        readers.set(nsr, false);
     }
 
     int NetSelect::getNumWorkers() const {
@@ -52,9 +60,8 @@ namespace Epyx
             // Build select parameters
             FD_ZERO(&rfds);
             fdmax = 0;
-            readersMutex.lock();
-            for (std::map < NetSelectReader*, bool>::iterator i = readers.begin();
-                i != readers.end(); i++) {
+            for (atom::Map < NetSelectReader*, bool>::const_iterator i = readers.beginLock();
+                running && !readers.isEnd(i); i++) {
                 if (!i->second) {
                     NetSelectReader *nsr = i->first;
                     EPYX_ASSERT(nsr != NULL);
@@ -65,7 +72,9 @@ namespace Epyx
                         fdmax = fd;
                 }
             }
-            readersMutex.unlock();
+            readers.endUnlock();
+            if (!running)
+                return;
 
             // Refresh every 0.01sec the FD list
             tv.tv_sec = 0;
@@ -75,9 +84,8 @@ namespace Epyx
                 throw ErrException("NetSelect", "select");
 
             // Add each FD to the blocking queue
-            readersMutex.lock();
-            for (std::map < NetSelectReader*, bool>::iterator i = readers.begin();
-                i != readers.end(); i++) {
+            for (atom::Map < NetSelectReader*, bool>::iterator i = readers.beginLock();
+                running && !readers.isEnd(i); i++) {
                 NetSelectReader *nsr = i->first;
                 EPYX_ASSERT(nsr != NULL);
                 int fd = nsr->getFileDescriptor();
@@ -86,23 +94,26 @@ namespace Epyx
                     workers.post(nsr);
                 }
             }
-            readersMutex.unlock();
+            readers.endUnlock();
         }
     }
 
-    void NetSelect::Workers::treat(NetSelectReader *nsr) {
-        // Tell this reader is treated
-        NetSelect *nsel = nsr->getOwner();
-        nsel->readersMutex.lock();
-        nsel->readers[nsr] = false;
-        nsel->readersMutex.unlock();
+    NetSelect::Workers::Workers(NetSelect *owner)
+    :WorkerPool(false), owner(owner) {
+    }
 
+    void NetSelect::Workers::treat(NetSelectReader *nsr) {
+        EPYX_ASSERT(owner != NULL);
+        EPYX_ASSERT(nsr != NULL);
         if (!nsr->read()) {
             // Destroy this reader on false return
-            nsel->readersMutex.lock();
-            nsel->readers.erase(nsr);
-            nsel->readersMutex.unlock();
-            delete nsr;
+            if (owner->readers.unset(nsr)) {
+                //log::debug << "NetSelect: Closing " << (nsr) << log::endl;
+                delete nsr;
+            }
         }
+
+        // Tell this reader is treated
+        owner->readers.set(nsr, false);
     }
 }

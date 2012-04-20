@@ -25,6 +25,8 @@ namespace Epyx
 
     inline void Mutex::lock() {
         int mutex_lock_status = pthread_mutex_lock(&(this->mutex));
+        EPYX_ASSERT_NO_LOG(mutex_lock_status != EAGAIN);
+        EPYX_ASSERT_NO_LOG(mutex_lock_status != EINVAL);
         EPYX_ASSERT_NO_LOG(mutex_lock_status == 0);
     }
 

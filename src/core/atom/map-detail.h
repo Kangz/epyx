@@ -12,9 +12,15 @@ namespace Epyx
     {
 
         template <typename TKey, typename TVal>
+        Map<TKey, TVal>::Map()
+        : readOnly(false) {
+        }
+
+        template <typename TKey, typename TVal>
         void Map<TKey, TVal>::set(TKey key, TVal value) {
             mut.lock();
-            map[key] = value;
+            if (!readOnly)
+                map[key] = value;
             mut.unlock();
         }
 
@@ -29,10 +35,14 @@ namespace Epyx
         }
 
         template <typename TKey, typename TVal>
-        void Map<TKey, TVal>::unset(TKey key) {
+        bool Map<TKey, TVal>::unset(TKey key) {
+            bool result;
             mut.lock();
-            map.erase(key);
+            if (!readOnly) {
+                result = (map.erase(key) > 0);
+            }
             mut.unlock();
+            return result;
         }
 
         template <typename TKey, typename TVal>
@@ -44,10 +54,27 @@ namespace Epyx
                 retval = defval;
             } else {
                 retval = it->second;
-                map.erase(it);
+                if (!readOnly)
+                    map.erase(it);
             }
             mut.unlock();
             return retval;
+        }
+
+        template <typename TKey, typename TVal>
+        void Map<TKey, TVal>::clear() {
+            mut.lock();
+            if (!readOnly)
+                map.clear();
+            mut.unlock();
+        }
+
+        template <typename TKey, typename TVal>
+        void Map<TKey, TVal>::clearForEver() {
+            mut.lock();
+            readOnly = true;
+            map.clear();
+            mut.unlock();
         }
 
         template <typename TKey, typename TVal>
@@ -65,7 +92,7 @@ namespace Epyx
         }
 
         template <typename TKey, typename TVal>
-        bool Map<TKey, TVal>::isEnd(const Map<TKey, TVal>::iterator& it) {
+        bool Map<TKey, TVal>::isEnd(const Map<TKey, TVal>::const_iterator& it) {
             return (it == map.end());
         }
 

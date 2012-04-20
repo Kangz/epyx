@@ -24,7 +24,15 @@ namespace Epyx
              * @brief iterator
              */
             typedef typename std::map<TKey, TVal>::iterator iterator;
+            /**
+             * @brief constant iterator
+             */
             typedef typename std::map<TKey, TVal>::const_iterator const_iterator;
+
+            /**
+             * @brief Constructor
+             */
+            Map();
 
             /**
              * @brief Insert an element
@@ -44,8 +52,9 @@ namespace Epyx
             /**
              * @brief Erase an element
              * @param key
+             * @return true if there was an element which is now deleted
              */
-            void unset(TKey key);
+            bool unset(TKey key);
 
             /**
              * @brief Get and unset
@@ -56,6 +65,16 @@ namespace Epyx
              * This may be useful to call a destrcuor on a registered value
              */
             TVal getUnset(TKey key, TVal defval);
+
+            /**
+             * @brief Clear the map
+             */
+            void clear();
+
+            /**
+             * @brief Clear the map and disallow any change
+             */
+            void clearForEver();
 
             /**
              * @brief Is it empty ?
@@ -74,7 +93,7 @@ namespace Epyx
              * @param it
              * @return true on and
              */
-            bool isEnd(const iterator& it);
+            bool isEnd(const const_iterator& it);
 
             /**
              * @brief End iteration and unlock map
@@ -82,6 +101,7 @@ namespace Epyx
             void endUnlock();
 
         private:
+            bool readOnly;
             std::map<TKey, TVal> map;
             Mutex mut;
         };
