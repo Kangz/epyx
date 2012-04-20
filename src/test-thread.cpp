@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "core/common.h"
 #include "core/worker-pool.h"
+#include "core/actor-manager.h"
 
 using namespace Epyx;
 
@@ -225,14 +226,43 @@ void test_worker_pool(){
     sleep(2);
 }
 
+class SimpleActor: public Actor<int>{
+public:
+    virtual void treat(int& n){
+        log::info << "SimpleActor received something (and is very happy) : " << n << log::endl;
+    }
+    ~SimpleActor(){
+        log::info << "Why would someone kill SimpleActor ?" << log::endl;
+    }
+};
+
+void test_actors(){
+    ActorManager manager(5, "Actors");
+
+    {
+        log::info<<"Making a simple actor and send it a message and destroy it immediately"<<log::endl;
+        ActorId<int> simple = manager.add(new SimpleActor);
+        simple.post(*(new int(18)));
+        simple.kill();
+    }
+    {
+        log::info<<"Making a simple actor and send it a message and destroy it after some time"<<log::endl;
+        ActorId<int> simple = manager.add(new SimpleActor);
+        simple.post(*(new int(18)));
+        usleep(10000);
+        simple.kill();
+    }
+}
+
 int main(){
     Thread::init();
     log::init(log::CONSOLE | log::LOGFILE, "Test.log");
 
-    test_mutex();
-    test_cond();
-    stress_test_logger();
-    test_worker_pool();
+    //test_mutex();
+    //test_cond();
+    //stress_test_logger();
+    //test_worker_pool();
+    test_actors();
 
     log::flushAndQuit();
     return 0;
