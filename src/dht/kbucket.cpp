@@ -1,23 +1,28 @@
+/**
+ * @file kbucket.cpp
+ * @brief implements the KBucket
+ */
+
 #include "kbucket.h"
 #include "../core/common.h"
 #include <queue>
 
-#define NODES_PER_BUCKET 20
-#define MAX_INACTIVE_PERIOD 15000
+namespace Epyx
+{
+namespace DHT
+{
 
-namespace Epyx {
-namespace DHT {
-    KBucket::KBucket(Id* const self) : ownId(*self){
-        buckets.resize(ID_LENGTH);
+    KBucket::KBucket(const Id& self) : ownId(self) {
+        buckets.resize(Id::LENGTH);
     }
 
-    void KBucket::seenPeer(Id* const peerId, N2NP::NodeId& n2npId){
+    void KBucket::seenPeer(const Id& peerId, N2NP::NodeId& n2npId) {
         lock.lock();
 
         bool add =false;
         time_t now=time(NULL);
 
-        Distance d(&ownId, peerId);
+        Distance d(ownId, peerId);
 
         //Find the bucket the peer belongs to
         Bucket& bucket = buckets[d.firstActiveBit()];
@@ -25,9 +30,9 @@ namespace DHT {
         std::list<Peer*>::iterator peer_it;
 
         //Search for the peer in the bucket to update its lastReceiveTime
-        for(peer_it = bucket.peers.begin(); peer_it != bucket.peers.end(); peer_it++){
+        for (peer_it = bucket.peers.begin(); peer_it != bucket.peers.end(); peer_it++) {
             Peer* peer = *peer_it;
-            if(*peerId == peer->id){
+            if (peerId == peer->id) {
                 Peer* temp = peer;
                 peer_it = bucket.peers.erase(peer_it);
                 temp->lastReceiveTime = now;
@@ -39,11 +44,11 @@ namespace DHT {
         }
 
         //We want to add the peer to the bucket if it is not full or if the oldest peer in it is too old
-        if(bucket.peers.size()<NODES_PER_BUCKET){
+        if (bucket.peers.size()<NODES_PER_BUCKET) {
             add=true;
-        }else{
+        } else {
             Peer* peerFront = bucket.peers.front();
-            if(now - peerFront->lastReceiveTime>MAX_INACTIVE_PERIOD){
+            if (now - peerFront->lastReceiveTime>MAX_INACTIVE_PERIOD) {
                 bucket.peers.pop_front();
                 add=true;
                 delete peerFront;
@@ -51,9 +56,9 @@ namespace DHT {
         }
 
         //Finally add the peer to the KBucket
-        if(add){
+        if (add) {
             Peer* newPeer = new Peer();
-            newPeer->id=*peerId;
+            newPeer->id=peerId;
             newPeer->lastReceiveTime=now;
             newPeer->n2npId = n2npId;
             bucket.peers.push_back(newPeer);
@@ -63,13 +68,13 @@ namespace DHT {
     }
 
     struct FindNearestComparator {
-        bool operator()(const std::pair<Distance, Peer> a, const std::pair<Distance, Peer> b) const{
+        bool operator()(const std::pair<Distance, Peer> a, const std::pair<Distance, Peer> b) const {
             return a.first < b.first;
         }
     };
 
 
-    void KBucket::findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n){
+    void KBucket::findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n) {
         lock.lock();
 
         std::priority_queue<std::pair<Distance,Peer>, std::vector<std::pair<Distance, Peer> >,
@@ -82,25 +87,25 @@ namespace DHT {
         //TODO opti3: with split buckets restrain the search
         std::vector<Bucket>::iterator bucket;
         std::list<Peer*>::iterator peer;
-        for( bucket=buckets.begin(); bucket!=buckets.end(); bucket++ ){
-            for( peer=bucket->peers.begin(); peer!=bucket->peers.end(); peer++ ){
+        for ( bucket=buckets.begin(); bucket!=buckets.end(); bucket++ ) {
+            for ( peer=bucket->peers.begin(); peer!=bucket->peers.end(); peer++ ) {
 
-                Distance dist(&id, &((*peer)->id));
+                Distance dist(id, (*peer)->id);
 
-                if(closest.size() >= (unsigned long)n){
+                if (closest.size() >= (unsigned long)n) {
                     std::pair<Distance,Peer> farthest = closest.top();
-                    if(dist < farthest.first){
+                    if (dist < farthest.first) {
                         closest.pop();
                     }
                 }
 
-                if(closest.size() < (unsigned long)n){
+                if (closest.size() < (unsigned long)n) {
                     closest.push(std::pair<Distance,Peer>(dist,*(*peer)));
                 }
             }
         }
 
-        while(closest.size() > 0){
+        while (closest.size() > 0) {
             nearest.push_back(closest.top().second);
             closest.pop();
         }

@@ -10,7 +10,7 @@
 #include "core/common.h"
 #include "dht/id.h"
 #include "dht/kbucket.h"
-#include "dht/dht-packet.h"
+#include "dht/packet.h"
 #include "n2np/nodeid.h"
 
 using namespace Epyx;
@@ -19,7 +19,7 @@ using namespace Epyx::DHT;
 
 void random_id(Id& id){
     uint8_t* dist = (uint8_t*) &id.data;
-    for (int i = 0; i < ID_STORAGE_SIZE; i++) {
+    for (int i = 0; i < Id::STORAGE_SIZE; i++) {
         *dist = rand()%256;
         dist ++;
     }
@@ -49,7 +49,7 @@ void test_id_distance(){
         Id a;
         random_id(a);
         Id b = a;
-        int bit = rand()%ID_LENGTH;
+        int bit = rand()%Id::LENGTH;
         b.data[bit/8] ^= 1 << (7 - (bit%8));
         log::info<<"     a: "<<a<<log::endl;
         log::info<<"     b: "<<b<<log::endl;
@@ -76,7 +76,7 @@ void test_kbucket(){
 
     log::info<<"I am at Id: "<<self<<log::endl;
 
-    KBucket kb(&self);
+    KBucket kb(self);
 
     log::info<<"Inserting 500.000 nodes in the routing table"<<log::endl;
 
@@ -84,7 +84,7 @@ void test_kbucket(){
         Id a;
         random_id(a);
 
-        kb.seenPeer(&a, n2npId);
+        kb.seenPeer(a, n2npId);
     }
 
     log::info<<"Making 10.000 lookups in the routing table"<<log::endl;
@@ -116,9 +116,9 @@ void test_kbucket(){
     }
 }
 
-void double_print(DHTPacket& pkt){
+void double_print(Packet& pkt){
     GTTPacket* pkt1 = pkt.toGTTPacket();
-    DHTPacket pkt2(*pkt1);
+    Packet pkt2(*pkt1);
     GTTPacket* pkt3 = pkt2.toGTTPacket();
     log::info << "dht -> gtt\n" << *pkt1 << log::endl;
     if(pkt.method == M_FOUND) log::info << pkt.value << log::endl;
@@ -127,7 +127,7 @@ void double_print(DHTPacket& pkt){
 }
 
 void test_dhtpacket(){
-    DHTPacket pkt;
+    Packet pkt;
     random_id(pkt.from);
 
     log::info<<"Testing PING"<<log::endl;
@@ -191,8 +191,8 @@ int main(){
     log::init(log::CONSOLE | log::LOGFILE, "Test.log");
     srand ( time(NULL) );
 
-    //test_id_distance();
-    //test_kbucket();
+    test_id_distance();
+    test_kbucket();
     test_dhtpacket();
 
     log::flushAndQuit();

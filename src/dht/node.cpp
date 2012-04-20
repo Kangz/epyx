@@ -7,7 +7,7 @@ namespace DHT
 
     Node::Node(){
         this->id = id; //TODO build the id somewhere
-        this->kbucket = new KBucket(&id);
+        this->kbucket = new KBucket(id);
     }
 
     Node::~Node(){
@@ -24,15 +24,15 @@ namespace DHT
         }
 
         //TODO: check that the packet is well-formed
-        //DHTPacket* pkt = new DHTPacket(*gtt_packet);
-        DHTPacket pkt(*gtt_packet);
+        //Packet* pkt = new Packet(*gtt_packet);
+        Packet pkt(*gtt_packet);
         delete gtt_packet;
         
-      //  this->dispatcher.post(new std::pair<N2NP::NodeId, DHTPacket*>(senderId, pkt));
+      //  this->dispatcher.post(new std::pair<N2NP::NodeId, Packet*>(senderId, pkt));
     //}
 
     
-        this->kbucket->seenPeer(&pkt.from, senderId);
+        this->kbucket->seenPeer(pkt.from, senderId);
 
         switch(pkt.method){
             case M_PING:
@@ -72,7 +72,7 @@ namespace DHT
         }
     }
 
-    void Node::send(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget){
+    void Node::send(Packet& pkt, Id target, N2NP::NodeId n2npTarget){
         pkt.from = this->id;
         GTTPacket* gtt = pkt.toGTTPacket();
         //std::string& raw_data = gtt->serialize();
@@ -80,13 +80,13 @@ namespace DHT
     }
 
     void Node::sendPong(Id target, N2NP::NodeId n2npTarget){
-        DHTPacket pkt;
+        Packet pkt;
         pkt.method = M_PONG;
         this->send(pkt, target, n2npTarget);
     } 
 
-    void Node::sendGot(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget){
-        DHTPacket answer;
+    void Node::sendGot(Packet& pkt, Id target, N2NP::NodeId n2npTarget){
+        Packet answer;
         answer.connectionId = pkt.connectionId;
         answer.method = M_GOT;
         /*if (this->storage.has(pkt.key) {
@@ -98,11 +98,11 @@ namespace DHT
         this->send(answer, target, n2npTarget);
     }
 
-    void Node::handleGot(DHTPacket& pkt){
+    void Node::handleGot(Packet& pkt){
     }
 
-    void Node::sendStored(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget){
-        DHTPacket answer;
+    void Node::sendStored(Packet& pkt, Id target, N2NP::NodeId n2npTarget){
+        Packet answer;
         answer.connectionId = pkt.connectionId;
         answer.method = M_STORED;
         answer.status = 0;
@@ -111,11 +111,11 @@ namespace DHT
         this->send(answer, target, n2npTarget);
     }
 
-    void Node::handleStored(DHTPacket& pkt){
+    void Node::handleStored(Packet& pkt){
     }
 
-    void Node::sendFound(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget){
-        DHTPacket answer;
+    void Node::sendFound(Packet& pkt, Id target, N2NP::NodeId n2npTarget){
+        Packet answer;
         answer.connectionId = pkt.connectionId;
         answer.method = M_FOUND;
         this->kbucket->findNearestNodes(pkt.idToFind, answer.foundPeers, pkt.count);
@@ -123,7 +123,7 @@ namespace DHT
         this->send(answer, target, n2npTarget);
     }
 
-    void Node::handleFound(DHTPacket& pkt){
+    void Node::handleFound(Packet& pkt){
     }
 
 }

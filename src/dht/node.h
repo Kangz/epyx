@@ -8,7 +8,7 @@
 #include "../parser/gttparser.h"
 #include "../n2np/nodeid.h"
 #include "kbucket.h"
-#include "dht-packet.h"
+#include "packet.h"
 
 namespace Epyx
 {
@@ -27,15 +27,15 @@ namespace DHT
         KBucket* kbucket;
         GTTParser gttParser;
 
-        void send(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget);
+        void send(Packet& pkt, Id target, N2NP::NodeId n2npTarget);
 
         void sendPong(Id target, N2NP::NodeId n2npTarget);
-        void sendGot(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget);
-        void handleGot(DHTPacket& pkt);
-        void sendStored(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget);
-        void handleStored(DHTPacket& pkt);
-        void sendFound(DHTPacket& pkt, Id target, N2NP::NodeId n2npTarget);
-        void handleFound(DHTPacket& pkt);
+        void sendGot(Packet& pkt, Id target, N2NP::NodeId n2npTarget);
+        void handleGot(Packet& pkt);
+        void sendStored(Packet& pkt, Id target, N2NP::NodeId n2npTarget);
+        void handleStored(Packet& pkt);
+        void sendFound(Packet& pkt, Id target, N2NP::NodeId n2npTarget);
+        void handleFound(Packet& pkt);
 
    };
 
