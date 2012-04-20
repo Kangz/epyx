@@ -54,16 +54,4 @@ namespace Epyx
         *newData = data;
         return strSize + size;
     }
-
-    bool GTTPacket::send(Socket& sock) const {
-        char *data = NULL;
-        unsigned long size = this->build(&data);
-        if (data == NULL) {
-            log::error << "GTTPacket: Unable to build packet to send" << log::endl;
-            return false;
-        }
-        bool result = sock.sendAll(data, size);
-        delete[] data;
-        return result;
-    }
 }

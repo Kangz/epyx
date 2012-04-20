@@ -14,12 +14,27 @@ namespace Epyx
         bool Node::send(const NodeId& to, const std::string& method,
             unsigned long size, const char *data) {
             EPYX_ASSERT(hasId);
+
             // Send packet to the relay by default
-            Packet realPkt(method, size, data);
-            realPkt.from = nodeid;
-            realPkt.to = to;
-            //log::info << "Node " << nodeid << ": Send " << realPkt << log::endl;
-            return realPkt.send(this->socket());
+            Packet n2npPkt(method, size, data);
+            n2npPkt.from = nodeid;
+            n2npPkt.to = to;
+
+            //log::info << "Node " << nodeid << ": Send " << n2npPkt << log::endl;
+            return n2npPkt.send(this->socket());
+        }
+
+        bool Node::send(const NodeId& to, const std::string& method,
+            const GTTPacket& pkt) {
+            char *data = NULL;
+            unsigned long size = pkt.build(&data);
+            if (data == NULL) {
+                log::error << "N2NP node: Unable to build GTT packet to send" << log::endl;
+                return false;
+            }
+            bool result = this->send(to, method, size, data);
+            delete[] data;
+            return result;
         }
 
         void Node::registerRecv(const PacketType& type, Node::ReceiveCb *cb, void* cbData) {

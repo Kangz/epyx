@@ -106,11 +106,20 @@ namespace Epyx
         bool Packet::send(Socket& sock) const {
             GTTPacket gttpkt;
             this->fillGTTPacket(gttpkt);
-            bool ret = gttpkt.send(sock);
-            // Do not free data
+
+            char *gttdata = NULL;
+            unsigned long gttsize = gttpkt.build(&gttdata);
+            if (gttdata == NULL) {
+                log::error << "N2NP packet: Unable to build packet" << log::endl;
+                return false;
+            }
+            bool result = sock.sendAll(gttdata, gttsize);
+            delete[] gttdata;
+
+            // Do not free own data
             gttpkt.size = 0;
             gttpkt.body = NULL;
-            return ret;
+            return result;
         }
 
         void Packet::fillGTTPacket(GTTPacket &gttpkt) const {

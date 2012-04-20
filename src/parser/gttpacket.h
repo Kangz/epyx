@@ -45,13 +45,6 @@ namespace Epyx
         unsigned long build(char **newData) const;
 
         /**
-         * @brief Send packet with a Socket
-         * @param sock
-         * @return true if it succeeded
-         */
-        bool send(Socket& sock) const;
-
-        /**
          * @brief Protocol name
          */
         std::string protocol;

@@ -34,15 +34,29 @@ namespace Epyx
             Node(const Address& addr);
 
             /**
-             * @brief Send packet to another node
+             * @brief Send an N2NP packet to another node
              * @param to destination Node ID
              * @param method
              * @param size
-             * @param body
+             * @param data
              * @return true on success
              */
             bool send(const NodeId& to, const std::string& method,
-                    unsigned long size, const char *body);
+                    unsigned long size, const char *data);
+
+            /**
+             * @brief Send an ancapsulated GTT packet packet to another node
+             * 
+             * First build the GTT packet, then add N2NP headers, and send the
+             * whole through network
+             * 
+             * @param to destination Node ID
+             * @param method
+             * @param pkt holy packet
+             * @return true on success
+             */
+            bool send(const NodeId& to, const std::string& method,
+                    const GTTPacket& pkt);
 
             /**
              * @brief Register a receive callback
