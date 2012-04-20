@@ -9,6 +9,7 @@
 #include "../core/mutex.h"
 #include "../core/worker-pool.h"
 #include "../core/timeout.h"
+#include "../core/atom/counter.h"
 #include "../net/address.h"
 #include "../net/socket.h"
 #include "../net/netselecttcpserver.h"
@@ -93,6 +94,9 @@ namespace Epyx
             // Map of known nodes (with its Mutex)
             std::map<std::string, NodeInfo*> nodes;
             Mutex nodesMutex;
+
+            // use a counter to attribute nodes
+            atom::Counter nodeNextId;
 
             // Disable copy
             Relay(const Relay&);

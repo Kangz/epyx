@@ -6,43 +6,44 @@
 #ifndef EPYX_CORE_ACTOR_MANAGER_DETAIL_H
 #define EPYX_CORE_ACTOR_MANAGER_DETAIL_H
 
-namespace Epyx{
+namespace Epyx
+{
 
-    template<typename T> ActorId<T> ActorManager::add(Actor<T>* a){
+    template<typename T> ActorId<T> ActorManager::add(Actor<T>* a) {
         EPYX_ASSERT(a != NULL);
         return this->add(*a);
     }
 
-    template<typename T> ActorId<T> ActorManager::add(Actor<T>& a){
-        ActorId<T> res(this, actorCount);
-
+    template<typename T> ActorId<T> ActorManager::add(Actor<T>& a) {
+        unsigned int i = actorCount.getIncrement();
+        ActorId<T> res(this, i);
         a.setId(res);
 
         actorsLock.lock();
-        actors[actorCount++] = &a;
+        actors[i] = &a;
         actorsLock.unlock();
 
         return res;
     }
 
-    template<typename T> ActorId<T>::ActorId(){
+    template<typename T> ActorId<T>::ActorId() {
         manager = NULL;
         id = -1;
     }
 
-    template<typename T> ActorId<T>::ActorId(ActorManager* m, int i){
+    template<typename T> ActorId<T>::ActorId(ActorManager* m, int i) {
         manager = m;
         id = i;
     }
 
-    template<typename T> void ActorId<T>::post(T& msg){
-        manager->post(id, static_cast<void*>(&msg));
+    template<typename T> void ActorId<T>::post(T& msg) {
+        manager->post(id, static_cast<void*> (&msg));
     }
 
-    template<typename T> void ActorId<T>::kill(){
+    template<typename T> void ActorId<T>::kill() {
         manager->kill(*this);
     }
- 
+
 }
 
-#endif //EPYX_CORE_ACTOR_MANAGER_DETAIL_H
+#endif /* EPYX_CORE_ACTOR_MANAGER_DETAIL_H */

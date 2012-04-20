@@ -7,8 +7,6 @@
 
 #include <pthread.h>
 #include <errno.h>
-#include "assert.h"
-#include "exception.h"
 
 namespace Epyx
 {

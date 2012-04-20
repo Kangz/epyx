@@ -7,6 +7,9 @@
 #ifndef EPYX_MUTEX_DETAIL_H
 #define EPYX_MUTEX_DETAIL_H
 
+#include "assert.h"
+#include "exception.h"
+
 namespace Epyx
 {
 

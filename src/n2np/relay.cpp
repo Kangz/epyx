@@ -10,7 +10,7 @@ namespace Epyx
 
         Relay::Relay(const Address& addr)
         :WorkerPool(1, true, "Relay@" + addr.toString()),
-        relayAddr(addr), relayId(addr) {
+        relayAddr(addr), relayId(addr), nodeNextId(1) {
         }
 
         Relay::~Relay() {
@@ -22,8 +22,8 @@ namespace Epyx
 
             // Build a random unique node name
             std::ostringstream nodeNameStream;
-            nodeNameStream << sock->getAddress()
-                << '-' << String::fromInt(rand() % 10000);
+            nodeNameStream << String::fromInt(nodeNextId.getIncrement())
+                << '-' << sock->getAddress();
             const std::string nodeName = nodeNameStream.str();
             const NodeId nodeid(nodeName.c_str(), relayAddr);
 

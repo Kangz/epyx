@@ -10,6 +10,7 @@
 #include "actor-base.h"
 #include "mutex.h"
 #include "worker-pool.h"
+#include "atom/counter.h"
 #include <string>
 #include <map>
 
@@ -19,7 +20,6 @@ namespace Epyx
     struct ActorId_base;
     template<typename T> struct ActorId;
     template<typename T> class Actor;
-
     /**
      * @class ActorManager
      *
@@ -75,14 +75,11 @@ namespace Epyx
         void post(int id, void* msg);
 
     private:
-        class ActorWorkers: public WorkerPool<std::pair<int, void*> >
+        class ActorWorkers : public WorkerPool<std::pair<int, void*> >
         {
         public:
-            ActorWorkers(int num_workers, const std::string& name, ActorManager* m):
-                WorkerPool<std::pair<int, void*> >(num_workers, true, name){
-                    this->manager = m;
-            }
 
+            ActorWorkers(int num_workers, const std::string& name, ActorManager* m);
             virtual void treat(std::pair<int, void*>* msg);
 
         private:
@@ -92,24 +89,24 @@ namespace Epyx
         ActorWorkers wp;
         std::map<int, Actor_base*> actors;
         Mutex actorsLock;
-        int actorCount;
+        atom::Counter actorCount;
     };
-
     /**
      * @struct ActorId_base
      * @brief the base class of the ActorId, do not use directly
      */
-    struct ActorId_base{
+    struct ActorId_base
+    {
         int id;
         ActorManager* manager;
     };
-
     /**
      * @struct ActorId
      * @brief Identifies and sends commands to an Actor
      * @tparam T the template parameter of the corresponding actor
      */
-    template<typename T> struct ActorId: public ActorId_base{
+    template<typename T> struct ActorId : public ActorId_base
+    {
         /**
          * @brief ActorId's default constructor
          */
@@ -124,7 +121,7 @@ namespace Epyx
          * @brief sends a message to its Actor
          * @param msg the message
          */
-        void post(T& msg);
+        void post(T & msg);
 
         /**
          * @brief kills its Actor
@@ -135,4 +132,4 @@ namespace Epyx
 }
 #include "actor-manager-detail.h"
 
-#endif //EPYX_CORE_ACTOR_MANAGER_H
+#endif /* EPYX_CORE_ACTOR_MANAGER_H */

@@ -10,18 +10,17 @@
 namespace Epyx
 {
 
-    ActorManager::ActorManager(int num_workers, const std::string& name):
-        wp(num_workers, name, this), actorCount(0){
+    ActorManager::ActorManager(int num_workers, const std::string& name) :
+    wp(num_workers, name, this), actorCount(0) {
     }
 
-    ActorManager::~ActorManager(){
+    ActorManager::~ActorManager() {
         //TODO: find out why it was not called
         wp.stop();
         //TODO finish and delete everything
     }
 
-
-    void ActorManager::kill(ActorId_base a){
+    void ActorManager::kill(ActorId_base a) {
         actorsLock.lock();
 
         std::map<int, Actor_base*>::iterator it;
@@ -30,7 +29,7 @@ namespace Epyx
         // If we find the actor we wait until it finishes what it is doing
         // and we destroy it. The workers will not access it as they lock
         // actor before unlocking actorsLock
-        if(it != actors.end()){
+        if (it != actors.end()) {
             Actor_base* actor = (*it).second;
             actor->lock();
             actor->unlock();
@@ -41,11 +40,17 @@ namespace Epyx
         actorsLock.unlock();
     }
 
-    void ActorManager::post(int id, void* msg){
+    void ActorManager::post(int id, void* msg) {
         wp.post(new std::pair<int, void*>(id, msg));
     }
 
-    void ActorManager::ActorWorkers::treat(std::pair<int, void*>* msg){
+    ActorManager::ActorWorkers::ActorWorkers(int num_workers, const std::string& name,
+        ActorManager* m)
+    :WorkerPool<std::pair<int, void*> >(num_workers, true, name),
+    manager(m) {
+    }
+
+    void ActorManager::ActorWorkers::treat(std::pair<int, void*>* msg) {
         ActorManager* m = this->manager;
 
         Actor_base* a = NULL;
@@ -54,7 +59,7 @@ namespace Epyx
 
         std::map<int, Actor_base*>::iterator it;
         it = m->actors.find(msg->first);
-        if(it != m->actors.end()){
+        if (it != m->actors.end()) {
             Actor_base* actor = (*it).second;
 
             //KEEP IT IN THIS ORDER, see kill() for more info
@@ -62,7 +67,7 @@ namespace Epyx
             m->actorsLock.unlock();
             actor->_internal_treat(msg->second);
             actor->unlock();
-        }else{
+        } else {
             m->actorsLock.unlock();
         }
 

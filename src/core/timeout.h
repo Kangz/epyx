@@ -3,8 +3,8 @@
  * @brief Millisecond timeout
  */
 
-#ifndef TIMEOUT_H
-#define TIMEOUT_H
+#ifndef EPYX_TIMEOUT_H
+#define EPYX_TIMEOUT_H
 
 #include <sys/time.h>
 
@@ -48,5 +48,5 @@ namespace Epyx
     bool operator<(const Timeout& t1, const Timeout& t2);
 }
 
-#endif /* TIMEOUT_H */
+#endif /* EPYX_TIMEOUT_H */
 

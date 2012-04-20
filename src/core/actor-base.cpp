@@ -1,5 +1,5 @@
 /**
- * @file actor-base.c
+ * @file actor-base.cpp
  * @brief Implementation of the base class of the actors
  */
 
@@ -8,17 +8,20 @@
 namespace Epyx
 {
 
-    Actor_base::Actor_base(){}
+    Actor_base::Actor_base() {
+    }
 
-    Actor_base::~Actor_base(){}
+    Actor_base::~Actor_base() {
+    }
 
-    void Actor_base::timeout(){}
+    void Actor_base::timeout() {
+    }
 
-    void Actor_base::lock(){
+    void Actor_base::lock() {
         this->mutex.lock();
     }
 
-    void Actor_base::unlock(){
+    void Actor_base::unlock() {
         this->mutex.unlock();
     }
 

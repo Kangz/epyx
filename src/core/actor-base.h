@@ -11,6 +11,10 @@ namespace Epyx
 {
     class ActorManager;
 
+    /**
+     * @class Actor_base
+     * @private
+     */
     class Actor_base
     {
     public:

@@ -45,17 +45,17 @@ namespace Epyx
 
     };
 
-
-    template<typename T> void Actor<T>::_internal_treat(void* msg){
-        T* message = static_cast<T*>(msg);
+    template<typename T> void Actor<T>::_internal_treat(void* msg) {
+        T* message = static_cast<T*> (msg);
         this->treat(*message);
         delete message;
     }
 
-    template<typename T> void Actor<T>::setId(ActorId<T> id){
+    template<typename T> void Actor<T>::setId(ActorId<T> id) {
         self = id;
     }
 
-    template<typename T> void Actor<T>::timeout(){}
+    template<typename T> void Actor<T>::timeout() {
+    }
 }
 #endif //EPYX_CORE_ACTOR_H
