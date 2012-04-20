@@ -3,8 +3,8 @@
  * @brief Atomic counter management
  */
 
-#ifndef ATOMICCOUNTER_H
-#define ATOMICCOUNTER_H
+#ifndef EPYX_ATOM_COUNTER_H
+#define EPYX_ATOM_COUNTER_H
 
 #include "../mutex.h"
 
@@ -48,5 +48,5 @@ namespace Epyx
     }
 }
 
-#endif /* ATOMICCOUNTER_H */
+#endif /* EPYX_ATOM_COUNTER_H */
 

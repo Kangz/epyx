@@ -31,9 +31,7 @@ namespace Epyx
             NodeInfo *node = new NodeInfo(nodeid, sock);
 
             // Insert node
-            nodesMutex.lock();
-            nodes[nodeName] = node;
-            nodesMutex.unlock();
+            nodes.set(nodeName, node);
 
             log::info << "Relay: Attach node " << nodeid
                 << " from " << sock->getAddress() << log::endl;
@@ -55,10 +53,7 @@ namespace Epyx
 
             log::info << "Relay: Detach node " << nodeid << log::endl;
 
-            nodesMutex.lock();
-            NodeInfo *node = nodes[nodeid.getName()];
-            nodes.erase(nodeid.getName());
-            nodesMutex.unlock();
+            NodeInfo *node = nodes.getUnset(nodeid.getName(), NULL);
             if (node != NULL) {
                 delete node;
             }
@@ -67,10 +62,7 @@ namespace Epyx
 
         bool Relay::waitForAllDetach(const Timeout& timeout) {
             while (!timeout.hasExpired()) {
-                nodesMutex.lock();
-                bool isEmpty = nodes.empty();
-                nodesMutex.unlock();
-                if (isEmpty)
+                if (nodes.empty())
                     return true;
             }
             return false;
@@ -78,15 +70,14 @@ namespace Epyx
 
         void Relay::detachAllNodes() {
             // Delete every Node information
-            nodesMutex.lock();
-            for (std::map<std::string, NodeInfo*>::iterator i = nodes.begin();
-                i != nodes.end(); i++) {
+            for (atom::Map<std::string, NodeInfo*>::iterator i = nodes.beginLock();
+                !nodes.isEnd(i); i++) {
                 if (i->second != NULL) {
                     delete(i->second);
                     i->second = NULL;
                 }
             }
-            nodesMutex.unlock();
+            nodes.endUnlock();
         }
 
         const NodeId& Relay::getId() const {
@@ -112,12 +103,7 @@ namespace Epyx
             }
 
             // Packet is for one of my nodes. Let's find it in the map !
-            const std::string toName = pkt->to.getName();
-            NodeInfo *node = NULL;
-            this->nodesMutex.lock();
-            if (this->nodes.count(toName))
-                node = (*(this->nodes.find(toName))).second;
-            this->nodesMutex.unlock();
+            NodeInfo *node = nodes.get(pkt->to.getName(), NULL);
 
             if (node == NULL) {
                 log::error << "[Relay " << relayId << "] Destination not found: "

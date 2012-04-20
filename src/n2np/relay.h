@@ -10,6 +10,7 @@
 #include "../core/worker-pool.h"
 #include "../core/timeout.h"
 #include "../core/atom/counter.h"
+#include "../core/atom/map.h"
 #include "../net/address.h"
 #include "../net/socket.h"
 #include "../net/netselecttcpserver.h"
@@ -92,8 +93,7 @@ namespace Epyx
             } NodeInfo;
 
             // Map of known nodes (with its Mutex)
-            std::map<std::string, NodeInfo*> nodes;
-            Mutex nodesMutex;
+            atom::Map<std::string, NodeInfo*> nodes;
 
             // use a counter to attribute nodes
             atom::Counter nodeNextId;

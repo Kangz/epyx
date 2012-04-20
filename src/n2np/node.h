@@ -46,10 +46,10 @@ namespace Epyx
 
             /**
              * @brief Send an ancapsulated GTT packet packet to another node
-             * 
+             *
              * First build the GTT packet, then add N2NP headers, and send the
              * whole through network
-             * 
+             *
              * @param to destination Node ID
              * @param method
              * @param pkt holy packet
