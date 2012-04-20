@@ -1,3 +1,8 @@
+/**
+ * @file actor-base.c
+ * @brief Implementation of the base class of the actors
+ */
+
 #include "actor-base.h"
 
 namespace Epyx

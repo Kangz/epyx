@@ -1,3 +1,8 @@
+/**
+ * @file actor-manager.cpp
+ * @brief Implementation of the actor framework (non-templated part)
+ */
+
 #include "actor-manager.h"
 
 #include "common.h"

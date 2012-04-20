@@ -1,3 +1,7 @@
+/**
+ * @file actor-base.h
+ * @brief Definition of the base class of the actors, do not use directly
+ */
 #ifndef EPYX_CORE_ACTOR_BASE_H
 #define EPYX_CORE_ACTOR_BASE_H
 
@@ -14,7 +18,17 @@ namespace Epyx
         virtual ~Actor_base();
         virtual void _internal_treat(void* msg) = 0;
         virtual void timeout();
+
+        /**
+         * @brief locks this actor
+         *
+         * DO NOT USE INSIDE treat() OR timeout()
+         */
         void lock();
+
+        /**
+         * @brief unlocks this actor
+         */
         void unlock();
 
     private:
