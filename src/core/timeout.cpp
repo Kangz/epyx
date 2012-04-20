@@ -50,4 +50,10 @@ namespace Epyx
         }
         return tv;
     }
+
+    bool operator<(const Timeout& t1, const Timeout& t2){
+        if (t1.maxTime.tv_sec < t2.maxTime.tv_sec) return true;
+        if (t1.maxTime.tv_sec > t2.maxTime.tv_sec) return false;
+        return t1.maxTime.tv_usec < t2.maxTime.tv_usec;
+    }
 }
