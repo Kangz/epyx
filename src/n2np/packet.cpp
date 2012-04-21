@@ -8,10 +8,10 @@ namespace Epyx
     namespace N2NP
     {
 
-        Packet::Packet(const PacketType& type, unsigned int size,
+        Packet::Packet(const std::string method, unsigned int size,
             const char *data)
-        :method(type.toString()), from(), to(), version(""), pktID(0),
-        type(type), size(size), data(NULL) {
+        :method(method), from(), to(), version(""), pktID(0),
+        size(size), data(NULL) {
             if (data != NULL) {
                 char *newData = new char[size];
                 memcpy(newData, data, size);
@@ -21,7 +21,7 @@ namespace Epyx
 
         Packet::Packet(const Packet& pkt)
         :method(pkt.method), from(pkt.from), to(pkt.to), version(pkt.version),
-        pktID(pkt.pktID), type(pkt.type), size(pkt.size) {
+        pktID(pkt.pktID), size(pkt.size) {
             char *newData = new char[pkt.size];
             memcpy(newData, pkt.data, pkt.size);
             data = newData;
@@ -31,7 +31,6 @@ namespace Epyx
             if (this != &pkt) {
                 this->from = pkt.from;
                 this->to = pkt.to;
-                this->type = pkt.type;
                 this->size = pkt.size;
                 char *newData = new char[pkt.size];
                 memcpy(newData, pkt.data, pkt.size);
@@ -61,8 +60,6 @@ namespace Epyx
                     to = NodeId(it->second);
                 } else if (!it->first.compare("Version")) {
                     version = it->second;
-                } else if (!it->first.compare("Type")) {
-                    type = PacketType(it->second);
                 } else if (!it->first.compare("ID")) {
                     pktID = String::toInt(it->second);
                 } else {
@@ -86,7 +83,7 @@ namespace Epyx
 
         std::ostream& operator<<(std::ostream& os, const Packet& pkt) {
             os << "[N2NP " << pkt.from << " > " << pkt.to
-                << " type " << pkt.type << " ID " << pkt.pktID
+                << " method " << pkt.method << " ID " << pkt.pktID
                 << " size " << pkt.size << "]";
             return os;
         }
@@ -128,7 +125,6 @@ namespace Epyx
             gttpkt.headers["From"] = from.toString();
             gttpkt.headers["To"] = to.toString();
             gttpkt.headers["Version"] = (version.empty() ? "0" : version);
-            gttpkt.headers["Type"] = type.toString();
             gttpkt.headers["ID"] = String::fromInt(pktID);
             gttpkt.size = size;
             gttpkt.body = data;

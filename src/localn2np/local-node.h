@@ -56,7 +56,7 @@ namespace Epyx
         /**
          * @brief Register a receive callback
          */
-        void registerRecv(const N2NP::PacketType& type, ReceiveCb *cb, void* cbData);
+        void registerRecv(const std::string& method, ReceiveCb *cb, void* cbData);
 
     protected:
         /**
@@ -77,7 +77,7 @@ namespace Epyx
         LocalRelay *relay;
 
         // Callbacks for Recv
-        std::map<N2NP::PacketType, ReceiveCbData> recvCallbacks;
+        std::map<std::string, ReceiveCbData> recvCallbacks;
         Mutex recvCallbacksMutex;
 
         // Disable copy

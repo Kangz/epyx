@@ -7,7 +7,6 @@
 #define EPYX_N2NP_PACKET_H
 
 #include "nodeid.h"
-#include "packettype.h"
 #include "../net/socket.h"
 #include "../parser/gttpacket.h"
 
@@ -24,11 +23,11 @@ namespace Epyx
         public:
             /**
              * @brief Constructor
-             * @param type
+             * @param method
              * @param size
              * @param data
              */
-            Packet(const PacketType& type, unsigned int size,
+            Packet(const std::string method, unsigned int size,
                     const char *data);
 
             /**
@@ -102,10 +101,6 @@ namespace Epyx
              */
             unsigned long pktID;
 
-            /**
-             * @brief Content type
-             */
-            PacketType type;
             /**
              * @brief Content size
              */

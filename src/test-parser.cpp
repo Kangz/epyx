@@ -7,9 +7,9 @@ static const int MAXLENGTH = 10000;
 
 bool test_parser() {
     // Build a N2NP packet
-    Epyx::N2NP::PacketType testtype("Test");
+    std::string testmethod("Test");
     std::string message("Hello World. Let me introduce you to Epyx.");
-    Epyx::N2NP::Packet pkt(testtype, message.length(), message.c_str());
+    Epyx::N2NP::Packet pkt(testmethod, message.length(), message.c_str());
     pkt.from = Epyx::N2NP::NodeId("Epyx@129.104.13.37:42");
     pkt.to = Epyx::N2NP::NodeId("World@");
     pkt.method = "PING";

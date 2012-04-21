@@ -99,8 +99,6 @@ void test_n2np() {
     // Create nodes
     const int nodeNum = 42;
     Epyx::N2NP::Node * nodes[nodeNum];
-    Epyx::N2NP::PacketType type("TEST");
-    Epyx::N2NP::PacketType pongType("PONG");
     Epyx::log::info << "Create nodes..." << Epyx::log::endl;
     Ponger testModule;
     Displayer testModule2;

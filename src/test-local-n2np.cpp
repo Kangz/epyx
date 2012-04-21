@@ -15,7 +15,7 @@
 void test_command(Epyx::LocalNode& node, const Epyx::Address& addr) {
     unsigned int id;
     std::string msg;
-    Epyx::N2NP::PacketType type("test");
+    std::string method("test");
 
     // Waiting for other threads
     usleep(10);
@@ -40,7 +40,7 @@ void test_command(Epyx::LocalNode& node, const Epyx::Address& addr) {
             Epyx::N2NP::NodeId nodeTo(idStream.str().c_str(), addr);
 
             // Build a new packet
-            Epyx::N2NP::Packet pkt(type, msg.size() + 1, msg.c_str());
+            Epyx::N2NP::Packet pkt(method, msg.size() + 1, msg.c_str());
 
             // Send !
             node.send(nodeTo, pkt);
@@ -52,7 +52,7 @@ void test_command(Epyx::LocalNode& node, const Epyx::Address& addr) {
  * @brief Receive callback for every node
  */
 bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2NP::Packet& pkt, void* arg) {
-    Epyx::N2NP::PacketType pongType("pong");
+    std::string pongMethod("pong");
     Epyx::log::debug << "[Node " << node << "] Recv from " << pkt.from << ": `"
         << pkt.data << "'" << Epyx::log::endl;
     // Send a pong with the same data
@@ -67,7 +67,7 @@ bool nodeRecv(Epyx::LocalNode& node, const Epyx::N2NP::Packet& pkt, void* arg) {
     if (data != pkt.data)
         size = strlen(data) + 1;
 
-    Epyx::N2NP::Packet pongPkt(pongType, size, data);
+    Epyx::N2NP::Packet pongPkt(pongMethod, size, data);
     node.send(pkt.from, pongPkt);
     return true;
 }
@@ -90,8 +90,8 @@ void test_local_n2np() {
     Epyx::LocalRelay *relay = NULL;
     try {
         Epyx::Address addr("L0C4L", 0, 0);
-        Epyx::N2NP::PacketType type("test");
-        Epyx::N2NP::PacketType pongType("pong");
+        std::string method("test");
+        std::string pongMethod("pong");
 
         // Create a relay
         relay = new Epyx::LocalRelay(addr);
@@ -102,8 +102,8 @@ void test_local_n2np() {
             std::ostringstream strid;
             strid << "node-" << (i + 1);
             nodes[i] = new Epyx::LocalNode(strid.str());
-            nodes[i]->registerRecv(type, nodeRecv, NULL);
-            nodes[i]->registerRecv(pongType, nodeRecvPong, NULL);
+            nodes[i]->registerRecv(method, nodeRecv, NULL);
+            nodes[i]->registerRecv(pongMethod, nodeRecvPong, NULL);
             nodes[i]->attach(relay);
         }
         Epyx::log::debug << "Created nodes 1.." << nodeNum << Epyx::log::endl;

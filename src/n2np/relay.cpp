@@ -37,7 +37,7 @@ namespace Epyx
                 << " from " << sock->getAddress() << log::endl;
 
             // Send node ID to node
-            Packet pkt(PacketType("ID"), 0, NULL);
+            Packet pkt("ID", 0, NULL);
             pkt.method = "ID";
             pkt.from = relayId;
             pkt.to = nodeid;

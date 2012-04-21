@@ -29,10 +29,10 @@ namespace Epyx
         relay->post(real_pkt);
     }
 
-    void LocalNode::registerRecv(const N2NP::PacketType& type, ReceiveCb *cb, void* cbData) {
+    void LocalNode::registerRecv(const std::string& method, ReceiveCb *cb, void* cbData) {
         ReceiveCbData cbEntry = {cb, cbData};
         recvCallbacksMutex.lock();
-        recvCallbacks.insert(std::make_pair(type, cbEntry));
+        recvCallbacks.insert(std::make_pair(method, cbEntry));
         recvCallbacksMutex.unlock();
     }
 
@@ -48,21 +48,21 @@ namespace Epyx
 
         // Debug
         //log::debug << "[Node " << *this << "] Recv from " << pkt->from
-        //    << " type " << pkt->type << log::endl;
+        //    << " method " << pkt->method << log::endl;
 
         // Find the recv callback
         bool foundCallback = false;
         ReceiveCbData recvCbData;
 
         this->recvCallbacksMutex.lock();
-        if (this->recvCallbacks.count(pkt->type)) {
-            recvCbData = (*(this->recvCallbacks.find(pkt->type))).second;
+        if (this->recvCallbacks.count(pkt->method)) {
+            recvCbData = (*(this->recvCallbacks.find(pkt->method))).second;
             foundCallback = true;
         }
         this->recvCallbacksMutex.unlock();
 
         if (!foundCallback) {
-            log::error << "[Node " << *this << "] Unknown type " << pkt->type << log::endl;
+            log::error << "[Node " << *this << "] Unknown method " << pkt->method << log::endl;
             return;
         }
 
@@ -77,7 +77,7 @@ namespace Epyx
         if (!result) {
             log::error << "[Node " << *this << "] Problem with message"
                 << " from " << pkt->from
-                << " type " << pkt->type << log::endl;
+                << " method " << pkt->method << log::endl;
         }
     }
 }
