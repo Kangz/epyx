@@ -9,11 +9,11 @@ namespace Epyx
 
         Node::Node(const Address& addr)
         :NetSelectSocket(new TCPSocket(addr)), hasId(false) {
-            this->send(NodeId("",addr),"ID",0,NULL);
+            this->send(NodeId("",addr),"ID",NULL,0);
         }
 
         bool Node::send(const NodeId& to, const std::string& method,
-            unsigned long size, const char *data) {
+            const char *data, unsigned long size) {
             if(method != "ID")
                 EPYX_ASSERT(hasId);
 
@@ -34,7 +34,7 @@ namespace Epyx
                 log::error << "N2NP node: Unable to build GTT packet to send" << log::endl;
                 return false;
             }
-            bool result = this->send(to, method, size, data);
+            bool result = this->send(to, method, data, size);
             delete[] data;
             return result;
         }

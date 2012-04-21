@@ -37,7 +37,7 @@ void test_command(Epyx::N2NP::Node& myNode, Epyx::N2NP::NodeId nodeids[], unsign
             Epyx::log::debug << "[Cli] Sending " << msg << " to " << nodeid << Epyx::log::endl;
 
             // Send !
-            myNode.send(nodeid, "TEST", msg.length() + 1, msg.c_str());
+            myNode.send(nodeid, "TEST", msg.c_str(), msg.length() + 1);
         }
     }
 }
@@ -61,7 +61,7 @@ void Ponger::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const cha
     else if (!strcasecmp(data, "Question?"))
         pongstr = "The answer is 42.";
 
-    node.send(from, "PONG", pongstr.length() + 1, pongstr.c_str());
+    node.send(from, "PONG", pongstr.c_str(), pongstr.length() + 1);
 }
 
 class Displayer : public Epyx::N2NP::Module

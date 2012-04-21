@@ -36,12 +36,12 @@ namespace Epyx
              * @brief Send an N2NP packet to another node
              * @param to destination Node ID
              * @param method
-             * @param size
              * @param data
+             * @param size
              * @return true on success
              */
             bool send(const NodeId& to, const std::string& method,
-                    unsigned long size, const char *data);
+                    const char *data, unsigned long size);
 
             /**
              * @brief Send an ancapsulated GTT packet packet to another node
