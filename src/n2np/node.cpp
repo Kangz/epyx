@@ -39,11 +39,14 @@ namespace Epyx
             return result;
         }
 
-        void Node::registerRecv(const PacketType& type, Node::ReceiveCb *cb, void* cbData) {
-            ReceiveCbData cbEntry = {cb, cbData};
-            recvCallbacksMutex.lock();
-            recvCallbacks[type] = cbEntry;
-            recvCallbacksMutex.unlock();
+        void Node::addModule(std::string method, Module *m) {
+            modulesMutex.lock();
+            if(modules.count(method) > 0) {
+            modulesMutex.unlock();
+            throw new FailException("N2NP::Node", "Cannot add a module to an already bound key");
+            }
+            modules[method] = m;
+            modulesMutex.unlock();
         }
 
         const NodeId& Node::getId() const {
@@ -98,34 +101,28 @@ namespace Epyx
 
             //log::info << "Node " << nodeid << ": Recv " << *pkt << log::endl;
 
-            // Find the recv callback
-            bool foundCallback = false;
-            ReceiveCbData recvCbData;
+            // Find the relevant module
+            bool foundModule = false;
+            Module* moduleToCall;
 
-            this->recvCallbacksMutex.lock();
-            if (this->recvCallbacks.count(pkt->type)) {
-                recvCbData = (*(this->recvCallbacks.find(pkt->type))).second;
-                foundCallback = true;
+            this->modulesMutex.lock();
+            if (this->modules.count(pkt->method)) {
+                moduleToCall = this->modules[pkt->method];
+                foundModule = true;
             }
-            this->recvCallbacksMutex.unlock();
+            this->modulesMutex.unlock();
 
-            if (!foundCallback) {
+            if (!foundModule) {
                 log::error << "[Node " << nodeid << "] Unhandled method "
-                    << pkt->type << log::endl;
+                    << pkt->method << log::endl;
                 return;
             }
 
-            // Call the callback
-            bool result = false;
+            // Call the module
             try {
-                result = (*recvCbData.cb)(*this, *pkt, recvCbData.arg);
+                moduleToCall->fromN2NP(*this, pkt->from, pkt->data, pkt->size);
             } catch (Exception e) {
                 log::error << "[Node " << nodeid << "] Exception " << e << log::endl;
-                result = false;
-            }
-            if (!result) {
-                log::error << "[Node " << nodeid << "] Problem with packet "
-                    << pkt << log::endl;
             }
         }
     }

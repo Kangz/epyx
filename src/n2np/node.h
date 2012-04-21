@@ -7,6 +7,7 @@
 #define EPYX_N2NP_NODE_H
 
 #include "packet.h"
+#include "module.h"
 #include "../net/netselectsocket.h"
 #include "../parser/gttparser.h"
 
@@ -14,18 +15,16 @@ namespace Epyx
 {
     namespace N2NP
     {
-        // For ReceiveCb
+        class Module; //It does exist, it tell you.
+
         class Node;
+
         /**
          * @class Node
          * @brief N2NP node
          */
         class Node : public NetSelectSocket
         {
-        private:
-            //Internal definition used for the callback
-            typedef bool (ReceiveCb) (Node&, const Packet&, void* cbData);
-
         public:
             /**
              * @brief Create a new node
@@ -59,12 +58,11 @@ namespace Epyx
                     const GTTPacket& pkt);
 
             /**
-             * @brief Register a receive callback
-             * @param type
-             * @param cb
-             * @param cbData
+             * @brief Register a new Module
+             * @param method Which method to use
+             * @param m The module to call
              */
-            void registerRecv(const PacketType& type, ReceiveCb *cb, void* cbData);
+            void addModule(std::string method, Module *m);
 
             /**
              * @brief Get node ID
@@ -93,15 +91,11 @@ namespace Epyx
             // This ID
             NodeId nodeid;
             bool hasId;
-            typedef struct ReceiveCbData
-            {
-                ReceiveCb* cb;
-                void* arg;
-            } ReceiveCbData;
+  
 
             // Callbacks for Recv
-            std::map<PacketType, ReceiveCbData> recvCallbacks;
-            Mutex recvCallbacksMutex;
+            std::map<std::string, Module*> modules;
+            Mutex modulesMutex;
 
             // GTT parser
             GTTParser gttparser;

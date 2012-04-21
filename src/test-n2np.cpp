@@ -42,33 +42,39 @@ void test_command(Epyx::N2NP::Node& myNode, Epyx::N2NP::NodeId nodeids[], unsign
     }
 }
 
-/**
- * @brief Receive callback for every node
- */
-bool nodeRecv(Epyx::N2NP::Node& node, const Epyx::N2NP::Packet& pkt, void* arg) {
-    Epyx::log::debug << "[Node " << node.getId() << "] Recv from " << pkt.from << ": `"
-        << pkt.data << "'" << Epyx::log::endl;
+
+class Ponger : public Epyx::N2NP::Module
+{
+    public:
+        virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size);
+};
+
+void Ponger::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size) {
+    Epyx::log::debug << "[Node " << node.getId() << "] Recv from " << from << ": `"
+    << data << "'" << Epyx::log::endl;
     // Send a pong with the same data
     // .. or not
-    std::string pongstr(pkt.data, pkt.size);
+    std::string pongstr(data, size);
 
-    if (!strcasecmp(pkt.data, "o<"))
+    if (!strcasecmp(data, "o<"))
         pongstr = "PAN !";
-    else if (!strcasecmp(pkt.data, "Question?"))
+    else if (!strcasecmp(data, "Question?"))
         pongstr = "The answer is 42.";
 
-    node.send(pkt.from, "PONG", pongstr.length() + 1, pongstr.c_str());
-    return true;
+    node.send(from, "PONG", pongstr.length() + 1, pongstr.c_str());
 }
 
-/**
- * @brief Receive callback for Pong messages
- */
-bool nodeRecvPong(Epyx::N2NP::Node& node, const Epyx::N2NP::Packet& pkt, void* arg) {
-    Epyx::log::debug << "[Node " << node.getId() << "] Pong from " << pkt.from << ": `"
-        << pkt.data << "'" << Epyx::log::endl;
-    return true;
+class Displayer : public Epyx::N2NP::Module
+{
+    public:
+        virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size);
+};
+
+void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size) {
+    Epyx::log::debug << "[Node " << node.getId() << "] Pong from " << from << ": `"
+        << data << "'" << Epyx::log::endl;
 }
+
 
 /**
  * @brief Test local N2NP implementation
@@ -96,10 +102,13 @@ void test_n2np() {
     Epyx::N2NP::PacketType type("TEST");
     Epyx::N2NP::PacketType pongType("PONG");
     Epyx::log::info << "Create nodes..." << Epyx::log::endl;
+    Ponger testModule;
+    Displayer testModule2;
     for (int i = 0; i < nodeNum; i++) {
         nodes[i] = new Epyx::N2NP::Node(addr);
-        nodes[i]->registerRecv(type, nodeRecv, NULL);
-        nodes[i]->registerRecv(pongType, nodeRecvPong, NULL);
+        nodes[i]->addModule("TEST", &testModule);
+        nodes[i]->addModule("PONG", &testModule2);
+        //nodes[i]->registerRecv(pongType, nodeRecvPong, NULL);
         selectNodes->add(nodes[i]);
     }
 
