@@ -11,7 +11,7 @@ namespace DHT
     Node::~Node() {
     }
 
-    void Node::eatN2NP(const N2NP::NodeId& senderId, const N2NP::NodeId& myself, char* data, int dataSize) {
+    void Node::fromN2NP(N2NP::Node& myself, N2NP::NodeId senderId, const char* data, unsigned int dataSize) {
         gttParser.eat(data, dataSize);
         GTTPacket* gtt_packet = gttParser.getPacket();
         gttParser.reset();
@@ -25,14 +25,14 @@ namespace DHT
         Packet* pkt = new Packet(*gtt_packet);
         delete gtt_packet;
 
-        n.processPacket(senderId, *pkt);
+        n.processPacket(myself, senderId, *pkt);
     }
 
-    void Node::send(Packet& pkt, const Id& target, const N2NP::NodeId& n2npTarget) {
+    void Node::send(N2NP::Node& n2npNode, Packet& pkt, const Id& target, const N2NP::NodeId& n2npTarget) {
         pkt.from = this->id;
         GTTPacket* gtt = pkt.toGTTPacket();
-        //std::string& raw_data = gtt->serialize();
-        //this->n2np.send(n2npTarget, "dht", raw_data.c_str(), raw_data.length());
+        //std::string& raw_data = gtt->build();
+        n2npNode.send(n2npTarget, "DHT", *gtt);
     }
 
 }

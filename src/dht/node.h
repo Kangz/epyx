@@ -6,7 +6,7 @@
 #include "../core/common.h"
 #include "../parser/gttpacket.h"
 #include "../parser/gttparser.h"
-#include "../n2np/nodeid.h"
+#include "../n2np/node.h"
 #include "internal-node.h"
 #include "kbucket.h"
 #include "packet.h"
@@ -18,14 +18,14 @@ namespace DHT
 
     class InternalNode;
 
-    class Node
+    class Node : public N2NP::Module
     {
     public:
         Node(Id& id, const std::string& name);
         ~Node();
 
-        void eatN2NP(const N2NP::NodeId& senderId, const N2NP::NodeId& myself, char* data, int dataSize);
-        void send(Packet& pkt, const Id& target, const N2NP::NodeId& n2npTarget);
+        void fromN2NP(N2NP::Node& myself, N2NP::NodeId senderId, const char* data, unsigned int dataSize);
+        void send(N2NP::Node& n2npNode, Packet& pkt, const Id& target, const N2NP::NodeId& n2npTarget);
     private:
         Id id;
         GTTParser gttParser;
