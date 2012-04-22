@@ -8,10 +8,13 @@
 #include <ctime>
 #include <stdint.h>
 #include "core/common.h"
+#include "dht/node.h"
 #include "dht/id.h"
 #include "dht/kbucket.h"
 #include "dht/packet.h"
 #include "n2np/nodeid.h"
+#include "n2np/relay.h"
+#include "n2np/node.h"
 
 using namespace Epyx;
 
@@ -182,7 +185,81 @@ void test_dhtpacket(){
     }
     random_id(pkt.idToFind);
     double_print(pkt);
+}
 
+
+class FakeDht : public Epyx::N2NP::Module
+{
+public:
+    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size){
+        log::info<<"The fakeDHT received a message"<<log::endl;
+        std::string toPrint(data, size);
+        log::info<<toPrint<<log::endl;
+    }
+};
+
+
+void test_dht_n2np(){
+     // Create Net Select for relay
+    NetSelect *selectRelay = new NetSelect(10, "wRelay");
+    selectRelay->setName("NetSelectRelay");
+    selectRelay->start();
+
+    // Create relay
+    Address addr("127.0.0.1:4242");
+    N2NP::Relay *relay = new N2NP::Relay(addr);
+    selectRelay->add(new N2NP::RelayServer(new TCPServer(addr.getPort(), 50), relay));
+    log::info << "Start Relay " << relay->getId() << log::endl;
+
+    // Create Net Select for nodes
+    Epyx::NetSelect *selectNodes = new Epyx::NetSelect(10, "WNodes");
+    selectNodes->setName("NetSelectNodes");
+    selectNodes->start();
+
+    // Create nodes
+    Epyx::log::info << "Create nodes..." << Epyx::log::endl;
+    Epyx::N2NP::Node node0(addr), node1(addr);
+
+    DHT::Id id;
+    random_id(id);
+    DHT::Node dht(id, "DHT");
+
+    node0.addModule("DHT", &dht);
+    selectNodes->add(&node0);
+
+    FakeDht fakeDHT;
+    node1.addModule("DHT", &fakeDHT);
+    selectNodes->add(&node1);
+
+    // Wait for node IDs
+    Epyx::log::info << "Waiting for nodes..." << Epyx::log::endl;
+    Epyx::N2NP::NodeId nodeids[2];
+    while (!node0.isReady() || !node1.isReady()){
+        usleep(100);
+    }
+
+    Id fakeId;
+    random_id(fakeId);
+
+    #define SendToDHT(method, message) \
+    { \
+        std::ostringstream o; \
+        std::string msg = (message); \
+        o << "DHT " << (method) << "\r\n"; \
+        o << "from: " << fakeId << "\r\n"; \
+        if(msg.length() != 0) o << (msg); \
+        else o << "\r\n"; \
+        std::string s = o.str(); \
+        dht.fromN2NP(node0, node1.getId(), s.c_str(), s.length()); \
+    }
+
+    log::info << "Sending a PING to the DHT" << log::endl;
+    SendToDHT("PING", "");
+
+    #undef SendToDHT
+
+    sleep(1); // Avoid a segmentation fault in net, probably
+              //because things are destroyed before some callback
 
 }
 
@@ -191,9 +268,10 @@ int main(){
     log::init(log::CONSOLE | log::LOGFILE, "Test.log");
     srand ( time(NULL) );
 
-    test_id_distance();
-    test_kbucket();
-    test_dhtpacket();
+    //test_id_distance();
+    //test_kbucket();
+    //test_dhtpacket();
+    test_dht_n2np();
 
     log::flushAndQuit();
     return 0;
