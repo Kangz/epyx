@@ -25,14 +25,14 @@ namespace DHT
         Packet* pkt = new Packet(*gtt_packet);
         delete gtt_packet;
 
-        n.processPacket(myself, senderId, *pkt);
+        n.processPacket(*pkt, *(new Target(myself, senderId, pkt->from)));
     }
 
-    void Node::send(N2NP::Node& n2npNode, Packet& pkt, const Id& target, const N2NP::NodeId& n2npTarget) {
+    void Node::send(Packet& pkt, const Target& target) {
         pkt.from = this->id;
+        //pkt.to = target.id;
         GTTPacket* gtt = pkt.toGTTPacket();
-        //std::string& raw_data = gtt->build();
-        n2npNode.send(n2npTarget, "DHT", *gtt);
+        target.myN2np.send(target.n2npId, "DHT", *gtt);
     }
 
 }

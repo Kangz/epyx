@@ -8,6 +8,8 @@
 #include "../n2np/node.h"
 #include "kbucket.h"
 #include "packet.h"
+#include "static-actors.h"
+#include "target.h"
 
 namespace Epyx
 {
@@ -16,26 +18,31 @@ namespace DHT
 
     class Node;
 
+    struct StaticActorData;
+
     class InternalNode
     {
     public:
         InternalNode(const Id& id, Node& parent, const std::string& name);
         ~InternalNode();
 
-        void processPacket(N2NP::Node& myN2NP, const N2NP::NodeId& sender, Packet& pkt);
+        void processPacket(Packet& pkt, Target& target);
+        void send(Packet& pkt, const Target& target);
 
     private:
+        ActorManager actors;
+        ActorId<StaticActorData> pingActor;
         Id id;
         Node& parent;
         KBucket kbucket;
 
-        void sendPong(N2NP::Node& myN2NP, const Id& target, const N2NP::NodeId& n2npTarget);
-        void sendGot(N2NP::Node& myN2NP, Packet& pkt, const Id& target, const N2NP::NodeId& n2npTarget);
-        void handleGot(N2NP::Node& myN2NP, Packet& pkt);
-        void sendStored(N2NP::Node& myN2NP, Packet& pkt, const Id& target, const N2NP::NodeId& n2npTarget);
-        void handleStored(N2NP::Node& myN2NP, Packet& pkt);
-        void sendFound(N2NP::Node& myN2NP, Packet& pkt, const Id& target, const N2NP::NodeId& n2npTarget);
-        void handleFound(N2NP::Node& myN2NP, Packet& pkt);
+        void sendPong(Target& target);
+        void sendGot(Packet& pkt, Target& target);
+        void handleGot(Packet& pkt, Target& target);
+        void sendStored(Packet& pkt, Target& target);
+        void handleStored(Packet& pkt, Target& target);
+        void sendFound(Packet& pkt, Target& target);
+        void handleFound(Packet& pkt, Target& target);
 
    };
 

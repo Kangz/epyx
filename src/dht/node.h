@@ -10,6 +10,7 @@
 #include "internal-node.h"
 #include "kbucket.h"
 #include "packet.h"
+#include "target.h"
 
 namespace Epyx
 {
@@ -18,6 +19,7 @@ namespace DHT
 
     class InternalNode;
 
+
     class Node : public N2NP::Module
     {
     public:
@@ -25,13 +27,12 @@ namespace DHT
         ~Node();
 
         void fromN2NP(N2NP::Node& myself, N2NP::NodeId senderId, const char* data, unsigned int dataSize);
-        void send(N2NP::Node& n2npNode, Packet& pkt, const Id& target, const N2NP::NodeId& n2npTarget);
+        void send(Packet& pkt, const Target& target);
     private:
         Id id;
         GTTParser gttParser;
         InternalNode n;
-
-   };
+    };
 
 }
 }
