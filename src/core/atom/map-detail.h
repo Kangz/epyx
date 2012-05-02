@@ -27,6 +27,9 @@ namespace Epyx
         template <typename TKey, typename TVal>
         TVal Map<TKey, TVal>::getAndLock(TKey key, TVal defval) {
             mut.lock();
+#if EPYX_ATOM_MAP_DEBUG
+            log::debug << "Mutex " << this << " !lock" << log::endl;
+#endif
             const_iterator it = map.find(key);
             return ((it == map.end()) ? defval : it->second);
             // No mut.unlock();
@@ -35,6 +38,9 @@ namespace Epyx
         template <typename TKey, typename TVal>
         TVal Map<TKey, TVal>::get(TKey key, TVal defval) {
             TVal retval = this->getAndLock(key, defval);
+#if EPYX_ATOM_MAP_DEBUG
+            log::debug << "Mutex " << this << " !unlock (get)" << log::endl;
+#endif
             mut.unlock();
             return retval;
         }
@@ -94,6 +100,9 @@ namespace Epyx
         template <typename TKey, typename TVal>
         typename Map<TKey, TVal>::iterator Map<TKey, TVal>::beginLock() {
             mut.lock();
+#if EPYX_ATOM_MAP_DEBUG
+            log::debug << "Mutex " << this << " !lock (iter)" << log::endl;
+#endif
             return map.begin();
         }
 
@@ -104,6 +113,9 @@ namespace Epyx
 
         template <typename TKey, typename TVal>
         void Map<TKey, TVal>::endUnlock() {
+#if EPYX_ATOM_MAP_DEBUG
+            log::debug << "Mutex " << this << " !unlock" << log::endl;
+#endif
             mut.unlock();
         }
 

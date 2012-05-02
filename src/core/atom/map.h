@@ -9,6 +9,10 @@
 #include "../mutex.h"
 #include <map>
 
+#ifndef EPYX_ATOM_MAP_DEBUG
+#define EPYX_ATOM_MAP_DEBUG 0
+#endif
+
 namespace Epyx
 {
     namespace atom
