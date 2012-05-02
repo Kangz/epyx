@@ -7,6 +7,7 @@
 #define EPYX_NETSELECT_H
 
 #include "../core/common.h"
+#include "../core/atom/counter.h"
 #include "../core/atom/map.h"
 #include "netselectreader.h"
 
@@ -41,16 +42,22 @@ namespace Epyx
          * be used by the caller. Moreover, nsr needs to have been created with
          * new (because it is destroyed by delete)
          */
-        void add(NetSelectReader *nsr);
+        int add(NetSelectReader *nsr);
 
         /**
-         * @brief gets the number of workers
+         * @brief Kill a reader
+         * @param id
+         */
+        void kill(int id);
+
+        /**
+         * @brief Get the number of workers
          * @return the current number of workers
          */
         int getNumWorkers() const;
 
         /**
-         * @brief sets the number of workers
+         * @brief Set the number of workers
          * @param n the number of workers needed
          */
         void setNumWorkers(int n);
@@ -59,19 +66,35 @@ namespace Epyx
         void run();
 
     private:
-        // For each reader, tell wether it is already in the blocking queue
-        // waiting to be read, to prevent useless select
-        atom::Map<NetSelectReader*, bool> readers;
-        class Workers : public WorkerPool<NetSelectReader>
+        /**
+         * @brief NetSelectReader information
+         */
+        struct NetSelectReaderInfo {
+            // Reader
+            NetSelectReader* reader;
+
+            // It is alive
+            bool alive;
+
+            // It has data to be read (it is in the blocking queue)
+            bool inQueue;
+
+            NetSelectReaderInfo(NetSelectReader *nsr);
+            ~NetSelectReaderInfo();
+        };
+
+        atom::Counter readersId;
+        atom::Map<int, NetSelectReaderInfo*> readers;
+        class Workers : public WorkerPool<int>
         {
         public:
             Workers(NetSelect *owner);
-            void treat(NetSelectReader *nsr);
+            void treat(int *nsriId);
         private:
             NetSelect *owner;
         } workers;
 
-        friend void Workers::treat(NetSelectReader *nsr);
+        friend void Workers::treat(int *nsriId);
 
         bool running;
     };

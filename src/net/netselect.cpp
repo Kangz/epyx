@@ -5,7 +5,7 @@ namespace Epyx
 {
 
     NetSelect::NetSelect(int numworkers, const std::string& workerName)
-    :workers(this), running(true) {
+    :readersId(1), workers(this), running(true) {
         workers.setName(workerName);
         workers.setNumWorkers(numworkers);
     }
@@ -18,30 +18,45 @@ namespace Epyx
         running = false;
 
         // Save NetSelectReaders before destroying the map
-        std::list<NetSelectReader*> nsrBackup;
-        for (atom::Map < NetSelectReader*, bool>::iterator i = readers.beginLock();
+        std::list<NetSelectReaderInfo*> nsriBackup;
+        for (atom::Map < int, NetSelectReaderInfo*>::iterator i = readers.beginLock();
             !readers.isEnd(i); i++) {
-            NetSelectReader *nsr = i->first;
+            NetSelectReaderInfo *nsri = i->second;
             //log::debug << "NetSelect: About to destroy " << nsr << log::endl;
-            if (nsr != NULL)
-                nsrBackup.push_back(nsr);
+            if (nsri != NULL)
+                nsriBackup.push_back(nsri);
         }
         readers.endUnlock();
 
         // Delete every selected stuff
         readers.clearForEver();
-        while (!nsrBackup.empty()) {
-            NetSelectReader *nsr = nsrBackup.front();
-            nsrBackup.pop_front();
+        while (!nsriBackup.empty()) {
+            NetSelectReaderInfo *nsri = nsriBackup.front();
+            nsriBackup.pop_front();
             //log::debug << "NetSelect: Destroy " << nsr << log::endl;
-            delete nsr;
+            delete nsri;
         }
     }
 
-    void NetSelect::add(NetSelectReader *nsr) {
+    int NetSelect::add(NetSelectReader *nsr) {
         EPYX_ASSERT(nsr != NULL);
         nsr->setOwner(this);
-        readers.set(nsr, false);
+        int id = readersId.getIncrement();
+        readers.set(id, new NetSelectReaderInfo(nsr));
+        return id;
+    }
+
+    void NetSelect::kill(int id) {
+        NetSelectReaderInfo *nsri = readers.getAndLock(id, NULL);
+        if (nsri != NULL) {
+            nsri->alive = false;
+            readers.endUnlock();
+            nsri = readers.getUnset(id, NULL);
+            if (nsri != NULL)
+                delete nsri;
+        } else {
+            readers.endUnlock();
+        }
     }
 
     int NetSelect::getNumWorkers() const {
@@ -60,17 +75,18 @@ namespace Epyx
             // Build select parameters
             FD_ZERO(&rfds);
             fdmax = 0;
-            for (atom::Map < NetSelectReader*, bool>::const_iterator i = readers.beginLock();
+            for (atom::Map < int, NetSelectReaderInfo*>::const_iterator i = readers.beginLock();
                 running && !readers.isEnd(i); i++) {
-                if (!i->second) {
-                    NetSelectReader *nsr = i->first;
-                    EPYX_ASSERT(nsr != NULL);
-                    int fd = nsr->getFileDescriptor();
-                    EPYX_ASSERT(fd >= 0);
-                    FD_SET(fd, &rfds);
-                    if (fd > fdmax)
-                        fdmax = fd;
-                }
+                NetSelectReaderInfo *nsri = i->second;
+                EPYX_ASSERT(nsri != NULL);
+                if (!nsri->alive || nsri->inQueue)
+                    continue;
+                EPYX_ASSERT(nsri->reader != NULL);
+                int fd = nsri->reader->getFileDescriptor();
+                EPYX_ASSERT(fd >= 0);
+                FD_SET(fd, &rfds);
+                if (fd > fdmax)
+                    fdmax = fd;
             }
             readers.endUnlock();
             if (!running)
@@ -84,36 +100,56 @@ namespace Epyx
                 throw ErrException("NetSelect", "select");
 
             // Add each FD to the blocking queue
-            for (atom::Map < NetSelectReader*, bool>::iterator i = readers.beginLock();
+            for (atom::Map < int, NetSelectReaderInfo*>::iterator i = readers.beginLock();
                 running && !readers.isEnd(i); i++) {
-                NetSelectReader *nsr = i->first;
-                EPYX_ASSERT(nsr != NULL);
-                int fd = nsr->getFileDescriptor();
-                if (!i->second && FD_ISSET(fd, &rfds)) {
-                    i->second = true;
-                    workers.post(nsr);
+                NetSelectReaderInfo *nsri = i->second;
+                EPYX_ASSERT(nsri != NULL);
+                if (!nsri->alive)
+                    continue;
+                EPYX_ASSERT(nsri->reader != NULL);
+                int fd = nsri->reader->getFileDescriptor();
+                if (!nsri->inQueue && FD_ISSET(fd, &rfds)) {
+                    nsri->inQueue = true;
+                    workers.post(new int(i->first));
                 }
             }
             readers.endUnlock();
         }
     }
 
-    NetSelect::Workers::Workers(NetSelect *owner)
-    :WorkerPool(false), owner(owner) {
+    NetSelect::NetSelectReaderInfo::NetSelectReaderInfo(NetSelectReader *nsr)
+    :reader(nsr), alive(true), inQueue(false) {
     }
 
-    void NetSelect::Workers::treat(NetSelectReader *nsr) {
+    NetSelect::NetSelectReaderInfo::~NetSelectReaderInfo() {
+        if (reader != NULL) {
+            delete reader;
+            reader = NULL;
+        }
+    }
+
+    NetSelect::Workers::Workers(NetSelect *owner)
+    :WorkerPool(true), owner(owner) {
+    }
+
+    void NetSelect::Workers::treat(int *nsriId) {
         EPYX_ASSERT(owner != NULL);
+        EPYX_ASSERT(nsriId != NULL);
+        NetSelectReaderInfo *nsri = owner->readers.get(*nsriId, NULL);
+        if (nsri == NULL || !nsri->alive)
+            return;
+        NetSelectReader *nsr = nsri->reader;
         EPYX_ASSERT(nsr != NULL);
+
         if (!nsr->read()) {
             // Destroy this reader on false return
-            if (owner->readers.unset(nsr)) {
-                //log::debug << "NetSelect: Closing " << (nsr) << log::endl;
-                delete nsr;
-            }
+            owner->kill(*nsriId);
+            return;
         }
-
         // Tell this reader is treated
-        owner->readers.set(nsr, false);
+        nsri = owner->readers.getAndLock(*nsriId, NULL);
+        if (nsri != NULL)
+            nsri->inQueue = false;
+        owner->readers.endUnlock();
     }
 }
