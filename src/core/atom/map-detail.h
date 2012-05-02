@@ -25,11 +25,16 @@ namespace Epyx
         }
 
         template <typename TKey, typename TVal>
-        TVal Map<TKey, TVal>::get(TKey key, TVal defval) {
-            TVal retval;
+        TVal Map<TKey, TVal>::getAndLock(TKey key, TVal defval) {
             mut.lock();
             const_iterator it = map.find(key);
-            retval = ((it == map.end()) ? defval : it->second);
+            return ((it == map.end()) ? defval : it->second);
+            // No mut.unlock();
+        }
+
+        template <typename TKey, typename TVal>
+        TVal Map<TKey, TVal>::get(TKey key, TVal defval) {
+            TVal retval = this->getAndLock(key, defval);
             mut.unlock();
             return retval;
         }
@@ -67,6 +72,7 @@ namespace Epyx
             if (!readOnly)
                 map.clear();
             mut.unlock();
+            EPYX_ASSERT(map.empty());
         }
 
         template <typename TKey, typename TVal>

@@ -42,6 +42,16 @@ namespace Epyx
             void set(TKey key, TVal value);
 
             /**
+             * @brief Get an element and lock the map to do something with
+             * @param key
+             * @param defval Default value
+             * @return map[key] if it exists, defval otherwise
+             *
+             * @note Call endUnlock() to unlock the map
+             */
+            TVal getAndLock(TKey key, TVal defval);
+
+            /**
              * @brief Get an element
              * @param key
              * @param defval Default value
