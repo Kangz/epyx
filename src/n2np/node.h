@@ -10,6 +10,7 @@
 #include "module.h"
 #include "../net/netselectsocket.h"
 #include "../parser/gttparser.h"
+#include "../core/atom/counter.h"
 
 namespace Epyx
 {
@@ -87,6 +88,8 @@ namespace Epyx
              * @brief Treat a N2NP packet
              */
             void treat(Packet *pkt);
+            //void sendAck(Packet *pkt);
+            //void sendErr(Packet *pkt);
 
             // This ID
             NodeId nodeid;
@@ -103,6 +106,9 @@ namespace Epyx
             // Disable copy
             Node(const Node&);
             const Node& operator=(const Node&);
+            
+            atom::Counter curId;
+            std::map<unsigned long, Packet*> sentMap;
         };
     }
 }

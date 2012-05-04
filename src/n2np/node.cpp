@@ -8,7 +8,7 @@ namespace Epyx
     {
 
         Node::Node(const Address& addr)
-        :NetSelectSocket(new TCPSocket(addr)), hasId(false) {
+        :NetSelectSocket(new TCPSocket(addr)), hasId(false), curId(0) {
             this->send(NodeId("",addr),"ID",NULL,0);
         }
 
@@ -18,12 +18,18 @@ namespace Epyx
                 EPYX_ASSERT(hasId);
 
             // Send packet to the relay by default
-            Packet n2npPkt(method, size, data);
-            n2npPkt.from = nodeid;
-            n2npPkt.to = to;
+            Packet *n2npPkt = new Packet(method, size, data);
+            n2npPkt->from = nodeid;
+            n2npPkt->to = to;
+            n2npPkt->pktID = curId.getIncrement();
 
             //log::info << "Node " << nodeid << ": Send " << n2npPkt << log::endl;
-            return n2npPkt.send(this->socket());
+            if(sentMap.count(n2npPkt->pktID) == 1)
+                throw new FailException("N2NP::Node", "Duplicate packet ID while sending");
+            sentMap[n2npPkt->pktID] = n2npPkt;
+            if(this->hasId)
+                log::debug << "Node " << this->getId() << " has a map of " << sentMap.size() << " packets." << log::endl;
+            return n2npPkt->send(this->socket());
         }
 
         bool Node::send(const NodeId& to, const std::string& method,
