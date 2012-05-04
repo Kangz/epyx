@@ -80,6 +80,12 @@ namespace Epyx
          * @return (string)n
          */
         static std::string fromInt(int n);
+        /**
+         * @brief Converts an integer to a string
+         * @param n
+         * @return (string)n
+         */
+        static std::string fromUnsignedLong(unsigned long n);
 
         /**
          * @brief Returns a new copy of the content of the argument

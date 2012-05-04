@@ -1,6 +1,8 @@
 #include "node.h"
 #include "../core/common.h"
 #include "../net/tcpsocket.h"
+#include "../core/string.h"
+#include <cstring>
 
 namespace Epyx
 {
@@ -13,7 +15,7 @@ namespace Epyx
         }
 
         bool Node::send(const NodeId& to, const std::string& method,
-            const char *data, unsigned long size) {
+            const char *data, unsigned long size, bool store) {
             if(method != "ID")
                 EPYX_ASSERT(hasId);
 
@@ -24,12 +26,26 @@ namespace Epyx
             n2npPkt->pktID = curId.getIncrement();
 
             //log::info << "Node " << nodeid << ": Send " << n2npPkt << log::endl;
-            if(sentMap.count(n2npPkt->pktID) == 1)
-                throw new FailException("N2NP::Node", "Duplicate packet ID while sending");
-            sentMap[n2npPkt->pktID] = n2npPkt;
-            if(this->hasId)
-                log::debug << "Node " << this->getId() << " has a map of " << sentMap.size() << " packets." << log::endl;
+            if(store) {
+                if(sentMap.count(n2npPkt->pktID) == 1)
+                    throw new FailException("N2NP::Node", "Duplicate packet ID while sending");
+                sentMap[n2npPkt->pktID] = n2npPkt;
+                if(this->hasId)
+                    log::debug << "Node " << this->getId() << " has a map of " << sentMap.size() << " packets." << log::endl;
+            }
+
             return n2npPkt->send(this->socket());
+        }
+
+        void Node::sendAck(Packet *pkt) {
+            log::debug << "Acknowledging a packet !" << log::endl;
+            std::string s = String::fromUnsignedLong(pkt->pktID);
+            this->send(pkt->from, "ACK", String::toNewChar(s), s.length(), false);
+        }
+        void Node::sendErr(Packet *pkt) {
+            log::debug << "Erroring a packet !" << log::endl;
+            std::string s = String::fromUnsignedLong(pkt->pktID);
+            this->send(pkt->from, "ERR", String::toNewChar(s), s.length(), false);
         }
 
         bool Node::send(const NodeId& to, const std::string& method,
@@ -107,6 +123,23 @@ namespace Epyx
 
             //log::info << "Node " << nodeid << ": Recv " << *pkt << log::endl;
 
+            //Special treatment for internal method ERR and ACK
+            if(pkt->method == "ACK") {
+                char* charId = new char[pkt->size+1];
+                memcpy(charId, pkt->data, pkt->size);
+                charId[pkt->size] = '\0';
+                unsigned long idAcked = String::toInt(charId);
+                if(sentMap.count(idAcked) == 1) {
+                    delete sentMap[idAcked];
+                    sentMap.erase(idAcked);
+                    log::debug << "Succesfully erased an acked packed" << log::endl;
+                }
+                return;
+            }
+            else if(pkt->method == "ERR") {
+                return;
+            }
+
             // Find the relevant module
             bool foundModule = false;
             Module* moduleToCall;
@@ -121,6 +154,7 @@ namespace Epyx
             if (!foundModule) {
                 log::error << "[Node " << nodeid << "] Unhandled method "
                     << pkt->method << log::endl;
+                this->sendErr(pkt);
                 return;
             }
 
@@ -130,6 +164,9 @@ namespace Epyx
             } catch (MinorException e) {
                 log::error << "[Node " << nodeid << "] Exception " << e << log::endl;
             }
+
+            //Everything went right, let's acknowledge the packet.
+            this->sendAck(pkt);
         }
     }
 }

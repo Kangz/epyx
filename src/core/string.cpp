@@ -60,6 +60,12 @@ namespace Epyx
         return out.str();
     }
 
+    std::string String::fromUnsignedLong(unsigned long n) {
+        std::stringstream out;
+        out << n;
+        return out.str();
+    }
+
     char* String::toNewChar(const std::string& s) {
         char* res = new char[s.length()];
         memcpy(res, s.c_str(), s.length());

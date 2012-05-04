@@ -42,7 +42,7 @@ namespace Epyx
              * @return true on success
              */
             bool send(const NodeId& to, const std::string& method,
-                    const char *data, unsigned long size);
+                    const char *data, unsigned long size, bool store = true);
 
             /**
              * @brief Send an ancapsulated GTT packet packet to another node
@@ -88,8 +88,8 @@ namespace Epyx
              * @brief Treat a N2NP packet
              */
             void treat(Packet *pkt);
-            //void sendAck(Packet *pkt);
-            //void sendErr(Packet *pkt);
+            void sendAck(Packet *pkt);
+            void sendErr(Packet *pkt);
 
             // This ID
             NodeId nodeid;
