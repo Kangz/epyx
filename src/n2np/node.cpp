@@ -121,7 +121,7 @@ namespace Epyx
             // Call the module
             try {
                 moduleToCall->fromN2NP(*this, pkt->from, pkt->data, pkt->size);
-            } catch (Exception e) {
+            } catch (MinorException e) {
                 log::error << "[Node " << nodeid << "] Exception " << e << log::endl;
             }
         }

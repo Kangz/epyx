@@ -81,6 +81,21 @@ namespace Epyx
          */
         ErrException(const char *module, const char *fct);
     };
+    /**
+     * @class MinorException
+     * @brief Internal Epyx exception (meant to be caught at some point)
+     */
+    class MinorException : public Exception
+    {
+    public:
+        /**
+         * @brief Build an internal Epyx exception
+         * @param module
+         * @param error message to be logged.
+         */
+        MinorException(const char *module, const char *message);
+    };
+
 }
 
 #endif /* EPYX_EXCEPTION_H */

@@ -65,7 +65,7 @@ namespace Epyx
                 } else {
                     log::error << "N2NP::Packet: Unknown header "
                         << it->first << log::endl;
-                    throw FailException("N2NP::Packet", "Invalid GTT packet");
+                    throw MinorException("N2NP::Packet", "Invalid GTT header");
                 }
             }
             size = pkt.size;

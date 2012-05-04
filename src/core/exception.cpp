@@ -32,4 +32,9 @@ namespace Epyx
         msg << "Error with " << fct;
         this->append(msg.str().c_str());
     }
+
+    MinorException::MinorException(const char *module, const char* message)
+   :Exception("Internal Epyx error", module, message) {
+   }
+
 }

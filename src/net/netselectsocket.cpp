@@ -40,7 +40,7 @@ namespace Epyx
         // Eat data
         try {
             this->eat(data, recvSize);
-        } catch (Exception e) {
+        } catch (MinorException e) {
             log::error << e << log::endl;
             log::error << "Closing socket to " << sock->getAddress() <<
                 " due to an exception" << log::endl;
