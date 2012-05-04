@@ -4,20 +4,20 @@ namespace Epyx
 {
     namespace atom
     {
-        Counter::Counter(unsigned int initial)
+        Counter::Counter(unsigned long initial)
         :cnt(initial) {
         }
 
-        unsigned int Counter::get() {
+        unsigned long Counter::get() {
             mut.lock();
-            unsigned int val = cnt;
+            unsigned long val = cnt;
             mut.unlock();
             return val;
         }
 
-        unsigned int Counter::getIncrement() {
+        unsigned long Counter::getIncrement() {
             mut.lock();
-            unsigned int val = cnt;
+            unsigned long val = cnt;
             cnt++;
             mut.unlock();
             return val;

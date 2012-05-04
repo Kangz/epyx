@@ -23,23 +23,23 @@ namespace Epyx
              * @brief Constructor
              * @param initial Initial value
              */
-            Counter(unsigned int initial = 0);
+            Counter(unsigned long initial = 0);
 
             /**
              * @brief Get value
              * @return counter value
              */
-            unsigned int get();
+            unsigned long get();
 
             /**
              * @brief Increment and get old value of the counter
              * @return value before increment
              */
-            unsigned int getIncrement();
+            unsigned long getIncrement();
 
         private:
             Mutex mut;
-            unsigned int cnt;
+            unsigned long cnt;
 
             // Disable copy
             Counter(const Counter&);
