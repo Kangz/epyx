@@ -59,6 +59,12 @@ file(
     src/dht/*
 )
 
+file(
+    GLOB_RECURSE
+    crypto_sources
+    src/crypto/*
+)
+
 # Test executables
 add_executable(
     test-thread
@@ -150,4 +156,17 @@ add_executable(
 target_link_libraries(
     test-dht
     pthread
+)
+
+add_executable(
+    test-crypto
+    ${core_sources}
+    ${crypto_sources}
+    src/test-crypto.cpp
+)
+
+target_link_libraries(
+    test-crypto
+    pthread
+    cryptopp
 )
