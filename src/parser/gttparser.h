@@ -55,16 +55,6 @@ namespace Epyx
         GTTPacket* getPacket();
 
     protected:
-        class ParserException
-        {
-        public:
-
-            ParserException(const char *message)
-            : message(message) {
-            }
-            const char *message;
-        };
-
         /**
          * @brief Current GTT Packet
          *

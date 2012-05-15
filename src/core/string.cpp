@@ -50,8 +50,8 @@ namespace Epyx
 
         // An error happened
         if (endptr == str && l == 0)
-            throw new ErrException("String::toInt", "strtol");
-        throw new FailException("String::toInt", "Invalid characters");
+            throw ParserException("String::toInt", "strtol");
+        throw ParserException("String::toInt", "Invalid characters");
     }
 
     std::string String::fromInt(int n) {

@@ -64,6 +64,7 @@ namespace Epyx
          * @brief Converts a string to an integer
          * @param str
          * @return (int)str
+         * @throw ParserException if str is not an integer
          */
         static long toInt(const std::string& str);
 
@@ -71,6 +72,7 @@ namespace Epyx
          * @brief Converts a string to an integer
          * @param str
          * @return (int)str
+         * @throw ParserException if str is not an integer
          */
         static long toInt(const char *str);
 

@@ -94,7 +94,7 @@ namespace Epyx
             // This ID
             NodeId nodeid;
             bool hasId;
-  
+
 
             // Callbacks for Recv
             std::map<std::string, Module*> modules;
@@ -106,7 +106,7 @@ namespace Epyx
             // Disable copy
             Node(const Node&);
             const Node& operator=(const Node&);
-            
+
             atom::Counter curId;
             std::map<unsigned long, Packet*> sentMap;
         };

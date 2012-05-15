@@ -94,8 +94,8 @@ namespace Epyx
             }
         } catch (ParserException e) {
             log::error << "An error occured in GTTParser while processing a packet:\n" <<
-                e.message << log::endl;
-            errorMessage = e.message;
+                e.getMessage() << log::endl;
+            errorMessage = e.getMessage();
             hasError = true;
             return NULL;
         }
@@ -109,11 +109,11 @@ namespace Epyx
 
         // Read protocol name
         if (!isupper(l[i]))
-            throw ParserException("protocol name should begin with capital letters");
+            throw ParserException("GTTParser", "protocol name should begin with capital letters");
         i++;
         while (l[i] != ' ') {
             if (!(isupper(l[i]) || isdigit(l[i]) || (l[i] == '_')))
-                throw ParserException("protocol name should continue with [A-Z0-9]* or end with a space");
+                throw ParserException("GTTParser", "protocol name should continue with [A-Z0-9]* or end with a space");
             i++;
         }
         currentPkt->protocol = std::string(l, i);
@@ -122,11 +122,11 @@ namespace Epyx
         // Read method name
         iMethod = i;
         if (!isupper(l[i]))
-            throw ParserException("method name should begin with capital letters");
+            throw ParserException("GTTParser", "method name should begin with capital letters");
         i++;
         while (l[i] != 0) {
             if (!(isupper(l[i]) || isdigit(l[i]) || (l[i] == '_')))
-                throw ParserException("method name should continue with [A-Z0-9]* or end with a space");
+                throw ParserException("GTTParser", "method name should continue with [A-Z0-9]* or end with a space");
             i++;
         }
         currentPkt->method = std::string(l + iMethod, i - iMethod);
@@ -139,11 +139,11 @@ namespace Epyx
 
         // Read flag name
         if (!isalpha(l[i]))
-            throw ParserException("flag_name should begin with [a-zA-Z] or we should add newline to end the header");
+            throw ParserException("GTTParser", "flag_name should begin with [a-zA-Z] or we should add newline to end the header");
         i++;
         while (l[i] != ':') {
             if (!(isalnum(l[i]) || (l[i] == '_') || (l[i] == '-')))
-                throw ParserException("flag name should continue with [A-Za-z0-9-_]* or end with a space");
+                throw ParserException("GTTParser", "flag name should continue with [A-Za-z0-9-_]* or end with a space");
             i++;
         }
         std::string flagName(l, i);
@@ -153,13 +153,13 @@ namespace Epyx
         while (l[i] == ' ')
             i++;
         if (l[i] == 0)
-            throw ParserException("flag without value");
+            throw ParserException("GTTParser", "flag without value");
 
         // Read value
         iValue = i;
         while (l[i] != 0) {
             if (!(l[i] >= 32 && l[i] < 126))
-                throw ParserException("flag_value should consist of printable characters or just end with CRLF");
+                throw ParserException("GTTParser", "flag_value should consist of printable characters or just end with CRLF");
             i++;
         }
         std::string flagValue(l + iValue, i - iValue);
@@ -167,10 +167,10 @@ namespace Epyx
         // Content length
         if (!strcasecmp(flagName.c_str(), "content-length")) {
             if (currentPkt->size > 0)
-                throw ParserException("content-length flag has already appeared");
+                throw ParserException("GTTParser", "content-length flag has already appeared");
             currentPkt->size = String::toInt(flagValue.c_str());
             if (currentPkt->size <= 0)
-                throw ParserException("not valid body size, body size should be a positive integer");
+                throw ParserException("GTTParser", "not valid body size, body size should be a positive integer");
         } else {
             currentPkt->headers[flagName] = flagValue;
         }

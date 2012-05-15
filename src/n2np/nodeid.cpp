@@ -23,7 +23,7 @@ namespace Epyx
             size_t pos = str.find('@');
             if (pos == std::string::npos) {
                 log::error << "N2NP: Arobas is missing in " << str << log::endl;
-                throw FailException("N2np::NodeId", "No @ in ID");
+                throw ParserException("N2np::NodeId", "No @ in ID");
             }
             name = str.substr(0, pos);
             relay = Address(str.substr(pos + 1));

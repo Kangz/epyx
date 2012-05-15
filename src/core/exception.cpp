@@ -21,6 +21,10 @@ namespace Epyx
         return os << e.type << " in module " << e.module << ": " << e.message << "\n";
     }
 
+    const std::string& Exception::getMessage() const {
+        return message;
+    }
+
     FailException::FailException(const char *module, const char *message)
     :Exception("Epyx fails", module, message) {
     }
@@ -34,7 +38,11 @@ namespace Epyx
     }
 
     MinorException::MinorException(const char *module, const char* message)
-   :Exception("Internal Epyx error", module, message) {
-   }
+    :Exception("Internal Epyx error", module, message) {
+    }
+
+    ParserException::ParserException(const char *module, const char* message)
+    :Exception("Parser error", module, message) {
+    }
 
 }

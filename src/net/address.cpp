@@ -18,7 +18,7 @@ namespace Epyx
             if (n == std::string::npos) {
                 // TODO: Better sanity checks
                 log::fatal << "Unknown address " << addressFormat << log::endl;
-                throw FailException("Address", "Invalid IPv6 address");
+                throw ParserException("Address", "Invalid IPv6 address");
             }
             ip = addressFormat.substr(1, n - 1);
             portstr = addressFormat.substr(n + 1);

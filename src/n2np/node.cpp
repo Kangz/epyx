@@ -28,7 +28,7 @@ namespace Epyx
             //log::info << "Node " << nodeid << ": Send " << n2npPkt << log::endl;
             if(store) {
                 if(sentMap.count(n2npPkt->pktID) == 1)
-                    throw new FailException("N2NP::Node", "Duplicate packet ID while sending");
+                    throw FailException("N2NP::Node", "Duplicate packet ID while sending");
                 sentMap[n2npPkt->pktID] = n2npPkt;
                 if(this->hasId)
                     log::debug << "Node " << this->getId() << " has a map of " << sentMap.size() << " packets." << log::endl;
@@ -65,7 +65,7 @@ namespace Epyx
             modulesMutex.lock();
             if(modules.count(method) > 0) {
             modulesMutex.unlock();
-            throw new FailException("N2NP::Node", "Cannot add a module to an already bound key");
+            throw FailException("N2NP::Node", "Cannot add a module to an already bound key");
             }
             modules[method] = m;
             modulesMutex.unlock();

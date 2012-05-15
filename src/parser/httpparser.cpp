@@ -12,7 +12,7 @@ namespace Epyx
         int i = 0;
         while (l[i] != ' ') {
             if (!(isalnum(l[i]) || (l[i] == '/') || (l[i] == '.')))
-                throw ParserException("Invalid HTTP version");
+                throw ParserException("HTTPParser", "Invalid HTTP version");
             i++;
         }
         currentPkt->protocol = std::string(l, i);
@@ -22,7 +22,7 @@ namespace Epyx
         int iCode = i;
         while (l[i] != ' ') {
             if (!(isdigit(l[i])))
-                throw ParserException("Invalid HTTP code");
+                throw ParserException("HTTPParser", "Invalid HTTP code");
             i++;
         }
         currentPkt->method = std::string(l + iCode, i - iCode);
@@ -32,7 +32,7 @@ namespace Epyx
         int iDesc = i;
         while (l[i] != 0) {
             if (!(isalnum(l[i]) || (l[i] == ' ')))
-                throw ParserException("Invalid HTTP code decription");
+                throw ParserException("HTTPParser", "Invalid HTTP code decription");
             i++;
         }
         currentPkt->headers["HTTP-code"] = std::string(l + iDesc, i - iDesc);
@@ -45,11 +45,11 @@ namespace Epyx
 
         // Read flag name
         if (!isalpha(l[i]))
-            throw ParserException("flag_name should begin with [a-zA-Z] or we should add newline to end the header");
+            throw ParserException("HTTPParser", "flag_name should begin with [a-zA-Z] or we should add newline to end the header");
         i++;
         while (l[i] != ':') {
             if (!(isalnum(l[i]) || (l[i] == '_') || (l[i] == '-')))
-                throw ParserException("flag name should continue with [A-Za-z0-9-_]* or end with a space");
+                throw ParserException("HTTPParser", "flag name should continue with [A-Za-z0-9-_]* or end with a space");
             i++;
         }
         std::string flagName(l, i);
@@ -60,7 +60,7 @@ namespace Epyx
         while (l[i] == ' ')
             i++;
         if (l[i] == 0){
-            //throw ParserException("flag without value"); // Why should it bug?
+            //throw ParserException("HTTPParser", "flag without value"); // Why should it bug?
             currentPkt->headers[flagName]="";
             return;
         }
@@ -68,7 +68,7 @@ namespace Epyx
         iValue = i;
         while (l[i] != 0) {
             if (!(l[i] >= 32 && l[i] < 126))
-                throw ParserException("flag_value should consist of printable characters or just end with CRLF");
+                throw ParserException("HTTPParser", "flag_value should consist of printable characters or just end with CRLF");
             i++;
         }
         std::string flagValue(l + iValue, i - iValue);
@@ -76,10 +76,10 @@ namespace Epyx
         // Content length
         if (!strcasecmp(flagName.c_str(), "content-length")) {
             if (currentPkt->size > 0)
-                throw ParserException("content-length flag has already appeared");
+                throw ParserException("HTTPParser", "content-length flag has already appeared");
             currentPkt->size = String::toInt(flagValue.c_str());
             if (currentPkt->size <= 0)
-                throw ParserException("not valid body size, body size should be a positive integer");
+                throw ParserException("HTTPParser", "not valid body size, body size should be a positive integer");
             currentPkt->body = new char[currentPkt->size];
         } else {
             currentPkt->headers[flagName] = flagValue;

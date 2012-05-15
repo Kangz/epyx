@@ -37,6 +37,11 @@ namespace Epyx
          */
         friend std::ostream& operator<<(std::ostream& os, const Exception& e);
 
+        /**
+         * @brief Get message
+         */
+        const std::string& getMessage() const;
+
     protected:
         /**
          * @brief Exception type
@@ -91,11 +96,24 @@ namespace Epyx
         /**
          * @brief Build an internal Epyx exception
          * @param module
-         * @param error message to be logged.
+         * @param message error message to be logged
          */
         MinorException(const char *module, const char *message);
     };
-
+    /**
+     * @class ParserException
+     * @brief Exception which is raised when invalid data is parsed
+     */
+    class ParserException : public Exception
+    {
+    public:
+        /**
+         * @brief Build a parser exception
+         * @param module
+         * @param message
+         */
+        ParserException(const char *module, const char *message);
+    };
 }
 
 #endif /* EPYX_EXCEPTION_H */
