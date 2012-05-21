@@ -67,6 +67,12 @@ namespace Epyx
             std::string toString() const;
 
             /**
+             * @brief compare this and nodeid
+             * @param addr
+             */
+            int compare(const NodeId& nodeid) const;
+
+            /**
              * @brief Equality test
              * @param nodeid1
              * @param nodeid2
@@ -79,6 +85,13 @@ namespace Epyx
              * @param nodeid2
              */
             friend bool operator!=(const NodeId& nodeid1, const NodeId& nodeid2);
+
+            /**
+             * Less test
+             * @param nodeid1
+             * @param nodeid2
+             */
+            friend bool operator<(const NodeId& nodeid1, const NodeId& nodeid2);
 
             /**
              * @brief Get Node name

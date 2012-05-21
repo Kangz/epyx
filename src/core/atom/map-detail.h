@@ -6,6 +6,9 @@
 #ifndef EPYX_ATOM_MAP_DETAIL_H
 #define EPYX_ATOM_MAP_DETAIL_H
 
+#include "../assert.h"
+#include "../log.h"
+
 namespace Epyx
 {
     namespace atom

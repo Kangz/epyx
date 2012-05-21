@@ -58,6 +58,13 @@ namespace Epyx
             }
             bool result = this->send(to, method, data, size);
             delete[] data;
+
+            // Statistics
+            unsigned int weight = (size > 1000) ? 1000 : size;
+            unsigned int cnt = mruNodeIds.getAndLock(to, 0);
+            mruNodeIds.set(to, cnt + weight);
+            mruNodeIds.endUnlock();
+
             return result;
         }
 
@@ -139,6 +146,12 @@ namespace Epyx
             else if(pkt->method == "ERR") {
                 return;
             }
+
+            // Statistics
+            unsigned int weight = (pkt->size > 1000) ? 1000 : pkt->size;
+            unsigned int cnt = mruNodeIds.getAndLock(pkt->from, 0);
+            mruNodeIds.set(pkt->from, cnt + weight);
+            mruNodeIds.endUnlock();
 
             // Find the relevant module
             bool foundModule = false;

@@ -51,16 +51,26 @@ namespace Epyx
             return stream.str();
         }
 
+        int NodeId::compare(const NodeId& nodeid) const {
+            int c = relay.compare(nodeid.relay);
+            if (c != 0) return c;
+            return name.compare(nodeid.name);
+        }
+
         bool operator==(const NodeId& nodeid1, const NodeId& nodeid2) {
-            return (!nodeid1.name.compare(nodeid2.name))
-                && (nodeid1.relay == nodeid2.relay);
+            return nodeid1.compare(nodeid2) == 0;
         }
 
         bool operator!=(const NodeId& nodeid1, const NodeId& nodeid2) {
-            return !(nodeid1 == nodeid2);
+            return nodeid1.compare(nodeid2) != 0;
+        }
+
+        bool operator<(const NodeId& nodeid1, const NodeId& nodeid2) {
+            return nodeid1.compare(nodeid2) < 0;
         }
 
         const std::string& NodeId::getName() const {
+
             return name;
         }
 

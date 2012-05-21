@@ -142,13 +142,26 @@ namespace Epyx
         return stream.str();
     }
 
+    int Address::compare(const Address& addr) const {
+        if (ipVersion < addr.ipVersion) return -1;
+        if (ipVersion > addr.ipVersion) return 1;
+        // TODO: compare with bitmasks
+        int c = ip.compare(addr.ip);
+        if (c != 0) return c;
+        if (port < addr.port) return -1;
+        if (port > addr.port) return 1;
+        return 0;
+    }
+
     bool operator==(const Address& addr1, const Address& addr2) {
-        return (addr1.port == addr2.port)
-            && (addr1.ipVersion == addr2.ipVersion)
-            && !addr1.ip.compare(addr2.ip);
+        return addr1.compare(addr2) == 0;
     }
 
     bool operator!=(const Address& addr1, const Address& addr2) {
-        return !(addr1 == addr2);
+        return addr1.compare(addr2) != 0;
+    }
+
+    bool operator<(const Address& addr1, const Address& addr2) {
+        return addr1.compare(addr2) < 0;
     }
 }

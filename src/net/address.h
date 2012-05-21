@@ -11,7 +11,6 @@
 
 namespace Epyx
 {
-
     /**
      * @class Address
      *
@@ -85,6 +84,12 @@ namespace Epyx
         std::string toString() const;
 
         /**
+         * @brief compare this and addr
+         * @param addr
+         */
+        int compare(const Address& addr) const;
+
+        /**
          * @brief Equality test
          * @param addr1
          * @param addr2
@@ -97,6 +102,13 @@ namespace Epyx
          * @param addr2
          */
         friend bool operator!=(const Address& addr1, const Address& addr2);
+
+        /**
+         * @brief Less test
+         * @param addr1
+         * @param addr2
+         */
+        friend bool operator<(const Address& addr1, const Address& addr2);
 
     private:
         // IP string

@@ -11,6 +11,7 @@
 #include "../net/netselectsocket.h"
 #include "../parser/gttparser.h"
 #include "../core/atom/counter.h"
+#include "../core/atom/map.h"
 
 namespace Epyx
 {
@@ -95,13 +96,16 @@ namespace Epyx
             NodeId nodeid;
             bool hasId;
 
-
             // Callbacks for Recv
             std::map<std::string, Module*> modules;
             Mutex modulesMutex;
 
             // GTT parser
             GTTParser gttparser;
+
+            // Most recently used node IDs.
+            // Each node has a number which corresponds to a weight.
+            atom::Map<NodeId, unsigned int> mruNodeIds;
 
             // Disable copy
             Node(const Node&);
