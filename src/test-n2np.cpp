@@ -113,11 +113,9 @@ void test_n2np(Epyx::API& epyx, const Epyx::Address &addr) {
 
     test_command(*(nodes[0]), nodeids, nodeNum);
 
-    for (int i = 0; i < nodeNum; i++) {
-        Epyx::log::info << "Destroy node " << nodeids[i] << Epyx::log::endl;
+    Epyx::log::info << "Destroy everything for " << addr << Epyx::log::endl;
+    for (int i = 0; i < nodeNum; i++)
         epyx.destroyNode(nodesIndex[i]);
-    }
-    Epyx::log::info << "Destroy relay " << addr << Epyx::log::endl;
     epyx.destroyRelay(2000);
 }
 

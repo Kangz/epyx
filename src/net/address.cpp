@@ -100,6 +100,10 @@ namespace Epyx
         return port;
     }
 
+    bool Address::empty() const {
+        return ip.empty() && (port == 0);
+    }
+
     void Address::getSockAddr(struct sockaddr *saddr) const {
         EPYX_ASSERT(saddr != NULL);
         EPYX_ASSERT(this->ipVersion > 0);

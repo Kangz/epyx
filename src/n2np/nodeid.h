@@ -105,6 +105,12 @@ namespace Epyx
              */
             const Address& getRelay() const;
 
+            /**
+             * @brief is empty
+             * @return true if it is empty
+             */
+            bool empty() const;
+
         private:
             std::string name;
             Address relay;

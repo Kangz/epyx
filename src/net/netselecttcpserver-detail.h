@@ -1,5 +1,6 @@
 #include "netselect.h"
 #include "../core/common.h"
+#include "server.h"
 
 namespace Epyx
 {
@@ -38,8 +39,11 @@ namespace Epyx
             return false;
         newfd = ::accept(srvfd, (struct sockaddr*) &clientAddr,
                 &clientAddrLen);
-        if (newfd == -1)
+        if (newfd == -1) {
+            if (!srv->isBinded())
+                return false;
             throw ErrException("NetSelectTCPServer::read", "accept");
+        }
 
         // Encapsulate socket
         try {

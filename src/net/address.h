@@ -63,6 +63,12 @@ namespace Epyx
         unsigned short getPort() const;
 
         /**
+         * @brief Is it empty ?
+         * @return the answer
+         */
+        bool empty() const;
+
+        /**
          * @brief Create a sockaddr structure from the address
          * @param saddr sockaddr structure
          *

@@ -27,10 +27,13 @@ namespace Epyx
                 // Build a N2NP packet and post it to the Relay
                 Packet *n2nppkt = new Packet(*gttpkt);
                 //There is a special packet that we must treat here
-                if(n2nppkt->method == "ID" && n2nppkt->to == relay->getId())
-                    relay->attachNode(&this->socket());
-                else
+                if(n2nppkt->method == "ID" && n2nppkt->to == relay->getId()) {
+                    nodeid = relay->attachNode(&this->socket());
+                    if (nodeid.empty())
+                        log::error << "N2NP: No node ID found" << log::endl;
+                } else {
                     relay->post(n2nppkt);
+                }
                 delete gttpkt;
             }
             std::string error;

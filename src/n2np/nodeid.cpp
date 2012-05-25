@@ -77,5 +77,9 @@ namespace Epyx
         const Address& NodeId::getRelay() const {
             return relay;
         }
+
+        bool NodeId::empty() const {
+            return name.empty() && relay.empty();
+        }
     }
 }
