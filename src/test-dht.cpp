@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <stdint.h>
-#include "core/common.h"
+#include "api.h"
 #include "dht/node.h"
 #include "dht/id.h"
 #include "dht/kbucket.h"
@@ -264,15 +264,15 @@ void test_dht_n2np(){
 }
 
 int main(){
-    Thread::init();
-    log::init(log::CONSOLE | log::LOGFILE, "Test.log");
+    Epyx::API epyx(log::CONSOLE | log::LOGFILE, "Test.log");
     srand ( time(NULL) );
-
-    //test_id_distance();
-    //test_kbucket();
-    //test_dhtpacket();
-    test_dht_n2np();
-
-    log::flushAndQuit();
+    try {
+        //test_id_distance();
+        //test_kbucket();
+        //test_dhtpacket();
+        test_dht_n2np();
+    } catch (Epyx::Exception e) {
+        Epyx::log::fatal << e << Epyx::log::endl;
+    }
     return 0;
 }

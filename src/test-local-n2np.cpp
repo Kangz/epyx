@@ -6,7 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <string.h>
-#include "core/common.h"
+#include "api.h"
 #include "localn2np/local-node.h"
 
 /**
@@ -127,13 +127,11 @@ void test_local_n2np() {
  * @brief Setup environment and invoke test_local_n2np()
  */
 int main() {
+    Epyx::API epyx;
     try {
-        Epyx::Thread::init();
-        Epyx::log::init(Epyx::log::CONSOLE, "");
         test_local_n2np();
-        Epyx::log::flushAndQuit();
     } catch (Epyx::Exception e) {
-        std::cerr << e << "\n";
+        Epyx::log::fatal << e << Epyx::log::endl;
     }
     return 0;
 }

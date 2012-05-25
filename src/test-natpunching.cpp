@@ -1,4 +1,4 @@
-#include "core/common.h"
+#include "api.h"
 #include "natpunching/upnp/openconnect.h"
 /*
 #include <iostream>
@@ -63,11 +63,18 @@ bool test_IGD() {
 }
 
 int main(int argc, char* argv[]) {
+    Epyx::API epyx;
+    try {
+        //Epyx::UPNP::Natpunch natpunch;
+        //natpunch.openMapPort(22, 1337);
+        test_IGD();
+    } catch (Epyx::Exception e) {
+        Epyx::log::fatal << e << Epyx::log::endl;
+    }
+    return 0;
+
     //std::string address, service, path;
     //unsigned short port;
-    Epyx::Thread::init();
-    Epyx::log::init(Epyx::log::CONSOLE, "");
-    Epyx::Socket::init();
 
     /*
     std::cout << "Enter Address to connect with : " ;
@@ -102,14 +109,4 @@ int main(int argc, char* argv[]) {
         std::cerr << e << std::endl;
     }
      */
-    try {
-        //Epyx::UPNP::Natpunch natpunch;
-        //natpunch.openMapPort(22, 1337);
-        test_IGD();
-    } catch (Epyx::FailException e) {
-        Epyx::log::fatal << e << Epyx::log::endl;
-    }
-    Epyx::log::flushAndQuit();
-    return 0;
-
 }

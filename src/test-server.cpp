@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <strings.h>
-#include "core/common.h"
+#include "api.h"
 #include "net/netselect.h"
 #include "net/netselectsocket.h"
 #include "net/netselecttcpserver.h"
@@ -61,7 +61,7 @@ public:
             // Close socket
             this->socket().close();
         } else if (!strcasecmp(line, "pan")) {
-            throw Epyx::FailException("test-server", "A client tried to kill me");
+            throw Epyx::MinorException("test-server", "A client tried to kill me");
         } else if (!strcasecmp(line, "o<")) {
             socket().write("PAN !\n");
         } else {
@@ -74,9 +74,7 @@ public:
 
 int main()
 {
-    Epyx::Thread::init();
-    Epyx::log::init(Epyx::log::CONSOLE, "");
-    Epyx::Socket::init();
+    Epyx::API epyx;
     try {
         // Start select() thread
         Epyx::NetSelect selectThread(20, "SelectWorker");
@@ -94,8 +92,8 @@ int main()
         selectThread.wait();
         Epyx::log::debug << "Server thread has terminated" << Epyx::log::endl;
     } catch (Epyx::Exception e) {
-        Epyx::log::error << e << Epyx::log::endl;
+        Epyx::log::fatal << e << Epyx::log::endl;
     }
-    Epyx::log::flushAndQuit();
+    return 0;
 }
 

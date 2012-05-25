@@ -8,6 +8,7 @@ namespace Epyx
         // Number of workers in NetSelect may be configured via netsel.setNumWorkers
         Thread::init();
         log::init(logflags, logfile);
+        Socket::init();
     }
 
     API::~API() {

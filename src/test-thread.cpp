@@ -2,10 +2,8 @@
  * This program tests Thread and Mutex classes
  */
 
-#include <iostream>
 #include <stdlib.h>
-#include "core/common.h"
-#include "core/worker-pool.h"
+#include "api.h"
 #include "core/actor-manager.h"
 
 using namespace Epyx;
@@ -277,15 +275,15 @@ void test_actors(){
 }
 
 int main(){
-    Thread::init();
-    log::init(log::CONSOLE | log::LOGFILE, "Test.log");
-
-    //test_mutex();
-    //test_cond();
-    //stress_test_logger();
-    //test_worker_pool();
-    test_actors();
-
-    log::flushAndQuit();
+    Epyx::API epyx(log::CONSOLE | log::LOGFILE, "Test.log");
+    try {
+        //test_mutex();
+        //test_cond();
+        //stress_test_logger();
+        //test_worker_pool();
+        test_actors();
+    } catch (Epyx::Exception e) {
+        Epyx::log::fatal << e << Epyx::log::endl;
+    }
     return 0;
 }
