@@ -46,6 +46,13 @@ namespace Epyx
             void set(TKey key, TVal value);
 
             /**
+             * @brief Insert an element when the map is already locked
+             * @param key
+             * @param value
+             */
+            void setLocked(TKey key, TVal value);
+
+            /**
              * @brief Get an element and lock the map to do something with
              * @param key
              * @param defval Default value

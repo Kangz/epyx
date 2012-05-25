@@ -11,12 +11,12 @@ namespace Epyx
 
         Node::Node(const Address& addr)
         :NetSelectSocket(new TCPSocket(addr)), hasId(false), curId(0) {
-            this->send(NodeId("",addr),"ID",NULL,0);
+            this->send(NodeId("", addr), "ID", NULL, 0);
         }
 
         bool Node::send(const NodeId& to, const std::string& method,
             const char *data, unsigned long size, bool store) {
-            if(method != "ID")
+            if (method != "ID")
                 EPYX_ASSERT(hasId);
 
             // Send packet to the relay by default
@@ -26,11 +26,11 @@ namespace Epyx
             n2npPkt->pktID = curId.getIncrement();
 
             //log::info << "Node " << nodeid << ": Send " << n2npPkt << log::endl;
-            if(store) {
-                if(sentMap.count(n2npPkt->pktID) == 1)
+            if (store) {
+                if (sentMap.count(n2npPkt->pktID) == 1)
                     throw FailException("N2NP::Node", "Duplicate packet ID while sending");
                 sentMap[n2npPkt->pktID] = n2npPkt;
-                if(this->hasId)
+                if (this->hasId)
                     log::debug << "Node " << this->getId() << " has a map of " << sentMap.size() << " packets." << log::endl;
             }
 
@@ -42,6 +42,7 @@ namespace Epyx
             std::string s = String::fromUnsignedLong(pkt->pktID);
             this->send(pkt->from, "ACK", String::toNewChar(s), s.length(), false);
         }
+
         void Node::sendErr(Packet *pkt) {
             log::debug << "Erroring a packet !" << log::endl;
             std::string s = String::fromUnsignedLong(pkt->pktID);
@@ -62,7 +63,7 @@ namespace Epyx
             // Statistics
             unsigned int weight = (size > 1000) ? 1000 : size;
             unsigned int cnt = mruNodeIds.getAndLock(to, 0);
-            mruNodeIds.set(to, cnt + weight);
+            mruNodeIds.setLocked(to, cnt + weight);
             mruNodeIds.endUnlock();
 
             return result;
@@ -70,9 +71,9 @@ namespace Epyx
 
         void Node::addModule(std::string method, Module *m) {
             modulesMutex.lock();
-            if(modules.count(method) > 0) {
-            modulesMutex.unlock();
-            throw FailException("N2NP::Node", "Cannot add a module to an already bound key");
+            if (modules.count(method) > 0) {
+                modulesMutex.unlock();
+                throw FailException("N2NP::Node", "Cannot add a module to an already bound key");
             }
             modules[method] = m;
             modulesMutex.unlock();
@@ -131,26 +132,25 @@ namespace Epyx
             //log::info << "Node " << nodeid << ": Recv " << *pkt << log::endl;
 
             //Special treatment for internal method ERR and ACK
-            if(pkt->method == "ACK") {
-                char* charId = new char[pkt->size+1];
+            if (pkt->method == "ACK") {
+                char* charId = new char[pkt->size + 1];
                 memcpy(charId, pkt->data, pkt->size);
                 charId[pkt->size] = '\0';
                 unsigned long idAcked = String::toInt(charId);
-                if(sentMap.count(idAcked) == 1) {
+                if (sentMap.count(idAcked) == 1) {
                     delete sentMap[idAcked];
                     sentMap.erase(idAcked);
                     log::debug << "Succesfully erased an acked packed" << log::endl;
                 }
                 return;
-            }
-            else if(pkt->method == "ERR") {
+            } else if (pkt->method == "ERR") {
                 return;
             }
 
             // Statistics
             unsigned int weight = (pkt->size > 1000) ? 1000 : pkt->size;
             unsigned int cnt = mruNodeIds.getAndLock(pkt->from, 0);
-            mruNodeIds.set(pkt->from, cnt + weight);
+            mruNodeIds.setLocked(pkt->from, cnt + weight);
             mruNodeIds.endUnlock();
 
             // Find the relevant module

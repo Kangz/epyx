@@ -28,6 +28,12 @@ namespace Epyx
         }
 
         template <typename TKey, typename TVal>
+        void Map<TKey, TVal>::setLocked(TKey key, TVal value) {
+            if (!readOnly)
+                map[key] = value;
+        }
+
+        template <typename TKey, typename TVal>
         TVal Map<TKey, TVal>::getAndLock(TKey key, TVal defval) {
             mut.lock();
 #if EPYX_ATOM_MAP_DEBUG
