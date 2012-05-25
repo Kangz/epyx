@@ -11,6 +11,7 @@ namespace Epyx
         Relay::Relay(const Address& addr)
         :WorkerPool(1, true, "Relay@" + addr.toString()),
         relayAddr(addr), relayId(addr), nodeNextId(1) {
+            log::info << "Relay: Start " << relayId << log::endl;
         }
 
         Relay::~Relay() {

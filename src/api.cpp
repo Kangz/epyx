@@ -66,13 +66,18 @@ namespace Epyx
         if (netsel == NULL)
             throw FailException("API::addNode", "No NetSelect created");
         EPYX_ASSERT(node != NULL);
-            
+
         return netsel->add(node);
     }
-    
+
     void API::destroyNode(int nodeId) {
         if (netsel == NULL)
             throw FailException("API::killNode", "No NetSelect created");
         netsel->kill(nodeId);
+    }
+
+    void API::waitNet() {
+        EPYX_ASSERT(netsel != NULL);
+        netsel->wait();
     }
 }

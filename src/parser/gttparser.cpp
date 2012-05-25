@@ -105,7 +105,9 @@ namespace Epyx
     void GTTParser::parseFirstLine(const std::string& line) {
         const char *l = line.c_str();
         int i = 0, iMethod = 0;
-        EPYX_ASSERT(line.length() != 0);
+
+        if (line.length() == 0)
+            throw ParserException("GTTParser", "empty first line");
 
         // Read protocol name
         if (!isupper(l[i]))

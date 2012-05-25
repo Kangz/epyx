@@ -12,8 +12,10 @@
 #include "n2np/relay.h"
 #include "n2np/node.h"
 
-namespace Epyx {
-    class API {
+namespace Epyx
+{
+    class API
+    {
     public:
         /**
          * @brief Initialise all internal stuff
@@ -21,32 +23,32 @@ namespace Epyx {
          * @param logfile
          */
         API(int logflags = log::CONSOLE, const std::string& logfile = "");
-        
+
         /**
          * @brief End Epyx
          */
         ~API();
-        
+
         /**
          * @brief Set the number of workers in NetSelect
          * @param numworkers
          */
         void setNetWorkers(int numworkers);
-        
+
         /**
          * @brief Spawn a new relay (only one for the entire API)
          * @param addr IP address and TCP port
          * @param nbConn TCP maximal connection number to the relay
          */
         void spawnRelay(const Address& addr, unsigned int nbConn = 50);
-        
+
         /**
          * @brief Destroy specified relay
          * @param addr
          * @param detachTime timeout to wait for detach nodes
          */
         void destroyRelay(const Timeout& detachTime);
-        
+
         /**
          * @brief Add a new node
          * @param node a dynamicaly-allocated node
@@ -56,23 +58,28 @@ namespace Epyx {
          * @return identifier
          */
         int addNode(N2NP::Node *node);
-        
+
         /**
          * @brief Kill a node
          * @param nodeId
          */
         void destroyNode(int nodeId);
-        
+
+        /**
+         * @brief Wait for the NetSelect to terminate
+         */
+        void waitNet();
+
     private:
         // Disable copy construction and assignment.
         API(const API&);
         const API& operator=(const API&);
-        
+
         /**
          * @brief NetSelect of every socket
          */
         NetSelect *netsel;
-        
+
         /**
          * @brief Relay (one or none)
          */

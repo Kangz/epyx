@@ -51,3 +51,7 @@ target_link_libraries(test-dht pthread)
 
 add_executable(test-crypto ${core_sources} ${crypto_sources} src/test-crypto.cpp)
 target_link_libraries(test-crypto pthread cryptopp)
+
+# Real programs
+add_executable(simple-relay ${epyx_api_sources} src/simple-relay.cpp)
+target_link_libraries(simple-relay pthread)
