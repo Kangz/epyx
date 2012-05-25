@@ -2,6 +2,7 @@
 #include "../core/common.h"
 #include <sstream>
 #include <string.h>
+#include <ifaddrs.h>
 
 namespace Epyx
 {
@@ -69,7 +70,7 @@ namespace Epyx
             this->port = ntohs(ipv6->sin6_port);
             this->ipVersion = 6;
         } else {
-            Epyx::log::fatal << "You have just invented a new IP version" \
+            Epyx::log::fatal << "You have just invented a new IP version " \
                 << "without giving me information about how to handle it\n" \
                 << "The version is: " << saddr->sa_family << "\n" \
                 << "IPv4 is: " << AF_INET << "\n" \
@@ -167,5 +168,23 @@ namespace Epyx
 
     bool operator<(const Address& addr1, const Address& addr2) {
         return addr1.compare(addr2) < 0;
+    }
+
+    std::vector<Address> Address::getIfaceAdresses(int port) {
+        std::vector<Address> addrs;
+        struct ifaddrs *ifAddrStruct = NULL;
+        struct ifaddrs *ifa = NULL;
+
+        getifaddrs(&ifAddrStruct);
+        for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next) {
+            if (ifa->ifa_addr->sa_family == AF_INET || ifa->ifa_addr->sa_family == AF_INET6) {
+                Address addr(ifa->ifa_addr);
+                addr.port = port;
+                addrs.push_back(addr);
+            }
+        }
+        if (ifAddrStruct != NULL)
+            freeifaddrs(ifAddrStruct);
+        return addrs;
     }
 }

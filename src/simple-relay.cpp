@@ -37,16 +37,26 @@ int main(int argc, char **argv) {
                     throw Epyx::FailException("Main", "Invalid case");
             }
         }
-        if (optind >= argc) {
-            Epyx::log::info << "No relay specified" << Epyx::log::endl;
-        }
 
         epyx.setNetWorkers(nbConn);
+        if (optind >= argc) {
+            Epyx::log::info << "No relay specified, using default" << Epyx::log::endl;
+            std::vector<Epyx::Address> addrs = Epyx::Address::getIfaceAdresses(4242);
+            for (std::vector<Epyx::Address>::const_iterator iaddr = addrs.begin();
+                iaddr != addrs.end(); iaddr++) {
+                // Only keep IPv4
+                std::string ipaddr = iaddr->getIp();
+                if (ipaddr.empty() || ipaddr.find(':') != std::string::npos)
+                    continue;
 
-        // Spwan relays
-        for (int index = optind; index < argc; index++) {
-            const Epyx::Address addr(argv[index]);
-            epyx.spawnRelay(addr, nbConn);
+                epyx.spawnRelay(*iaddr, nbConn);
+            }
+        } else {
+            // Spwan relays
+            for (int index = optind; index < argc; index++) {
+                const Epyx::Address addr(argv[index]);
+                epyx.spawnRelay(addr, nbConn);
+            }
         }
         epyx.waitNet();
     } catch (Epyx::Exception e) {

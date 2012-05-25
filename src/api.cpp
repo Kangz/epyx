@@ -43,7 +43,7 @@ namespace Epyx
             throw FailException("API::spawnRelay", "No NetSelect created");
 
         relay = new N2NP::Relay(addr);
-        nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(addr.getPort(), nbConn), relay));
+        nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(addr, nbConn), relay));
     }
 
     void API::destroyRelay(const Timeout& detachTime) {

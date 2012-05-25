@@ -208,7 +208,7 @@ void test_dht_n2np(){
     // Create relay
     Address addr("127.0.0.1:4242");
     N2NP::Relay *relay = new N2NP::Relay(addr);
-    selectRelay->add(new N2NP::RelayServer(new TCPServer(addr.getPort(), 50), relay));
+    selectRelay->add(new N2NP::RelayServer(new TCPServer(addr, 50), relay));
     log::info << "Start Relay " << relay->getId() << log::endl;
 
     // Create Net Select for nodes

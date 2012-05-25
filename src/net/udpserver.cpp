@@ -5,8 +5,8 @@
 namespace Epyx
 {
 
-    UDPServer::UDPServer(unsigned short port)
-    :Server(port) {
+    UDPServer::UDPServer(const Address& addr)
+    :Server(addr) {
         if (!this->_internal_bind(SOCK_DGRAM))
             return;
 

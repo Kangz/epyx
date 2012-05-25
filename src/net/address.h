@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <arpa/inet.h>
+#include <vector>
 
 namespace Epyx
 {
@@ -115,6 +116,13 @@ namespace Epyx
          * @param addr2
          */
         friend bool operator<(const Address& addr1, const Address& addr2);
+
+        /**
+         * @brief Get interface addresses
+         * @param port
+         * @return a std::vector of addresses
+         */
+        static std::vector<Address> getIfaceAdresses(int port = 0);
 
     private:
         // IP string

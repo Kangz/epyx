@@ -21,7 +21,7 @@ namespace Epyx
          * @brief Create a new UDP server
          * @param port UDP port to bind to
          */
-        UDPServer(unsigned short port);
+        UDPServer(const Address& addr);
 
         /**
          * @brief Receive data for the server

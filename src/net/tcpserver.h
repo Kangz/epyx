@@ -22,7 +22,7 @@ namespace Epyx
          * @param port TCP port to bind to
          * @param nbConn maximum connection number
          */
-        TCPServer(unsigned short port, unsigned int nbConn);
+        TCPServer(const Address& addr, unsigned int nbConn);
     };
 
 }

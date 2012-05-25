@@ -20,7 +20,7 @@ namespace Epyx
          * @brief Create a new generic unbinded server
          * @param port
          */
-        Server(unsigned short port);
+        Server(const Address& addr);
         ~Server();
 
         /**
@@ -47,10 +47,6 @@ namespace Epyx
         int getFd() const;
 
     protected:
-        /**
-         * @brief Server listening port
-         */
-        unsigned short port;
         /**
          * @brief Server binded address
          */

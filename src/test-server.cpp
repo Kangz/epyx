@@ -79,7 +79,8 @@ int main()
         // Start select() thread
         Epyx::NetSelect selectThread(20, "SelectWorker");
         // Do NOT delete tcpServer : it is deleted by NetSelectTCPServer
-        Epyx::TCPServer *tcpServer = new Epyx::TCPServer(4242, selectThread.getNumWorkers());
+        const Epyx::Address addr("", 4242);
+        Epyx::TCPServer *tcpServer = new Epyx::TCPServer(addr, 20);
         Epyx::log::debug << "ServerWorker listening at " << tcpServer->getAddress() <<
             Epyx::log::endl;
         selectThread.add(new Epyx::NetSelectTCPServer<TestNetSelectSocket, void>(tcpServer, NULL));

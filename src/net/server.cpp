@@ -8,8 +8,8 @@
 namespace Epyx
 {
 
-    Server::Server(unsigned short port)
-    :port(port), address("*", port), sockfd(-1) {
+    Server::Server(const Address& addr)
+    :address(addr), sockfd(-1) {
     }
 
     Server::~Server() {
@@ -44,8 +44,11 @@ namespace Epyx
         struct addrinfo hints, *addrAll, *pai;
         int status, flag;
 
+        // Get IP address (if empty, use NULL)
+        const std::string ipaddrStr = address.getIp();
+        const char *ipaddr = (ipaddrStr.empty() ? NULL : ipaddrStr.c_str());
         // Convert port to char* to find address hints
-        snprintf(charport, sizeof (charport), "%u", port);
+        snprintf(charport, sizeof (charport), "%u", address.getPort());
         memset(&hints, 0, sizeof hints);
         // AF_INET or AF_INET6 to force IP version
         hints.ai_family = AF_UNSPEC;
@@ -53,7 +56,7 @@ namespace Epyx
         hints.ai_socktype = socktype;
         // Server = passive
         hints.ai_flags = AI_PASSIVE;
-        status = ::getaddrinfo(NULL, charport, &hints, &addrAll);
+        status = ::getaddrinfo(ipaddr, charport, &hints, &addrAll);
         if (status != 0) {
             log::fatal << "getaddrinfo error " << status << ": "
                 << gai_strerror(status) << log::endl;
