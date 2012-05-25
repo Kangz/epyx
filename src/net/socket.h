@@ -55,7 +55,7 @@ namespace Epyx
          */
         void setFd(int sockfd);
         /**
-         * @brief Get the internal file descriptor
+         * @brief Get the internal file descriptor, or -1 if it is closed
          */
         int getFd() const;
         /**

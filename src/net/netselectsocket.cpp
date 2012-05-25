@@ -22,9 +22,7 @@ namespace Epyx
 
     int NetSelectSocket::getFileDescriptor() const {
         EPYX_ASSERT(sock != NULL);
-        int fd = sock->getFd();
-        EPYX_ASSERT(fd >= 0);
-        return fd;
+        return sock->getFd();
     }
 
     bool NetSelectSocket::read() {

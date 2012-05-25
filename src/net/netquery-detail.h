@@ -42,6 +42,8 @@ namespace Epyx
         char data[size];
         EPYX_ASSERT(sock != NULL);
         int sockfd = sock->getFd();
+        if (sockfd < 0)
+            return NULL;
 
         // select() loop
         while (!timeout.hasExpired()) {

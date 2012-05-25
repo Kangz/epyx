@@ -107,6 +107,14 @@ namespace Epyx
         }
 
         template <typename TKey, typename TVal>
+        long unsigned int Map<TKey, TVal>::size() {
+            mut.lock();
+            long unsigned int result = map.size();
+            mut.unlock();
+            return result;
+        }
+
+        template <typename TKey, typename TVal>
         typename Map<TKey, TVal>::iterator Map<TKey, TVal>::beginLock() {
             mut.lock();
 #if EPYX_ATOM_MAP_DEBUG

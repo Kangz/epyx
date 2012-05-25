@@ -135,6 +135,7 @@ add_executable(
     ${net_sources}
     ${n2np_sources}
     ${parser_sources}
+    src/api.cpp
     src/test-n2np.cpp
 )
 target_link_libraries(

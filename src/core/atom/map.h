@@ -104,6 +104,12 @@ namespace Epyx
             bool empty();
 
             /**
+             * @brief Get the number of items
+             * @return count
+             */
+            long unsigned int size();
+
+            /**
              * @brief Lock map and begin iteration
              * @return iterator
              */

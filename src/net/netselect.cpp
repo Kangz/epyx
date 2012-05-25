@@ -83,10 +83,11 @@ namespace Epyx
                     continue;
                 EPYX_ASSERT(nsri->reader != NULL);
                 int fd = nsri->reader->getFileDescriptor();
-                EPYX_ASSERT(fd >= 0);
-                FD_SET(fd, &rfds);
-                if (fd > fdmax)
-                    fdmax = fd;
+                if (fd >= 0) {
+                    FD_SET(fd, &rfds);
+                    if (fd > fdmax)
+                        fdmax = fd;
+                }
             }
             readers.endUnlock();
             if (!running)
@@ -100,6 +101,7 @@ namespace Epyx
                 throw ErrException("NetSelect", "select");
 
             // Add each FD to the blocking queue
+            std::list<int> closedList;
             for (atom::Map < int, NetSelectReaderInfo*>::iterator i = readers.beginLock();
                 running && !readers.isEnd(i); i++) {
                 NetSelectReaderInfo *nsri = i->second;
@@ -108,12 +110,22 @@ namespace Epyx
                     continue;
                 EPYX_ASSERT(nsri->reader != NULL);
                 int fd = nsri->reader->getFileDescriptor();
-                if (!nsri->inQueue && FD_ISSET(fd, &rfds)) {
-                    nsri->inQueue = true;
-                    workers.post(new int(i->first));
+                if (fd >= 0) {
+                    if (!nsri->inQueue && FD_ISSET(fd, &rfds)) {
+                        nsri->inQueue = true;
+                        workers.post(new int(i->first));
+                    }
+                } else {
+                    closedList.push_back(i->first);
                 }
             }
             readers.endUnlock();
+
+            // Remove closed sockets
+            while (!closedList.empty()) {
+                this->kill(closedList.front());
+                closedList.pop_front();
+            }
         }
     }
 

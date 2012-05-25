@@ -33,7 +33,10 @@ namespace Epyx
         TCPSocket *newSock = NULL;
 
         clientAddrLen = sizeof clientAddr;
-        newfd = ::accept(srv->getFd(), (struct sockaddr*) &clientAddr,
+        int srvfd = srv->getFd();
+        if (srvfd < 0)
+            return false;
+        newfd = ::accept(srvfd, (struct sockaddr*) &clientAddr,
                 &clientAddrLen);
         if (newfd == -1)
             throw ErrException("NetSelectTCPServer::read", "accept");

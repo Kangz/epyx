@@ -67,7 +67,6 @@ namespace Epyx
     }
 
     int Socket::getFd() const {
-        EPYX_ASSERT(sock >= 0);
         return sock;
     }
 

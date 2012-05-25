@@ -23,7 +23,7 @@ namespace Epyx
 
         /**
          * @brief Get the file descriptor of the socket which is select()'ed
-         * @return socket_fd
+         * @return socket_fd, or -1 if it is closed
          */
         virtual int getFileDescriptor() const = 0;
 

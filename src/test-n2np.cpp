@@ -3,7 +3,7 @@
  * @brief This program tests Node to Node Protocol
  */
 
-#include "core/common.h"
+#include "api.h"
 #include "n2np/relay.h"
 #include "n2np/node.h"
 #include <strings.h>
@@ -82,26 +82,15 @@ void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const 
 /**
  * @brief Test local N2NP implementation
  */
-void test_n2np() {
-    // Create Net Select for relay
-    Epyx::NetSelect *selectRelay = new Epyx::NetSelect(10, "WRelay");
-    selectRelay->setName("NetSelectRelay");
-    selectRelay->start();
-
+void test_n2np(Epyx::API& epyx, const Epyx::Address &addr) {
     // Create relay
-    Epyx::Address addr("127.0.0.1:4242");
-    Epyx::N2NP::Relay *relay = new Epyx::N2NP::Relay(addr);
-    selectRelay->add(new Epyx::N2NP::RelayServer(new Epyx::TCPServer(addr.getPort(), 50), relay));
-    Epyx::log::info << "Start Relay " << relay->getId() << Epyx::log::endl;
-
-    // Create Net Select for nodes
-    Epyx::NetSelect *selectNodes = new Epyx::NetSelect(10, "WNodes");
-    selectNodes->setName("NetSelectNodes");
-    selectNodes->start();
+    epyx.spawnRelay(addr);
+    Epyx::log::info << "Start Relay at " << addr << Epyx::log::endl;
 
     // Create nodes
     const int nodeNum = 42;
-    Epyx::N2NP::Node * nodes[nodeNum];
+    Epyx::N2NP::Node* nodes[nodeNum];
+    int nodesIndex[nodeNum];
     Epyx::log::info << "Create nodes..." << Epyx::log::endl;
     Ponger testModule;
     Displayer testModule2;
@@ -110,7 +99,7 @@ void test_n2np() {
         nodes[i]->addModule("TEST", &testModule);
         nodes[i]->addModule("PONG", &testModule2);
         //nodes[i]->registerRecv(pongType, nodeRecvPong, NULL);
-        selectNodes->add(nodes[i]);
+        nodesIndex[i] = epyx.addNode(nodes[i]);
     }
 
     // Wait for node IDs
@@ -124,28 +113,24 @@ void test_n2np() {
 
     test_command(*(nodes[0]), nodeids, nodeNum);
 
-    // Everything stops at destruction, but nodes first !
-    delete selectNodes;
-    Epyx::log::info << "Waiting for nodes to be detached..." << Epyx::log::endl;
-    if (!relay->waitForAllDetach(Epyx::Timeout(2000))) {
-        Epyx::log::info << "Detach remaining nodes" << Epyx::log::endl;
-        relay->detachAllNodes();
+    for (int i = 0; i < nodeNum; i++) {
+        Epyx::log::info << "Destroy node " << nodeids[i] << Epyx::log::endl;
+        epyx.destroyNode(nodesIndex[i]);
     }
-    delete selectRelay;
-    delete relay;
+    Epyx::log::info << "Destroy relay " << addr << Epyx::log::endl;
+    epyx.destroyRelay(2000);
 }
 
 /**
  * @brief Setup environment and invoke test_n2np()
  */
 int main() {
+    Epyx::API epyx;
     try {
-        Epyx::Thread::init();
-        Epyx::log::init(Epyx::log::CONSOLE, "");
-        test_n2np();
-        Epyx::log::flushAndQuit();
+        epyx.setNetWorkers(50);
+        test_n2np(epyx, Epyx::Address("0.0.0.0:4242"));
     } catch (Epyx::Exception e) {
-        std::cerr << e << "\n";
+        Epyx::log::fatal << e << Epyx::log::endl;
     }
     return 0;
 }
