@@ -22,8 +22,7 @@ namespace DHT
 
         switch(pkt.method){
             case M_PING:
-                pingActor.post(*(new StaticActorData(target, pkt)));
-                delete &pkt;
+                this->pingActor.post(*(new StaticActorData(target, pkt)));
                 break;
 
             case M_PONG:
@@ -56,7 +55,7 @@ namespace DHT
                 break;
 
             default:
-                log::error << "The DHT received an unknown method" << log::endl;
+                log::error << "The DHT received a packet with an unknown method" << log::endl;
                 delete &pkt;
                 delete &target;
                 break;

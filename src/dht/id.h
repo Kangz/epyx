@@ -21,8 +21,8 @@ namespace DHT
     class Id
     {
     public:
-        static const int LENGTH = 160;
-        static const int STORAGE_SIZE = 160/8;
+        static const int LENGTH = 256;
+        static const int STORAGE_SIZE = 256/8;
         unsigned char data[STORAGE_SIZE];
 
     }; //TODO uint32_t ?
