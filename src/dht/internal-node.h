@@ -8,6 +8,7 @@
 #include "../n2np/node.h"
 #include "kbucket.h"
 #include "packet.h"
+#include "storage.h"
 #include "static-actors.h"
 #include "target.h"
 
@@ -29,19 +30,21 @@ namespace DHT
         void processPacket(Packet& pkt, Target& target);
         void send(Packet& pkt, const Target& target);
 
-    private:
+        //TODO: avoid making these public
         ActorManager actors;
         ActorId<StaticActorData> pingActor;
+        ActorId<StaticActorData> getActor;
+        ActorId<StaticActorData> storeActor;
+        ActorId<StaticActorData> findActor;
         Id id;
         Node& parent;
         KBucket kbucket;
+        Storage storage;
 
+    private:
         void sendPong(Target& target);
-        void sendGot(Packet& pkt, Target& target);
         void handleGot(Packet& pkt, Target& target);
-        void sendStored(Packet& pkt, Target& target);
         void handleStored(Packet& pkt, Target& target);
-        void sendFound(Packet& pkt, Target& target);
         void handleFound(Packet& pkt, Target& target);
 
    };

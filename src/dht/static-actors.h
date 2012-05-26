@@ -7,6 +7,7 @@
 #include "../n2np/nodeid.h"
 #include "../n2np/node.h"
 #include "target.h"
+#include "value.h"
 
 namespace Epyx
 {
@@ -27,6 +28,33 @@ namespace DHT
     class PingActor: public Actor<StaticActorData> {
     public:
         PingActor(InternalNode& n);
+        void treat(StaticActorData& msg);
+
+    private:
+        InternalNode& n;
+    };
+
+    class GetActor: public Actor<StaticActorData> {
+    public:
+        GetActor(InternalNode& n);
+        void treat(StaticActorData& msg);
+
+    private:
+        InternalNode& n;
+    };
+
+    class StoreActor: public Actor<StaticActorData> {
+    public:
+        StoreActor(InternalNode& n);
+        void treat(StaticActorData& msg);
+
+    private:
+        InternalNode& n;
+    };
+
+    class FindActor: public Actor<StaticActorData> {
+    public:
+        FindActor(InternalNode& n);
         void treat(StaticActorData& msg);
 
     private:
