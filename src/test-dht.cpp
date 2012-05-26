@@ -144,7 +144,7 @@ void test_dhtpacket(){
     log::info<<"Testing STORE"<<log::endl;
     pkt.method = M_STORE;
     pkt.connectionId = 42;
-    random_id(pkt.key);
+    pkt.key = "someKeyIWant/ToFind";
     pkt.value = std::string(34, 'c');
     double_print(pkt);
 
@@ -157,7 +157,7 @@ void test_dhtpacket(){
     log::info<<"Testing GET"<<log::endl;
     pkt.method = M_GET;
     pkt.connectionId = 42;
-    random_id(pkt.key);
+    pkt.key = "someKeyIWant/ToFind";
     double_print(pkt);
 
     log::info<<"Testing GOT"<<log::endl;
@@ -171,7 +171,6 @@ void test_dhtpacket(){
     pkt.method = M_FIND;
     pkt.connectionId = 42;
     pkt.count = 20;
-    random_id(pkt.idToFind);
     double_print(pkt);
 
     log::info<<"Testing FOUND"<<log::endl;
@@ -256,13 +255,38 @@ void test_dht_n2np(){
     log::info << "Sending a PING to the DHT" << log::endl;
     SendToDHT("PING", "");
 
-    SendToDHT("GET", "");
+    SendToDHT("GET",
+            "connectionid: 42\r\n"
+            "key: someKeyIWant/ToFind\r\n"
+            "\r\n");
+
+    sleep(1);
+
+    SendToDHT("STORE",
+            "connectionid: 43\r\n"
+            "key: someKeyIWant/ToFind\r\n"
+            "content-length: 5\r\n"
+            "\r\n"
+            "12345");
+
+    sleep(1);
+
+    SendToDHT("GET",
+            "connectionid: 44\r\n"
+            "key: someKeyIWant/ToFind\r\n"
+            "\r\n");
+
+    sleep(1);
+
+    SendToDHT("FIND",
+            "connectionid: 45\r\n"
+            "count: 20\r\n"
+            "target: db3b:c14f:0000:0000:0000:0000:0000:0000:9063:a3cc:ff7f:0000:61ef:3d58:017f:0000\r\n"
+            "\r\n")
 
     #undef SendToDHT
 
-    sleep(1); // Avoid a segmentation fault in net, probably
-              //because things are destroyed before some callback
-
+    sleep(1); //Wait for the processing of the messages
 }
 
 int main(){
@@ -271,7 +295,7 @@ int main(){
     try {
         //test_id_distance();
         //test_kbucket();
-        //test_dhtpacket();
+        test_dhtpacket();
         test_dht_n2np();
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;

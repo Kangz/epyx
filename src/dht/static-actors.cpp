@@ -36,13 +36,14 @@ namespace DHT
     void GetActor::treat(StaticActorData& msg) {
         Packet answer;
         answer.method = M_GOT;
+        answer.connectionId = msg.pkt->connectionId;
+        answer.status = 1;
 
         Value requested;
         if(this->n.storage.get(msg.pkt->key, requested)){
             answer.value = requested.content;
             answer.status = 0;
         }
-        answer.status = 1;
         this->n.send(answer, msg.target);
         msg.freeData();
     }

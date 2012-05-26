@@ -11,6 +11,7 @@ namespace DHT
         pingActor = actors.add(new PingActor(*this));
         getActor = actors.add(new GetActor(*this));
         storeActor = actors.add(new StoreActor(*this));
+        findActor = actors.add(new FindActor(*this));
     }
 
     InternalNode::~InternalNode() {
