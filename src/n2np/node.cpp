@@ -43,7 +43,21 @@ namespace Epyx
 #endif
             }
 
-            return n2npPkt->send(this->socket());
+            //We need to select a socket to send to.
+            Socket *selected;
+            directMutex.lock();
+            if(this->directSockets.count(to))
+                selected = this->directSockets[to];
+            else {
+                NodeId remoteRelay(to.getRelay());
+                if(this->directSockets.count(remoteRelay))
+                    selected = this->directSockets[remoteRelay];
+                else
+                    selected = &(this->socket());
+            }
+            directMutex.unlock();
+                
+            return n2npPkt->send(*selected);
         }
 
         void Node::sendAck(Packet *pkt) {
@@ -92,6 +106,16 @@ namespace Epyx
             modulesMutex.unlock();
         }
 
+        void Node::offerDirectConn(NodeId& recipient, Socket *socket) {
+            directMutex.lock();
+            if(directSockets.count(recipient) > 0) {
+                directSockets[recipient]->close();
+                delete directSockets[recipient];
+            }
+            directSockets[recipient] = socket;
+            directMutex.unlock();
+        }
+        
         const NodeId& Node::getId() const {
             EPYX_ASSERT(hasId);
             return nodeid;

@@ -67,6 +67,13 @@ namespace Epyx
             void addModule(std::string method, Module *m);
 
             /**
+             * @brief Offer a new direct connection to use
+             * @param recipient The other end of the link, as a nodeId
+             * @param socket The socket to be given
+             */
+            void offerDirectConn(NodeId& recipient, Socket *socket);
+
+            /**
              * @brief Get node ID
              * @return this->nodeid
              */
@@ -120,6 +127,10 @@ namespace Epyx
 
             atom::Counter curId;
             std::map<unsigned long, Packet*> sentMap;
+
+            // Stockage for socket
+            Mutex directMutex;
+            std::map<NodeId, Socket*> directSockets; 
         };
     }
 }
