@@ -4,6 +4,13 @@
 #include "../core/string.h"
 #include <cstring>
 
+#ifndef EPYX_N2NP_NODE_DEBUG
+/**
+ * @brief N2NP::Node debug
+ */
+#define EPYX_N2NP_NODE_DEBUG 0
+#endif
+
 namespace Epyx
 {
     namespace N2NP
@@ -30,21 +37,27 @@ namespace Epyx
                 if (sentMap.count(n2npPkt->pktID) == 1)
                     throw FailException("N2NP::Node", "Duplicate packet ID while sending");
                 sentMap[n2npPkt->pktID] = n2npPkt;
+#if EPYX_N2NP_NODE_DEBUG
                 if (this->hasId)
                     log::debug << "Node " << this->getId() << " has a map of " << sentMap.size() << " packets." << log::endl;
+#endif
             }
 
             return n2npPkt->send(this->socket());
         }
 
         void Node::sendAck(Packet *pkt) {
+#if EPYX_N2NP_NODE_DEBUG
             log::debug << "Acknowledging a packet !" << log::endl;
+#endif
             std::string s = String::fromUnsignedLong(pkt->pktID);
             this->send(pkt->from, "ACK", String::toNewChar(s), s.length(), false);
         }
 
         void Node::sendErr(Packet *pkt) {
+#if EPYX_N2NP_NODE_DEBUG
             log::debug << "Erroring a packet !" << log::endl;
+#endif
             std::string s = String::fromUnsignedLong(pkt->pktID);
             this->send(pkt->from, "ERR", String::toNewChar(s), s.length(), false);
         }
@@ -147,7 +160,9 @@ namespace Epyx
                 if (sentMap.count(idAcked) == 1) {
                     delete sentMap[idAcked];
                     sentMap.erase(idAcked);
+#if EPYX_N2NP_NODE_DEBUG
                     log::debug << "Succesfully erased an acked packed" << log::endl;
+#endif
                 }
                 return;
             } else if (pkt->method == "ERR") {
