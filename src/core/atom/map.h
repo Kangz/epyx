@@ -89,8 +89,9 @@ namespace Epyx
 
             /**
              * @brief Clear the map
+             * @param isLocked true if the map is already locked
              */
-            void clear();
+            void clear(bool isLocked = false);
 
             /**
              * @brief Clear the map and disallow any change

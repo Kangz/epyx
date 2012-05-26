@@ -88,6 +88,13 @@ namespace Epyx
             return hasId;
         }
 
+        bool Node::waitReady(const Timeout& timeout) const {
+            while (!hasId && !timeout.hasExpired()) {
+                usleep(1);
+            }
+            return hasId;
+        }
+
         void Node::eat(const char *data, long size) {
             gttparser.eat(data, size);
             GTTPacket *gttpkt = NULL;

@@ -8,9 +8,11 @@
 
 #include "core/common.h"
 #include "core/atom/counter.h"
+#include "core/atom/map.h"
 #include "net/netselect.h"
 #include "n2np/relay.h"
 #include "n2np/node.h"
+#include <list>
 
 namespace Epyx
 {
@@ -66,6 +68,11 @@ namespace Epyx
         void destroyNode(int nodeId);
 
         /**
+         * @brief Kill every nodes
+         */
+        void destroyAllNodes();
+
+        /**
          * @brief Wait for the NetSelect to terminate
          */
         void waitNet();
@@ -74,6 +81,9 @@ namespace Epyx
         // Disable copy construction and assignment.
         API(const API&);
         const API& operator=(const API&);
+
+        // Main mutex, for netsel and relay, NOT for nodes
+        Mutex mut;
 
         /**
          * @brief NetSelect of every socket
@@ -85,6 +95,9 @@ namespace Epyx
          */
         N2NP::Relay *relay;
         int nsRelayId;
+
+        // Node index (map index => index)
+        atom::Map<int, int> nodeIndexes;
     };
 }
 

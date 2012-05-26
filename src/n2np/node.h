@@ -12,6 +12,7 @@
 #include "../parser/gttparser.h"
 #include "../core/atom/counter.h"
 #include "../core/atom/map.h"
+#include "../core/timeout.h"
 
 namespace Epyx
 {
@@ -20,7 +21,6 @@ namespace Epyx
         class Module; //It does exist, it tell you.
 
         class Node;
-
         /**
          * @class Node
          * @brief N2NP node
@@ -77,6 +77,13 @@ namespace Epyx
              * @return true if it is
              */
             bool isReady() const;
+
+            /**
+             * @brief Wait for a node to be ready
+             * @param timeout
+             * @return true is the node is ready, false is timeout has expired
+             */
+            bool waitReady(const Timeout& timeout) const;
 
         protected:
             /**

@@ -82,12 +82,13 @@ namespace Epyx
         }
 
         template <typename TKey, typename TVal>
-        void Map<TKey, TVal>::clear() {
-            mut.lock();
+        void Map<TKey, TVal>::clear(bool isLocked) {
+            if (!isLocked)
+                mut.lock();
             if (!readOnly)
                 map.clear();
-            mut.unlock();
-            EPYX_ASSERT(map.empty());
+            if (!isLocked)
+                mut.unlock();
         }
 
         template <typename TKey, typename TVal>

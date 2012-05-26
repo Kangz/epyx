@@ -89,33 +89,34 @@ void test_n2np(Epyx::API& epyx, const Epyx::Address &addr) {
 
     // Create nodes
     const int nodeNum = 42;
-    Epyx::N2NP::Node* nodes[nodeNum];
-    int nodesIndex[nodeNum];
+    Epyx::N2NP::Node* firstNode = NULL;
+    Epyx::N2NP::NodeId nodeids[nodeNum];
     Epyx::log::info << "Create nodes..." << Epyx::log::endl;
     Ponger testModule;
     Displayer testModule2;
     for (int i = 0; i < nodeNum; i++) {
-        nodes[i] = new Epyx::N2NP::Node(addr);
-        nodes[i]->addModule("TEST", &testModule);
-        nodes[i]->addModule("PONG", &testModule2);
-        //nodes[i]->registerRecv(pongType, nodeRecvPong, NULL);
-        nodesIndex[i] = epyx.addNode(nodes[i]);
+        Epyx::N2NP::Node *node = new Epyx::N2NP::Node(addr);
+        if (firstNode == NULL)
+            firstNode = node;
+        node->addModule("TEST", &testModule);
+        node->addModule("PONG", &testModule2);
+        //node->registerRecv(pongType, nodeRecvPong, NULL);
+        epyx.addNode(node);
+        if (!node->waitReady(5000)) {
+            delete node;
+            Epyx::log::error << "Initialisation of node " << i << " took too much time"
+                << Epyx::log::endl;
+            epyx.destroyAllNodes();
+            epyx.destroyRelay(2000);
+            return;
+        }
+        nodeids[i] = node->getId();
     }
 
-    // Wait for node IDs
-    Epyx::log::info << "Waiting for nodes..." << Epyx::log::endl;
-    Epyx::N2NP::NodeId nodeids[nodeNum];
-    for (int i = 0; i < nodeNum; i++) {
-        while (!nodes[i]->isReady())
-            usleep(100);
-        nodeids[i] = nodes[i]->getId();
-    }
-
-    test_command(*(nodes[0]), nodeids, nodeNum);
+    test_command(*firstNode, nodeids, nodeNum);
 
     Epyx::log::info << "Destroy everything for " << addr << Epyx::log::endl;
-    for (int i = 0; i < nodeNum; i++)
-        epyx.destroyNode(nodesIndex[i]);
+    epyx.destroyAllNodes();
     epyx.destroyRelay(2000);
 }
 
@@ -126,7 +127,7 @@ int main() {
     Epyx::API epyx;
     try {
         epyx.setNetWorkers(50);
-        test_n2np(epyx, Epyx::Address("0.0.0.0:4242"));
+        test_n2np(epyx, Epyx::Address("127.0.0.1:4242"));
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }
