@@ -41,6 +41,9 @@ namespace Epyx
     void API::spawnRelay(const Address& addr, unsigned int nbConn) {
         if (netsel == NULL)
             throw FailException("API::spawnRelay", "No NetSelect created");
+        
+        if (relay != NULL)
+            throw FailException("API::spawnRelay", "Spawning multiple relays");
 
         relay = new N2NP::Relay(addr);
         nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(addr, nbConn), relay));
