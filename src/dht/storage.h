@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include "../core/common.h"
+#include "value.h"
 
 namespace Epyx
 {
@@ -16,12 +17,12 @@ namespace DHT
         public:
             Storage();
             bool has(const std::string& key);
-            std::string get(const std::string& key);
+            bool get(const std::string& key, Value& res);
             void set(const std::string& key, const std::string& data);
 
         private:
             Mutex lock;
-            std::map<std::string, std::string> data;
+            std::map<std::string, Value> data;
     };
 
 }

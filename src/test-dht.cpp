@@ -1,5 +1,5 @@
 /**
- * This program tests Thread and Mutex classes
+ * A program to test the DHT
  */
 
 #include <iostream>
@@ -192,7 +192,7 @@ class FakeDht : public Epyx::N2NP::Module
 {
 public:
     virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size){
-        log::info<<"The fakeDHT received a message"<<log::endl;
+        log::info<<"The fakeDHT received a message:"<<log::endl;
         std::string toPrint(data, size);
         log::info<<toPrint<<log::endl;
     }
@@ -255,6 +255,8 @@ void test_dht_n2np(){
 
     log::info << "Sending a PING to the DHT" << log::endl;
     SendToDHT("PING", "");
+
+    SendToDHT("GET", "");
 
     #undef SendToDHT
 

@@ -14,16 +14,22 @@ namespace DHT
         return result;
     }
 
-    std::string Storage::get(const std::string& key){
+    bool Storage::get(const std::string& key, Value& res){
+        bool result = false;
         lock.lock();
-        std::string& result = data[key];
+        std::map<std::string, Value>::iterator it = data.find(key);
+        if (it != data.end()) {
+            res = (*it).second;
+        }
+        result = true;
         lock.unlock();
         return result;
     }
 
     void Storage::set(const std::string& key, const std::string& datum){
         lock.lock();
-        data[key] = datum;
+        Value v(datum);
+        data.insert(std::make_pair(key, datum));
         lock.unlock();
     }
 
