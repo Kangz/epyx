@@ -14,6 +14,7 @@
 #include "packet.h"
 #include "storage.h"
 #include "static-actors.h"
+#include "process-actors.h"
 #include "target.h"
 
 namespace Epyx
@@ -24,6 +25,7 @@ namespace DHT
     class Node;
 
     struct StaticActorData;
+    struct ProcessActorData;
 
     class InternalNode
     {
@@ -34,12 +36,19 @@ namespace DHT
         void processPacket(Packet& pkt, Target& target);
         void send(Packet& pkt, const Target& target);
 
+        long registerProcessActor(Actor<ProcessActorData>& actor);
+        void unregisterProcessActor(long actorNumber);
+
         //TODO: avoid making these public
         ActorManager actors;
         ActorId<StaticActorData> pingActor;
         ActorId<StaticActorData> getActor;
         ActorId<StaticActorData> storeActor;
         ActorId<StaticActorData> findActor;
+
+        atom::Counter processActorsCount;
+        atom::Map<long, ActorId<ProcessActorData>*> processActors;
+
         Id id;
         Node& parent;
         KBucket kbucket;
@@ -47,9 +56,8 @@ namespace DHT
 
     private:
         void sendPong(Target& target);
-        void handleGot(Packet& pkt, Target& target);
-        void handleStored(Packet& pkt, Target& target);
-        void handleFound(Packet& pkt, Target& target);
+
+        void dispatchToProcessActor(Packet& pkt, Target& target);
 
    };
 

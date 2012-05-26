@@ -35,24 +35,18 @@ namespace DHT
                 this->getActor.post(*(new StaticActorData(target, pkt)));
                 break;
 
-            case M_GOT:
-                this->handleGot(pkt, target);
-                break;
-
             case M_STORE:
                 this->storeActor.post(*(new StaticActorData(target, pkt)));
-                break;
-
-            case M_STORED:
-                this->handleStored(pkt, target);
                 break;
 
             case M_FIND:
                 this->findActor.post(*(new StaticActorData(target, pkt)));
                 break;
 
+            case M_GOT:
+            case M_STORED:
             case M_FOUND:
-                this->handleFound(pkt, target);
+                this->dispatchToProcessActor(pkt, target);
                 break;
 
             default:
@@ -74,13 +68,38 @@ namespace DHT
         delete &target;
     }
 
-    void InternalNode::handleGot(Packet& pkt, Target& target) {
+    long InternalNode::registerProcessActor(Actor<ProcessActorData>& actor) {
+        //TODO delete all this when the node is destroyed
+        ActorId<ProcessActorData>* a = new ActorId<ProcessActorData>(actors.add(actor));
+        long n = processActorsCount.getIncrement();
+        processActors.set(n, a);
+        return n;
     }
 
-    void InternalNode::handleStored(Packet& pkt, Target& target) {
+    void InternalNode::dispatchToProcessActor(Packet& pkt, Target& target){
+        ActorId<ProcessActorData>* id = processActors.getAndLock(pkt.connectionId, NULL);
+        if(id == NULL){
+            processActors.endUnlock();
+            return;
+        }
+        ActorId<ProcessActorData> saved_id(*id);
+        processActors.endUnlock();
+
+        saved_id.post(*(new ProcessActorData(target, pkt)));
     }
 
-    void InternalNode::handleFound(Packet& pkt, Target& target) {
+    void InternalNode::unregisterProcessActor(long actorNumber){
+        ActorId<ProcessActorData>* id = processActors.getAndLock(actorNumber, NULL);
+        if(id == NULL){
+            processActors.endUnlock();
+            return;
+        }
+        ActorId<ProcessActorData> saved_id(*id);
+        delete id;
+        processActors.endUnlock();
+
+        saved_id.kill();
+        processActors.unset(actorNumber);
     }
 
 }
