@@ -1,5 +1,5 @@
 /**
- * @file packet.h
+ * @file n2np/packet.h
  * @brief N2NP Packet
  */
 

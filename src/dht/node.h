@@ -1,4 +1,5 @@
 /**
+ * @file dht/node.h
  */
 #ifndef EPYX_DHT_NODE_H
 #define EPYX_DHT_NODE_H

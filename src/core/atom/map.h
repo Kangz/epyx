@@ -10,6 +10,9 @@
 #include <map>
 
 #ifndef EPYX_ATOM_MAP_DEBUG
+/**
+ * @brief atom::Map debug
+ */
 #define EPYX_ATOM_MAP_DEBUG 0
 #endif
 

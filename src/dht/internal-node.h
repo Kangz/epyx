@@ -1,3 +1,7 @@
+/**
+ * @file dht/internal-node.h
+ * @brief Private structure of Node
+ */
 #ifndef EPYX_DHT_INTERNAL_NODE_H
 #define EPYX_DHT_INTERNAL_NODE_H
 

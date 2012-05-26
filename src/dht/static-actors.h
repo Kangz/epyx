@@ -1,3 +1,7 @@
+/**
+ * @file dht/static-actors.h
+ * @brief Internal actors for DHT
+ */
 #ifndef EPYX_DHT_STATIC_ACTORS_H
 #define EPYX_DHT_STATIC_ACTORS_H
 

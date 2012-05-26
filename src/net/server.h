@@ -18,7 +18,7 @@ namespace Epyx
     public:
         /**
          * @brief Create a new generic unbinded server
-         * @param port
+         * @param addr
          */
         Server(const Address& addr);
         ~Server();

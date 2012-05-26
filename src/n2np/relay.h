@@ -1,5 +1,5 @@
 /**
- * @file relay.h
+ * @file n2np/relay.h
  * @brief Implement N2NP Relay main functions
  */
 

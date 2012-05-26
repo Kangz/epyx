@@ -1,5 +1,5 @@
 /**
- * @file id.h
+ * @file dht/id.h
  * @brief DHT Id representing a DHT key and positions in the hash space
  */
 #ifndef EPYX_DHT_ID_H

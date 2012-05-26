@@ -19,7 +19,7 @@ namespace Epyx
     public:
         /**
          * @brief Create a new TCP server
-         * @param port TCP port to bind to
+         * @param addr IP address and TCP port to bind to
          * @param nbConn maximum connection number
          */
         TCPServer(const Address& addr, unsigned int nbConn);

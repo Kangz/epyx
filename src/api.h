@@ -1,6 +1,6 @@
 /**
- * @file epyx.h
- * @brief Interface definition
+ * @file api.h
+ * @brief Application Programming Interface of Epyx
  */
 
 #ifndef EPYX_API_H

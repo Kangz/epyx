@@ -1,5 +1,5 @@
 /**
- * @file node.h
+ * @file n2np/node.h
  * @brief N2NP node implementation
  */
 

@@ -1,5 +1,5 @@
 /**
- * @file relaysocket.h
+ * @file n2np/relaysocket.h
  * @brief Implement how a Relay is acceded with a Socket
  */
 

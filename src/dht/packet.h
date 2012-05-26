@@ -1,5 +1,5 @@
 /**
- * @file packet.h
+ * @file dht/packet.h
  * @brief the definition of the DHT Packet
  */
 #ifndef EPYX_DHT_PACKET_H

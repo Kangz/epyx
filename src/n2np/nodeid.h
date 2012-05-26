@@ -1,5 +1,5 @@
 /**
- * @file nodeid.h
+ * @file n2np/nodeid.h
  * @brief N2NP Node Identifier
  */
 

@@ -6,6 +6,9 @@
 #include "api.h"
 #include <unistd.h>
 
+/**
+ * @brief Default port for relay
+ */
 #define RELAY_DEFAULT_PORT 4242
 
 int main(int argc, char **argv) {

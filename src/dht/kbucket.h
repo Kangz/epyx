@@ -1,5 +1,5 @@
 /**
- * @file kbucket.h
+ * @file dht/kbucket.h
  * @brief defines the KBucket : the DHT routing table
  */
 

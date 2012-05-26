@@ -1,3 +1,6 @@
+/**
+ * @file dht/storage.h
+ */
 #ifndef EPYX_DHT_STORAGE_H
 #define EPYX_DHT_STORAGE_H
 

@@ -1,3 +1,6 @@
+/**
+ * @file dht/peer.h
+ */
 #ifndef EPYX_DHT_PEER_H
 #define EPYX_DHT_PEER_H
 

@@ -1,5 +1,5 @@
 /**
- * @file id.cpp
+ * @file dht/id.cpp
  * @brief Implements the methods of Ids and Distances
  */
 

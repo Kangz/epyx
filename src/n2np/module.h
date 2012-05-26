@@ -1,5 +1,5 @@
 /**
- * @file module.h
+ * @file n2np/module.h
  * @brief N2NP module
  */
 #ifndef EPYX_N2NP_MODULE_H

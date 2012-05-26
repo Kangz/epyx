@@ -1,5 +1,5 @@
 /**
- * @file packet.cpp
+ * @file dht/packet.cpp
  * @brief the implementation of the DHT Packet
  */
 

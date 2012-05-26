@@ -1,3 +1,6 @@
+/**
+ * @file dht/value.h
+ */
 #ifndef EPYX_DHT_VALUE_H
 #define EPYX_DHT_VALUE_H
 

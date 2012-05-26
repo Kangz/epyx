@@ -19,7 +19,7 @@ namespace Epyx
     public:
         /**
          * @brief Create a new UDP server
-         * @param port UDP port to bind to
+         * @param addr IP address and UDP port to bind to
          */
         UDPServer(const Address& addr);
 
