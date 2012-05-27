@@ -6,6 +6,7 @@
 #include "internal-node.h"
 #include "../n2np/nodeid.h"
 #include "target.h"
+#include "finder-actor.h"
 
 namespace Epyx
 {
@@ -13,6 +14,7 @@ namespace DHT
 {
 
     class InternalNode;
+    struct FinderActorData;
 
     struct ProcessActorData{
         Target& target;
@@ -22,6 +24,30 @@ namespace DHT
         ProcessActorData(Target& target, Packet& pkt);
         void freeData();
     };
+
+    class ProcessActor: public Actor<ProcessActorData> {
+        protected:
+            ProcessActor(InternalNode& n, int timeout = 0);
+            void destroy();
+
+            InternalNode& n;
+            long processId;
+    };
+
+    static const int SINGLE_REQUEST_TIMEOUT = 2*1000;
+
+    class SingularFindActor: public ProcessActor {
+        public:
+            SingularFindActor(InternalNode& n, ActorId<FinderActorData> p, Target& t, Id& requested);
+
+        protected:
+            void treat(ProcessActorData& msg);
+            void timeout();
+
+            Target target;
+            ActorId<FinderActorData> parent;
+    };
+
 }
 }
 

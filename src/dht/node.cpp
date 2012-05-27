@@ -35,5 +35,9 @@ namespace DHT
         target.myN2np.send(target.n2npId, "DHT", *gtt);
     }
 
+    void Node::sendPing(Target& t){
+        n.sendPing(t);
+    }
+
 }
 }

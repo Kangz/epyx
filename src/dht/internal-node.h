@@ -36,8 +36,10 @@ namespace DHT
         void processPacket(Packet& pkt, Target& target);
         void send(Packet& pkt, const Target& target);
 
-        long registerProcessActor(Actor<ProcessActorData>& actor);
+        long registerProcessActor(Actor<ProcessActorData>& actor, int timeout = 0);
         void unregisterProcessActor(long actorNumber);
+
+        void sendPing(Target& t);
 
         //TODO: avoid making these public
         ActorManager actors;

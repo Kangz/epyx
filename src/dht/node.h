@@ -29,6 +29,10 @@ namespace DHT
 
         void fromN2NP(N2NP::Node& myself, N2NP::NodeId senderId, const char* data, unsigned int dataSize);
         void send(Packet& pkt, const Target& target);
+
+        //API
+        void sendPing(Target& t);
+
     private:
         Id id;
         GTTParser gttParser;

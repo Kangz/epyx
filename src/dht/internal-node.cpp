@@ -61,16 +61,28 @@ namespace DHT
         this->parent.send(pkt, target);
     }
 
+    void InternalNode::sendPing(Target& t){
+        Packet pkt;
+        pkt.method = M_PING;
+        send(pkt, t);
+        //delete t ?
+    }
+
     void InternalNode::sendPong(Target& target) {
         Packet pkt;
         pkt.method = M_PONG;
-        this->parent.send(pkt, target);
+        send(pkt, target);
         delete &target;
     }
 
-    long InternalNode::registerProcessActor(Actor<ProcessActorData>& actor) {
+    long InternalNode::registerProcessActor(Actor<ProcessActorData>& actor, int timeout) {
         //TODO delete all this when the node is destroyed
-        ActorId<ProcessActorData>* a = new ActorId<ProcessActorData>(actors.add(actor));
+        ActorId<ProcessActorData>* a;
+        if(timeout > 0){
+            a = new ActorId<ProcessActorData>(actors.add(actor, timeout));
+        }else{
+            a = new ActorId<ProcessActorData>(actors.add(actor));
+        }
         long n = processActorsCount.getIncrement();
         processActors.set(n, a);
         return n;
