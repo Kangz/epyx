@@ -29,6 +29,7 @@ namespace Epyx
     public:
         virtual void _internal_treat(void* msg);
         void setId(ActorId<T> id);
+        ActorId<T> getId();
 
     protected:
         /**
@@ -66,6 +67,10 @@ namespace Epyx
 
     template<typename T> void Actor<T>::setId(ActorId<T> id) {
         self = id;
+    }
+
+    template<typename T> ActorId<T> Actor<T>::getId() {
+        return self;
     }
 
     template<typename T> void Actor<T>::timeout() {}
