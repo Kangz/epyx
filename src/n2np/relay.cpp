@@ -37,8 +37,13 @@ namespace Epyx
             log::info << "Relay: Attach node " << nodeid
                 << " from " << sock->getAddress() << log::endl;
 
+            // Send IP to node in data
+            std::ostringstream dataStream;
+            dataStream << "IP: " << sock->getAddress() << String::crlf;
+            const std::string dataString = dataStream.str();
+
             // Send node ID to node
-            Packet pkt("ID", 0, NULL);
+            Packet pkt("ID", dataString.length(), dataString.c_str());
             pkt.method = "ID";
             pkt.from = relayId;
             pkt.to = nodeid;

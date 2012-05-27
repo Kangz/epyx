@@ -163,6 +163,28 @@ namespace Epyx
                 nodeid = pkt->to;
                 hasId = true;
                 //log::info << "Node " << nodeid << ": Received ID " << *pkt << log::endl;
+
+                // Decode data
+                LineParser parser;
+                parser.push(pkt->data, pkt->size);
+                parser.push(String::crlf, strlen(String::crlf));
+                std::string line;
+                while (parser.popLine(line)) {
+                    line = String::trim(line);
+                    if (line.empty())
+                        continue;
+                    size_t commaPos = line.find(':');
+                    if (commaPos == std::string::npos)
+                        continue;
+                    std::string name = line.substr(0, commaPos);
+                    name = String::toLower(String::trim(name));
+                    std::string value = line.substr(commaPos+1);
+                    value = String::trim(value);
+                    if (name == "ip") {
+                        // Set IP address as seen
+                        this->socket().setLocalAddress(Address(value));
+                    }
+                }
                 return;
             }
 
