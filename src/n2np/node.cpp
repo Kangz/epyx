@@ -44,19 +44,15 @@ namespace Epyx
             }
 
             //We need to select a socket to send to.
-            Socket *selected;
-            directMutex.lock();
-            if(this->directSockets.count(to))
-                selected = this->directSockets[to];
-            else {
-                NodeId remoteRelay(to.getRelay());
-                if(this->directSockets.count(remoteRelay))
-                    selected = this->directSockets[remoteRelay];
-                else
+            Socket *selected = directSockets.get(to, NULL);
+            if (selected == NULL) {
+                selected = directSockets.get(NodeId(to.getRelay()), NULL);
+                if (selected == NULL) {
                     selected = &(this->socket());
+                }
             }
-            directMutex.unlock();
-                
+            EPYX_ASSERT(selected != NULL);
+
             return n2npPkt->send(*selected);
         }
 
@@ -96,26 +92,21 @@ namespace Epyx
             return result;
         }
 
-        void Node::addModule(std::string method, Module *m) {
-            modulesMutex.lock();
-            if (modules.count(method) > 0) {
-                modulesMutex.unlock();
+        void Node::addModule(const std::string& method, Module *m) {
+            EPYX_ASSERT(m != NULL);
+            if (modules.get(method, NULL) != NULL)
                 throw FailException("N2NP::Node", "Cannot add a module to an already bound key");
-            }
-            modules[method] = m;
-            modulesMutex.unlock();
+            modules.set(method, m);
         }
 
-        void Node::offerDirectConn(NodeId& recipient, Socket *socket) {
-            directMutex.lock();
-            if(directSockets.count(recipient) > 0) {
-                directSockets[recipient]->close();
-                delete directSockets[recipient];
-            }
-            directSockets[recipient] = socket;
-            directMutex.unlock();
+        void Node::offerDirectConn(const NodeId& recipient, Socket *socket) {
+            Socket *oldsocket = directSockets.getAndLock(recipient, NULL);
+            directSockets.setLocked(recipient, socket);
+            directSockets.endUnlock();
+            if (oldsocket != NULL)
+                delete oldsocket;
         }
-        
+
         const NodeId& Node::getId() const {
             EPYX_ASSERT(hasId);
             return nodeid;
@@ -182,7 +173,7 @@ namespace Epyx
                         continue;
                     std::string name = line.substr(0, commaPos);
                     name = String::toLower(String::trim(name));
-                    std::string value = line.substr(commaPos+1);
+                    std::string value = line.substr(commaPos + 1);
                     value = String::trim(value);
                     if (name == "ip") {
                         // Set IP address as seen
@@ -226,17 +217,8 @@ namespace Epyx
             mruNodeIds.endUnlock();
 
             // Find the relevant module
-            bool foundModule = false;
-            Module* moduleToCall;
-
-            this->modulesMutex.lock();
-            if (this->modules.count(pkt->method)) {
-                moduleToCall = this->modules[pkt->method];
-                foundModule = true;
-            }
-            this->modulesMutex.unlock();
-
-            if (!foundModule) {
+            Module* moduleToCall = modules.get(pkt->method, NULL);
+            if (moduleToCall == NULL) {
                 log::error << "[Node " << nodeid << "] Unhandled method "
                     << pkt->method << log::endl;
                 this->sendErr(pkt);

@@ -64,14 +64,14 @@ namespace Epyx
              * @param method Which method to use
              * @param m The module to call
              */
-            void addModule(std::string method, Module *m);
+            void addModule(const std::string& method, Module *m);
 
             /**
              * @brief Offer a new direct connection to use
              * @param recipient The other end of the link, as a nodeId
              * @param socket The socket to be given
              */
-            void offerDirectConn(NodeId& recipient, Socket *socket);
+            void offerDirectConn(const NodeId& recipient, Socket *socket);
 
             /**
              * @brief Get node ID
@@ -93,9 +93,9 @@ namespace Epyx
             bool waitReady(const Timeout& timeout) const;
 
             /**
-            * @brief Get the node address, from the point of view of the relay
-            * @return this->socket().getLocalAddress();
-            */
+             * @brief Get the node address, from the point of view of the relay
+             * @return this->socket().getLocalAddress();
+             */
             Address getNodeAddress() const;
 
         protected:
@@ -117,8 +117,7 @@ namespace Epyx
             bool hasId;
 
             // Callbacks for Recv
-            std::map<std::string, Module*> modules;
-            Mutex modulesMutex;
+            atom::Map<std::string, Module*> modules;
 
             // GTT parser
             GTTParser gttparser;
@@ -134,9 +133,8 @@ namespace Epyx
             atom::Counter curId;
             std::map<unsigned long, Packet*> sentMap;
 
-            // Stockage for socket
-            Mutex directMutex;
-            std::map<NodeId, Socket*> directSockets; 
+            // Stockage for sockets
+            atom::Map<NodeId, Socket*> directSockets;
         };
     }
 }
