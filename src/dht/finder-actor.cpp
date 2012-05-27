@@ -18,16 +18,24 @@ namespace DHT
         delete &target;
     }
 
-    FinderActor::FinderActor(InternalNode& n, Id& idToFind)
-    :n(n), requestId(idToFind) {}
+    void FindCallback::onError() {}
+
+    FinderActor::FinderActor(InternalNode& n, Id& idToFind, FindCallback* cb)
+    :n(n), requestedId(idToFind), callback(cb) {
+    }
 
     void FinderActor::treat(FinderActorData& msg) {
+        
     }
 
     void FinderActor::timeout() {
+        callback.onError();
+        delete callback;
+        kill();
     }
 
-    void sendFindQueryTo(Target& target) {
+    void FinderActor::sendFindQueryTo(Target& target) {
+        new SingularFindActor(n, getId(), target, requestedId);
     }
 }
 }

@@ -24,19 +24,26 @@ namespace DHT
         ~FinderActorData();
     };
 
+    class FindCallback {
+        public:
+            virtual void onFound() = 0;
+            virtual void onError();
+    };
+
     class FinderActor: public Actor<FinderActorData> {
         public:
-            FinderActor(InternalNode& n, Id& idToFind);
+            FinderActor(InternalNode& n, Id& idToFind, FindCallback* cb);
 
         protected:
             void treat(FinderActorData& msg);
             void timeout();
 
         private:
-            void sendQueryTo(Target& t);
+            void sendFindQueryTo(Target& t);
 
             InternalNode& n;
-            Id requestId;
+            Id requestedId;
+            FindCallback* callback;
     };
 
 }
