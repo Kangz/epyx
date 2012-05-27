@@ -127,6 +127,7 @@ void double_print(Packet& pkt){
     if(pkt.method == M_FOUND) log::info << pkt.value << log::endl;
     log::info << "dht -> gtt -> dht -> gtt\n" << *pkt3 << log::endl;
     if(pkt.method == M_FOUND) log::info << pkt2.value << log::endl;
+    log::waitFlush();
 }
 
 void test_dhtpacket(){
@@ -171,16 +172,18 @@ void test_dhtpacket(){
     pkt.method = M_FIND;
     pkt.connectionId = 42;
     pkt.count = 20;
+    random_id(pkt.idToFind);
     double_print(pkt);
 
     log::info<<"Testing FOUND"<<log::endl;
     pkt.method = M_FOUND;
     pkt.connectionId = 42;
     pkt.status = 0;
+    pkt.foundPeers = new std::vector<Peer>();
     for(int i=0; i<20; i++){
         Peer temp;
         random_id(temp.id);
-        pkt.foundPeers.push_back(temp);
+        pkt.foundPeers->push_back(temp);
     }
     random_id(pkt.idToFind);
     double_print(pkt);

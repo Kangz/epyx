@@ -71,8 +71,9 @@ namespace DHT
         answer.method = M_FOUND;
         answer.connectionId = msg.pkt->connectionId;
         answer.status = 0;
+        answer.foundPeers = new std::vector<Peer>();
 
-        this->n.kbucket.findNearestNodes(msg.pkt->idToFind, answer.foundPeers, msg.pkt->count);
+        this->n.kbucket.findNearestNodes(msg.pkt->idToFind, *answer.foundPeers, msg.pkt->count);
 
         this->n.send(answer, msg.target);
         msg.freeData();

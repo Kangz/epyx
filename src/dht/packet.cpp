@@ -15,11 +15,19 @@ namespace Epyx
 {
 namespace DHT
 {
-    Packet::Packet(){}
-    Packet::~Packet(){}
+    Packet::Packet() {
+        foundPeers = NULL;
+    }
+    Packet::~Packet() {
+        if(foundPeers != NULL) {
+            delete foundPeers;
+        }
+    }
 
-    Packet::Packet(GTTPacket& pkt){
+    Packet::Packet(GTTPacket& pkt) {
         //TODO: what should we do if a packet is not valid ?
+        foundPeers = NULL;
+
         if(pkt.headers.count("from")==0){
             throw;
         }
@@ -95,11 +103,12 @@ namespace DHT
             connectionId = String::toInt(pkt.headers["connectionid"]);
             count = String::toInt(pkt.headers["count"]);
 
+            foundPeers = new std::vector<Peer>();
             Peer p;
             std::istringstream ssdata(value);
             for(int i=0; i<count; i++){
                 p.unserialize(ssdata);
-                foundPeers.push_back(p);
+                foundPeers->push_back(p);
             }
 
         }else{
@@ -107,7 +116,7 @@ namespace DHT
         }
     }
 
-    GTTPacket* Packet::toGTTPacket(){
+    GTTPacket* Packet::toGTTPacket() {
         GTTPacket* pkt = new GTTPacket();
         pkt->protocol = "DHT";
 
@@ -172,9 +181,9 @@ namespace DHT
                 pkt->method = "FOUND";
 
                 pkt->headers["connectionid"] = String::fromInt(connectionId);
-                pkt->headers["count"] = String::fromInt(foundPeers.size());
+                pkt->headers["count"] = String::fromInt(foundPeers->size());
 
-                for(std::vector<Peer>::iterator i=foundPeers.begin(); i != foundPeers.end(); ++i){
+                for(std::vector<Peer>::iterator i=foundPeers->begin(); i != foundPeers->end(); ++i){
                     (*i).serialize(oss);
                 }
                 value = oss.str();
@@ -185,7 +194,7 @@ namespace DHT
         return pkt;
     }
 
-    void Packet::getValueFromGTT(GTTPacket& pkt){
+    void Packet::getValueFromGTT(GTTPacket& pkt) {
         status = String::toInt(pkt.headers["status"]);
         if(status == 0){
             value = std::string(pkt.body, pkt.size);
@@ -194,7 +203,7 @@ namespace DHT
         }
     }
 
-    void Packet::setValueForGTT(GTTPacket* pkt){
+    void Packet::setValueForGTT(GTTPacket* pkt) {
         pkt->headers["status"] = String::fromInt(status);
         if (status == 0) {
             pkt->body = String::toNewChar(value);
