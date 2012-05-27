@@ -92,6 +92,12 @@ namespace Epyx
              */
             bool waitReady(const Timeout& timeout) const;
 
+            /**
+            * @brief Get the node address, from the point of view of the relay
+            * @return this->socket().getLocalAddress();
+            */
+            Address getNodeAddress() const;
+
         protected:
             /**
              * @brief Eat data and treat each N2NP packet it contains

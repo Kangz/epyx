@@ -132,6 +132,10 @@ namespace Epyx
             return hasId;
         }
 
+        Address Node::getNodeAddress() const {
+            return this->socket().getLocalAddress();
+        }
+
         void Node::eat(const char *data, long size) {
             gttparser.eat(data, size);
             GTTPacket *gttpkt = NULL;
