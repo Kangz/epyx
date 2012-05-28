@@ -63,6 +63,12 @@ namespace DHT
         a->start();
     }
 
+    void InternalNode::getValue(GetCallback* cb, const std::string& key) {
+        GetterActor* a = new GetterActor(*this, key, cb);
+        actors.add(a);
+        a->start();
+    }
+
     void InternalNode::send(Packet& pkt, const Target& target) {
         this->parent.send(pkt, target);
     }

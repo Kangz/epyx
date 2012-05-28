@@ -13,6 +13,7 @@
 #include "packet.h"
 #include "target.h"
 #include "finder-actor.h"
+#include "getter-actor.h"
 
 namespace Epyx
 {
@@ -35,6 +36,7 @@ namespace DHT
         void sendPing(Peer& p);
         Peer getConnectionInfo();
         void findClosest(FindCallback* cb, int count, Id& idToFind);
+        void getValue(GetCallback* cb, const std::string& key);
 
     private:
         Id id;

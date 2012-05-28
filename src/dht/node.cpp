@@ -46,5 +46,10 @@ namespace DHT
     void Node:: findClosest(FindCallback* cb, int count, Id& idToFind) {
         n.findClosest(cb, count, idToFind);
     }
+
+    void Node::getValue(GetCallback* cb, const std::string& key) {
+        n.getValue(cb, key);
+    }
+
 }
 }

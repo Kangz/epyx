@@ -7,6 +7,7 @@
 #include "../n2np/nodeid.h"
 #include "target.h"
 #include "finder-actor.h"
+#include "getter-actor.h"
 
 namespace Epyx
 {
@@ -15,6 +16,7 @@ namespace DHT
 
     class InternalNode;
     struct FinderActorData;
+    struct GetterActorData;
 
     struct ProcessActorData{
         Target& target;
@@ -46,6 +48,17 @@ namespace DHT
 
             Peer target;
             ActorId<FinderActorData> parent;
+    };
+
+    class SingularGetActor: public ProcessActor {
+        public:
+            SingularGetActor(InternalNode& n, ActorId<GetterActorData> p, Peer& peer, const std::string& key);
+
+        protected:
+            void treat(ProcessActorData& msg);
+            void timeout();
+
+            ActorId<GetterActorData> parent;
     };
 
 }

@@ -1,6 +1,7 @@
 #include "process-actors.h"
 #include "internal-node.h"
 #include "finder-actor.h"
+#include "getter-actor.h"
 
 namespace Epyx
 {
@@ -57,5 +58,30 @@ namespace DHT
         parent.post(*(new FinderActorData(target, NULL, false)));
         kill();
     }
+
+    SingularGetActor::SingularGetActor(InternalNode& n, ActorId<GetterActorData> p, Peer& peer, const std::string& key)
+    :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), parent(p){
+        Packet pkt;
+        pkt.method = M_GET;
+        pkt.connectionId = processId;
+        pkt.key = key;
+
+        this->n.send(pkt, *n.peerToTarget(peer));
+    }
+
+    void SingularGetActor::treat(ProcessActorData& msg) {
+        if(msg.pkt->method == M_GOT && msg.pkt->status == 0) {
+            parent.post(*(new GetterActorData(msg.pkt->value)));
+            kill();
+        } else {
+            timeout();
+        }
+    }
+
+    void SingularGetActor::timeout() {
+        parent.post(*(new GetterActorData()));
+        kill();
+    }
+
 }
 }

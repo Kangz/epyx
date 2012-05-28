@@ -17,6 +17,7 @@
 #include "process-actors.h"
 #include "target.h"
 #include "finder-actor.h"
+#include "getter-actor.h"
 
 namespace Epyx
 {
@@ -36,6 +37,7 @@ namespace DHT
 
         void processPacket(Packet& pkt, Target& target);
         void findClosest(FindCallback* cb, int count, Id& idToFind);
+        void getValue(GetCallback* cb, const std::string& key);
 
         void send(Packet& pkt, const Target& target);
 
