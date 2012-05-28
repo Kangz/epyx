@@ -69,6 +69,12 @@ namespace DHT
         a->start();
     }
 
+    void InternalNode::setValue(SetCallback* cb, const std::string& key, const std::string& value) {
+        SetterActor* a = new SetterActor(*this, key, value, cb);
+        actors.add(a);
+        a->start();
+    }
+
     void InternalNode::send(Packet& pkt, const Target& target) {
         this->parent.send(pkt, target);
     }

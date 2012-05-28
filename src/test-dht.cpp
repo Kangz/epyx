@@ -315,6 +315,16 @@ class MyGetCallback: public GetCallback {
         }
 };
 
+class MySetCallback: public SetCallback {
+    public:
+        void onSet() {
+            log::info<<"I set the value." << log::endl;
+        }
+        void onError() {
+            log::info << "Some error ocurred while setting the value." << log::endl;
+        }
+};
+
 void test_dht_network(){
     // Create Net Select for relay
     NetSelect *selectRelay = new NetSelect(10, "wRelay");
@@ -382,13 +392,25 @@ void test_dht_network(){
 
     dhtNodes[0]->findClosest(new MyFindCallback(), 5, idToFind);
 
-    sleep(10);
+    sleep(3);
 
-    log::info << "Launching the GET query" << log::endl;
+    log::info << "Launching the GET query (should fail)" << log::endl;
 
     dhtNodes[0]->getValue(new MyGetCallback(), "value1");
 
-    sleep(10);
+    sleep(3);
+
+    log::info << "Launching the SET query" << log::endl;
+
+    dhtNodes[0]->setValue(new MySetCallback(), "value1", "42");
+
+    sleep(3);
+
+    log::info << "Launching the GET query (should work)" << log::endl;
+
+    dhtNodes[0]->getValue(new MyGetCallback(), "value1");
+
+    sleep(3);
 }
 
 

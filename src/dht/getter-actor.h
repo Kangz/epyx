@@ -66,4 +66,4 @@ namespace DHT
 }
 }
 
-#endif //EPYX_DHT_FINDER_ACTOR_H
+#endif //EPYX_DHT_SETTER_ACTOR_H

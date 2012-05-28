@@ -14,6 +14,7 @@
 #include "target.h"
 #include "finder-actor.h"
 #include "getter-actor.h"
+#include "setter-actor.h"
 
 namespace Epyx
 {
@@ -37,6 +38,7 @@ namespace DHT
         Peer getConnectionInfo();
         void findClosest(FindCallback* cb, int count, Id& idToFind);
         void getValue(GetCallback* cb, const std::string& key);
+        void setValue(SetCallback* cb, const std::string& key, const std::string& value);
 
     private:
         Id id;

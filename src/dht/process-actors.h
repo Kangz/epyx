@@ -8,6 +8,7 @@
 #include "target.h"
 #include "finder-actor.h"
 #include "getter-actor.h"
+#include "setter-actor.h"
 
 namespace Epyx
 {
@@ -17,6 +18,7 @@ namespace DHT
     class InternalNode;
     struct FinderActorData;
     struct GetterActorData;
+    struct SetterActorData;
 
     struct ProcessActorData{
         Target& target;
@@ -59,6 +61,17 @@ namespace DHT
             void timeout();
 
             ActorId<GetterActorData> parent;
+    };
+
+    class SingularSetActor: public ProcessActor {
+        public:
+            SingularSetActor(InternalNode& n, ActorId<SetterActorData> p, Peer& peer, const std::string& key, const std::string& value);
+
+        protected:
+            void treat(ProcessActorData& msg);
+            void timeout();
+
+            ActorId<SetterActorData> parent;
     };
 
 }

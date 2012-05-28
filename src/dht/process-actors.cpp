@@ -2,6 +2,7 @@
 #include "internal-node.h"
 #include "finder-actor.h"
 #include "getter-actor.h"
+#include "setter-actor.h"
 
 namespace Epyx
 {
@@ -57,7 +58,7 @@ namespace DHT
     }
 
     SingularGetActor::SingularGetActor(InternalNode& n, ActorId<GetterActorData> p, Peer& peer, const std::string& key)
-    :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), parent(p){
+    :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), parent(p) {
         Packet pkt;
         pkt.method = M_GET;
         pkt.connectionId = processId;
@@ -77,6 +78,31 @@ namespace DHT
 
     void SingularGetActor::timeout() {
         parent.post(*(new GetterActorData()));
+        kill();
+    }
+
+    SingularSetActor::SingularSetActor(InternalNode& n, ActorId<SetterActorData> p, Peer& peer, const std::string& key, const std::string& value)
+    :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), parent(p) {
+        Packet pkt;
+        pkt.method = M_STORE;
+        pkt.connectionId = processId;
+        pkt.key = key;
+        pkt.value = value;
+
+        this->n.send(pkt, *n.peerToTarget(peer));
+    }
+
+    void SingularSetActor::treat(ProcessActorData& msg) {
+        if(msg.pkt->method == M_GOT && msg.pkt->status == 0) {
+            parent.post(*(new SetterActorData(true)));
+            kill();
+        } else {
+            timeout();
+        }
+    }
+
+    void SingularSetActor::timeout() {
+        parent.post(*(new SetterActorData(false)));
         kill();
     }
 

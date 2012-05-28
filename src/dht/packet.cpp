@@ -42,11 +42,11 @@ namespace DHT
 
         }else if(pkt.method == "STORE"){
             method = M_STORE;
-            if(pkt.headers.count("connectionid") == 0 || pkt.headers.count("key") == 0 || !pkt.body){
+            if(pkt.headers.count("connectionid") == 0 || pkt.headers.count("key") == 0){
                 throw;
             }
 
-            value = std::string(pkt.body, pkt.size);
+            this->getValueFromGTT(pkt, false);
             connectionId = String::toInt(pkt.headers["connectionid"]);
 
             key = pkt.headers["key"];
@@ -141,8 +141,7 @@ namespace DHT
 
                 pkt->headers["connectionid"] = String::fromInt(connectionId);
 
-                pkt->body = String::toNewChar(value);
-                pkt->size = value.size();
+                this->setValueForGTT(pkt, false);
                 break;
 
             case M_STORED:
@@ -153,7 +152,6 @@ namespace DHT
 
             case M_GET:
                 pkt->method = "GET";
-
                 pkt->headers["key"] = key;
 
                 pkt->headers["connectionid"] = String::fromInt(connectionId);
@@ -186,6 +184,7 @@ namespace DHT
                 for(std::vector<Peer>::iterator i=foundPeers->begin(); i != foundPeers->end(); ++i){
                     (*i).serialize(oss);
                 }
+
                 value = oss.str();
                 this->setValueForGTT(pkt);
                 break;
@@ -194,18 +193,22 @@ namespace DHT
         return pkt;
     }
 
-    void Packet::getValueFromGTT(GTTPacket& pkt) {
-        status = String::toInt(pkt.headers["status"]);
-        if(status == 0){
+    void Packet::getValueFromGTT(GTTPacket& pkt, bool useStatus) {
+        if(useStatus) {
+            status = String::toInt(pkt.headers["status"]);
+        }
+        if(! useStatus || status == 0){
             value = std::string(pkt.body, pkt.size);
         }else{
             value = std::string("");
         }
     }
 
-    void Packet::setValueForGTT(GTTPacket* pkt) {
-        pkt->headers["status"] = String::fromInt(status);
-        if (status == 0) {
+    void Packet::setValueForGTT(GTTPacket* pkt, bool useStatus) {
+        if(useStatus) {
+            pkt->headers["status"] = String::fromInt(status);
+        }
+        if (! useStatus || status == 0) {
             pkt->body = String::toNewChar(value);
             pkt->size = value.size();
         } else {

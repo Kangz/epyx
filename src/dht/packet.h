@@ -76,8 +76,8 @@ namespace DHT
         Id idToFind;
 
     private:
-        void getValueFromGTT(GTTPacket& pkt);
-        void setValueForGTT(GTTPacket* pkt);
+        void getValueFromGTT(GTTPacket& pkt, bool useStatus = true);
+        void setValueForGTT(GTTPacket* pkt, bool useStatus = true);
     };
 
 }

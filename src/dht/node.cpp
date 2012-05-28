@@ -51,5 +51,8 @@ namespace DHT
         n.getValue(cb, key);
     }
 
+    void Node::setValue(SetCallback* cb, const std::string& key, const std::string& value) {
+        n.setValue(cb, key, value);
+    }
 }
 }
