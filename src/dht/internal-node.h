@@ -30,7 +30,7 @@ namespace DHT
     class InternalNode
     {
     public:
-        InternalNode(const Id& id, Node& parent, const std::string& name);
+        InternalNode(const Id& id, N2NP::Node& n2npSelf, Node& parent, const std::string& name);
         ~InternalNode();
 
         void processPacket(Packet& pkt, Target& target);
@@ -38,6 +38,8 @@ namespace DHT
 
         long registerProcessActor(Actor<ProcessActorData>& actor, int timeout = 0);
         void unregisterProcessActor(long actorNumber);
+
+        Target* peerToTarget(Peer& p);
 
         void sendPing(Target& t);
 
@@ -52,6 +54,7 @@ namespace DHT
         atom::Map<long, ActorId<ProcessActorData>*> processActors;
 
         Id id;
+        N2NP::Node& n2npId;
         Node& parent;
         KBucket kbucket;
         Storage storage;

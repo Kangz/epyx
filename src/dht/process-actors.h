@@ -38,13 +38,13 @@ namespace DHT
 
     class SingularFindActor: public ProcessActor {
         public:
-            SingularFindActor(InternalNode& n, ActorId<FinderActorData> p, Target& t, Id& requested);
+            SingularFindActor(InternalNode& n, ActorId<FinderActorData> p, Peer& peer, Id& requested);
 
         protected:
             void treat(ProcessActorData& msg);
             void timeout();
 
-            Target target;
+            Peer target;
             ActorId<FinderActorData> parent;
     };
 

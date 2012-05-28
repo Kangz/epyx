@@ -24,7 +24,7 @@ namespace DHT
     class Node : public N2NP::Module
     {
     public:
-        Node(Id& id, const std::string& name);
+        Node(Id& id, N2NP::Node& n2npSelf, const std::string& name);
         ~Node();
 
         void fromN2NP(N2NP::Node& myself, N2NP::NodeId senderId, const char* data, unsigned int dataSize);

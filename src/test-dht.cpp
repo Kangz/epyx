@@ -221,16 +221,7 @@ void test_dht_n2np(){
     // Create nodes
     Epyx::log::info << "Create nodes..." << Epyx::log::endl;
     Epyx::N2NP::Node node0(addr), node1(addr);
-
-    DHT::Id id;
-    random_id(id);
-    DHT::Node dht(id, "DHT");
-
-    node0.addModule("DHT", &dht);
     selectNodes->add(&node0);
-
-    FakeDht fakeDHT;
-    node1.addModule("DHT", &fakeDHT);
     selectNodes->add(&node1);
 
     // Wait for node IDs
@@ -239,6 +230,16 @@ void test_dht_n2np(){
     while (!node0.isReady() || !node1.isReady()){
         usleep(100);
     }
+
+    DHT::Id id;
+    random_id(id);
+    DHT::Node dht(id, node0, "DHT");
+
+    node0.addModule("DHT", &dht);
+
+    FakeDht fakeDHT;
+    node1.addModule("DHT", &fakeDHT);
+
 
     Id fakeId;
     random_id(fakeId);

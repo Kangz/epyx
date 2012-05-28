@@ -5,7 +5,7 @@ namespace Epyx
 namespace DHT
 {
 
-    Node::Node(Id& id, const std::string& name): id(id), n(id, *this, name) {
+    Node::Node(Id& id, N2NP::Node& n2npSelf, const std::string& name): id(id), n(id, n2npSelf, *this, name) {
     }
 
     Node::~Node() {

@@ -6,8 +6,8 @@ namespace Epyx
 namespace DHT
 {
 
-    InternalNode::InternalNode(const Id& id, Node& parent, const std::string& name)
-    :actors(5, name + "Actors"), id(id), parent(parent), kbucket(id) {
+    InternalNode::InternalNode(const Id& id, N2NP::Node& n2npSelf, Node& parent, const std::string& name)
+    :actors(5, name + "Actors"), id(id), n2npId(n2npSelf), parent(parent), kbucket(id) {
         pingActor = actors.add(new PingActor(*this));
         getActor = actors.add(new GetActor(*this));
         storeActor = actors.add(new StoreActor(*this));
@@ -114,5 +114,8 @@ namespace DHT
         processActors.unset(actorNumber);
     }
 
+    Target* InternalNode::peerToTarget(Peer& p) {
+        return new Target(n2npId, p.n2npId, p.id);
+    }
 }
 }
