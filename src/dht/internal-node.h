@@ -44,7 +44,8 @@ namespace DHT
 
         Target* peerToTarget(Peer& p);
 
-        void sendPing(Target& t);
+        void sendPing(Peer& p);
+        Peer getConnectionInfo();
 
         //TODO: avoid making these public
         ActorManager actors;

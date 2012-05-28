@@ -32,7 +32,8 @@ namespace DHT
         void send(Packet& pkt, const Target& target);
 
         //API
-        void sendPing(Target& t);
+        void sendPing(Peer& p);
+        Peer getConnectionInfo();
         void findClosest(FindCallback* cb, int count, Id& idToFind);
 
     private:

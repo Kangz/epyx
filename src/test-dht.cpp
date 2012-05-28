@@ -240,7 +240,6 @@ void test_dht_n2np(){
     FakeDht fakeDHT;
     node1.addModule("DHT", &fakeDHT);
 
-
     Id fakeId;
     random_id(fakeId);
 
@@ -293,14 +292,78 @@ void test_dht_n2np(){
     sleep(1); //Wait for the processing of the messages
 }
 
+static const int NETWORK_SIZE = 50;
+
+void test_dht_network(){
+    // Create Net Select for relay
+    NetSelect *selectRelay = new NetSelect(10, "wRelay");
+    selectRelay->setName("NetSelectRelay");
+    selectRelay->start();
+
+    // Create relay
+    Address addr("127.0.0.1:4242");
+    N2NP::Relay *relay = new N2NP::Relay(addr);
+    selectRelay->add(new N2NP::RelayServer(new TCPServer(addr, 50), relay));
+    log::info << "Start Relay " << relay->getId() << log::endl;
+
+    // Create Net Select for nodes
+    Epyx::NetSelect *selectNodes = new Epyx::NetSelect(10, "WNodes");
+    selectNodes->setName("NetSelectNodes");
+    selectNodes->start();
+
+    // Create nodes
+    Epyx::log::info << "Create nodes..." << Epyx::log::endl;
+    Epyx::N2NP::Node* n2npNodes[NETWORK_SIZE];
+    for(int i=0; i<NETWORK_SIZE; i++){
+        n2npNodes[i] = new Epyx::N2NP::Node(addr);
+        selectNodes->add(n2npNodes[i]);
+    }
+
+    // Wait for node IDs
+    Epyx::log::info << "Waiting for nodes..." << Epyx::log::endl;
+    Epyx::N2NP::NodeId n2npIds[NETWORK_SIZE];
+    for(int i=0; i<NETWORK_SIZE; i++) {
+        while (!n2npNodes[i]->isReady()){
+            usleep(100);
+        }
+    }
+
+    //Create DHTs
+    log::info << "Creating DHTs" << log::endl;
+    DHT::Node* dhtNodes[NETWORK_SIZE];
+    for(int i=0; i<NETWORK_SIZE; i++) {
+        DHT::Id id;
+        random_id(id);
+        std::ostringstream o("DHT");
+        o << i;
+        dhtNodes[i] = new DHT::Node(id, *n2npNodes[i], o.str());
+        n2npNodes[i]->addModule("DHT", dhtNodes[i]);
+    }
+
+    //Make pings
+    log::info << "Building the network" << log::endl;
+    for(int i=0; i<NETWORK_SIZE; i++) {
+        for(int j=i+1; j<NETWORK_SIZE; j++) {
+            Peer p = dhtNodes[j]->getConnectionInfo();
+            dhtNodes[i]->sendPing(p);
+        }
+    }
+
+    log::info << "Done sending PING commands, waiting for the messages to be processed" << log::endl;
+
+    sleep(10); //Wait for the processing of the messages
+}
+
+
 int main(){
     Epyx::API epyx(log::CONSOLE | log::LOGFILE, "Test.log");
     srand ( time(NULL) );
     try {
         //test_id_distance();
         //test_kbucket();
-        test_dhtpacket();
-        test_dht_n2np();
+        //test_dhtpacket();
+        //test_dht_n2np();
+        test_dht_network();
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }

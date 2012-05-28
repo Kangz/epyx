@@ -65,11 +65,18 @@ namespace DHT
         this->parent.send(pkt, target);
     }
 
-    void InternalNode::sendPing(Target& t){
+    void InternalNode::sendPing(Peer& p){
         Packet pkt;
         pkt.method = M_PING;
-        send(pkt, t);
+        send(pkt, *peerToTarget(p));
         //delete t ?
+    }
+
+    Peer InternalNode::getConnectionInfo() {
+        Peer p;
+        p.id = id;
+        p.n2npId = n2npId.getId();
+        return p;
     }
 
     void InternalNode::sendPong(Target& target) {

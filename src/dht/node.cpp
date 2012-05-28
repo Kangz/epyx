@@ -35,8 +35,12 @@ namespace DHT
         target.myN2np.send(target.n2npId, "DHT", *gtt);
     }
 
-    void Node::sendPing(Target& t){
-        n.sendPing(t);
+    void Node::sendPing(Peer& p){
+        n.sendPing(p);
+    }
+
+    Peer Node::getConnectionInfo() {
+        return n.getConnectionInfo();
     }
 
     void Node:: findClosest(FindCallback* cb, int count, Id& idToFind) {
