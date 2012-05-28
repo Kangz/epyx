@@ -73,7 +73,7 @@ namespace DHT
 
         }else if(pkt.method == "GOT"){
             method = M_GOT;
-            if(pkt.headers.count("connectionid") == 0 || pkt.headers.count("status") == 0 || !pkt.body){
+            if(pkt.headers.count("connectionid") == 0 || pkt.headers.count("status") == 0){
                 throw;
             }
 

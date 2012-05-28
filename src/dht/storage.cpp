@@ -20,8 +20,8 @@ namespace DHT
         std::map<std::string, Value>::iterator it = data.find(key);
         if (it != data.end()) {
             res = (*it).second;
+            result = true;
         }
-        result = true;
         lock.unlock();
         return result;
     }

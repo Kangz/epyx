@@ -305,6 +305,16 @@ class MyFindCallback: public FindCallback {
         }
 };
 
+class MyGetCallback: public GetCallback {
+    public:
+        void onGot(const std::string& result) {
+            log::info<<"I found a value !!! It is : " << result << log::endl;
+        }
+        void onError() {
+            log::info << "I did not find the value :(" << log::endl;
+        }
+};
+
 void test_dht_network(){
     // Create Net Select for relay
     NetSelect *selectRelay = new NetSelect(10, "wRelay");
@@ -371,6 +381,12 @@ void test_dht_network(){
     random_id(idToFind);
 
     dhtNodes[0]->findClosest(new MyFindCallback(), 5, idToFind);
+
+    sleep(10);
+
+    log::info << "Launching the GET query" << log::endl;
+
+    dhtNodes[0]->getValue(new MyGetCallback(), "value1");
 
     sleep(10);
 }

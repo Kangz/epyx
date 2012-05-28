@@ -27,6 +27,12 @@ namespace DHT
         }
     }
 
+    void GetCallback::onError() {
+    }
+
+    GetCallback::~GetCallback() {
+    }
+
     #define GET_REDUNDANCY 10
 
     GetterSearchCallback::GetterSearchCallback(ActorId<GetterActorData> parent)
