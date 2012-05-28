@@ -54,6 +54,7 @@ namespace Epyx
     Socket::Socket(int sock, const Address &addr)
     :sock(sock), address(addr) {
         EPYX_ASSERT(sock >= 0);
+        this->updateLocalAddress();
     }
 
     Socket::~Socket() {
@@ -64,6 +65,7 @@ namespace Epyx
         EPYX_ASSERT(this->sock < 0);
         EPYX_ASSERT(sockfd >= 0);
         this->sock = sockfd;
+        this->updateLocalAddress();
     }
 
     int Socket::getFd() const {
@@ -88,6 +90,20 @@ namespace Epyx
 
     Address Socket::getLocalAddress() const {
         return localAddress;
+    }
+
+    void Socket::updateLocalAddress() {
+        EPYX_ASSERT(sock >= 0);
+        struct sockaddr_storage saddr;
+        socklen_t saddr_len = sizeof (saddr);
+        if (::getsockname(sock, (struct sockaddr *) &saddr, &saddr_len) < 0) {
+            log::warn << "Socket::updateLocalAddress: getsockname error "
+                << log::errstd << log::endl;
+            // Do nothing
+            return;
+        }
+        // Update address
+        localAddress = Address((struct sockaddr *) &saddr);
     }
 
     void Socket::close() {

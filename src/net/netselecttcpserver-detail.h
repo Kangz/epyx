@@ -1,6 +1,7 @@
 #include "netselect.h"
 #include "../core/common.h"
 #include "server.h"
+#include "socket.h"
 
 namespace Epyx
 {
@@ -48,7 +49,8 @@ namespace Epyx
         // Encapsulate socket
         try {
             newSock = new TCPSocket(newfd, Address((struct sockaddr*) &clientAddr));
-            newSock->setLocalAddress(srv->getAddress());
+            if (newSock->getLocalAddress().empty())
+                newSock->setLocalAddress(srv->getAddress());
             T *nsSocket = new T(newSock, param);
             this->getOwner()->add(nsSocket);
         } catch (Exception e) {

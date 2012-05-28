@@ -36,6 +36,7 @@ namespace Epyx
             return false;
         }
         this->isConnected = true;
+        this->updateLocalAddress();
         return true;
     }
 

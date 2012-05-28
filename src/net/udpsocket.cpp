@@ -28,6 +28,8 @@ namespace Epyx
         }
         address.getSockAddr((struct sockaddr *) &saddr);
         bytes = ::sendto(this->sock, data, size, 0, (const struct sockaddr *) &saddr, sizeof (saddr));
+        if (localAddress.empty())
+            this->updateLocalAddress();
         // TODO: Implement status error (ex. Conn closed, ...)
 
         if (bytes < 0)

@@ -12,7 +12,6 @@
 
 namespace Epyx
 {
-
     /**
      * @class Socket
      *
@@ -79,6 +78,10 @@ namespace Epyx
          * @brief Get the local address
          */
         Address getLocalAddress() const;
+        /**
+         * @brief Update local address from socket
+         */
+        void updateLocalAddress();
 
         /**
          * @brief Shutdown and close the socket
