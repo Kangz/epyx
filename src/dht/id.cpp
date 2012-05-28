@@ -52,6 +52,13 @@ namespace DHT
         return in;
     }
 
+    void idForString(Id& id, const std::string& toCipher) {
+        const unsigned char* ciphered = reinterpret_cast<const unsigned char*>(crypto::SHA256(toCipher).c_str());
+        for(int i = 0; i<Id::STORAGE_SIZE; i++) {
+            id.data[i] = ciphered[i];
+        }
+    }
+
 
     Distance::Distance(const Id* a, const Id* b) {
         initSelf(a, b);

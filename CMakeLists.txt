@@ -46,8 +46,8 @@ add_executable(test-n2np ${epyx_api_sources} src/test-n2np.cpp)
 target_link_libraries(test-n2np pthread)
 
 add_executable(test-dht ${epyx_api_sources} src/test-dht.cpp
-    ${dht_sources} ${localn2np_sources})
-target_link_libraries(test-dht pthread)
+    ${dht_sources} ${localn2np_sources} ${crypto_sources})
+target_link_libraries(test-dht pthread cryptopp)
 
 add_executable(test-crypto ${core_sources} ${crypto_sources} src/test-crypto.cpp)
 target_link_libraries(test-crypto pthread cryptopp)

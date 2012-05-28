@@ -10,31 +10,8 @@ namespace Epyx
 {
 namespace crypto
 {
-
-    //CryptoPP has a strange way to chain filters, there is no memory leak here.
-    std::string SHA256(const std::string& message){
-        std::string digest;
-        CryptoPP::SHA256 hash;
-        CryptoPP::StringSource enc(message, true,
-            new CryptoPP::HashFilter(hash,
-                new CryptoPP::StringSink(digest)
-            )
-        );
-
-        return digest;
-    }
-
-    std::string Base64(const std::string& message){
-        std::string digest;
-        CryptoPP::StringSource enc(message, true,
-            new CryptoPP::Base64Encoder(
-                new CryptoPP::StringSink(digest)
-            )
-        );
-
-        return digest;
-    }
-
+    std::string SHA256(const std::string& message);
+    std::string Base64(const std::string& message);
 }
 }
 

@@ -6,6 +6,8 @@
 #define EPYX_DHT_ID_H
 
 #include <iostream>
+#include <string>
+#include "../crypto/sha2.h"
 
 namespace Epyx
 {
@@ -24,12 +26,13 @@ namespace DHT
         static const int LENGTH = 256;
         static const int STORAGE_SIZE = 256/8;
         unsigned char data[STORAGE_SIZE];
-
     }; //TODO uint32_t ?
 
 
     std::ostream& operator<<(std::ostream& os, const Id& id);
     std::istream& operator>>(std::istream& in, Id& id);
+
+    void idForString(Id& id, const std::string& toCipher);
 
     /**
      * @class Distance

@@ -52,6 +52,7 @@ namespace DHT
 
     void GetterActor::start() {
         Id id;
+        idForString(id, key);
         n.findClosest(new GetterSearchCallback(getId()), GET_REDUNDANCY, id);
     }
 
