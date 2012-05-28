@@ -131,7 +131,7 @@ namespace Epyx
             const Node& operator=(const Node&);
 
             atom::Counter curId;
-            std::map<unsigned long, Packet*> sentMap;
+            atom::Map<unsigned long, Packet*> sentMap;
 
             // Stockage for sockets
             atom::Map<NodeId, Socket*> directSockets;

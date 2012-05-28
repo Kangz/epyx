@@ -34,12 +34,13 @@ namespace Epyx
 
             //log::info << "Node " << nodeid << ": Send " << n2npPkt << log::endl;
             if (store) {
-                if (sentMap.count(n2npPkt->pktID) == 1)
+                if (sentMap.get(n2npPkt->pktID, NULL) != NULL)
                     throw FailException("N2NP::Node", "Duplicate packet ID while sending");
-                sentMap[n2npPkt->pktID] = n2npPkt;
+                sentMap.set(n2npPkt->pktID, n2npPkt);
 #if EPYX_N2NP_NODE_DEBUG
                 if (this->hasId)
-                    log::debug << "Node " << this->getId() << " has a map of " << sentMap.size() << " packets." << log::endl;
+                    log::debug << "Node " << this->getId() << " has a map of "
+                        << sentMap.size() << " packets." << log::endl;
 #endif
             }
 
@@ -198,9 +199,9 @@ namespace Epyx
                 memcpy(charId, pkt->data, pkt->size);
                 charId[pkt->size] = '\0';
                 unsigned long idAcked = String::toInt(charId);
-                if (sentMap.count(idAcked) == 1) {
-                    delete sentMap[idAcked];
-                    sentMap.erase(idAcked);
+                Packet *ackedPkt = sentMap.getUnset(idAcked, NULL);
+                if (ackedPkt != NULL) {
+                    delete ackedPkt;
 #if EPYX_N2NP_NODE_DEBUG
                     log::debug << "Succesfully erased an acked packed" << log::endl;
 #endif
