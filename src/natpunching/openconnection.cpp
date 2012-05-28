@@ -75,8 +75,8 @@ namespace Epyx {
             //If we're using UPNP, we open a port mapping
             if (tested_method == UPNP){
                 Epyx::UPNP::Natpunch nat;
-                log::fatal << "nat.openMapPort(addr.getPort(),remotePort); not yet implemented" << log::endl;
-                //addr = nat.openMapPort(addr.getPort(),remotePort);
+                //log::fatal << "nat.openMapPort(addr.getPort(),remotePort); not yet implemented" << log::endl;
+                addr = nat.openMapPort(addr.getPort());
             }
             //Now, Ask to open a connection.
             GTTPacket pkt;
