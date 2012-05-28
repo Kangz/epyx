@@ -40,7 +40,7 @@ namespace Epyx
 #if EPYX_N2NP_NODE_DEBUG
                 if (this->hasId)
                     log::debug << "Node " << this->getId() << " has a map of "
-                        << sentMap.size() << " packets." << log::endl;
+                    << sentMap.size() << " packets." << log::endl;
 #endif
             }
 
@@ -124,8 +124,8 @@ namespace Epyx
             return hasId;
         }
 
-        Address Node::getNodeAddress() const {
-            return this->socket().getLocalAddress();
+        const Address& Node::getNodeAddress() const {
+            return nodeAddressFromRelay;
         }
 
         void Node::eat(const char *data, long size) {
@@ -178,7 +178,7 @@ namespace Epyx
                     value = String::trim(value);
                     if (name == "ip") {
                         // Set IP address as seen
-                        this->socket().setLocalAddress(Address(value));
+                        nodeAddressFromRelay = Address(value);
                     }
                 }
                 return;

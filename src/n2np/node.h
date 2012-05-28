@@ -94,9 +94,9 @@ namespace Epyx
 
             /**
              * @brief Get the node address, from the point of view of the relay
-             * @return this->socket().getLocalAddress();
+             * @return nodeAddressFromRelay
              */
-            Address getNodeAddress() const;
+            const Address& getNodeAddress() const;
 
         protected:
             /**
@@ -135,6 +135,9 @@ namespace Epyx
 
             // Stockage for sockets
             atom::Map<NodeId, Socket*> directSockets;
+
+            // Node address, from the relay point of view
+            Address nodeAddressFromRelay;
         };
     }
 }
