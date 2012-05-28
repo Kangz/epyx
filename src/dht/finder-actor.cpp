@@ -30,11 +30,16 @@ namespace DHT
 
     FinderActor::FinderActor(InternalNode& n, Id& idToFind, int count, FindCallback* cb)
     :n(n), countToFind(count), pendingRequests(0), requestedId(idToFind), callback(cb) {
+    }
+
+    void FinderActor::start(){
+        //log::debug << "Started a new FIND query" << log::endl;
+        lock();
         heap_make(shortlist);
         heap_make(foundPeers);
 
         std::vector<Peer> nearest;
-        n.kbucket.findNearestNodes(idToFind, nearest, count);
+        n.kbucket.findNearestNodes(requestedId, nearest, countToFind);
 
         std::vector<Peer>::iterator it;
         for(it = nearest.begin(); it != nearest.end(); it ++) {
@@ -46,10 +51,12 @@ namespace DHT
         for(i = shortlist.begin(); i != shortlist.end(); i++) {
             sendFindQueryTo((*i).second);
         }
+        unlock();
     }
 
     void FinderActor::treat(FinderActorData& msg) {
         pendingRequests --;
+
         if(msg.answered) {
             std::vector<Peer>::iterator peerToAdd = msg.answeredPeers->begin();
             for(; peerToAdd != msg.answeredPeers->end(); peerToAdd ++) {
@@ -70,6 +77,16 @@ namespace DHT
 
     void FinderActor::addToShortList(Peer& p) {
         Distance dist(requestedId, p.id);
+        //I have a problem with containers here I need a container that can be a priority_queue
+        //on which I can make a search for an element.
+        //I'm making a manual search instead
+        ClosestQueue::iterator it;
+        for(it = shortlist.begin(); it != shortlist.end(); it++){
+            if((*it).first == dist){
+                return;
+            }
+        }
+
         heap_push(shortlist, std::make_pair(dist, p));
         if(shortlist.size() > FIND_REDUNDANCY) {
             heap_pop_no_res(shortlist);
@@ -78,6 +95,13 @@ namespace DHT
 
     void FinderActor::addToFoundPeers(Peer& p) {
         Distance dist(requestedId, p.id);
+        ClosestQueue::iterator it;
+        for(it = foundPeers.begin(); it != foundPeers.end(); it++){
+            if((*it).second.id == p.id){
+                return;
+            }
+        }
+
         heap_push(foundPeers, std::make_pair(dist, p));
         if(foundPeers.size() > (unsigned long) countToFind) {
             heap_pop_no_res(foundPeers);
@@ -96,6 +120,7 @@ namespace DHT
     }
 
     void FinderActor::sendFindQueryTo(Peer& p) {
+        //log::debug << "Sending FIND to " << p.id << log::endl;
         addToContactedPeers(p);
         pendingRequests ++;
         new SingularFindActor(n, getId(), p, requestedId);
@@ -104,7 +129,7 @@ namespace DHT
     bool FinderActor::sendNewQuery() {
         ClosestQueue::iterator it;
         for(it = shortlist.begin(); it != shortlist.end(); it ++) {
-            if(contactedPeers.find((*it).first) != contactedPeers.end()) {
+            if(contactedPeers.find((*it).first) == contactedPeers.end()) {
                 sendFindQueryTo((*it).second);
                 return true;
             }

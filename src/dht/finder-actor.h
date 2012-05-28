@@ -28,7 +28,7 @@ namespace DHT
 
     class FindCallback {
         public:
-            virtual void onFound(ClosestQueue result) = 0;
+            virtual void onFound(ClosestQueue& result) = 0;
             virtual void onError();
             virtual ~FindCallback();
     };
@@ -42,6 +42,7 @@ namespace DHT
     class FinderActor: public Actor<FinderActorData> {
         public:
             FinderActor(InternalNode& n, Id& idToFind, int count, FindCallback* cb);
+            void start();
 
         protected:
             void treat(FinderActorData& msg);

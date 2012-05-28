@@ -292,7 +292,18 @@ void test_dht_n2np(){
     sleep(1); //Wait for the processing of the messages
 }
 
-static const int NETWORK_SIZE = 50;
+static const int NETWORK_SIZE = 100;
+
+class MyFindCallback: public FindCallback {
+    public:
+        void onFound(std::vector<std::pair<Distance, Peer> >& result){
+            log::info << "The DHT found the closest Ids with distance : " << log::endl;
+            std::vector<std::pair<Distance, Peer> >::iterator it;
+            for(it = result.begin(); it != result.end(); it ++){
+                log::info << (*it).first << log::endl;
+            }
+        }
+};
 
 void test_dht_network(){
     // Create Net Select for relay
@@ -334,7 +345,8 @@ void test_dht_network(){
     for(int i=0; i<NETWORK_SIZE; i++) {
         DHT::Id id;
         random_id(id);
-        std::ostringstream o("DHT");
+        std::ostringstream o;
+        o << "DHT";
         o << i;
         dhtNodes[i] = new DHT::Node(id, *n2npNodes[i], o.str());
         n2npNodes[i]->addModule("DHT", dhtNodes[i]);
@@ -352,6 +364,15 @@ void test_dht_network(){
     log::info << "Done sending PING commands, waiting for the messages to be processed" << log::endl;
 
     sleep(10); //Wait for the processing of the messages
+
+    log::info << "Launching the FIND query" << log::endl;
+
+    Id idToFind;
+    random_id(idToFind);
+
+    dhtNodes[0]->findClosest(new MyFindCallback(), 5, idToFind);
+
+    sleep(10);
 }
 
 

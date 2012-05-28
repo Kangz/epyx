@@ -58,7 +58,9 @@ namespace DHT
     }
 
     void InternalNode::findClosest(FindCallback* cb, int count, Id& idToFind) {
-        actors.add(new FinderActor(*this, idToFind, count, cb));
+        FinderActor* a = new FinderActor(*this, idToFind, count, cb);
+        actors.add(a);
+        a->start();
     }
 
     void InternalNode::send(Packet& pkt, const Target& target) {

@@ -31,6 +31,7 @@ namespace DHT
 
     SingularFindActor::SingularFindActor(InternalNode& n, ActorId<FinderActorData> p, Peer& peer, Id& requested)
     :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), target(peer), parent(p){
+        //log::debug << "SingularFind created for " << peer.id << log::endl;
         Packet pkt;
         pkt.method = M_FIND;
         pkt.connectionId = processId;
@@ -41,6 +42,7 @@ namespace DHT
     }
 
     void SingularFindActor::treat(ProcessActorData& msg) {
+        //log::debug << "SingularFind had a result for " << target.id << log::endl;
         if(msg.pkt->method == M_FOUND && msg.pkt->status == 0 && msg.pkt->count > 0) {
             parent.post(*(new FinderActorData(target, msg.pkt->foundPeers, true)));
             msg.pkt->foundPeers = NULL;
@@ -51,6 +53,7 @@ namespace DHT
     }
 
     void SingularFindActor::timeout() {
+        //log::debug << "SingularFind timedout for " << target.id << log::endl;
         parent.post(*(new FinderActorData(target, NULL, false)));
         kill();
     }
