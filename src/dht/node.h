@@ -12,6 +12,7 @@
 #include "kbucket.h"
 #include "packet.h"
 #include "target.h"
+#include "finder-actor.h"
 
 namespace Epyx
 {
@@ -32,6 +33,7 @@ namespace DHT
 
         //API
         void sendPing(Target& t);
+        void findClosest(FindCallback* cb, int count, Id& idToFind);
 
     private:
         Id id;

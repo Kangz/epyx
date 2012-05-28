@@ -57,6 +57,10 @@ namespace DHT
         }
     }
 
+    void InternalNode::findClosest(FindCallback* cb, int count, Id& idToFind) {
+        actors.add(new FinderActor(*this, idToFind, count, cb));
+    }
+
     void InternalNode::send(Packet& pkt, const Target& target) {
         this->parent.send(pkt, target);
     }

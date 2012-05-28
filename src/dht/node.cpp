@@ -39,5 +39,8 @@ namespace DHT
         n.sendPing(t);
     }
 
+    void Node:: findClosest(FindCallback* cb, int count, Id& idToFind) {
+        n.findClosest(cb, count, idToFind);
+    }
 }
 }

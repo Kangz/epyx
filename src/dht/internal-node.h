@@ -16,6 +16,7 @@
 #include "static-actors.h"
 #include "process-actors.h"
 #include "target.h"
+#include "finder-actor.h"
 
 namespace Epyx
 {
@@ -34,6 +35,8 @@ namespace DHT
         ~InternalNode();
 
         void processPacket(Packet& pkt, Target& target);
+        void findClosest(FindCallback* cb, int count, Id& idToFind);
+
         void send(Packet& pkt, const Target& target);
 
         long registerProcessActor(Actor<ProcessActorData>& actor, int timeout = 0);
