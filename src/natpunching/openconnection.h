@@ -20,7 +20,7 @@ namespace Epyx {
                 //Initialising the state Machine
                 OpenConnection(N2NP::Node& node, N2NP::NodeId & remoteHost, bool client = true);
                 //Avancing from a state to another
-                void getMessage(std::string command, std::map<std::string,std::string> headers);
+                void getMessage(const std::string& command, const std::map<std::string,std::string>& headers);
             protected:
                 void run();
             private:
@@ -30,8 +30,12 @@ namespace Epyx {
                 bool client_tried;
                 bool server_tried;
                 method tested_method;
-                N2NP::Node node;
-                TCPSocket socket;
+                N2NP::Node *node;
+                TCPSocket *socket;
+
+                // Disable copy
+                OpenConnection(const OpenConnection&);
+                const OpenConnection& operator=(const OpenConnection&);
         };
         
     } // namespace DirectConnection

@@ -24,7 +24,7 @@ namespace Epyx {
             sock->setLocalAddress(Address((struct sockaddr*) &localAddr));
         }
         Address Listener::getAddress(){
-            if (sock != null)
+            if (sock != NULL)
                 return sock->getAddress();
             else
                 return Address();
@@ -34,7 +34,7 @@ namespace Epyx {
             socklen_t localAddrLen;
             localAddrLen = sizeof localAddr;
             
-            ::getsockname(newfd,(struct sockaddr*) &localAddr,&localAddrLen);
+            ::getsockname(sock->getFd(),(struct sockaddr*) &localAddr,&localAddrLen);
             return Address ( (struct sockaddr*) &localAddr);
         }
         TCPSocket * Listener::getSocket(){

@@ -6,10 +6,10 @@
 namespace Epyx {
     namespace DirectConnection {
         
-        class Dispatcher : public Epyx::N2NP::Module
+        class Dispatcher : public N2NP::Module
         {
             public:
-                void fromN2NP(Node &node, NodeId from, const char *data, unsigned int size);
+                void fromN2NP(N2NP::Node &node, N2NP::NodeId from, const char *data, unsigned int size);
         };
         
     } // namespace DirectConnection

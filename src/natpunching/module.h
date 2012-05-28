@@ -14,11 +14,11 @@ namespace Epyx {
             public:
                 // Will Call DirectConnection::OpenConnection class which opens an independant Thread
                 // Use to be the Client
-                static OpenConnection openDirectConnection(N2NP::Node &node, N2NP::NodeId &remoteHost); 
+                static OpenConnection* openDirectConnection(N2NP::Node &node, N2NP::NodeId &remoteHost); 
                 // Use to be the server
-                static OpenConnection openDirectConnectionServer(N2NP::Node &node, N2NP::NodeId &remoteHost);
-                static Epyx::atom::Map<Epyx::N2NP::NodeId,OpenConnection> NodeConnect;
-                static void init(Node &node);
+                static OpenConnection* openDirectConnectionServer(N2NP::Node &node, N2NP::NodeId &remoteHost);
+                static atom::Map<N2NP::NodeId,OpenConnection*> NodeConnect;
+                static void init(N2NP::Node &node);
                 //static Epyx::NetSelect ConnectionListeners;
             private:
                 
