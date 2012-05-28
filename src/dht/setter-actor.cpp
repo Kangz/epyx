@@ -74,6 +74,7 @@ namespace DHT
                 }
                 pendingRequests = msg.peersToAsk->size();
             }
+            found = true;
             return;
         }
 
@@ -83,7 +84,7 @@ namespace DHT
 
         pendingRequests --;
         if(pendingRequests == 0) {
-            if(nErrors <= 3) {
+            if(nErrors > 3) {
                 callback->onSet();
                 delete callback;
                 kill();

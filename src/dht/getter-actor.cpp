@@ -73,6 +73,7 @@ namespace DHT
                 }
                 pendingRequests = msg.peersToAsk->size();
             }
+            found = true;
             return;
         }
 
