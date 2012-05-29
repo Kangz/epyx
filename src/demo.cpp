@@ -163,7 +163,7 @@ int main(int argc, char **argv) {
         system("clear");
 	
         
-        Epyx::N2NP::NodeId n(name,relayAddr);
+        Epyx::N2NP::NodeId n(name);
 	Demo::nodeid = n;
 	Demo::affichage();
         Demo::run();
