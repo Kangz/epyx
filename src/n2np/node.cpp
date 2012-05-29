@@ -54,6 +54,12 @@ namespace Epyx
             }
             EPYX_ASSERT(selected != NULL);
 
+            // Statistics
+            unsigned int weight = (size > 1000) ? 1000 : size;
+            unsigned int cnt = mruNodeIds.getAndLock(to, 0);
+            mruNodeIds.setLocked(to, cnt + weight);
+            mruNodeIds.endUnlock();
+
             return n2npPkt->send(*selected);
         }
 
@@ -83,12 +89,6 @@ namespace Epyx
             }
             bool result = this->send(to, method, data, size);
             delete[] data;
-
-            // Statistics
-            unsigned int weight = (size > 1000) ? 1000 : size;
-            unsigned int cnt = mruNodeIds.getAndLock(to, 0);
-            mruNodeIds.setLocked(to, cnt + weight);
-            mruNodeIds.endUnlock();
 
             return result;
         }
