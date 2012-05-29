@@ -47,6 +47,8 @@ target_link_libraries(test-n2np pthread cryptopp)
 
 add_executable(demo ${epyx_api_sources} src/demo.cpp)
 target_link_libraries(demo pthread cryptopp)
+add_executable(demo-ok ${epyx_api_sources} src/demo-ok.cpp)
+target_link_libraries(demo-ok pthread cryptopp)
 add_executable(demoframe ${epyx_api_sources} src/demoframe.cpp)
 target_link_libraries(demoframe pthread cryptopp)
 
