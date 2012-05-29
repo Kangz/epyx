@@ -36,6 +36,14 @@ void random_id(std::string& s){
     s = ss.str();
 }
 
+void zero_id(Id& id){
+    uint8_t* dist = (uint8_t*) &id.data;
+    for (int i = 0; i < Id::STORAGE_SIZE; i++) {
+        *dist = (uint8_t) 0;
+        dist ++;
+    }
+}
+
 void test_id_distance(){
     Id a, b;
     random_id(a);
@@ -417,7 +425,12 @@ void test_dht_network(Epyx::API& epyx, bool prod){
     DHT::Node* dhtNodes[NETWORK_SIZE];
     for(int i=0; i<NETWORK_SIZE; i++) {
         DHT::Id id;
-        random_id(id);
+        if(prod && i == 0){
+            zero_id(id);
+        }else{
+            random_id(id);
+        }
+        log::debug<<id<<log::endl;
         std::ostringstream o;
         o << "DHT";
         o << i;
