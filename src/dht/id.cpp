@@ -94,6 +94,12 @@ namespace DHT
 
         dist --;
 
+        //If it is still NULL that means dist === 0
+        if (firstActiveChar == NULL) {
+            firstActive = Id::LENGTH - 1;
+            return;
+        }
+
         unsigned char active = *firstActiveChar;
 
         for(int i=0; i<8; i++){

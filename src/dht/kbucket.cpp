@@ -29,27 +29,29 @@ namespace DHT
 
         std::list<Peer*>::iterator peer_it;
 
+        std::list<Peer*>& peers = bucket.peers;
+
         //Search for the peer in the bucket to update its lastReceiveTime
-        for (peer_it = bucket.peers.begin(); peer_it != bucket.peers.end(); peer_it++) {
+        for (peer_it = peers.begin(); peer_it != peers.end(); ++peer_it) {
             Peer* peer = *peer_it;
             if (peerId == peer->id) {
                 Peer* temp = peer;
-                peer_it = bucket.peers.erase(peer_it);
+                peer_it = peers.erase(peer_it);
                 temp->lastReceiveTime = now;
                 temp->n2npId = n2npId;
-                bucket.peers.push_back(temp);
+                peers.push_back(temp);
                 lock.unlock();
                 return;
             }
         }
 
         //We want to add the peer to the bucket if it is not full or if the oldest peer in it is too old
-        if (bucket.peers.size()<NODES_PER_BUCKET) {
+        if (peers.size()<NODES_PER_BUCKET) {
             add=true;
         } else {
-            Peer* peerFront = bucket.peers.front();
+            Peer* peerFront = peers.front();
             if (now - peerFront->lastReceiveTime>MAX_INACTIVE_PERIOD) {
-                bucket.peers.pop_front();
+                peers.pop_front();
                 add=true;
                 delete peerFront;
             }
@@ -61,7 +63,7 @@ namespace DHT
             newPeer->id=peerId;
             newPeer->lastReceiveTime=now;
             newPeer->n2npId = n2npId;
-            bucket.peers.push_back(newPeer);
+            peers.push_back(newPeer);
         }
 
         lock.unlock();
