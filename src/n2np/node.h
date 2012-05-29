@@ -13,6 +13,7 @@
 #include "../core/atom/counter.h"
 #include "../core/atom/map.h"
 #include "../core/timeout.h"
+#include <stack>
 
 namespace Epyx
 {
@@ -97,6 +98,8 @@ namespace Epyx
              * @return nodeAddressFromRelay
              */
             const Address& getNodeAddress() const;
+
+            void askForDirectConnectionIds(std::stack<NodeId>& stackIds);
 
         protected:
             /**

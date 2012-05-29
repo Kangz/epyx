@@ -51,6 +51,13 @@ namespace Epyx
         void kill(int id);
 
         /**
+         * @brief Get a reader
+         * @param id
+         * @return the reader, or NULL if it does not exist
+         */
+        NetSelectReader* get(int id);
+
+        /**
          * @brief Get the number of workers
          * @return the current number of workers
          */
@@ -69,7 +76,8 @@ namespace Epyx
         /**
          * @brief NetSelectReader information
          */
-        struct NetSelectReaderInfo {
+        struct NetSelectReaderInfo
+        {
             // Reader
             NetSelectReader* reader;
 
@@ -79,7 +87,7 @@ namespace Epyx
             // It has data to be read (it is in the blocking queue)
             bool inQueue;
 
-            NetSelectReaderInfo(NetSelectReader *nsr);
+            NetSelectReaderInfo(NetSelectReader * nsr);
             ~NetSelectReaderInfo();
         };
 

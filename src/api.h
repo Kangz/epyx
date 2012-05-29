@@ -98,7 +98,16 @@ namespace Epyx
 
         // Node index (map index => index)
         atom::Map<int, int> nodeIndexes;
+        class OpenConnThread : public Thread
+        {
+        public:
+            OpenConnThread(API *api);
+        protected:
+            void run();
+        private:
+            API *api;
+        };
     };
 }
 
-#endif /* EPYX_EPYX_H */
+#endif /* EPYX_API_H */

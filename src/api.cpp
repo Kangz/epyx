@@ -1,4 +1,10 @@
+#include <stack>
+
+
+#include "natpunching/module.h"
+
 #include "api.h"
+#include "natpunching/openconnection.h"
 
 namespace Epyx
 {
@@ -107,5 +113,37 @@ namespace Epyx
     void API::waitNet() {
         EPYX_ASSERT(netsel != NULL);
         netsel->wait();
+    }
+
+    API::OpenConnThread::OpenConnThread(API *api)
+    :api(api) {
+        EPYX_ASSERT(api != NULL);
+    }
+
+    void API::OpenConnThread::run() {
+        EPYX_ASSERT(api != NULL);
+        while (true) {
+            // Get node indexes from the locked map
+            std::list<int> nodeIndexesList;
+            for (atom::Map<int, int>::const_iterator i = api->nodeIndexes.beginLock();
+                !api->nodeIndexes.isEnd(i); i++) {
+                nodeIndexesList.push_back(i->second);
+            }
+            api->nodeIndexes.endUnlock();
+
+            // Treat each node
+            for (std::list<int>::const_iterator i = nodeIndexesList.begin();
+                i != nodeIndexesList.end(); i++) {
+                NetSelectReader *nodeAsReader = api->netsel->get(*i);
+                N2NP::Node *node = static_cast<N2NP::Node*> (nodeAsReader);
+                std::stack<N2NP::NodeId> idLists;
+                node->askForDirectConnectionIds(idLists);
+                while (!idLists.empty()) {
+                    N2NP::NodeId id = idLists.top();
+                    idLists.pop();
+                    DirectConnection::Module::openDirectConnection(*node, id);
+                }
+            }
+        }
     }
 }

@@ -59,6 +59,13 @@ namespace Epyx
         }
     }
 
+    NetSelectReader* NetSelect::get(int id) {
+        NetSelectReaderInfo *info = readers.get(id, NULL);
+        if (info == NULL)
+            return NULL;
+        return info->reader;
+    }
+
     int NetSelect::getNumWorkers() const {
         return workers.getNumWorkers();
     }

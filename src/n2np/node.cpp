@@ -3,6 +3,7 @@
 #include "../net/tcpsocket.h"
 #include "../core/string.h"
 #include <cstring>
+#include <stack>
 
 #ifndef EPYX_N2NP_NODE_DEBUG
 /**
@@ -126,6 +127,17 @@ namespace Epyx
 
         const Address& Node::getNodeAddress() const {
             return nodeAddressFromRelay;
+        }
+
+        void Node::askForDirectConnectionIds(std::stack<NodeId>& stackIds) {
+            for (atom::Map<NodeId, unsigned int>::iterator i = mruNodeIds.beginLock();
+                !mruNodeIds.isEnd(i); i++) {
+                if (directSockets.get(i->first, NULL) == NULL) {
+                    stackIds.push(i->first);
+                    i->second = 0;
+                }
+            }
+            mruNodeIds.endUnlock();
         }
 
         void Node::eat(const char *data, long size) {

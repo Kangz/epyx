@@ -22,41 +22,40 @@ file(GLOB_RECURSE crypto_sources src/crypto/*)
 
 # More general file sets, with deps
 file(GLOB epyx_api_sources src/api.cpp
-    ${core_sources} ${n2np_sources} ${net_sources} ${parser_sources})
+    ${core_sources} ${crypto_sources} ${dht_sources} ${n2np_sources}
+    ${natpunching_sources} ${net_sources} ${parser_sources} ${tinyxml_sources})
 
 # Test executables
-add_executable(test-thread ${epyx_api_sources} src/test-thread.cpp)
-target_link_libraries(test-thread pthread)
+#add_executable(test-thread ${epyx_api_sources} src/test-thread.cpp)
+#target_link_libraries(test-thread pthread cryptopp)
 
-add_executable(test-server ${epyx_api_sources} src/test-server.cpp)
-target_link_libraries(test-server pthread)
+#add_executable(test-server ${epyx_api_sources} src/test-server.cpp)
+#target_link_libraries(test-server pthread cryptopp)
 
-add_executable(test-parser ${epyx_api_sources} src/test-parser.cpp)
-target_link_libraries(test-parser pthread)
+#add_executable(test-parser ${epyx_api_sources} src/test-parser.cpp)
+#target_link_libraries(test-parser pthread cryptopp)
 
-add_executable(test-natpunching ${epyx_api_sources} src/test-natpunching.cpp
-    ${natpunching_sources} ${tinyxml_sources})
-target_link_libraries(test-natpunching pthread)
+#add_executable(test-natpunching ${epyx_api_sources} src/test-natpunching.cpp)
+#target_link_libraries(test-natpunching pthread cryptopp)
 
-add_executable(test-local-n2np ${epyx_api_sources} src/test-local-n2np.cpp
-    ${localn2np_sources})
-target_link_libraries(test-local-n2np pthread)
+#add_executable(test-local-n2np ${epyx_api_sources} src/test-local-n2np.cpp
+#    ${localn2np_sources})
+#target_link_libraries(test-local-n2np pthread cryptopp)
 
 add_executable(test-n2np ${epyx_api_sources} src/test-n2np.cpp)
-target_link_libraries(test-n2np pthread)
+target_link_libraries(test-n2np pthread cryptopp)
 
 add_executable(demo ${epyx_api_sources} src/demo.cpp)
-target_link_libraries(demo pthread)
+target_link_libraries(demo pthread cryptopp)
 add_executable(demoframe ${epyx_api_sources} src/demoframe.cpp)
-target_link_libraries(demoframe pthread)
+target_link_libraries(demoframe pthread cryptopp)
 
-add_executable(test-dht ${epyx_api_sources} src/test-dht.cpp
-    ${dht_sources} ${localn2np_sources} ${crypto_sources})
+add_executable(test-dht ${epyx_api_sources} src/test-dht.cpp ${localn2np_sources})
 target_link_libraries(test-dht pthread cryptopp)
 
-add_executable(test-crypto ${core_sources} ${crypto_sources} src/test-crypto.cpp)
-target_link_libraries(test-crypto pthread cryptopp)
+#add_executable(test-crypto ${core_sources} ${crypto_sources} src/test-crypto.cpp)
+#target_link_libraries(test-crypto pthread cryptopp)
 
 # Real programs
 add_executable(simple-relay ${epyx_api_sources} src/simple-relay.cpp)
-target_link_libraries(simple-relay pthread)
+target_link_libraries(simple-relay pthread cryptopp)
