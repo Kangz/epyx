@@ -61,7 +61,8 @@ namespace Epyx
 
         mut.lock();
         relay = new N2NP::Relay(addr);
-        nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(addr, nbConn), relay));
+        //nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(addr, nbConn), relay));
+        nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(Address("0.0.0.0", addr.getPort()), nbConn), relay));
         mut.unlock();
     }
 
@@ -142,6 +143,7 @@ namespace Epyx
                     N2NP::NodeId id = idLists.top();
                     idLists.pop();
                     DirectConnection::Module::openDirectConnection(*node, id);
+                    sleep(2);
                 }
             }
         }

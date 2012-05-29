@@ -325,17 +325,70 @@ class MySetCallback: public SetCallback {
         }
 };
 
-void test_dht_network(bool prod){
+Address getRelayAddress(int port) {
+    // No specified interface : find one
+    std::vector<Epyx::Address> addrs = Epyx::Address::getIfaceAdresses(port);
+    std::vector<Epyx::Address> externAddresses;
+    std::vector<Epyx::Address> localAddresses;
+
+    for (std::vector<Epyx::Address>::const_iterator iaddr = addrs.begin();
+        iaddr != addrs.end(); iaddr++) {
+        // Keep only IPv4
+        std::string ipaddr = iaddr->getIp();
+        if (ipaddr.empty() || ipaddr.find(':') != std::string::npos)
+            continue;
+        // Difference between local and extern
+        if (ipaddr.length() > 3 && !ipaddr.substr(0, 4).compare("127."))
+            localAddresses.push_back(*iaddr);
+        else
+            externAddresses.push_back(*iaddr);
+    }
+
+    if (!externAddresses.empty()) {
+        if (externAddresses.size() >= 2) {
+            Epyx::log::info << "More than one extern network interface found. Using first of:"
+                << Epyx::log::endl;
+            for (std::vector<Epyx::Address>::const_iterator iaddr = externAddresses.begin();
+                iaddr != externAddresses.end(); iaddr++) {
+                Epyx::log::info << "* " << *iaddr << Epyx::log::endl;
+            }
+        } else {
+            Epyx::log::info << "Found extern network interface " << externAddresses[0]
+                << Epyx::log::endl;
+        }
+        return externAddresses[0];
+    } else if (!localAddresses.empty()) {
+        Epyx::log::info << "No extern network interface found, using local."
+            << Epyx::log::endl;
+        if (localAddresses.size() >= 2) {
+            Epyx::log::info << "More than one local interface found. Using first of:"
+                << Epyx::log::endl;
+            for (std::vector<Epyx::Address>::const_iterator iaddr = localAddresses.begin();
+                iaddr != localAddresses.end(); iaddr++) {
+                Epyx::log::info << "* " << *iaddr << Epyx::log::endl;
+            }
+        } else {
+            Epyx::log::info << "Found local network interface " << localAddresses[0]
+                << Epyx::log::endl;
+        }
+        return localAddresses[0];
+    } else {
+        Epyx::log::info << "No network interface found, exiting."
+            << Epyx::log::endl;
+        return Address();
+    }
+}
+void test_dht_network(Epyx::API& epyx, bool prod){
     // Create Net Select for relay
     NetSelect *selectRelay = new NetSelect(10, "wRelay");
     selectRelay->setName("NetSelectRelay");
     selectRelay->start();
 
     // Create relay
-    Address addr("127.0.0.1:4242");
-    N2NP::Relay *relay = new N2NP::Relay(addr);
-    selectRelay->add(new N2NP::RelayServer(new TCPServer(addr, 50), relay));
-    log::info << "Start Relay " << relay->getId() << log::endl;
+    Address addr = getRelayAddress(4242);
+    if (addr.empty())
+        return;
+    epyx.spawnRelay(addr, 50);
 
     // Create Net Select for nodes
     Epyx::NetSelect *selectNodes = new Epyx::NetSelect(10, "WNodes");
@@ -441,7 +494,8 @@ int main(){
         //test_kbucket();
         //test_dhtpacket();
         //test_dht_n2np();
-        test_dht_network(true); // HACK for the presentation
+        epyx.setNetWorkers(20);
+        test_dht_network(epyx, true); // HACK for the presentation
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }
