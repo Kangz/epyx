@@ -18,9 +18,11 @@ namespace Epyx {
                 Address getAddress();
                 Address getLocalAddress();
                 char* getData();
+                bool hasAccepted();
             protected:
                 void run();
             private:
+                bool hasAccept;
                 char* data;
                 TCPServer* srv;
                 TCPSocket * sock;

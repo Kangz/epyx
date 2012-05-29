@@ -4,7 +4,7 @@ namespace Epyx {
     namespace DirectConnection {
         
         Listener::Listener(TCPServer *srv)
-            :srv(srv)
+            :srv(srv), hasAccept(false)
         {
         }
         void Listener::run(){
@@ -19,6 +19,7 @@ namespace Epyx {
             int newfd = srv->getFd();
             
             ::accept(newfd,(struct sockaddr*) &clientAddr, &clientAddrLen);
+            hasAccept = true;
             sock = new TCPSocket(newfd, Address((struct sockaddr*) &clientAddr));
             ::getsockname(newfd,(struct sockaddr*) &localAddr,&localAddrLen);
             sock->setLocalAddress(Address((struct sockaddr*) &localAddr));
@@ -29,6 +30,10 @@ namespace Epyx {
             else
                 return Address();
         }
+        bool Listener::hasAccepted(){
+            return this->hasAccept;
+        }
+
         Address Listener::getLocalAddress(){
             struct sockaddr_storage localAddr;
             socklen_t localAddrLen;
