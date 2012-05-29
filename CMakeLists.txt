@@ -49,8 +49,6 @@ add_executable(demo ${epyx_api_sources} src/demo.cpp)
 target_link_libraries(demo pthread)
 add_executable(demoframe ${epyx_api_sources} src/demoframe.cpp)
 target_link_libraries(demoframe pthread)
-add_executable(testinput ${epyx_api_sources} src/testinput.cpp)
-target_link_libraries(testinput pthread)
 
 add_executable(test-dht ${epyx_api_sources} src/test-dht.cpp
     ${dht_sources} ${localn2np_sources} ${crypto_sources})
