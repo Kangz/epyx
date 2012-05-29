@@ -29,7 +29,11 @@ namespace DHT
     void Storage::set(const std::string& key, const std::string& datum){
         lock.lock();
         Value v(datum);
-        data.insert(std::make_pair(key, datum));
+        if(data.find(key) == data.end()) {
+            data.insert(std::make_pair(key, datum));
+        } else {
+            (*data.find(key)).second = datum;
+        }
         lock.unlock();
     }
 
