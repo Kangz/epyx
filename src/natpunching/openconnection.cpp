@@ -68,6 +68,7 @@ namespace Epyx {
         }
         
         void OpenConnection::serverStateOpen(){
+            std::string testMessage ="Test";
             //First we open a listening socket on an available port
             Listener sockListen(new TCPServer(Address("0.0.0.0:0"),20));
             sockListen.start();
@@ -82,10 +83,28 @@ namespace Epyx {
             GTTPacket pkt;
             pkt.method = "SEND";
             pkt.headers["Address"] = addr.toString();
+            pkt.headers["Message"] = testMessage;
+            this->node->send(this->remoteHost,"DIRECTCONNECTION",pkt);
+            char[10] data;
+            sockListen.getSocket()->recv((void *) data,10);
+            if (std::string(data) == testMessage){
+                pkt.method="ESTABLISHED";
+                node->offerDirectConn(this->remoteHost,sockListen.getSocket());
+                node->send(this->remoteHost,"DIRECTCONNECTION",pkt);
+            }else{
+                pkt.method="DID_NOT_WORK";
+                sockListen.getSocket()->close();
+                sockListen.term();
+                node->send(this->remoteHost,"DIRECTCONNECTION",pkt);
+                this->getMessage("DID_NOT_WORK", std::map<std::string, std::string>());
+            }
                     
         }
         void OpenConnection::run(){
             if (etat == STATE_SERVER){
+                GTTPacket pkt;
+                pkt.method = "SEND";
+                
                 serverStateOpen();
             }else if (etat == STATE_CLIENT){
                 
