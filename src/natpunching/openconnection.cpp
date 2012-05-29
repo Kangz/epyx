@@ -85,7 +85,7 @@ namespace Epyx {
             pkt.headers["Address"] = addr.toString();
             pkt.headers["Message"] = testMessage;
             this->node->send(this->remoteHost,"DIRECTCONNECTION",pkt);
-            char[10] data;
+            char data[10];
             sockListen.getSocket()->recv((void *) data,10);
             if (std::string(data) == testMessage){
                 pkt.method="ESTABLISHED";
