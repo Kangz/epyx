@@ -23,8 +23,13 @@ namespace Epyx
 
             // Build a random unique node name
             std::ostringstream nodeNameStream;
-            nodeNameStream << String::fromInt(nodeNextId.getIncrement())
-                << '-' << sock->getAddress();
+            long number = nodeNextId.getIncrement();
+            if(number == 1){
+                nodeNameStream << "self";
+            }else{
+                nodeNameStream << String::fromInt(nodeNextId.getIncrement())
+                    << '-' << sock->getAddress();
+            }
             const std::string nodeName = nodeNameStream.str();
             const NodeId nodeid(nodeName.c_str(), relayAddr);
 
