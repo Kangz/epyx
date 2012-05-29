@@ -59,19 +59,19 @@ namespace DHT
 
     void InternalNode::findClosest(FindCallback* cb, int count, Id& idToFind) {
         FinderActor* a = new FinderActor(*this, idToFind, count, cb);
-        actors.add(a);
+        actors.add(a, 5000);//The timeout is specific for our demo
         a->start();
     }
 
     void InternalNode::getValue(GetCallback* cb, const std::string& key) {
         GetterActor* a = new GetterActor(*this, key, cb);
-        actors.add(a);
+        actors.add(a, 5000);//The timeout is specific for our demo
         a->start();
     }
 
     void InternalNode::setValue(SetCallback* cb, const std::string& key, const std::string& value) {
         SetterActor* a = new SetterActor(*this, key, value, cb);
-        actors.add(a);
+        actors.add(a, 5000);//The timeout is specific for our demo
         a->start();
     }
 

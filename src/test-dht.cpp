@@ -325,7 +325,7 @@ class MySetCallback: public SetCallback {
         }
 };
 
-void test_dht_network(){
+void test_dht_network(bool prod){
     // Create Net Select for relay
     NetSelect *selectRelay = new NetSelect(10, "wRelay");
     selectRelay->setName("NetSelectRelay");
@@ -380,49 +380,56 @@ void test_dht_network(){
             dhtNodes[i]->sendPing(p);
         }
     }
-
     log::info << "Done sending PING commands, waiting for the messages to be processed" << log::endl;
 
     sleep(10); //Wait for the processing of the messages
 
-    log::info << "Launching the FIND query" << log::endl;
+    if(!prod){ 
+    
+        log::info << "Launching the FIND query" << log::endl;
 
-    Id idToFind;
-    random_id(idToFind);
+        Id idToFind;
+        random_id(idToFind);
 
-    dhtNodes[0]->findClosest(new MyFindCallback(), 5, idToFind);
+        dhtNodes[0]->findClosest(new MyFindCallback(), 5, idToFind);
 
-    sleep(3);
+        sleep(3);
 
-    log::info << "Launching the GET query (should fail)" << log::endl;
+        log::info << "Launching the GET query (should fail)" << log::endl;
 
-    dhtNodes[0]->getValue(new MyGetCallback(), "value1");
+        dhtNodes[0]->getValue(new MyGetCallback(), "value1");
 
-    sleep(3);
+        sleep(3);
 
-    log::info << "Launching the SET query" << log::endl;
+        log::info << "Launching the SET query" << log::endl;
 
-    dhtNodes[1]->setValue(new MySetCallback(), "value1", "42");
+        dhtNodes[1]->setValue(new MySetCallback(), "value1", "42");
 
-    sleep(3);
+        sleep(3);
 
-    log::info << "Launching the GET query (should work)" << log::endl;
+        log::info << "Launching the GET query (should work)" << log::endl;
 
-    dhtNodes[0]->getValue(new MyGetCallback(), "value1");
+        dhtNodes[0]->getValue(new MyGetCallback(), "value1");
 
-    sleep(3);
+        sleep(3);
 
-    log::info << "Launching a synchronous SET query" << log::endl;
+        log::info << "Launching a synchronous SET query" << log::endl;
 
-    dhtNodes[1]->setValueSync("value1", "42<-w00t");
+        dhtNodes[1]->setValueSync("value1", "42<-w00t");
 
-    log::info << "Launching a synchronous GET query" << log::endl;
+        log::info << "Launching a synchronous GET query" << log::endl;
 
-    std::string value;
+        std::string value;
 
-    dhtNodes[0]->getValueSync("value1", value);
+        dhtNodes[0]->getValueSync("value1", value);
 
-    log::info << "dht[\"value1\"]=\"" << value << "\"" << log::endl;
+        log::info << "dht[\"value1\"]=\"" << value << "\"" << log::endl;
+    } else {
+        log::info<<"Prod environnement STARTED"<<log::endl;
+        while(true){
+            sleep(1);
+        } 
+    }
 }
 
 
@@ -434,7 +441,7 @@ int main(){
         //test_kbucket();
         //test_dhtpacket();
         //test_dht_n2np();
-        test_dht_network();
+        test_dht_network(true); // HACK for the presentation
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }
