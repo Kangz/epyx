@@ -39,6 +39,8 @@ namespace DHT
         void findClosest(FindCallback* cb, int count, Id& idToFind);
         void getValue(GetCallback* cb, const std::string& key);
         void setValue(SetCallback* cb, const std::string& key, const std::string& value);
+        bool getValueSync(const std::string& key, std::string& result);
+        bool setValueSync(const std::string& key, const std::string& value);
 
     private:
         Id id;

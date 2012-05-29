@@ -54,5 +54,73 @@ namespace DHT
     void Node::setValue(SetCallback* cb, const std::string& key, const std::string& value) {
         n.setValue(cb, key, value);
     }
+
+    class NodeSyncGetCallback: public GetCallback {
+        Condition* cond;
+        std::string* whereResultIsStored;
+        bool* got;
+        public:
+            NodeSyncGetCallback(Condition* c, std::string* storage, bool* b) {
+                cond = c;
+                got = b;
+                whereResultIsStored = storage;
+            }
+            void onGot(const std::string& result) {
+                *got = true;
+                *whereResultIsStored = result;
+                cond->lock();
+                cond->notify();
+                cond->unlock();
+            }
+            void onError() {
+                *got = false;
+                cond->lock();
+                cond->notify();
+                cond->unlock();
+            }
+    };
+
+    class NodeSyncSetCallback: public SetCallback {
+        Condition* cond;
+        bool* set;
+        public:
+                NodeSyncSetCallback(Condition* c, bool* b) {
+                    cond = c;
+                    set = b;
+                }
+                void onSet() {
+                    *set = true;
+                    cond->lock();
+                    cond->notify();
+                    cond->unlock();
+                }
+                void onError() {
+                    *set = false;
+                    cond->lock();
+                    cond->notify();
+                    cond->unlock();
+                }
+    };
+
+    bool Node::getValueSync(const std::string& key, std::string& result) {
+        Condition cond;
+        bool got;
+        cond.lock();
+        getValue(new NodeSyncGetCallback(&cond, &result, &got), key);
+        cond.wait();
+        cond.unlock();
+        return got;
+    }
+
+    bool Node::setValueSync(const std::string& key, const std::string& value) {
+        Condition cond;
+        bool set;
+        cond.lock();
+        setValue(new NodeSyncSetCallback(&cond, &set), key, value);
+        cond.wait();
+        cond.unlock();
+        return set;
+    }
+
 }
 }

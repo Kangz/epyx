@@ -402,7 +402,7 @@ void test_dht_network(){
 
     log::info << "Launching the SET query" << log::endl;
 
-    dhtNodes[0]->setValue(new MySetCallback(), "value1", "42");
+    dhtNodes[1]->setValue(new MySetCallback(), "value1", "42");
 
     sleep(3);
 
@@ -411,6 +411,18 @@ void test_dht_network(){
     dhtNodes[0]->getValue(new MyGetCallback(), "value1");
 
     sleep(3);
+
+    log::info << "Launching a synchronous SET query" << log::endl;
+
+    dhtNodes[1]->setValueSync("value1", "42<-w00t");
+
+    log::info << "Launching a synchronous GET query" << log::endl;
+
+    std::string value;
+
+    dhtNodes[0]->getValueSync("value1", value);
+
+    log::info << "dht[\"value1\"]=\"" << value << "\"" << log::endl;
 }
 
 
