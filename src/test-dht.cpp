@@ -300,7 +300,7 @@ void test_dht_n2np(){
     sleep(1); //Wait for the processing of the messages
 }
 
-static const int NETWORK_SIZE = 100;
+static const int NETWORK_SIZE = 10;
 
 class MyFindCallback: public FindCallback {
     public:

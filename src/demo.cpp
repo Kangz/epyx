@@ -72,7 +72,7 @@ void Demo::run(){
 			msg = std::string("");
 		}
 		affichage();
-        }
+    }
 }
 
 
@@ -85,7 +85,6 @@ public:
 };
 
 void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size) {
-
     Demo::historique.append(LightGreen).append(sentence).append(data).append(Restore);
 	Demo::affichage();
 }
@@ -128,7 +127,13 @@ int main(int argc, char **argv) {
         zero_id(peer.id);
         peer.n2npId = N2NP::NodeId("self", node->getId().getRelay());
         dhtNode->sendPing(peer);
-        dhtNode->setValueSync(Demo::pseudo, node->getId().toString());
+
+        sleep(1);
+        
+        if(!dhtNode->setValueSync(Demo::pseudo, node->getId().toString())){
+            std::cout << "En attente...\n";
+            sleep(1);
+        }
 
         
         std::cout<< "Entrez le pseudo que vous voulez contacter : ";
@@ -140,7 +145,9 @@ int main(int argc, char **argv) {
             std::cout << "En attente...\n";
             sleep(1);
         }
-        
+       
+        log::debug<<pseudo_ext<<" est dans "<<name<<log::endl;
+
         Displayer displayModule;
         
         displayModule.sentence = std::string("<").append(pseudo_ext).append("> : ");
