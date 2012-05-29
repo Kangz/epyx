@@ -2,6 +2,7 @@
 #include "api.h"
 #include "n2np/relay.h"
 #include "n2np/node.h"
+#include "dht/node.h"
 #include <strings.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -10,6 +11,25 @@
 #define LightGreen "\033[01;33m"
 #define LightBlue "\033[01;34m"
 #define Restore "\033[0m"
+
+using namespace Epyx;
+
+void zero_id(DHT::Id& id){
+    uint8_t* dist = (uint8_t*) &id.data;
+    for (int i = 0; i < DHT::Id::STORAGE_SIZE; i++) {
+        *dist = (uint8_t) 0;
+        dist ++;
+    }
+}
+
+void random_id(DHT::Id& id){
+    uint8_t* dist = (uint8_t*) &id.data;
+    for (int i = 0; i < DHT::Id::STORAGE_SIZE; i++) {
+        *dist = rand()%256;
+        dist ++;
+    }
+}
+
 class Demo{
 public:
 	static std::string msg;
@@ -84,6 +104,15 @@ int main(int argc, char **argv) {
         Epyx::Address relayAddr(argv[1]);
         
         Epyx::N2NP::Node *node = new Epyx::N2NP::Node(relayAddr);
+        epyx.addNode(node);
+        if (!node->waitReady(5000)) {
+            delete node;
+            Epyx::log::error << "Initialisation of node took too much time"
+                << Epyx::log::endl;
+            epyx.destroyAllNodes();
+            epyx.destroyRelay(2000);
+            return 1;
+        }
 
 	Demo::node = node;
         
@@ -91,13 +120,26 @@ int main(int argc, char **argv) {
         
         std::cin >> Demo::pseudo;
         
+        DHT::Id id;
+        random_id(id);
+        DHT::Node *dhtNode = new DHT::Node(id, *node, "DHT");
+        node->addModule("DHT", dhtNode);
+        DHT::Peer peer;
+        zero_id(peer.id);
+        peer.n2npId = N2NP::NodeId("self", node->getId().getRelay());
+        dhtNode->sendPing(peer);
+        dhtNode->setValueSync(Demo::pseudo, node->getId().toString());
+
+        
         std::cout<< "Entrez le pseudo que vous voulez contacter : ";
         
         std::cin >> pseudo_ext;
         
         std::string name;
-        
-        std::cin >> name;
+        while (!dhtNode->getValueSync(pseudo_ext, name)) {
+            std::cout << "En attente...\n";
+            sleep(1);
+        }
         
         Displayer displayModule;
         
@@ -105,7 +147,7 @@ int main(int argc, char **argv) {
         
         node->addModule("DISPLAY", &displayModule);
         
-        epyx.addNode(node);
+        
        
        	tcgetattr(STDIN_FILENO, &tios);
     	//tcflag_t old_c_lflag = tios.c_lflag;
