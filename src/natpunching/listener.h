@@ -22,10 +22,10 @@ namespace Epyx {
             protected:
                 void run();
             private:
-                bool hasAccept;
-                char* data;
                 TCPServer* srv;
                 TCPSocket * sock;
+                bool hasAccept;
+                char* data;
         };
         
     } // namespace DirectConnection

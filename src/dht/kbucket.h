@@ -48,8 +48,8 @@ namespace DHT
          */
         void findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n);
 
-        static const int NODES_PER_BUCKET = 20;
-        static const int MAX_INACTIVE_PERIOD = 15000;
+        static const unsigned int NODES_PER_BUCKET = 20;
+        static const unsigned int MAX_INACTIVE_PERIOD = 15000;
 
     private:
         Mutex lock;

@@ -93,8 +93,8 @@ namespace Epyx {
                 else
                     sleep(1);
             }
+            char data[10];
             if (accepted){
-                char data[10];
                 sockListen.getSocket()->recv((void *) data,10);
             }
             if (accepted && std::string(data) == testMessage){
