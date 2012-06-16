@@ -56,7 +56,7 @@ namespace Epyx
          * @param node a dynamicaly-allocated node
          *
          * node is deleted by API, NOT by the caller
-         * 
+         *
          * @return identifier
          */
         int addNode(N2NP::Node *node);

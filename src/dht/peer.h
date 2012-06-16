@@ -16,7 +16,7 @@ namespace DHT
             Id id;
             N2NP::NodeId n2npId;
             time_t lastReceiveTime;
-            
+
             void serialize(std::ostream& o);
             void unserialize(std::istream& i);
     };

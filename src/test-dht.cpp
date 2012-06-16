@@ -409,8 +409,8 @@ void test_dht_network(Epyx::API& epyx, bool prod){
 
     sleep(10); //Wait for the processing of the messages
 
-    if(!prod){ 
-    
+    if(!prod){
+
         log::info << "Launching the FIND query" << log::endl;
 
         Id idToFind(DHT::Id::INIT_RANDOM);
@@ -452,7 +452,7 @@ void test_dht_network(Epyx::API& epyx, bool prod){
         log::info<<"Prod environnement STARTED"<<log::endl;
         while(true){
             sleep(1);
-        } 
+        }
     }
 }
 
