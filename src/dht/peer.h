@@ -10,15 +10,19 @@ namespace Epyx
 {
 namespace DHT
 {
+    class Peer
+    {
+    public:
+        Id id;
+        N2NP::NodeId n2npId;
+        time_t lastReceiveTime;
 
-    class Peer {
-        public:
-            Id id;
-            N2NP::NodeId n2npId;
-            time_t lastReceiveTime;
+        Peer();
+        Peer(const Id& id, const N2NP::NodeId& n2npId, time_t lastReceiveTime);
+        Peer(const N2NP::NodeId& n2npId);
 
-            void serialize(std::ostream& o);
-            void unserialize(std::istream& i);
+        void serialize(std::ostream& o);
+        void unserialize(std::istream& i);
     };
 
 }

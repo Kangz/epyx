@@ -59,11 +59,7 @@ namespace DHT
 
         //Finally add the peer to the KBucket
         if (add) {
-            Peer* newPeer = new Peer();
-            newPeer->id=peerId;
-            newPeer->lastReceiveTime=now;
-            newPeer->n2npId = n2npId;
-            peers.push_back(newPeer);
+            peers.push_back(new Peer(peerId, n2npId, now));
         }
 
         lock.unlock();
