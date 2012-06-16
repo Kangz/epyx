@@ -20,34 +20,8 @@ using namespace Epyx;
 
 using namespace Epyx::DHT;
 
-void random_id(Id& id){
-    uint8_t* dist = (uint8_t*) &id.data;
-    for (int i = 0; i < Id::STORAGE_SIZE; i++) {
-        *dist = rand()%256;
-        dist ++;
-    }
-}
-
-void random_id(std::string& s){
-    std::stringstream ss;
-    Id id;
-    random_id(id);
-    ss << id;
-    s = ss.str();
-}
-
-void zero_id(Id& id){
-    uint8_t* dist = (uint8_t*) &id.data;
-    for (int i = 0; i < Id::STORAGE_SIZE; i++) {
-        *dist = (uint8_t) 0;
-        dist ++;
-    }
-}
-
 void test_id_distance(){
-    Id a, b;
-    random_id(a);
-    random_id(b);
+    Id a(DHT::Id::INIT_RANDOM), b(DHT::Id::INIT_RANDOM);
     log::info<<"     a: "<<a<<log::endl;
     log::info<<"     b: "<<b<<log::endl;
     Distance d(&a, &b);
@@ -57,8 +31,7 @@ void test_id_distance(){
     log::info<<"Modifying random bits"<<log::endl;
 
     for(int i=0; i<6; i++) {
-        Id a;
-        random_id(a);
+        Id a(DHT::Id::INIT_RANDOM);
         Id b = a;
         int bit = rand()%Id::LENGTH;
         b.data[bit/8] ^= 1 << (7 - (bit%8));
@@ -81,8 +54,7 @@ void test_id_distance(){
 }
 
 void test_kbucket(){
-    Id self;
-    random_id(self);
+    Id self(DHT::Id::INIT_RANDOM);
     N2NP::NodeId n2npId;
 
     log::info<<"I am at Id: "<<self<<log::endl;
@@ -92,27 +64,21 @@ void test_kbucket(){
     log::info<<"Inserting 500.000 nodes in the routing table"<<log::endl;
 
     for(int i=500000; i-->0;){
-        Id a;
-        random_id(a);
-
+        Id a(DHT::Id::INIT_RANDOM);
         kb.seenPeer(a, n2npId);
     }
 
     log::info<<"Making 10.000 lookups in the routing table"<<log::endl;
 
     for(int i=10000; i-->0;){
-        Id a;
-        random_id(a);
-
+        Id a(DHT::Id::INIT_RANDOM);
         std::vector<Peer> nearest;
-
         kb.findNearestNodes(a, nearest, 20);
     }
 
     log::info<<"Done making 10.000 lookups in the routing table"<<log::endl;
 
-    Id a;
-    random_id(a);
+    Id a(DHT::Id::INIT_RANDOM);
     std::vector<Peer> nearest;
     kb.findNearestNodes(a, nearest, 20);
 
@@ -140,7 +106,7 @@ void double_print(Packet& pkt){
 
 void test_dhtpacket(){
     Packet pkt;
-    random_id(pkt.from);
+    pkt.from.randomize();
 
     log::info<<"Testing PING"<<log::endl;
     pkt.method = M_PING;
@@ -180,7 +146,7 @@ void test_dhtpacket(){
     pkt.method = M_FIND;
     pkt.connectionId = 42;
     pkt.count = 20;
-    random_id(pkt.idToFind);
+    pkt.idToFind.randomize();
     double_print(pkt);
 
     log::info<<"Testing FOUND"<<log::endl;
@@ -190,10 +156,10 @@ void test_dhtpacket(){
     pkt.foundPeers = new std::vector<Peer>();
     for(int i=0; i<20; i++){
         Peer temp;
-        random_id(temp.id);
+        temp.id.randomize();
         pkt.foundPeers->push_back(temp);
     }
-    random_id(pkt.idToFind);
+    pkt.idToFind.randomize();
     double_print(pkt);
 }
 
@@ -239,8 +205,7 @@ void test_dht_n2np(){
         usleep(100);
     }
 
-    DHT::Id id;
-    random_id(id);
+    DHT::Id id(DHT::Id::INIT_RANDOM);
     DHT::Node dht(id, node0, "DHT");
 
     node0.addModule("DHT", &dht);
@@ -248,8 +213,7 @@ void test_dht_n2np(){
     FakeDht fakeDHT;
     node1.addModule("DHT", &fakeDHT);
 
-    Id fakeId;
-    random_id(fakeId);
+    Id fakeId(DHT::Id::INIT_RANDOM);
 
     #define SendToDHT(method, message) \
     { \
@@ -424,12 +388,7 @@ void test_dht_network(Epyx::API& epyx, bool prod){
     log::info << "Creating DHTs" << log::endl;
     DHT::Node* dhtNodes[NETWORK_SIZE];
     for(int i=0; i<NETWORK_SIZE; i++) {
-        DHT::Id id;
-        if(prod && i == 0){
-            zero_id(id);
-        }else{
-            random_id(id);
-        }
+        DHT::Id id((prod && i == 0) ? DHT::Id::INIT_ZERO : DHT::Id::INIT_RANDOM);
         log::debug<<id<<log::endl;
         std::ostringstream o;
         o << "DHT";
@@ -454,8 +413,7 @@ void test_dht_network(Epyx::API& epyx, bool prod){
     
         log::info << "Launching the FIND query" << log::endl;
 
-        Id idToFind;
-        random_id(idToFind);
+        Id idToFind(DHT::Id::INIT_RANDOM);
 
         dhtNodes[0]->findClosest(new MyFindCallback(), 5, idToFind);
 

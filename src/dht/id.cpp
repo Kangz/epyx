@@ -4,12 +4,49 @@
  */
 
 #include "id.h"
-#include <stdint.h>
+#include "../core/common.h"
 
 namespace Epyx
 {
 namespace DHT
 {
+    Id::Id() {
+        this->reset();
+    }
+    Id::Id(Initialisation init) {
+        switch (init) {
+            case INIT_ZERO:
+                this->reset();
+                return;
+            case INIT_RANDOM:
+                this->randomize();
+                return;
+        }
+        throw FailException("DHT::Id", "Invalid initialisation method");
+    }
+    Id::Id(const Id& id) {
+        for (int i = 0; i < Id::STORAGE_SIZE; i++)
+            data[i] = id.data[i];
+    }
+    Id& Id::operator=(const Id& id) {
+         if (this != &id) {
+             for (int i = 0; i < Id::STORAGE_SIZE; i++)
+                 this->data[i] = id.data[i];
+        }
+        return *this;
+    }
+
+    void Id::randomize() {
+        for (int i = 0; i < DHT::Id::STORAGE_SIZE; i++) {
+            data[i] = rand()%256;
+        }
+    }
+
+    void Id::reset() {
+        for (int i = 0; i < DHT::Id::STORAGE_SIZE; i++) {
+            data[i] = 0;
+        }
+    }
 
     std::ostream& operator<<(std::ostream& os, const Id& self) {
         const char hexa[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};

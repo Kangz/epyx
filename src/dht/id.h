@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <stdint.h>
 #include "../crypto/sha2.h"
 
 namespace Epyx
@@ -25,8 +26,35 @@ namespace DHT
     public:
         static const int LENGTH = 256;
         static const int STORAGE_SIZE = 256/8;
-        unsigned char data[STORAGE_SIZE];
-    }; //TODO uint32_t ?
+        uint8_t data[STORAGE_SIZE];
+
+        // Initialisation method
+        enum Initialisation {
+            INIT_ZERO,
+            INIT_RANDOM
+        };
+
+        /**
+         * @brief build a zeroed ID
+         */
+        Id();
+
+        Id(Initialisation init);
+
+        // Copy
+        Id(const Id& id);
+        Id& operator=(const Id& id);
+
+        /**
+         * @brief Randomize ID data
+         */
+        void randomize();
+
+        /**
+         * @brief Reset an ID to zero
+         */
+        void reset();
+    };
 
 
     std::ostream& operator<<(std::ostream& os, const Id& id);

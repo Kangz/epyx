@@ -14,22 +14,6 @@
 
 using namespace Epyx;
 
-void zero_id(DHT::Id& id){
-    uint8_t* dist = (uint8_t*) &id.data;
-    for (int i = 0; i < DHT::Id::STORAGE_SIZE; i++) {
-        *dist = (uint8_t) 0;
-        dist ++;
-    }
-}
-
-void random_id(DHT::Id& id){
-    uint8_t* dist = (uint8_t*) &id.data;
-    for (int i = 0; i < DHT::Id::STORAGE_SIZE; i++) {
-        *dist = rand()%256;
-        dist ++;
-    }
-}
-
 class Demo{
 public:
 	static std::string msg;
@@ -58,9 +42,9 @@ void Demo::affichage(){
 void Demo::run(){
 	struct termios tios;
 	tcgetattr(STDIN_FILENO, &tios);
-    	//tcflag_t old_c_lflag = tios.c_lflag;
-    	tios.c_lflag &= ~ICANON;
-    	tcsetattr(STDIN_FILENO, TCSANOW, &tios);
+    //tcflag_t old_c_lflag = tios.c_lflag;
+    tios.c_lflag &= ~ICANON;
+    tcsetattr(STDIN_FILENO, TCSANOW, &tios);
 	unsigned char c;
 
 	while(true){
@@ -113,18 +97,16 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-	Demo::node = node;
+        Demo::node = node;
         
         std::cout << "Entrez votre pseudo : ";
         
         std::cin >> Demo::pseudo;
         
-        DHT::Id id;
-        random_id(id);
+        DHT::Id id(DHT::Id::INIT_RANDOM);
         DHT::Node *dhtNode = new DHT::Node(id, *node, "DHT");
         node->addModule("DHT", dhtNode);
         DHT::Peer peer;
-        zero_id(peer.id);
         peer.n2npId = N2NP::NodeId("self", node->getId().getRelay());
         dhtNode->sendPing(peer);
 
@@ -164,8 +146,8 @@ int main(int argc, char **argv) {
 	
         
         Epyx::N2NP::NodeId n(name);
-	Demo::nodeid = n;
-	Demo::affichage();
+        Demo::nodeid = n;
+        Demo::affichage();
         Demo::run();
         
     } catch (Epyx::Exception e) {
