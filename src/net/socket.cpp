@@ -132,7 +132,7 @@ namespace Epyx
         return true;
     }
 
-    bool Socket::write(std::string message) {
+    bool Socket::write(const std::string& message) {
         // Do not send \0 character through the network
         return this->sendAll(message.c_str(), message.length());
     }

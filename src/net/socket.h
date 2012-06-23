@@ -122,7 +122,7 @@ namespace Epyx
          * @param message text to send
          * @return true on success
          */
-        bool write(std::string message);
+        bool write(const std::string& message);
 
         /**
          * @brief Virtual method to receive data
