@@ -59,7 +59,7 @@ target_link_libraries(test-dht pthread cryptopp)
 #target_link_libraries(test-crypto pthread cryptopp)
 
 add_executable(test-webm ${epyx_api_sources} src/test-webm.cpp ${webm_sources})
-target_link_libraries(test-webm pthread cryptopp vpx)
+target_link_libraries(test-webm pthread cryptopp vpx SDL)
 
 # Real programs
 add_executable(simple-relay ${epyx_api_sources} src/simple-relay.cpp)

@@ -14,6 +14,7 @@ int main() {
         EPYX_ASSERT(vdev.start_capture());
 
         Epyx::webm::FramePacket *fpkt;
+
         while (true) {
             // Get frame
             if (vdev.get_frame(&rawImage)) {

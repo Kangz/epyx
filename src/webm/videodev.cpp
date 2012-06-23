@@ -74,6 +74,7 @@ namespace Epyx
                 return false;
             }
 
+            //Ask for the capabilities of the device
             struct v4l2_capability cap;
             memset(&cap, 0, sizeof (struct v4l2_capability));
             if (ioctl(fd, VIDIOC_QUERYCAP, &cap) < 0) {
@@ -81,6 +82,7 @@ namespace Epyx
                 return false;
             }
 
+            //Set the format (size and pixel format)
             struct v4l2_format fmt;
             memset(&fmt, 0, sizeof (struct v4l2_format));
             fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -93,6 +95,7 @@ namespace Epyx
                 return false;
             }
 
+            //Set the streaming parameters
             struct v4l2_streamparm setfps;
             memset(&setfps, 0, sizeof (struct v4l2_streamparm));
             setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -103,6 +106,7 @@ namespace Epyx
                 return false;
             }
 
+            //Request MemoryMapping with 4 buffers
             struct v4l2_requestbuffers rb;
             memset(&rb, 0, sizeof (struct v4l2_requestbuffers));
             rb.count = NB_BUFFER;
