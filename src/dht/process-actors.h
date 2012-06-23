@@ -20,7 +20,6 @@
 #include "../core/actor.h"
 #include "internal-node.h"
 #include "../n2np/nodeid.h"
-#include "target.h"
 #include "finder-actor.h"
 #include "getter-actor.h"
 #include "setter-actor.h"
@@ -36,11 +35,11 @@ namespace DHT
     struct SetterActorData;
 
     struct ProcessActorData{
-        Target& target;
+        Peer& peer;
         Packet* pkt;
 
-        ProcessActorData(Target& target, Packet* pkt);
-        ProcessActorData(Target& target, Packet& pkt);
+        ProcessActorData(Peer& peer, Packet* pkt);
+        ProcessActorData(Peer& peer, Packet& pkt);
         void freeData();
     };
 

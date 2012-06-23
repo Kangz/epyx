@@ -26,7 +26,6 @@
 #include "internal-node.h"
 #include "kbucket.h"
 #include "packet.h"
-#include "target.h"
 #include "finder-actor.h"
 #include "getter-actor.h"
 #include "setter-actor.h"
@@ -46,7 +45,7 @@ namespace DHT
         ~Node();
 
         void fromN2NP(N2NP::Node& myself, N2NP::NodeId senderId, const char* data, unsigned int dataSize);
-        void send(Packet& pkt, const Target& target);
+        void send(Packet& pkt, const Peer& dest, N2NP::Node& myN2np);
 
         //API
         void sendPing(Peer& p);

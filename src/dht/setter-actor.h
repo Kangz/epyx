@@ -21,7 +21,6 @@
 #include "internal-node.h"
 #include "../n2np/nodeid.h"
 #include "../n2np/node.h"
-#include "target.h"
 #include "value.h"
 
 namespace Epyx

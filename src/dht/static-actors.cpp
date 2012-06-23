@@ -7,16 +7,16 @@ namespace Epyx
 namespace DHT
 {
 
-    StaticActorData::StaticActorData(Target& target, Packet* pkt)
-    :target(target), pkt(pkt) {
+    StaticActorData::StaticActorData(Peer& peer, Packet* pkt)
+    :peer(peer), pkt(pkt) {
     }
 
-    StaticActorData::StaticActorData(Target& target, Packet& pkt)
-    :target(target), pkt(&pkt) {
+    StaticActorData::StaticActorData(Peer& peer, Packet& pkt)
+    :peer(peer), pkt(&pkt) {
     }
 
     void StaticActorData::freeData(){
-        delete &target;
+        delete &peer;
         delete pkt;
     }
 
@@ -26,7 +26,7 @@ namespace DHT
     void PingActor::treat(StaticActorData& msg) {
         Packet pkt;
         pkt.method = M_PONG;
-        this->n.send(pkt, msg.target);
+        this->n.send(pkt, msg.peer);
         msg.freeData();
     }
 
@@ -44,7 +44,7 @@ namespace DHT
             answer.value = requested.content;
             answer.status = 0;
         }
-        this->n.send(answer, msg.target);
+        this->n.send(answer, msg.peer);
         msg.freeData();
     }
 
@@ -59,7 +59,7 @@ namespace DHT
 
         this->n.storage.set(msg.pkt->key, msg.pkt->value);
 
-        this->n.send(answer, msg.target);
+        this->n.send(answer, msg.peer);
         msg.freeData();
     }
 
@@ -75,7 +75,7 @@ namespace DHT
 
         this->n.kbucket.findNearestNodes(msg.pkt->idToFind, *answer.foundPeers, msg.pkt->count);
 
-        this->n.send(answer, msg.target);
+        this->n.send(answer, msg.peer);
         msg.freeData();
     }
 

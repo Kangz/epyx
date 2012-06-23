@@ -34,6 +34,7 @@ namespace DHT
 
         Peer();
         Peer(const Id& id, const N2NP::NodeId& n2npId, time_t lastReceiveTime);
+        Peer(const Id& id, const N2NP::NodeId& n2npId);
         Peer(const N2NP::NodeId& n2npId);
 
         void serialize(std::ostream& o);

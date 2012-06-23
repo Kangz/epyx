@@ -25,14 +25,13 @@ namespace DHT
         Packet* pkt = new Packet(*gtt_packet);
         delete gtt_packet;
 
-        n.processPacket(*pkt, *(new Target(myself, senderId, pkt->from)));
+        n.processPacket(*pkt, *(new Peer(pkt->from, senderId)));
     }
 
-    void Node::send(Packet& pkt, const Target& target) {
+    void Node::send(Packet& pkt, const Peer& dest, N2NP::Node& myN2np) {
         pkt.from = this->id;
-        //pkt.to = target.id;
         GTTPacket* gtt = pkt.toGTTPacket();
-        target.myN2np.send(target.n2npId, "DHT", *gtt);
+        myN2np.send(dest.n2npId, "DHT", *gtt);
     }
 
     void Node::sendPing(Peer& p){

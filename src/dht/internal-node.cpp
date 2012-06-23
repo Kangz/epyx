@@ -7,7 +7,7 @@ namespace DHT
 {
 
     InternalNode::InternalNode(const Id& id, N2NP::Node& n2npSelf, Node& parent, const std::string& name)
-    :actors(5, name + "Actors"), id(id), n2npId(n2npSelf), parent(parent), kbucket(id) {
+    :actors(5, name + "Actors"), id(id), myN2np(n2npSelf), parent(parent), kbucket(id) {
         pingActor = actors.add(new PingActor(*this));
         getActor = actors.add(new GetActor(*this));
         storeActor = actors.add(new StoreActor(*this));
@@ -17,42 +17,42 @@ namespace DHT
     InternalNode::~InternalNode() {
     }
 
-    void InternalNode::processPacket(Packet& pkt, Target& target) {
+    void InternalNode::processPacket(Packet& pkt, Peer& sender) {
 
-        this->kbucket.seenPeer(target.id, target.n2npId);
+        this->kbucket.seenPeer(sender.id, sender.n2npId);
 
         switch(pkt.method){
             case M_PING:
-                this->pingActor.post(*(new StaticActorData(target, pkt)));
+                this->pingActor.post(*(new StaticActorData(sender, pkt)));
                 break;
 
             case M_PONG:
                 delete &pkt;
-                delete &target;
+                delete &sender;
                 break;
 
             case M_GET:
-                this->getActor.post(*(new StaticActorData(target, pkt)));
+                this->getActor.post(*(new StaticActorData(sender, pkt)));
                 break;
 
             case M_STORE:
-                this->storeActor.post(*(new StaticActorData(target, pkt)));
+                this->storeActor.post(*(new StaticActorData(sender, pkt)));
                 break;
 
             case M_FIND:
-                this->findActor.post(*(new StaticActorData(target, pkt)));
+                this->findActor.post(*(new StaticActorData(sender, pkt)));
                 break;
 
             case M_GOT:
             case M_STORED:
             case M_FOUND:
-                this->dispatchToProcessActor(pkt, target);
+                this->dispatchToProcessActor(pkt, sender);
                 break;
 
             default:
                 log::error << "The DHT received a packet with an unknown method" << log::endl;
                 delete &pkt;
-                delete &target;
+                delete &sender;
                 break;
         }
     }
@@ -75,29 +75,22 @@ namespace DHT
         a->start();
     }
 
-    void InternalNode::send(Packet& pkt, const Target& target) {
-        this->parent.send(pkt, target);
+    void InternalNode::send(Packet& pkt, const Peer& dest) {
+        this->parent.send(pkt, dest, myN2np);
     }
 
     void InternalNode::sendPing(Peer& p){
         Packet pkt;
         pkt.method = M_PING;
-        send(pkt, *peerToTarget(p));
+        send(pkt, p);
         //delete t ?
     }
 
     Peer InternalNode::getConnectionInfo() {
         Peer p;
         p.id = id;
-        p.n2npId = n2npId.getId();
+        p.n2npId = myN2np.getId();
         return p;
-    }
-
-    void InternalNode::sendPong(Target& target) {
-        Packet pkt;
-        pkt.method = M_PONG;
-        send(pkt, target);
-        delete &target;
     }
 
     long InternalNode::registerProcessActor(Actor<ProcessActorData>& actor, int timeout) {
@@ -113,7 +106,7 @@ namespace DHT
         return n;
     }
 
-    void InternalNode::dispatchToProcessActor(Packet& pkt, Target& target){
+    void InternalNode::dispatchToProcessActor(Packet& pkt, Peer& sender){
         ActorId<ProcessActorData>* id = processActors.getAndLock(pkt.connectionId, NULL);
         if(id == NULL){
             processActors.endUnlock();
@@ -122,7 +115,7 @@ namespace DHT
         ActorId<ProcessActorData> saved_id(*id);
         processActors.endUnlock();
 
-        saved_id.post(*(new ProcessActorData(target, pkt)));
+        saved_id.post(*(new ProcessActorData(sender, pkt)));
     }
 
     void InternalNode::unregisterProcessActor(long actorNumber){
@@ -139,8 +132,5 @@ namespace DHT
         processActors.unset(actorNumber);
     }
 
-    Target* InternalNode::peerToTarget(Peer& p) {
-        return new Target(n2npId, p.n2npId, p.id);
-    }
 }
 }

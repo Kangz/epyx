@@ -30,7 +30,6 @@
 #include "storage.h"
 #include "static-actors.h"
 #include "process-actors.h"
-#include "target.h"
 #include "finder-actor.h"
 #include "getter-actor.h"
 #include "setter-actor.h"
@@ -51,17 +50,15 @@ namespace DHT
         InternalNode(const Id& id, N2NP::Node& n2npSelf, Node& parent, const std::string& name);
         ~InternalNode();
 
-        void processPacket(Packet& pkt, Target& target);
+        void processPacket(Packet& pkt, Peer& sender);
         void findClosest(FindCallback* cb, int count, Id& idToFind);
         void getValue(GetCallback* cb, const std::string& key);
         void setValue(SetCallback* cb, const std::string& key, const std::string& value);
 
-        void send(Packet& pkt, const Target& target);
+        void send(Packet& pkt, const Peer& dest);
 
         long registerProcessActor(Actor<ProcessActorData>& actor, int timeout = 0);
         void unregisterProcessActor(long actorNumber);
-
-        Target* peerToTarget(Peer& p);
 
         void sendPing(Peer& p);
         Peer getConnectionInfo();
@@ -77,15 +74,15 @@ namespace DHT
         atom::Map<long, ActorId<ProcessActorData>*> processActors;
 
         Id id;
-        N2NP::Node& n2npId;
+        N2NP::Node& myN2np;
         Node& parent;
         KBucket kbucket;
         Storage storage;
 
     private:
-        void sendPong(Target& target);
+        void sendPong(Peer& target);
 
-        void dispatchToProcessActor(Packet& pkt, Target& target);
+        void dispatchToProcessActor(Packet& pkt, Peer& target);
 
    };
 

@@ -16,6 +16,10 @@ namespace DHT
     :id(id), n2npId(n2npId), lastReceiveTime(lastReceiveTime) {
     }
 
+    Peer::Peer(const Id& id, const N2NP::NodeId& n2npId)
+    :id(id), n2npId(n2npId){
+    }
+
     Peer::Peer(const N2NP::NodeId& n2npId)
     :n2npId(n2npId) {
     }

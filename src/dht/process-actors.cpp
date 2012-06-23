@@ -9,16 +9,16 @@ namespace Epyx
 namespace DHT
 {
 
-    ProcessActorData::ProcessActorData(Target& target, Packet* pkt)
-    :target(target), pkt(pkt) {
+    ProcessActorData::ProcessActorData(Peer& peer, Packet* pkt)
+    :peer(peer), pkt(pkt) {
     }
 
-    ProcessActorData::ProcessActorData(Target& target, Packet& pkt)
-    :target(target), pkt(&pkt) {
+    ProcessActorData::ProcessActorData(Peer& peer, Packet& pkt)
+    :peer(peer), pkt(&pkt) {
     }
 
     void ProcessActorData::freeData() {
-        delete &target;
+        delete &peer;
         delete pkt;
     }
 
@@ -29,6 +29,7 @@ namespace DHT
 
     void ProcessActor::destroy() {
         n.unregisterProcessActor(processId);
+        kill();
     }
 
     SingularFindActor::SingularFindActor(InternalNode& n, ActorId<FinderActorData> p, Peer& peer, Id& requested)
@@ -39,14 +40,14 @@ namespace DHT
         pkt.count = 5; //TODO make it a cst
         pkt.idToFind = requested;
 
-        this->n.send(pkt, *n.peerToTarget(peer));
+        this->n.send(pkt, target);
     }
 
     void SingularFindActor::treat(ProcessActorData& msg) {
         if(msg.pkt->method == M_FOUND && msg.pkt->status == 0 && msg.pkt->count > 0) {
             parent.post(*(new FinderActorData(target, msg.pkt->foundPeers, true)));
             msg.pkt->foundPeers = NULL;
-            kill();
+            destroy();
         } else {
             timeout();
         }
@@ -54,7 +55,7 @@ namespace DHT
 
     void SingularFindActor::timeout() {
         parent.post(*(new FinderActorData(target, NULL, false)));
-        kill();
+        destroy();
     }
 
     SingularGetActor::SingularGetActor(InternalNode& n, ActorId<GetterActorData> p, Peer& peer, const std::string& key)
@@ -64,13 +65,13 @@ namespace DHT
         pkt.connectionId = processId;
         pkt.key = key;
 
-        this->n.send(pkt, *n.peerToTarget(peer));
+        this->n.send(pkt, peer);
     }
 
     void SingularGetActor::treat(ProcessActorData& msg) {
         if(msg.pkt->method == M_GOT && msg.pkt->status == 0) {
             parent.post(*(new GetterActorData(msg.pkt->value)));
-            kill();
+            destroy();
         } else {
             timeout();
         }
@@ -78,7 +79,7 @@ namespace DHT
 
     void SingularGetActor::timeout() {
         parent.post(*(new GetterActorData()));
-        kill();
+        destroy();
     }
 
     SingularSetActor::SingularSetActor(InternalNode& n, ActorId<SetterActorData> p, Peer& peer, const std::string& key, const std::string& value)
@@ -89,7 +90,7 @@ namespace DHT
         pkt.key = key;
         pkt.value = value;
 
-        this->n.send(pkt, *n.peerToTarget(peer));
+        this->n.send(pkt, peer);
     }
 
     void SingularSetActor::treat(ProcessActorData& msg) {

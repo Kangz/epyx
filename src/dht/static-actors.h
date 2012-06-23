@@ -25,7 +25,6 @@
 #include "internal-node.h"
 #include "../n2np/nodeid.h"
 #include "../n2np/node.h"
-#include "target.h"
 #include "value.h"
 
 namespace Epyx
@@ -36,11 +35,11 @@ namespace DHT
     class InternalNode;
 
     struct StaticActorData{
-        Target& target;
+        Peer& peer;
         Packet* pkt;
 
-        StaticActorData(Target& target, Packet* pkt);
-        StaticActorData(Target& target, Packet& pkt);
+        StaticActorData(Peer& peer, Packet* pkt);
+        StaticActorData(Peer& peer, Packet& pkt);
         void freeData();
     };
 
