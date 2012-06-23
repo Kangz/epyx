@@ -19,6 +19,7 @@ file(GLOB_RECURSE net_sources src/net/*)
 file(GLOB_RECURSE parser_sources src/parser/*)
 file(GLOB_RECURSE dht_sources src/dht/*)
 file(GLOB_RECURSE crypto_sources src/crypto/*)
+file(GLOB_RECURSE webm_sources src/webm/*)
 
 # More general file sets, with deps
 file(GLOB epyx_api_sources src/api.cpp
@@ -56,6 +57,9 @@ target_link_libraries(test-dht pthread cryptopp)
 
 #add_executable(test-crypto ${core_sources} ${crypto_sources} src/test-crypto.cpp)
 #target_link_libraries(test-crypto pthread cryptopp)
+
+add_executable(test-webm ${epyx_api_sources} src/test-webm.cpp ${webm_sources})
+target_link_libraries(test-webm pthread cryptopp vpx)
 
 # Real programs
 add_executable(simple-relay ${epyx_api_sources} src/simple-relay.cpp)
