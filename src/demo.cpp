@@ -105,6 +105,7 @@ bool Demo::run() {
 
     // Let's run !
     unsigned char c;
+    configureTerm();
     while (true) {
         updateDisplay();
         read(STDIN_FILENO, &c, 1);
