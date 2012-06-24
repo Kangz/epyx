@@ -15,7 +15,7 @@
  */
 /**
  * @file dht/internal-node.h
- * @brief Private structure of Node
+ * @brief Private structure of a DHT Node
  */
 #ifndef EPYX_DHT_INTERNAL_NODE_H
 #define EPYX_DHT_INTERNAL_NODE_H
@@ -44,38 +44,89 @@ namespace DHT
     struct StaticActorData;
     struct ProcessActorData;
 
+    /**
+     * @class InternalNode
+     *
+     * @brief Responsible of the internal state of a DHT node
+     *
+     * This is the central structure of the dht, holding the kbucket, the storage
+     * and the actor system. Actors are split into three categories : static actors,
+     * process actors and others.
+     *
+     * Static actors are spawned once and are used to reply to incoming queries.
+     * Using actors allows us to defer the operation and return immediately.
+     *
+     * Process actors are used to wait for a message with a specific connection Id
+     * they are spawned and the result of the function call is used to set the
+     * Connection-Id parameter in the query. When a packet with a valid connection
+     * id is recieved, the actor is called upon it.
+     * An actor is expcted to call unregisterProcessActor when it kills itself.
+     *
+     * Long network processes such a FIND operation are handled by an actor that is
+     * given the user's callback for this operation. Sometimes the network just
+     * fails and the actor can decide to time out. This first-level actor can
+     * then spawn multiple other actors for suboperations
+     */
     class InternalNode
     {
     public:
+
+        /**
+         * @brief InternalNode's constructor
+         * @param id this DHT node's own id
+         * @param n2npSelf the N2npId of the corresponding N2NP Node
+         * @param parent the corresponding DHT Node (public interface)
+         * @param name the name for the children threads
+         */
         InternalNode(const Id& id, N2NP::Node& n2npSelf, Node& parent, const std::string& name);
+
+        /**
+         * @brief InternalNode's destructor
+         */
         ~InternalNode();
 
+        /**
+         * @brief handles a packet received through the N2NP subsystem
+         * @param pkt the DHT packet received
+         * @param sender the connection information for the sender
+         */
         void processPacket(Packet& pkt, Peer& sender);
+
+        //Is proxied by Node
+        void sendPing(Peer& p);
         void findClosest(FindCallback* cb, int count, Id& idToFind);
         void getValue(GetCallback* cb, const std::string& key);
         void setValue(SetCallback* cb, const std::string& key, const std::string& value);
+        Peer getConnectionInfo();
 
+        //proxy for Node
         void send(Packet& pkt, const Peer& dest);
 
+        //Manages the processActors (see InternalNode description)
         long registerProcessActor(Actor<ProcessActorData>& actor, int timeout = 0);
         void unregisterProcessActor(long actorNumber);
 
-        void sendPing(Peer& p);
-        Peer getConnectionInfo();
-
         //TODO: avoid making these public
+
+        //The actor system
         ActorManager actors;
+
+        //Static actors
         ActorId<StaticActorData> pingActor;
         ActorId<StaticActorData> getActor;
         ActorId<StaticActorData> storeActor;
         ActorId<StaticActorData> findActor;
 
+        //Management for the process actors
         atom::Counter processActorsCount;
         atom::Map<long, ActorId<ProcessActorData>*> processActors;
 
+        //This node's identity
         Id id;
         N2NP::Node& myN2np;
         Node& parent;
+
+        //Other components
         KBucket kbucket;
         Storage storage;
 
@@ -83,7 +134,6 @@ namespace DHT
         void sendPong(Peer& target);
 
         void dispatchToProcessActor(Packet& pkt, Peer& target);
-
    };
 
 }

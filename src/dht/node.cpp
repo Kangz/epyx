@@ -12,6 +12,8 @@ namespace DHT
     }
 
     void Node::fromN2NP(N2NP::Node& myself, N2NP::NodeId senderId, const char* data, unsigned int dataSize) {
+        //Preprocess the packet for the InternalNode
+        //first make it a GTTPacket
         gttParser.eat(data, dataSize);
         GTTPacket* gtt_packet = gttParser.getPacket();
         gttParser.reset();
@@ -22,18 +24,26 @@ namespace DHT
         }
 
         //TODO: check that the packet is well-formed
+        //Then make it a DHT Packet
         Packet* pkt = new Packet(*gtt_packet);
         delete gtt_packet;
 
+        //Process it
         n.processPacket(*pkt, *(new Peer(pkt->from, senderId)));
     }
 
     void Node::send(Packet& pkt, const Peer& dest, N2NP::Node& myN2np) {
+        //We just need to add ourself to the packet
         pkt.from = this->id;
+
+        //Convert it
         GTTPacket* gtt = pkt.toGTTPacket();
+
+        //And send it
         myN2np.send(dest.n2npId, "DHT", *gtt);
     }
 
+    //These are simply proxies for the InternalNode
     void Node::sendPing(Peer& p){
         n.sendPing(p);
     }
@@ -54,51 +64,55 @@ namespace DHT
         n.setValue(cb, key, value);
     }
 
+
+    //The synchronous API is using the asynchronous API internally
     class NodeSyncGetCallback: public GetCallback {
+    private:
         Condition* cond;
         std::string* whereResultIsStored;
         bool* got;
-        public:
-            NodeSyncGetCallback(Condition* c, std::string* storage, bool* b) {
-                cond = c;
-                got = b;
-                whereResultIsStored = storage;
-            }
-            void onGot(const std::string& result) {
-                *got = true;
-                *whereResultIsStored = result;
-                cond->lock();
-                cond->notify();
-                cond->unlock();
-            }
-            void onError() {
-                *got = false;
-                cond->lock();
-                cond->notify();
-                cond->unlock();
-            }
+    public:
+        NodeSyncGetCallback(Condition* c, std::string* storage, bool* b) {
+            cond = c;
+            got = b;
+            whereResultIsStored = storage;
+        }
+        void onGot(const std::string& result) {
+            *got = true;
+            *whereResultIsStored = result;
+            cond->lock();
+            cond->notify();
+            cond->unlock();
+        }
+        void onError() {
+            *got = false;
+            cond->lock();
+            cond->notify();
+            cond->unlock();
+        }
     };
 
     class NodeSyncSetCallback: public SetCallback {
+    private:
         Condition* cond;
         bool* set;
-        public:
-                NodeSyncSetCallback(Condition* c, bool* b) {
-                    cond = c;
-                    set = b;
-                }
-                void onSet() {
-                    *set = true;
-                    cond->lock();
-                    cond->notify();
-                    cond->unlock();
-                }
-                void onError() {
-                    *set = false;
-                    cond->lock();
-                    cond->notify();
-                    cond->unlock();
-                }
+    public:
+        NodeSyncSetCallback(Condition* c, bool* b) {
+            cond = c;
+            set = b;
+        }
+        void onSet() {
+            *set = true;
+            cond->lock();
+            cond->notify();
+            cond->unlock();
+        }
+        void onError() {
+            *set = false;
+            cond->lock();
+            cond->notify();
+            cond->unlock();
+        }
     };
 
     bool Node::getValueSync(const std::string& key, std::string& result) {
