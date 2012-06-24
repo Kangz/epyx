@@ -1,6 +1,7 @@
 #include "static-actors.h"
 #include "node.h"
 #include "internal-node.h"
+#include "consts.h"
 #include <algorithm>
 
 namespace Epyx
@@ -22,7 +23,7 @@ namespace DHT
 
     FindCallback::~FindCallback() {}
 
-    #define FIND_REDUNDANCY 3
+    //Some helper functions for heaps
     #define heap_make(list) std::make_heap((list).begin(), (list).end(), heap_comp)
     #define heap_push(list, value) (list).push_back(value); std::push_heap((list).begin(), (list).end(), heap_comp)
     #define heap_pop_no_res(list) std::pop_heap((list).begin(), (list).end(), heap_comp); (list).pop_back()
@@ -33,11 +34,11 @@ namespace DHT
     }
 
     void FinderActor::start(){
-        //log::debug << "Started a new FIND query" << log::endl;
         lock();
         heap_make(shortlist);
         heap_make(foundPeers);
 
+        //Initialize the shortlist and foundPeers
         std::vector<Peer> nearest;
         n.kbucket.findNearestNodes(requestedId, nearest, countToFind);
 
@@ -47,6 +48,7 @@ namespace DHT
             addToFoundPeers(*it);
         }
 
+        //Send queries to the nodes closest to the target
         ClosestQueue::iterator i;
         for(i = shortlist.begin(); i != shortlist.end(); i++) {
             sendFindQueryTo((*i).second);
@@ -57,6 +59,7 @@ namespace DHT
     void FinderActor::treat(FinderActorData& msg) {
         pendingRequests --;
 
+        //Process the content of the message
         if(msg.answered) {
             std::vector<Peer>::iterator peerToAdd = msg.answeredPeers->begin();
             for(; peerToAdd != msg.answeredPeers->end(); peerToAdd ++) {
@@ -65,8 +68,10 @@ namespace DHT
             }
         }
 
+        //Try to send a query to a new node
         bool sent = sendNewQuery();
         if(!sent) {
+            //If we con't and the shortlist is empty that means we finished the search
             if(pendingRequests == 0) {
                 callback->onFound(foundPeers);
                 delete callback;
@@ -88,7 +93,7 @@ namespace DHT
         }
 
         heap_push(shortlist, std::make_pair(dist, p));
-        if(shortlist.size() > FIND_REDUNDANCY) {
+        if(shortlist.size() > FIND_PARALLEL_QUERIES) {
             heap_pop_no_res(shortlist);
         }
     }
@@ -120,7 +125,6 @@ namespace DHT
     }
 
     void FinderActor::sendFindQueryTo(Peer& p) {
-        //log::debug << "Sending FIND to " << p.id << log::endl;
         addToContactedPeers(p);
         pendingRequests ++;
         new SingularFindActor(n, getId(), p, requestedId);

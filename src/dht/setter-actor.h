@@ -13,6 +13,9 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
+/*
+ * @file dht/setter-actor.h
+ */
 #ifndef EPYX_DHT_SETTER_ACTOR_H
 #define EPYX_DHT_SETTER_ACTOR_H
 
@@ -30,6 +33,13 @@ namespace DHT
 
     class InternalNode;
 
+    /**
+     * @struct SetterActorData
+     * @brief the type of the messages received by the SetterActor
+     *
+     * It can be sent by the SetterSearchCallback and contain a peer list
+     * or be sent by SingularSetterActor siblings
+     */
     struct SetterActorData {
         std::vector<Peer>* peersToAsk;
         bool found;
@@ -40,42 +50,72 @@ namespace DHT
         ~SetterActorData();
     };
 
+    /**
+     * @class SetCallback
+     * @brief a user-defined callback for the SET operation
+     */
     class SetCallback {
-        public:
-            virtual void onSet() = 0;
-            virtual void onError();
-            virtual ~SetCallback();
+    public:
+        /**
+         * @brief called when the value is set
+         */
+        virtual void onSet() = 0;
+
+        /**
+         * @brief called when it fails
+         */
+        virtual void onError();
+        virtual ~SetCallback();
     };
 
+    //The FinderActor callback used by the SetterActor
     class SetterSearchCallback: public FindCallback {
-        public:
-            SetterSearchCallback(ActorId<SetterActorData> parent);
-            void onFound(ClosestQueue& result);
-            void onError();
+    public:
+        SetterSearchCallback(ActorId<SetterActorData> parent);
+        void onFound(ClosestQueue& result);
+        void onError();
 
-        private:
-            ActorId<SetterActorData> parent;
+    private:
+        ActorId<SetterActorData> parent;
     };
 
+    /**
+     * @class SetterActor
+     * @brief The logic for the set operation
+     *
+     * It first asks for the closest nodes to the key then
+     * send a SET query to each of these nodes
+     */
     class SetterActor: public Actor<SetterActorData> {
-        public:
-            SetterActor(InternalNode& n, const std::string& keyi, const std::string& value, SetCallback* cb);
-            void start();
+    public:
+        /**
+         * @brief the SetterActor constructor
+         * @param n the InternalNode
+         * @param key the key
+         * @param value the value
+         * @param cb the user-defined callback
+         */
+        SetterActor(InternalNode& n, const std::string& key, const std::string& value, SetCallback* cb);
 
-        protected:
-            void treat(SetterActorData& msg);
-            void timeout();
+        /**
+         * @brief called after the actor is added to the manager
+         */
+        void start();
 
-        private:
-            void ask(Peer& p);
+    protected:
+        void treat(SetterActorData& msg);
+        void timeout();
 
-            InternalNode& n;
-            SetCallback* callback;
-            std::string key;
-            std::string value;
-            int pendingRequests;
-            int nErrors;
-            bool found;
+    private:
+        void ask(Peer& p);
+
+        InternalNode& n;
+        SetCallback* callback;
+        std::string key;
+        std::string value;
+        int pendingRequests;
+        int nErrors;
+        bool found;
     };
 
 }

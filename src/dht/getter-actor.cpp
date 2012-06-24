@@ -3,6 +3,7 @@
 #include "internal-node.h"
 #include "finder-actor.h"
 #include <algorithm>
+#include "consts.h"
 
 namespace Epyx
 {
@@ -10,18 +11,18 @@ namespace DHT
 {
 
     GetterActorData::GetterActorData()
-    :peersToAsk(NULL), found(false), answered(false){
+    :peersToAsk(NULL), found(false), answered(false) {
     }
 
     GetterActorData::GetterActorData(std::vector<Peer>* peers)
-    :peersToAsk(peers), found(true), answered(false){
+    :peersToAsk(peers), found(true), answered(false) {
     }
 
     GetterActorData::GetterActorData(const std::string& result)
-    :peersToAsk(NULL), found(false), answered(true), result(result){
+    :peersToAsk(NULL), found(false), answered(true), result(result) {
     }
 
-    GetterActorData::~GetterActorData(){
+    GetterActorData::~GetterActorData() {
         if(peersToAsk != NULL) {
             delete peersToAsk;
         }
@@ -33,10 +34,8 @@ namespace DHT
     GetCallback::~GetCallback() {
     }
 
-    #define GET_REDUNDANCY 10
-
     GetterSearchCallback::GetterSearchCallback(ActorId<GetterActorData> parent)
-    :parent(parent){
+    :parent(parent) {
     }
 
     void GetterSearchCallback::onFound(ClosestQueue& result) {
@@ -59,10 +58,12 @@ namespace DHT
     void GetterActor::start() {
         Id id;
         idForString(id, key);
+        //Start the FIND process
         n.findClosest(new GetterSearchCallback(getId()), GET_REDUNDANCY, id);
     }
 
     void GetterActor::treat(GetterActorData& msg) {
+        //Branch used when we wait for the FIND process
         if(! found) {
             if (! msg.found) {
                 timeout();
@@ -77,6 +78,7 @@ namespace DHT
             return;
         }
 
+        //For now we stop at the first answer
         if(msg.answered) {
             callback->onGot(msg.result);
             delete callback;

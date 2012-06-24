@@ -4,6 +4,7 @@
 #include "finder-actor.h"
 #include "setter-actor.h"
 #include <algorithm>
+#include "consts.h"
 
 namespace Epyx
 {
@@ -34,8 +35,6 @@ namespace DHT
     SetCallback::~SetCallback() {
     }
 
-    #define SET_REDUNDANCY 10
-
     SetterSearchCallback::SetterSearchCallback(ActorId<SetterActorData> parent)
     :parent(parent){
     }
@@ -60,10 +59,12 @@ namespace DHT
     void SetterActor::start() {
         Id id;
         idForString(id, key);
+        //Send the FIND process
         n.findClosest(new SetterSearchCallback(getId()), SET_REDUNDANCY, id);
     }
 
     void SetterActor::treat(SetterActorData& msg) {
+        //While we wait for the FIND process
         if(! found) {
             if (! msg.found) {
                 timeout();
@@ -84,7 +85,7 @@ namespace DHT
 
         pendingRequests --;
         if(pendingRequests == 0) {
-            if(nErrors > 3) {
+            if(nErrors > SET_ERROR_THRESHOLD) {
                 callback->onSet();
                 delete callback;
                 kill();

@@ -3,6 +3,7 @@
 #include "finder-actor.h"
 #include "getter-actor.h"
 #include "setter-actor.h"
+#include "consts.h"
 
 namespace Epyx
 {
@@ -33,11 +34,12 @@ namespace DHT
     }
 
     SingularFindActor::SingularFindActor(InternalNode& n, ActorId<FinderActorData> p, Peer& peer, Id& requested)
-    :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), target(peer), parent(p){
+    :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), target(peer), parent(p) {
+        //Send the FIND query
         Packet pkt;
         pkt.method = M_FIND;
         pkt.connectionId = processId;
-        pkt.count = 5; //TODO make it a cst
+        pkt.count = FIND_NB_NODE_REQUESTED;
         pkt.idToFind = requested;
 
         this->n.send(pkt, target);
@@ -60,6 +62,7 @@ namespace DHT
 
     SingularGetActor::SingularGetActor(InternalNode& n, ActorId<GetterActorData> p, Peer& peer, const std::string& key)
     :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), parent(p) {
+        //Send the GET query
         Packet pkt;
         pkt.method = M_GET;
         pkt.connectionId = processId;
@@ -84,6 +87,7 @@ namespace DHT
 
     SingularSetActor::SingularSetActor(InternalNode& n, ActorId<SetterActorData> p, Peer& peer, const std::string& key, const std::string& value)
     :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), parent(p) {
+        //Send the SET query
         Packet pkt;
         pkt.method = M_STORE;
         pkt.connectionId = processId;

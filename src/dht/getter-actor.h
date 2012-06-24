@@ -13,6 +13,9 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
+/*
+ * @file dht/getter-actor.h
+ */
 #ifndef EPYX_DHT_GETTER_ACTOR_H
 #define EPYX_DHT_GETTER_ACTOR_H
 
@@ -30,6 +33,13 @@ namespace DHT
 
     class InternalNode;
 
+    /**
+     * @struct GetterActorData
+     * @brief the type of the messages received by the GetterActor
+     *
+     * It can be sent by the GetterSearchCallback and contain a peer list
+     * or be sent by SingularGetterActor siblings
+     */
     struct GetterActorData {
         std::vector<Peer>* peersToAsk;
         bool found;
@@ -41,13 +51,26 @@ namespace DHT
         ~GetterActorData();
     };
 
+    /**
+     * @class GetCallback
+     * @brief a user-defined callback for the GET operation
+     */
     class GetCallback {
-        public:
-            virtual void onGot(const std::string& result) = 0;
-            virtual void onError();
-            virtual ~GetCallback();
+    public:
+        /**
+         * @brief called when the value is found
+         * @param result the found value
+         */
+        virtual void onGot(const std::string& result) = 0;
+
+        /**
+         * @brief called when it fails
+         */
+        virtual void onError();
+        virtual ~GetCallback();
     };
 
+    //The FinderActor callback used by the GetterActor
     class GetterSearchCallback: public FindCallback {
         public:
             GetterSearchCallback(ActorId<GetterActorData> parent);
@@ -58,23 +81,40 @@ namespace DHT
             ActorId<GetterActorData> parent;
     };
 
+    /**
+     * @class GetterActor
+     * @brief The logic for the get operation
+     *
+     * It first asks for the closest nodes to the key then
+     * send a GET query to each of these nodes
+     */
     class GetterActor: public Actor<GetterActorData> {
-        public:
-            GetterActor(InternalNode& n, const std::string& key, GetCallback* cb);
-            void start();
+    public:
+        /**
+         * @brief the GetterActor constructor
+         * @param n the InternalNode
+         * @param key the key
+         * @param cb the user-defined callback
+         */
+        GetterActor(InternalNode& n, const std::string& key, GetCallback* cb);
 
-        protected:
-            void treat(GetterActorData& msg);
-            void timeout();
+        /**
+         * @brief called after the actor is added to the manager
+         */
+        void start();
 
-        private:
-            void ask(Peer& p);
+    protected:
+        void treat(GetterActorData& msg);
+        void timeout();
 
-            InternalNode& n;
-            GetCallback* callback;
-            std::string key;
-            int pendingRequests;
-            bool found;
+    private:
+        void ask(Peer& p);
+
+        InternalNode& n;
+        GetCallback* callback;
+        std::string key;
+        int pendingRequests;
+        bool found;
     };
 
 }

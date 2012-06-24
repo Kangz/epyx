@@ -10,28 +10,35 @@ namespace Epyx
 {
 namespace DHT
 {
+
     Id::Id() {
         this->reset();
     }
+
     Id::Id(Initialisation init) {
+        //Use the right initialisation method
         switch (init) {
-            case INIT_ZERO:
-                this->reset();
-                return;
-            case INIT_RANDOM:
-                this->randomize();
-                return;
+        case INIT_ZERO:
+            this->reset();
+            return;
+        case INIT_RANDOM:
+            this->randomize();
+            return;
         }
         throw FailException("DHT::Id", "Invalid initialisation method");
     }
+
     Id::Id(const Id& id) {
-        for (int i = 0; i < Id::STORAGE_SIZE; i++)
+        for (int i = 0; i < Id::STORAGE_SIZE; i++) {
             data[i] = id.data[i];
+        }
     }
+
     Id& Id::operator=(const Id& id) {
-         if (this != &id) {
-             for (int i = 0; i < Id::STORAGE_SIZE; i++)
-                 this->data[i] = id.data[i];
+        if (this != &id) {
+            for (int i = 0; i < Id::STORAGE_SIZE; i++) {
+                this->data[i] = id.data[i];
+            }
         }
         return *this;
     }
@@ -54,6 +61,7 @@ namespace DHT
         uint8_t *dist = (uint8_t *) self.data;
         int loop = 0;
 
+        //Handle hexa digits two at a time and inset colons
         for (int i = 0; i < Id::STORAGE_SIZE; i++) {
             if(loop%2 == 0 && loop != 0){
                 os << ':';
@@ -69,21 +77,24 @@ namespace DHT
     std::istream& operator>>(std::istream& in, Id& id) {
         uint8_t* pointer = (uint8_t*) id.data;
         uint8_t n1, n2;
+
         for(int i = 0; i<Id::STORAGE_SIZE; i++){
             n1 = in.get();
             n2 = in.get();
 
             uint8_t value = 0;
 
+            //Compute the char value for two digits
             n1 = n1>'9' ? (n1-'a'+10) : (n1-'0');
             n2 = n2>'9' ? (n2-'a'+10) : (n2-'0');
-
             value = 16*n1 + n2;
 
             *pointer = value;
             pointer ++;
+
+            //delete colons
             if(i != Id::STORAGE_SIZE-1 && i%2 ==1){
-                 in.get(); //delete the :
+                 in.get();
             }
         }
         return in;
@@ -101,7 +112,7 @@ namespace DHT
         initSelf(a, b);
     }
 
-    Distance::Distance(const Id& a, const Id& b){
+    Distance::Distance(const Id& a, const Id& b) {
         initSelf(&a, &b);
     }
 
@@ -109,7 +120,7 @@ namespace DHT
         return firstActive;
     }
 
-    void Distance::initSelf(const Id* a, const Id* b){
+    void Distance::initSelf(const Id* a, const Id* b) {
         uint8_t *a_data = (uint8_t *) a->data;
         uint8_t *b_data = (uint8_t *) b->data;
         uint8_t *dist = (uint8_t *) this->data;
@@ -117,6 +128,7 @@ namespace DHT
         firstActive = 0;
         uint8_t* firstActiveChar = NULL;
 
+        //Finds blocks of 0
         for (int i = 0; i < Id::STORAGE_SIZE; i++) {
             *(dist) = *(a_data++) ^ *(b_data++);
             if (firstActiveChar == NULL ) {
@@ -139,6 +151,7 @@ namespace DHT
 
         unsigned char active = *firstActiveChar;
 
+        //Search for the first 1 inside the block (there must be some asm for this)
         for(int i=0; i<8; i++){
             if( (0x80 & active) == 0 ){
                 firstActive ++;

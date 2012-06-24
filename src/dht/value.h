@@ -15,6 +15,7 @@
  */
 /**
  * @file dht/value.h
+ * @brief containers for values in the Storage
  */
 #ifndef EPYX_DHT_VALUE_H
 #define EPYX_DHT_VALUE_H
@@ -26,6 +27,9 @@ namespace Epyx
 namespace DHT
 {
 
+    /**
+     * @class Value
+     */
     struct Value {
         std::string content;
         Value(const std::string& c)

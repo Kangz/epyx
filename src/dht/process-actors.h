@@ -13,6 +13,10 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  */
+/*
+ * @file dht/process-actors.h
+ * @brief define process actors that handle answers to queries this Node sent.
+ */
 #ifndef EPYX_DHT_PROCESS_ACTORS_H
 #define EPYX_DHT_PROCESS_ACTORS_H
 
@@ -34,6 +38,10 @@ namespace DHT
     struct GetterActorData;
     struct SetterActorData;
 
+    /**
+     * @struct ProcessActorData
+     * @brief The common type of message used by proces actors.
+     */
     struct ProcessActorData{
         Peer& peer;
         Packet* pkt;
@@ -43,49 +51,83 @@ namespace DHT
         void freeData();
     };
 
+    /**
+     * @class ProcessActor
+     * @brief thebase class of every process Actor
+     *
+     * A process actor waits for a single message (or a timeout)
+     * and reports back to its parent actor as it is part of a process.
+     * ProcessActor::destroy should be called instead of kill()
+     */
     class ProcessActor: public Actor<ProcessActorData> {
-        protected:
-            ProcessActor(InternalNode& n, int timeout = 0);
-            void destroy();
+    protected:
+        /**
+         * @brief register the process actor in the node.
+         * @param n the InternalNode
+         * @param timeout the process actor timeout if it has one
+         */
+        ProcessActor(InternalNode& n, int timeout = 0);
 
-            InternalNode& n;
-            long processId;
+        /**
+         * @brief destroys the actor and unregisters it from the process
+         * actor list
+         */
+        void destroy();
+
+        InternalNode& n;
+        long processId;
     };
 
-    static const int SINGLE_REQUEST_TIMEOUT = 2*1000;
-
+    /**
+     * @class SingulerFindActor
+     * @brief part of a FIND process
+     *
+     * It sends the query and reports back to its parent
+     */
     class SingularFindActor: public ProcessActor {
-        public:
-            SingularFindActor(InternalNode& n, ActorId<FinderActorData> p, Peer& peer, Id& requested);
+    public:
+        SingularFindActor(InternalNode& n, ActorId<FinderActorData> p, Peer& peer, Id& requested);
 
-        protected:
-            void treat(ProcessActorData& msg);
-            void timeout();
+    protected:
+        void treat(ProcessActorData& msg);
+        void timeout();
 
-            Peer target;
-            ActorId<FinderActorData> parent;
+        Peer target;
+        ActorId<FinderActorData> parent;
     };
 
+    /**
+     * @class SingulerGetActor
+     * @brief part of a GET process
+     *
+     * It sends the query and reports back to its parent
+     */
     class SingularGetActor: public ProcessActor {
-        public:
-            SingularGetActor(InternalNode& n, ActorId<GetterActorData> p, Peer& peer, const std::string& key);
+    public:
+        SingularGetActor(InternalNode& n, ActorId<GetterActorData> p, Peer& peer, const std::string& key);
 
-        protected:
-            void treat(ProcessActorData& msg);
-            void timeout();
+    protected:
+        void treat(ProcessActorData& msg);
+        void timeout();
 
-            ActorId<GetterActorData> parent;
+        ActorId<GetterActorData> parent;
     };
 
+    /**
+     * @class SingulerSetActor
+     * @brief part of a SET process
+     *
+     * It sends the query and reports back to its parent
+     */
     class SingularSetActor: public ProcessActor {
-        public:
-            SingularSetActor(InternalNode& n, ActorId<SetterActorData> p, Peer& peer, const std::string& key, const std::string& value);
+    public:
+        SingularSetActor(InternalNode& n, ActorId<SetterActorData> p, Peer& peer, const std::string& key, const std::string& value);
 
-        protected:
-            void treat(ProcessActorData& msg);
-            void timeout();
+    protected:
+        void treat(ProcessActorData& msg);
+        void timeout();
 
-            ActorId<SetterActorData> parent;
+        ActorId<SetterActorData> parent;
     };
 
 }

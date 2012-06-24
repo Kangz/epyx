@@ -33,9 +33,31 @@ namespace DHT
     class Storage
     {
         public:
+            /**
+             * @brief the Storage constructor
+             */
             Storage();
+
+            /**
+             * @brief does it contain a key ?
+             * @param key the asked key
+             * @return true if it contains the key, false otherwise
+             */
             bool has(const std::string& key);
+
+            /**
+             * @brief try to get a value for a given key
+             * @param key the key
+             * @param res the result to be set
+             * @return true if it had the key
+             */
             bool get(const std::string& key, Value& res);
+
+            /**
+             * @brief set a key into the Storage
+             * @key the key
+             * @value the value
+             */
             void set(const std::string& key, const std::string& data);
 
         private:

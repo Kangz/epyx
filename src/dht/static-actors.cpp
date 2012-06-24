@@ -24,6 +24,7 @@ namespace DHT
     }
 
     void PingActor::treat(StaticActorData& msg) {
+        //We only need to send back a pong
         Packet pkt;
         pkt.method = M_PONG;
         this->n.send(pkt, msg.peer);
@@ -39,6 +40,7 @@ namespace DHT
         answer.connectionId = msg.pkt->connectionId;
         answer.status = 1;
 
+        //Try to find the value
         Value requested;
         if(this->n.storage.get(msg.pkt->key, requested)){
             answer.value = requested.content;
@@ -73,6 +75,7 @@ namespace DHT
         answer.status = 0;
         answer.foundPeers = new std::vector<Peer>();
 
+        //Ask the kbucket
         this->n.kbucket.findNearestNodes(msg.pkt->idToFind, *answer.foundPeers, msg.pkt->count);
 
         this->n.send(answer, msg.peer);

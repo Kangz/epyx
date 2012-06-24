@@ -15,6 +15,7 @@
  */
 /**
  * @file dht/consts.h
+ * @brief constants used by the current DHT, it might change for a more flexible system some day
  */
 #ifndef EPYX_DHT_CONSTS_H
 #define EPYX_DHT_CONSTS_H
@@ -24,9 +25,21 @@ namespace Epyx
 namespace DHT
 {
     //Define the timeouts in milliesconds
-    static int FIND_CALLBACK_TIMEOUT = 5000;
-    static int GET_CALLBACK_TIMEOUT = 10000;
-    static int SET_CALLBACK_TIMEOUT = 10000;
+    static const int FIND_CALLBACK_TIMEOUT = 5000;
+    static const int GET_CALLBACK_TIMEOUT = 10000;
+    static const int SET_CALLBACK_TIMEOUT = 10000;
+    static const int SINGLE_REQUEST_TIMEOUT = 2000;
+
+    //Parameters for the FIND process
+    static const int FIND_NB_NODE_REQUESTED = 5;
+    static const int FIND_PARALLEL_QUERIES = 3;
+
+    //Parameters for the GET process
+    static const int GET_REDUNDANCY = 10;
+
+    //Parameters for the SET process
+    static const int SET_REDUNDANCY = 10;
+    static const int SET_ERROR_THRESHOLD = 3;
 }
 }
 #endif /*EPYX_DHT_PEER_H*/
