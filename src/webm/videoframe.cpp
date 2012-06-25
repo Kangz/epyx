@@ -1,3 +1,7 @@
+/**
+ * @file webm/videoframe.cpp
+ * @brief VideoFrame definition
+ */
 #include "videoframe.h"
 #include "../core/common.h"
 
@@ -8,10 +12,15 @@ namespace webm {
     VideoFrame::VideoFrame(int width, int height, const std::string& name)
     :width(width), height(height), window_name(name)
     {
+        screen_rect.x = 0;
+        screen_rect.y = 0;
+        screen_rect.w = width;
+        screen_rect.h = height;
     }
 
     VideoFrame::~VideoFrame()
     {
+        SDL_FreeYUVOverlay(overlay);
         SDL_Quit();
     }
 
@@ -29,7 +38,7 @@ namespace webm {
         SDL_VideoDriverName(driverName, sizeof(driverName));
         log::info << "Using Video Driver : "<< driverName << log::endl;
 
-        screen = SDL_SetVideoMode(width, height, 0, SDL_ANYFORMAT | SDL_DOUBLEBUF);
+        screen = SDL_SetVideoMode(width, height, 0, video_format);
         overlay = SDL_CreateYUVOverlay(width, height, SDL_YV12_OVERLAY, screen);
 
         SDL_WM_SetCaption(window_name.c_str(), NULL);
@@ -37,8 +46,9 @@ namespace webm {
         return true;
     }
 
-    void VideoFrame::showFrame(vpx_image_t* image)
+    void VideoFrame::showFrame(const vpx_image_t* image)
     {
+        sdl_lock.lock();
         SDL_LockYUVOverlay(overlay);
 
         unsigned char *frame_pointer = (unsigned char *) overlay->pixels[0];
@@ -71,6 +81,30 @@ namespace webm {
         }
 
         SDL_UnlockYUVOverlay(overlay);
+        SDL_DisplayYUVOverlay(overlay, &screen_rect);
+        sdl_lock.unlock();
+    }
+
+    bool VideoFrame::checkSDLQuitAndEvents() {
+        sdl_lock.lock();
+
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            switch(event.type) {
+            case SDL_QUIT:
+                log::info << "SDL_QUIT event received" << log::endl;
+                sdl_lock.unlock();
+                return true;
+
+            case SDL_VIDEORESIZE:
+                screen = SDL_SetVideoMode(event.resize.w, event.resize.h, 0, video_format);
+                screen_rect.w = event.resize.w;
+                screen_rect.h = event.resize.h;
+            }
+        }
+
+        sdl_lock.unlock();
+        return false;
     }
 
 }

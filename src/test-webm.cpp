@@ -19,7 +19,7 @@ int main() {
         Epyx::webm::VideoFrame vframe(width, height, "Epyx");
         EPYX_ASSERT(vframe.init());
 
-        while (true) {
+        while (!vframe.checkSDLQuitAndEvents()) {
             // Get frame
             if (vdev.get_frame(&rawImage)) {
                 // Get time
