@@ -6,6 +6,7 @@
 #define EPYX_WEBM_FRAMEPACKET_H
 
 #include <stddef.h>
+#include "../parser/gttpacket.h"
 
 namespace Epyx
 {
@@ -15,7 +16,10 @@ namespace Epyx
         {
         public:
             FramePacket(void *data, size_t size, unsigned long timestamp, unsigned long duration);
+            FramePacket(GTTPacket& pkt);
             ~FramePacket();
+
+            unsigned long build(char **newData) const;
 
             unsigned char *data;
             size_t size;
