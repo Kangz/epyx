@@ -16,8 +16,12 @@ namespace Epyx
 
         FramePacket::FramePacket(GTTPacket& pkt) {
             //Check the packet is not ill-formed
-            if(pkt.headers.count("duration") == 0 || pkt.headers.count("timestamp") == 0 || pkt.size == 0) {
-                throw;
+            if (pkt.protocol.compare("WEBM") || pkt.method.compare("FRAME_PACKET")) {
+                throw ParserException("WebM::FramePacket", "Invalid packet");
+
+            }
+            if (pkt.headers.count("duration") == 0 || pkt.headers.count("timestamp") == 0 || pkt.size == 0) {
+                throw ParserException("WebM::FramePacket", "Invalid packet headers");
             }
 
             //Copy everything from the GTT packet
@@ -35,7 +39,8 @@ namespace Epyx
             GTTPacket pkt;
 
             //Fill the GTT packet
-            pkt.protocol = "WEBM_FRAME_PACKET";
+            pkt.protocol = "WEBM";
+            pkt.method = "FRAME_PACKET";
             pkt.headers["duration"] = String::fromInt(duration);
             pkt.headers["timestamp"] = String::fromInt(timestamp);
             pkt.body = (char*) data;

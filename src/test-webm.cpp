@@ -32,19 +32,31 @@ int main() {
 
                 encoder.encode(rawImage, utime, 0);
                 while ((fpkt = encoder.getPacket()) != NULL) {
-                    Epyx::log::info << "Packet size " << fpkt->size << Epyx::log::endl;
-                    decoder.decode(*fpkt);
+
+                    // Convert packet
+                    char *netdata;
+                    unsigned long netsize = fpkt->build(&netdata);
                     delete fpkt;
-                }
 
-                vpx_image_t *img = decoder.getFrame();
-                if (img != NULL) {
-                    vframe.showFrame(img);
-                }
+                    Epyx::log::info << "Net Packet of " << netsize << " bytes" << Epyx::log::endl;
 
-                //vframe.showFrame(&rawImage);
+                    // Receive packet
+                    Epyx::GTTParser parser;
+                    parser.eat(netdata, netsize);
+                    Epyx::GTTPacket *gttpkt;
+                    while ((gttpkt = parser.getPacket()) != NULL) {
+                        Epyx::webm::FramePacket recvFPkt(*gttpkt);
+                        decoder.decode(recvFPkt);
+                        delete gttpkt;
+
+
+                        vpx_image_t *img = decoder.getFrame();
+                        if (img != NULL) {
+                            vframe.showFrame(img);
+                        }
+                    }
+                }
             }
-            usleep(10);
         }
 
         EPYX_ASSERT(vdev.stop_capture());
