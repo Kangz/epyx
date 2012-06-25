@@ -119,6 +119,7 @@ namespace Epyx
 
             // Map the buffers
             for (unsigned int i = 0; i < NB_BUFFER; i++) {
+                struct v4l2_buffer buf;
                 memset(&buf, 0, sizeof (struct v4l2_buffer));
                 buf.index = i;
                 buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -139,6 +140,7 @@ namespace Epyx
 
             // Queue the buffers
             for (unsigned int i = 0; i < NB_BUFFER; ++i) {
+                struct v4l2_buffer buf;
                 memset(&buf, 0, sizeof (struct v4l2_buffer));
                 buf.index = i;
                 buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -175,11 +177,17 @@ namespace Epyx
 
         bool VideoDev::get_frame(vpx_image_t *raw) {
             EPYX_ASSERT(raw != NULL);
+            struct v4l2_buffer buf;
+            memset(&buf, 0, sizeof (struct v4l2_buffer));
             buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             buf.memory = V4L2_MEMORY_MMAP;
 
             // get a frame if we can
             if (ioctl(fd, VIDIOC_DQBUF, &buf) < 0) {
+                if (errno == EAGAIN) {
+                    // Busy
+                    return false;
+                }
                 log::warn << "[VideoDev] Unable to dequeue buffer: " << log::errstd << log::endl;
                 return false;
             }

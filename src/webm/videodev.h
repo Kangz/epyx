@@ -42,7 +42,6 @@ namespace Epyx
             // File descriptor
             int fd;
 
-            struct v4l2_buffer buf;
             const void* mem[NB_BUFFER];
             char frame[FRAME_SIZE];
 

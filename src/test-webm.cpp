@@ -1,6 +1,7 @@
 #include "api.h"
 #include "webm/videodev.h"
 #include "webm/vpxencoder.h"
+#include "webm/videoframe.h"
 
 int main() {
     try {
@@ -14,6 +15,9 @@ int main() {
         EPYX_ASSERT(vdev.start_capture());
 
         Epyx::webm::FramePacket *fpkt;
+
+        Epyx::webm::VideoFrame vframe(width, height, "Epyx");
+        EPYX_ASSERT(vframe.init());
 
         while (true) {
             // Get frame
@@ -29,6 +33,8 @@ int main() {
                     Epyx::log::info << "Packet size " << fpkt->size << Epyx::log::endl;
                     delete fpkt;
                 }
+
+                vframe.showFrame(&rawImage);
             }
             usleep(10);
         }
