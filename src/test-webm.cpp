@@ -1,5 +1,6 @@
 #include "api.h"
 #include "webm/videodev.h"
+#include "webm/vpxdecoder.h"
 #include "webm/vpxencoder.h"
 #include "webm/videoframe.h"
 
@@ -9,6 +10,7 @@ int main() {
         Epyx::API epyx;
         Epyx::webm::VideoDev vdev(width, height, frame_rate);
         Epyx::webm::VpxEncoder encoder(width, height, video_bitrate);
+        Epyx::webm::VpxDecoder decoder;
 
         vpx_image_t rawImage;
         vpx_img_alloc(&rawImage, IMG_FMT_YV12, width, height, 1);
@@ -31,10 +33,16 @@ int main() {
                 encoder.encode(rawImage, utime, 0);
                 while ((fpkt = encoder.getPacket()) != NULL) {
                     Epyx::log::info << "Packet size " << fpkt->size << Epyx::log::endl;
+                    decoder.decode(*fpkt);
                     delete fpkt;
                 }
 
-                vframe.showFrame(&rawImage);
+                vpx_image_t *img = decoder.getFrame();
+                if (img != NULL) {
+                    vframe.showFrame(img);
+                }
+
+                //vframe.showFrame(&rawImage);
             }
             usleep(10);
         }
