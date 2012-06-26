@@ -64,7 +64,6 @@ public:
     webm::VideoFrame vframe;
     Epyx::N2NP::Node *node;
     N2NP::NodeId remoteNodeid;
-    bool vframe_inited;
 
 private:
     // Clear screen
@@ -77,6 +76,7 @@ private:
     std::string historique;
     Mutex histomut;
     std::string pseudo;
+    bool vframe_inited;
     bool running;
 };
 
@@ -95,10 +95,6 @@ VideoDisplayer::VideoDisplayer(Demo* demo)
 }
 
 void VideoDisplayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size) {
-    if (!demo->vframe_inited) {
-        return;
-    }
-    log::info << "Receive Size "<< size << log::endl;
     Epyx::GTTParser parser;
     parser.eat(data, size);
     GTTPacket* gttpkt = parser.getPacket();
@@ -133,8 +129,6 @@ void SenderAndUIThread::run() {
                 char* netdata;
                 unsigned long netsize = fpkt->build(&netdata);
 
-                log::info<<"Sent Size" << netsize << log::endl;
-
                 demo->node->send(demo->remoteNodeid, "VIDEO", netdata, netsize);
             }
         }
@@ -163,6 +157,9 @@ bool Demo::run() {
     DHT::Peer relayPeer(relayNodeId);
     dhtNode->sendPing(relayPeer);
 
+    VideoDisplayer videoModule(this);
+    node->addModule("VIDEO", &videoModule);
+
     // Wait the ping to be proceeded
     sleep(1);
 
@@ -170,9 +167,6 @@ bool Demo::run() {
         std::cerr << "Impossible d'enregistrer une valeur !" << std::endl;
         return false;
     }
-
-    VideoDisplayer videoModule(this);
-    node->addModule("VIDEO", &videoModule);
 
     // Ask remote ID
     std::string pseudo_ext;
@@ -225,7 +219,7 @@ void Demo::stop() {
 void Demo::newFrame(const webm::FramePacket& fpkt) {
     decoder.decode(fpkt);
     vpx_image_t *img = decoder.getFrame();
-    if (!img == NULL) {
+    if (img != NULL && vframe_inited) {
         vframe.showFrame(img);
     }
 }
