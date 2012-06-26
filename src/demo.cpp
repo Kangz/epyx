@@ -201,6 +201,13 @@ bool Demo::run() {
     while (running) {
         updateDisplay();
         read(STDIN_FILENO, &c, 1);
+        if(c==8 || c== 127||c==126){
+            if(msg.length()>=1)
+                msg.erase(msg.length()-1);
+            
+            
+        }
+        else
         msg.append(1, c);
         if (c == '\n') {
             node->send(remoteNodeid, "DISPLAY", msg.c_str(), msg.length() + 1);
