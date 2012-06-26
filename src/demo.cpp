@@ -12,7 +12,7 @@
 #define Restore "\033[0m"
 
 using namespace Epyx;
-
+                
 class Demo;
 class Displayer :public Epyx::N2NP::Module
 {
@@ -109,7 +109,17 @@ bool Demo::run() {
     while (true) {
         updateDisplay();
         read(STDIN_FILENO, &c, 1);
-        msg.append(1, c);
+        if(c=='\b'||c==127){
+          //  std::cout<<"here i am";
+          /*  read(STDIN_FILENO,&back, 1);
+            read(STDIN_FILENO,&space, 1);
+            read(STDIN_FILENO,&back, 1);*/
+            if(msg.length()>=1)
+            msg.erase(msg.length()-1);
+            
+        }
+        else
+        msg.append(1,c);
         if (c == '\n') {
             node->send(remoteNodeid, "DISPLAY", msg.c_str(), msg.length() + 1);
             receive(pseudo, msg, true);
@@ -139,7 +149,7 @@ void Demo::receive(const std::string& pseudo, const std::string& msg, bool isMe)
 }
 
 void Demo::updateDisplay() {
-    // Display
+    
     clear();
     std::cout << historique;
     std::cout << "<" << pseudo << "> : " << msg;
@@ -151,11 +161,13 @@ int main(int argc, char **argv) {
     try {
         Epyx::API epyx;
         epyx.setNetWorkers(50);
-
+        
+        char * addr;
         // Create my node
         if (argc < 2) {
             std::cerr << "You need to tell me the relay I am intented to connect." << std::endl;
             return 1;
+            
         }
         Epyx::Address relayAddr(argv[1]);
         Epyx::N2NP::Node *node = new Epyx::N2NP::Node(relayAddr);
