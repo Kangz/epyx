@@ -11,8 +11,11 @@
 #include <unistd.h>
 #include <termios.h>
 #include <stdlib.h>
-#define LightGreen "\033[01;33m"
-#define LightBlue "\033[01;34m"
+#define LightBlue "\033[00;34m"
+#define Yellow "\033[00;32m"
+#define LightGreenBold "\033[01;33m"
+#define LightBlueBold "\033[01;34m"
+#define MagentaBold "\033[01;35m"
 #define Restore "\033[0m"
 
 using namespace Epyx;
@@ -245,7 +248,7 @@ void Demo::configureTerm() {
 
 void Demo::receive(const std::string& pseudo, const std::string& msg, bool isMe) {
     histomut.lock();
-    historique.append(isMe ? LightBlue : LightGreen)
+    historique.append(isMe ? LightBlueBold : LightGreenBold)
         .append(std::string("<").append(pseudo).append(std::string("> : "))
         .append(msg)).append(Restore);
     histomut.unlock();
@@ -259,9 +262,10 @@ void Demo::updateDisplay() {
     fflush(stdout);
 
 }
-
+void welcome(void);
 int main(int argc, char **argv) {
     try {
+        welcome();
         Epyx::API epyx;
         epyx.setNetWorkers(50);
 
@@ -288,4 +292,40 @@ int main(int argc, char **argv) {
         std::cout << e << std::endl;
     }
     return 0;
+}
+
+void welcome(void)
+{
+    system("clear");
+    std::cout<<Yellow;
+    std::cout<<"                                                                           "<<std::endl;
+    std::cout<<"                                                                           "<<std::endl;
+    
+    std::cout<<"       Welcome to ";
+    std::cout<<MagentaBold;
+    std::cout<<"EPYX";
+    std::cout<<Yellow;
+    std::cout<<" !                                              "<<std::endl;
+    
+    std::cout<<"                                                                        "<<std::endl;
+    std::cout<<"                                                                        "<<std::endl;
+    std::cout<<"       A Fancy Free Net Environment                  ┊ ┊  ┊ ┊┊ ┊ ┊  "<<std::endl;
+    std::cout<<"                                                    ┊ ┊ ┊ ┊┊ ┆ ┊ "<<std::endl;
+    std::cout<<"                                                  ☆ ┊ ☆ ┊☆ ┆ ┊  "<<std::endl;
+    std::cout<<"                                                   ☆  ☆  ┆ ┊     "<<std::endl; 
+    std::cout<<"       │★☆   ╮。。...                                 ☆   ┊  "<<std::endl;
+    std::cout<<"      ╭╯☆★☆★╭╯。。...                                     ┊  "<<std::endl;
+    std::cout<<"      ╰╮★☆★╭╯。。。...                                     ┊  "<<std::endl;
+    std::cout<<"       │☆╭—╯                                                    ☆  "<<std::endl;
+    std::cout<<"      ╭╯╭╯                                                          "<<std::endl;
+    std::cout<<"     ╔╝★╚╗                                                         "<<std::endl; 
+    std::cout<<"     ║★☆★║╔═══╗ ╔═══╗ ╔═══╗ ╔═══╗           "<<std::endl; 
+    std::cout<<"     ║☆★☆║║ E ║ ║ P ║ ║ Y ║ ║ X ║           "<<std::endl;
+    std::cout<<"    ◢◎══◎╝╚◎═◎╝═╚◎═◎╝═╚◎═◎╝═╚◎═◎╝           "<<std::endl;
+
+   
+    std::cout << Restore;
+    fflush(stdout);
+    sleep(1);
+    system("clear");
 }
