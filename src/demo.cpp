@@ -1,6 +1,10 @@
 #include "api.h"
 #include "n2np/relay.h"
 #include "n2np/node.h"
+#include "webm/videodev.h"
+#include "webm/vpxdecoder.h"
+#include "webm/vpxencoder.h"
+#include "webm/videoframe.h"
 #include "dht/node.h"
 #include <strings.h>
 #include <stdio.h>
@@ -23,6 +27,26 @@ private:
     Demo *demo;
     std::string pseudo_ext;
 };
+
+class VideoDisplayer :public Epyx::N2NP::Module
+{
+public:
+    VideoDisplayer(Demo *demo);
+    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size);
+private:
+    Demo *demo;
+};
+
+class SenderAndUIThread :public Thread
+{
+public:
+    SenderAndUIThread(Demo* demo);
+    virtual void run();
+
+private:
+    Demo* demo;
+};
+
 class Demo
 {
 public:
@@ -33,6 +57,15 @@ public:
 
     void receive(const std::string& pseudo, const std::string& msg, bool isMe = false);
 
+    void stop();
+
+    void newFrame(const webm::FramePacket& fpkt);
+
+    webm::VideoFrame vframe;
+    Epyx::N2NP::Node *node;
+    N2NP::NodeId remoteNodeid;
+    bool vframe_inited;
+
 private:
     // Clear screen
     void clear();
@@ -40,10 +73,11 @@ private:
     void configureTerm();
 
     std::string msg;
+    webm::VpxDecoder decoder;
     std::string historique;
     Mutex histomut;
     std::string pseudo;
-    Epyx::N2NP::Node *node;
+    bool running;
 };
 
 Displayer::Displayer(Demo *demo, const std::string& pseudo_ext)
@@ -56,8 +90,61 @@ void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const 
     demo->updateDisplay();
 }
 
+VideoDisplayer::VideoDisplayer(Demo* demo)
+:demo(demo) {
+}
+
+void VideoDisplayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size) {
+    if (!demo->vframe_inited) {
+        return;
+    }
+    log::info << "Receive Size "<< size << log::endl;
+    Epyx::GTTParser parser;
+    parser.eat(data, size);
+    GTTPacket* gttpkt = parser.getPacket();
+    webm::FramePacket fpkt(*gttpkt);
+    demo->newFrame(fpkt);
+    delete gttpkt;
+}
+
+
+SenderAndUIThread::SenderAndUIThread(Demo* demo)
+:Thread("UI"), demo(demo) {
+}
+
+void SenderAndUIThread::run() {
+    webm::VideoDev vdev(640, 480, 30);
+    webm::VpxEncoder encoder(640, 480, 400);
+
+    vpx_image_t rawImage;
+    vpx_img_alloc(&rawImage, IMG_FMT_YV12, 640, 480, 1);
+
+    bool vdev_started = vdev.start_capture();
+    while(! demo->vframe.checkSDLQuitAndEvents()) {
+        if(vdev_started && vdev.get_frame(&rawImage)) {
+            struct timeval tv;
+            int gettimeofday_status = gettimeofday(&tv, NULL);
+            EPYX_ASSERT(gettimeofday_status == 0);
+            long int utime = tv.tv_sec * 1000 + tv.tv_usec;
+
+            encoder.encode(rawImage, utime, 0);
+            webm::FramePacket* fpkt;
+            while ((fpkt = encoder.getPacket()) != NULL) {
+                char* netdata;
+                unsigned long netsize = fpkt->build(&netdata);
+
+                log::info<<"Sent Size" << netsize << log::endl;
+
+                demo->node->send(demo->remoteNodeid, "VIDEO", netdata, netsize);
+            }
+        }
+        usleep(1000);
+    }
+    demo->stop();
+}
+
 Demo::Demo(Epyx::N2NP::Node *node)
-:node(node) {
+:vframe(640, 480, "Epyx Chat"), node(node), vframe_inited(false) {
 }
 
 bool Demo::run() {
@@ -84,6 +171,9 @@ bool Demo::run() {
         return false;
     }
 
+    VideoDisplayer videoModule(this);
+    node->addModule("VIDEO", &videoModule);
+
     // Ask remote ID
     std::string pseudo_ext;
     std::cout << "Entrez le pseudo que vous voulez contacter : ";
@@ -95,7 +185,7 @@ bool Demo::run() {
         std::cout << "En attente...\n";
         sleep(1);
     }
-    Epyx::N2NP::NodeId remoteNodeid(remoteNodeidStr);
+    remoteNodeid = N2NP::NodeId(remoteNodeidStr);
 
     log::debug << pseudo_ext << " est dans " << remoteNodeid << log::endl;
 
@@ -104,9 +194,17 @@ bool Demo::run() {
     node->addModule("DISPLAY", &displayModule);
 
     // Let's run !
+    running = true;
+    vframe.init();
+
+    vframe_inited = true;
+
+    SenderAndUIThread ui_thread(this);
+    ui_thread.start();
+
     unsigned char c;
     configureTerm();
-    while (true) {
+    while (running) {
         updateDisplay();
         read(STDIN_FILENO, &c, 1);
         msg.append(1, c);
@@ -115,6 +213,20 @@ bool Demo::run() {
             receive(pseudo, msg, true);
             msg.assign("");
         }
+    }
+
+    return true;
+}
+
+void Demo::stop() {
+    running = false;
+}
+
+void Demo::newFrame(const webm::FramePacket& fpkt) {
+    decoder.decode(fpkt);
+    vpx_image_t *img = decoder.getFrame();
+    if (!img == NULL) {
+        vframe.showFrame(img);
     }
 }
 

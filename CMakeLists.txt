@@ -46,8 +46,8 @@ file(GLOB epyx_api_sources src/api.cpp
 add_executable(test-n2np ${epyx_api_sources} src/test-n2np.cpp)
 target_link_libraries(test-n2np pthread cryptopp)
 
-add_executable(demo ${epyx_api_sources} src/demo.cpp)
-target_link_libraries(demo pthread cryptopp)
+add_executable(demo ${epyx_api_sources} ${webm_sources} src/demo.cpp)
+target_link_libraries(demo pthread cryptopp vpx SDL)
 
 add_executable(demoframe ${epyx_api_sources} src/demoframe.cpp)
 target_link_libraries(demoframe pthread cryptopp)
