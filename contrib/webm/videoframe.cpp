@@ -3,7 +3,7 @@
  * @brief VideoFrame definition
  */
 #include "videoframe.h"
-#include "../core/common.h"
+#include "../../src/core/common.h"
 
 namespace Epyx {
 

@@ -8,7 +8,7 @@
 #include <string>
 #include <vpx/vpx_image.h>
 #include <SDL/SDL.h>
-#include "../core/common.h"
+#include "../../src/core/common.h"
 
 namespace Epyx {
 

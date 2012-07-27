@@ -1,5 +1,5 @@
 #include "vpxdecoder.h"
-#include "../core/common.h"
+#include "../../src/core/common.h"
 #include <vpx/vp8dx.h>
 #include <cstring>
 

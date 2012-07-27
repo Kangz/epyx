@@ -1,4 +1,4 @@
-#include "api.h"
+#include "../src/api.h"
 #include "webm/videodev.h"
 #include "webm/vpxdecoder.h"
 #include "webm/vpxencoder.h"

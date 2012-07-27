@@ -1,5 +1,5 @@
 #include "vpxencoder.h"
-#include "../core/common.h"
+#include "../../src/core/common.h"
 #include <vpx/vp8cx.h>
 
 namespace Epyx

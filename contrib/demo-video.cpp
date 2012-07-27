@@ -1,11 +1,9 @@
-#include "api.h"
-#include "n2np/relay.h"
-#include "n2np/node.h"
+#include "../src/api.h"
 #include "webm/videodev.h"
 #include "webm/vpxdecoder.h"
 #include "webm/vpxencoder.h"
 #include "webm/videoframe.h"
-#include "dht/node.h"
+#include "../src/dht/node.h"
 #include <strings.h>
 #include <stdio.h>
 #include <unistd.h>

@@ -1,5 +1,5 @@
 #include "videodev.h"
-#include "../core/common.h"
+#include "../../src/core/common.h"
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>

@@ -6,7 +6,7 @@
 #define EPYX_WEBM_FRAMEPACKET_H
 
 #include <stddef.h>
-#include "../parser/gttpacket.h"
+#include "../../src/parser/gttpacket.h"
 
 namespace Epyx
 {

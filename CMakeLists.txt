@@ -19,7 +19,9 @@ file(GLOB_RECURSE net_sources src/net/*)
 file(GLOB_RECURSE parser_sources src/parser/*)
 file(GLOB_RECURSE dht_sources src/dht/*)
 file(GLOB_RECURSE crypto_sources src/crypto/*)
-file(GLOB_RECURSE webm_sources src/webm/*)
+
+# Contrib files
+file(GLOB_RECURSE webm_sources contrib/webm/*)
 
 # More general file sets, with deps
 file(GLOB epyx_api_sources src/api.cpp
@@ -27,27 +29,24 @@ file(GLOB epyx_api_sources src/api.cpp
     ${natpunching_sources} ${net_sources} ${parser_sources} ${tinyxml_sources})
 
 # Test executables
-#add_executable(test-thread ${epyx_api_sources} src/test-thread.cpp)
-#target_link_libraries(test-thread pthread cryptopp)
+add_executable(test-thread ${epyx_api_sources} src/test-thread.cpp)
+target_link_libraries(test-thread pthread cryptopp)
 
-#add_executable(test-server ${epyx_api_sources} src/test-server.cpp)
-#target_link_libraries(test-server pthread cryptopp)
+add_executable(test-server ${epyx_api_sources} src/test-server.cpp)
+target_link_libraries(test-server pthread cryptopp)
 
-#add_executable(test-parser ${epyx_api_sources} src/test-parser.cpp)
-#target_link_libraries(test-parser pthread cryptopp)
+add_executable(test-parser ${epyx_api_sources} src/test-parser.cpp)
+target_link_libraries(test-parser pthread cryptopp)
 
-#add_executable(test-natpunching ${epyx_api_sources} src/test-natpunching.cpp)
-#target_link_libraries(test-natpunching pthread cryptopp)
+add_executable(test-natpunching ${epyx_api_sources} src/test-natpunching.cpp)
+target_link_libraries(test-natpunching pthread cryptopp)
 
-#add_executable(test-local-n2np ${epyx_api_sources} src/test-local-n2np.cpp
-#    ${localn2np_sources})
-#target_link_libraries(test-local-n2np pthread cryptopp)
+add_executable(test-local-n2np ${epyx_api_sources} src/test-local-n2np.cpp
+    ${localn2np_sources})
+target_link_libraries(test-local-n2np pthread cryptopp)
 
 add_executable(test-n2np ${epyx_api_sources} src/test-n2np.cpp)
 target_link_libraries(test-n2np pthread cryptopp)
-
-add_executable(demo ${epyx_api_sources} ${webm_sources} src/demo.cpp)
-target_link_libraries(demo pthread cryptopp vpx SDL)
 
 add_executable(demoframe ${epyx_api_sources} src/demoframe.cpp)
 target_link_libraries(demoframe pthread cryptopp)
@@ -58,8 +57,11 @@ target_link_libraries(test-dht pthread cryptopp)
 #add_executable(test-crypto ${core_sources} ${crypto_sources} src/test-crypto.cpp)
 #target_link_libraries(test-crypto pthread cryptopp)
 
-add_executable(test-webm ${epyx_api_sources} src/test-webm.cpp ${webm_sources})
+add_executable(test-webm ${epyx_api_sources} contrib/test-webm.cpp ${webm_sources})
 target_link_libraries(test-webm pthread cryptopp vpx SDL)
+
+add_executable(demo-video ${epyx_api_sources} ${webm_sources} contrib/demo-video.cpp)
+target_link_libraries(demo-video pthread cryptopp vpx SDL)
 
 # Real programs
 add_executable(simple-relay ${epyx_api_sources} src/simple-relay.cpp)
