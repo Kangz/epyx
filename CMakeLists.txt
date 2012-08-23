@@ -9,6 +9,11 @@ SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 SET(CMAKE_CXX_FLAGS "-g -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable")
 
+# Use Boost
+find_package(Boost 1.40.0 COMPONENTS thread)
+link_directories(${Boost_LIBRARY_DIRS})
+include_directories(${Boost_INCLUDE_DIRS})
+
 # Make some sets of files from directories
 file(GLOB_RECURSE tinyxml_sources include/tinyxml/*)
 file(GLOB_RECURSE core_sources src/core/*)
@@ -30,43 +35,43 @@ file(GLOB epyx_api_sources src/api.cpp
 
 # Test executables
 add_executable(test-thread ${epyx_api_sources} src/test-thread.cpp)
-target_link_libraries(test-thread pthread cryptopp)
+target_link_libraries(test-thread ${Boost_LIBRARIES} pthread cryptopp)
 
 add_executable(test-server ${epyx_api_sources} src/test-server.cpp)
-target_link_libraries(test-server pthread cryptopp)
+target_link_libraries(test-server ${Boost_LIBRARIES} pthread cryptopp)
 
 add_executable(test-parser ${epyx_api_sources} src/test-parser.cpp)
-target_link_libraries(test-parser pthread cryptopp)
+target_link_libraries(test-parser ${Boost_LIBRARIES} pthread cryptopp)
 
 add_executable(test-natpunching ${epyx_api_sources} src/test-natpunching.cpp)
-target_link_libraries(test-natpunching pthread cryptopp)
+target_link_libraries(test-natpunching ${Boost_LIBRARIES} pthread cryptopp)
 
 add_executable(test-local-n2np ${epyx_api_sources} src/test-local-n2np.cpp
     ${localn2np_sources})
-target_link_libraries(test-local-n2np pthread cryptopp)
+target_link_libraries(test-local-n2np ${Boost_LIBRARIES} pthread cryptopp)
 
 add_executable(test-n2np ${epyx_api_sources} src/test-n2np.cpp)
-target_link_libraries(test-n2np pthread cryptopp)
+target_link_libraries(test-n2np ${Boost_LIBRARIES} pthread cryptopp)
 
 add_executable(demoframe ${epyx_api_sources} src/demoframe.cpp)
-target_link_libraries(demoframe pthread cryptopp)
+target_link_libraries(demoframe ${Boost_LIBRARIES} pthread cryptopp)
 
 add_executable(test-dht ${epyx_api_sources} src/test-dht.cpp ${localn2np_sources})
-target_link_libraries(test-dht pthread cryptopp)
+target_link_libraries(test-dht ${Boost_LIBRARIES} pthread cryptopp)
 
 #add_executable(test-crypto ${core_sources} ${crypto_sources} src/test-crypto.cpp)
-#target_link_libraries(test-crypto pthread cryptopp)
+#target_link_libraries(test-crypto pthread ${Boost_LIBRARIES} cryptopp)
 
 add_executable(demo ${epyx_api_sources} src/demo.cpp)
-target_link_libraries(demo pthread cryptopp)
+target_link_libraries(demo ${Boost_LIBRARIES} pthread cryptopp)
 
 
 add_executable(test-webm ${epyx_api_sources} contrib/test-webm.cpp ${webm_sources})
-target_link_libraries(test-webm pthread cryptopp vpx SDL)
+target_link_libraries(test-webm ${Boost_LIBRARIES} pthread cryptopp vpx SDL)
 
 add_executable(demo-video ${epyx_api_sources} ${webm_sources} contrib/demo-video.cpp)
-target_link_libraries(demo-video pthread cryptopp vpx SDL)
+target_link_libraries(demo-video ${Boost_LIBRARIES} pthread cryptopp vpx SDL)
 
 # Real programs
 add_executable(simple-relay ${epyx_api_sources} src/simple-relay.cpp)
-target_link_libraries(simple-relay pthread cryptopp)
+target_link_libraries(simple-relay ${Boost_LIBRARIES} pthread cryptopp)
