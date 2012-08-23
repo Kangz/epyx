@@ -25,10 +25,10 @@
 #include <iostream>
 
 /**
- * @def EPYX_ASSERT(condition)
- * An assert using Epyx' logging system.
+ * @def EPYX_VERIFY(condition)
+ * An assert using Epyx' logging system, always active.
  */
-#define EPYX_ASSERT(condition)\
+#define EPYX_VERIFY(condition)\
 {\
     if(!(bool)(condition)){\
         Epyx::log::fatal << "\n[ASSERT] " #condition "\n";\
@@ -37,6 +37,12 @@
         throw Epyx::FailException("assert", #condition);\
     }\
 }
+
+/**
+ * @def EPYX_ASSERT(condition)
+ * An assert which may be disabled in production.
+ */
+#define EPYX_ASSERT(condition) EPYX_VERIFY(condition)
 
 /**
  * @def EPYX_ASSERT_WARN(condition)
