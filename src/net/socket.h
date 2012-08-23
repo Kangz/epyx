@@ -21,7 +21,6 @@
 #ifndef EPYX_SOCKET_H
 #define EPYX_SOCKET_H
 
-#include "../core/mutex.h"
 #include "sockaddress.h"
 #include <string>
 
@@ -157,8 +156,7 @@ namespace Epyx
 
     private:
         // Global initialisation stuff
-        static int is_init;
-        static Mutex init_mutex;
+        static bool is_init;
 
         // Disable copy
         Socket(const Socket&);

@@ -17,8 +17,7 @@
 namespace Epyx
 {
     // Socket library initialisation
-    int Socket::is_init = 0;
-    Mutex Socket::init_mutex;
+    bool Socket::is_init = false;
 
     void Socket::init() {
         if (!is_init) {
