@@ -24,7 +24,7 @@ namespace Epyx
             if (ip.at(iplen - 1) != ']') {
                 // TODO: Better sanity checks
                 log::fatal << "Unknown IPv6 " << ip << log::endl;
-                throw ParserException("Address", "Invalid IPv6 address");
+                throw ParserException("IpAddress", "Invalid IPv6 address");
             }
             this->ip = ip.substr(1, iplen - 2);
         }
@@ -63,7 +63,7 @@ namespace Epyx
                 << "IPv4 is: " << AF_INET << "\n" \
                 << "IPv6 is: " << AF_INET6 \
                 << log::endl;
-            throw FailException("Address", "Bad IP Version");
+            throw FailException("IpAddress", "Bad IP Version");
         }
     }
 
@@ -106,7 +106,7 @@ namespace Epyx
             inet_pton(AF_INET6, ip.c_str(), &(ipv6->sin6_addr));
             ipv6->sin6_port = htons(port);
         } else {
-            throw FailException("Address", "Bad IP Version");
+            throw FailException("IpAddress", "Bad IP Version");
         }
     }
 

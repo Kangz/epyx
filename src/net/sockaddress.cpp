@@ -23,7 +23,7 @@ namespace Epyx
             if (n == std::string::npos) {
                 // TODO: Better sanity checks
                 log::fatal << "Unknown address " << addressFormat << log::endl;
-                throw ParserException("Address", "Invalid IPv6 address");
+                throw ParserException("SockAddress", "Invalid IPv6 address");
             }
             ip = IpAddress(addressFormat.substr(1, n - 1), 6);
             portstr = addressFormat.substr(n + 1);
@@ -71,7 +71,7 @@ namespace Epyx
                 << "IPv4 is: " << AF_INET << "\n" \
                 << "IPv6 is: " << AF_INET6 \
                 << log::endl;
-            throw FailException("Address", "Bad IP Version");
+            throw FailException("SockAddress", "Bad IP Version");
         }
     }
 
