@@ -39,6 +39,11 @@ namespace Epyx
         UDPServer(const SockAddress& addr);
 
         /**
+         * @brief Override close to close only once the socket
+         */
+        virtual void close();
+
+        /**
          * @brief Receive data for the server
          *
          * @param data received data buffer

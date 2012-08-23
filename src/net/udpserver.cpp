@@ -15,6 +15,12 @@ namespace Epyx
         sock.setLocalAddress(address);
     }
 
+    void UDPServer::close() {
+        // Close socket and tell it is closed
+        sock.close();
+        sockfd = -1;
+    }
+
     int UDPServer::recv(void *data, int size) {
         int r = sock.recv(data, size);
         //sock.setAddress(sock.getLastRecvAddr());// This is not thread-safe
