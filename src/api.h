@@ -25,6 +25,7 @@
 #include "core/atom/counter.h"
 #include "core/atom/map.h"
 #include "net/netselect.h"
+#include "net/netif.h"
 #include "n2np/relay.h"
 #include "n2np/node.h"
 #include <boost/noncopyable.hpp>

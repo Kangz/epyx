@@ -128,6 +128,20 @@ namespace Epyx
         }
     }
 
+    bool IpAddress::isLocal() const {
+        if (ipVersion == 0 || ipVersion == 4) {
+            // 127.0.0.0/8
+            if (ip.length() > 4 && !ip.substr(0, 4).compare("127."))
+                return true;
+        }
+        if (ipVersion == 0 || ipVersion == 6) {
+            // ::*
+            if (ip.length() > 2 && !ip.substr(0, 2).compare("::"))
+                return true;
+        }
+        return false;
+    }
+
     int IpAddress::compare(const IpAddress& addr) const {
         if (ipVersion < addr.ipVersion) return -1;
         if (ipVersion > addr.ipVersion) return 1;

@@ -82,6 +82,11 @@ namespace Epyx
         std::string toString(bool addBrackets = false) const;
 
         /**
+         * Tell wether or not this IP address is local (127.0.0.0/8 or ::/16)
+         */
+        bool isLocal() const;
+
+        /**
          * @brief compare this and addr
          * @param addr
          */
