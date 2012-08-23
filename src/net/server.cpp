@@ -8,7 +8,7 @@
 namespace Epyx
 {
 
-    Server::Server(const Address& addr)
+    Server::Server(const SockAddress& addr)
     :address(addr), sockfd(-1) {
     }
 
@@ -30,7 +30,7 @@ namespace Epyx
         return (sockfd >= 0);
     }
 
-    const Address& Server::getAddress() const {
+    const SockAddress& Server::getAddress() const {
         return address;
     }
 
@@ -45,7 +45,7 @@ namespace Epyx
         int status, flag;
 
         // Get IP address (if empty, use NULL)
-        const std::string ipaddrStr = address.getIp();
+        const std::string ipaddrStr = address.getIpStr();
         const char *ipaddr = (ipaddrStr.empty() ? NULL : ipaddrStr.c_str());
         // Convert port to char* to find address hints
         snprintf(charport, sizeof (charport), "%u", address.getPort());
@@ -80,10 +80,10 @@ namespace Epyx
             status = ::bind(this->sockfd, pai->ai_addr, pai->ai_addrlen);
             if (status == 0) {
                 // Success : remember used address
-                this->address = Address(pai->ai_addr);
+                this->address = SockAddress(pai->ai_addr);
                 break;
             }
-            log::warn << "bind(" << Address(pai->ai_addr) << "): " << log::errstd << log::endl;
+            log::warn << "bind(" << SockAddress(pai->ai_addr) << "): " << log::errstd << log::endl;
 
             // Close socket if bind fails
             ::close(this->sockfd);

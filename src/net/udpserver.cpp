@@ -5,7 +5,7 @@
 namespace Epyx
 {
 
-    UDPServer::UDPServer(const Address& addr)
+    UDPServer::UDPServer(const SockAddress& addr)
     :Server(addr) {
         if (!this->_internal_bind(SOCK_DGRAM))
             return;

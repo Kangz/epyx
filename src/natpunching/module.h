@@ -17,7 +17,6 @@
 #define EPYX_DIRECTCONNECTION_MODULE_H
 #include "../core/atom/map.h"
 #include "openconnection.h"
-#include "../net/address.h"
 #include "../n2np/nodeid.h"
 #include "../net/netselect.h"
 #include <stack>

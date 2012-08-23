@@ -57,7 +57,7 @@ namespace Epyx
          * @param addr IP address and TCP port
          * @param nbConn TCP maximal connection number to the relay
          */
-        void spawnRelay(const Address& addr, unsigned int nbConn = 50);
+        void spawnRelay(const SockAddress& addr, unsigned int nbConn = 50);
 
         /**
          * @brief Destroy specified relay

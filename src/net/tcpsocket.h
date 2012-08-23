@@ -40,11 +40,11 @@ namespace Epyx
         /**
          * @brief Initialise a TCP socket with a remote address
          */
-        TCPSocket(const Address& addr);
+        TCPSocket(const SockAddress& addr);
         /**
          * @brief Build a new Socket object from an existing connection
          */
-        TCPSocket(int sock, const Address &addr);
+        TCPSocket(int sock, const SockAddress &addr);
 
         /**
          * @brief Send data through the socket

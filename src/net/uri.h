@@ -22,7 +22,7 @@
 #define EPYX_URI_H
 
 #include <string>
-#include "address.h"
+#include "sockaddress.h"
 
 namespace Epyx
 {
@@ -50,7 +50,7 @@ namespace Epyx
          * @param addr
          * @param path
          */
-        URI(const std::string& scheme, const Address& addr, const std::string& path);
+        URI(const std::string& scheme, const SockAddress& addr, const std::string& path);
         /**
          * @brief Constructor with parsing
          * @param uri
@@ -76,7 +76,7 @@ namespace Epyx
          * @brief Get address
          * @return this->addr
          */
-        const Address& getAddress() const;
+        const SockAddress& getAddress() const;
         /**
          * @brief Get absolute path
          * @return this->path
@@ -97,7 +97,7 @@ namespace Epyx
 
     private:
         std::string scheme;
-        Address addr;
+        SockAddress addr;
         std::string path;
     };
 }

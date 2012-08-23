@@ -40,11 +40,11 @@ namespace Epyx
         /**
          * @brief Initialise a TCP socket with a remote address
          */
-        UDPSocket(const Address& addr);
+        UDPSocket(const SockAddress& addr);
         /**
          * @brief Build a new Socket object from an existing connection
          */
-        UDPSocket(int sock, const Address &addr);
+        UDPSocket(int sock, const SockAddress &addr);
 
         /**
          * @brief Send data through the socket
@@ -68,10 +68,10 @@ namespace Epyx
          * @brief Get the remote address from which the last packet was received
          * @return remote address
          */
-        Address getLastRecvAddr() const;
+        SockAddress getLastRecvAddr() const;
 
     private:
-        Address lastRecvAddr;
+        SockAddress lastRecvAddr;
     };
 
 }

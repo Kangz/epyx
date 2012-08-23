@@ -25,13 +25,13 @@ namespace Epyx
             }
         }
 
-        const Address Natpunch::openMapPort(unsigned short localPort,
+        const SockAddress Natpunch::openMapPort(unsigned short localPort,
             unsigned short remotePort) {
             // Discovery UDP socket
             Discovery disco;
             if (!disco.queryAnswerIn(10000, &uri)) {
                 log::error << "UPnP discovery failed" << log::endl;
-                return Address();
+                return SockAddress();
             }
             //If remotePort is not set, we try to find an available one.
             // Now use IGD
@@ -39,7 +39,7 @@ namespace Epyx
             igd = new IGD(uri);
             if (!igd->getServices()) {
                 log::error << "Unable to get IGD services" << log::endl;
-                return Address();
+                return SockAddress();
             }
 
             log::debug << "IP addr : " << igd->getExtIPAdress() << log::endl;
@@ -60,7 +60,7 @@ namespace Epyx
                 }
             }
 
-            Address addr = igd->addPortMap(localPort, Epyx::UPNP::TCP, remotePort);
+            SockAddress addr = igd->addPortMap(localPort, Epyx::UPNP::TCP, remotePort);
             return addr;
         }
     }

@@ -39,7 +39,7 @@ namespace Epyx
         typedef struct portMap
         {
             bool enabled;
-            Epyx::Address destination;
+            SockAddress destination;
             unsigned short nat_port;
             std::string protocol;
             std::string description;
@@ -85,8 +85,8 @@ namespace Epyx
              * the internet. For compatibility reasons the remote Port must
              * be the same as the local port
              */
-            const Address addPortMap(unsigned short port, protocol proto);
-            const Address addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port);
+            const SockAddress addPortMap(unsigned short port, protocol proto);
+            const SockAddress addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port);
 
             /**
              * @brief Gets the local IP adress which communicates with the IGD.
@@ -102,7 +102,7 @@ namespace Epyx
              * Addr must be the IP TCP/UDP coordinates for access to user machine
              * through IGD NAT Device. (Ex the return value of addPortMap)
              */
-            bool delPortMap(const Address& addr, protocol proto);
+            bool delPortMap(const SockAddress& addr, protocol proto);
 
             /**
              * @brief Get list of services
@@ -118,7 +118,7 @@ namespace Epyx
             /**
              * @brief IGD address
              */
-            Address address;
+            SockAddress address;
 
             /**
              * @brief IGD services

@@ -63,7 +63,7 @@ namespace Epyx
 
         // Encapsulate socket
         try {
-            newSock = new TCPSocket(newfd, Address((struct sockaddr*) &clientAddr));
+            newSock = new TCPSocket(newfd, SockAddress((struct sockaddr*) &clientAddr));
             if (newSock->getLocalAddress().empty())
                 newSock->setLocalAddress(srv->getAddress());
             T *nsSocket = new T(newSock, param);

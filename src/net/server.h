@@ -20,7 +20,7 @@
 #ifndef EPYX_SERVER_H
 #define EPYX_SERVER_H
 
-#include "address.h"
+#include "sockaddress.h"
 
 namespace Epyx
 {
@@ -35,7 +35,7 @@ namespace Epyx
          * @brief Create a new generic unbinded server
          * @param addr
          */
-        Server(const Address& addr);
+        Server(const SockAddress& addr);
         ~Server();
 
         /**
@@ -53,7 +53,7 @@ namespace Epyx
          * @brief get server address
          * @return aserver Address object
          */
-        const Address& getAddress() const;
+        const SockAddress& getAddress() const;
 
 
         /**
@@ -65,7 +65,7 @@ namespace Epyx
         /**
          * @brief Server binded address
          */
-        Address address;
+        SockAddress address;
         /**
          * @brief Server socket file descriptor
          */

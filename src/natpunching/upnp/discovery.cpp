@@ -9,7 +9,7 @@ namespace Epyx
     {
 
         Discovery::Discovery()
-        :NetQuery(new UDPSocket(Address("239.255.255.250", 1900))) {
+        :NetQuery(new UDPSocket(SockAddress("239.255.255.250", 1900))) {
         }
 
         bool Discovery::query() {

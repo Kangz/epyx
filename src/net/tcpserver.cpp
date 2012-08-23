@@ -8,7 +8,7 @@
 namespace Epyx
 {
 
-    TCPServer::TCPServer(const Address& addr, unsigned int nbConn)
+    TCPServer::TCPServer(const SockAddress& addr, unsigned int nbConn)
     :Server(addr) {
         if (!this->_internal_bind(SOCK_STREAM))
             return;

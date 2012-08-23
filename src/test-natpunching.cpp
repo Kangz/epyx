@@ -49,7 +49,7 @@ bool test_IGD() {
     Epyx::log::debug << "External IP addr is " << igd.getExtIPAdress() << Epyx::log::endl;
 
     // PortMap
-    Epyx::Address addr = igd.addPortMap(22, Epyx::UPNP::TCP, 1337);
+    Epyx::SockAddress addr = igd.addPortMap(22, Epyx::UPNP::TCP, 1337);
     Epyx::log::debug << "External " << addr << " now maps to local port 22" << Epyx::log::endl;
     Epyx::log::debug << "Does it work? " << Epyx::log::endl;
     std::string blah;

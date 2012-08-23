@@ -8,12 +8,12 @@ namespace Epyx
     :isConnected(false) {
     }
 
-    TCPSocket::TCPSocket(const Address& addr)
+    TCPSocket::TCPSocket(const SockAddress& addr)
     :Socket(addr), isConnected(false) {
         this->connect();
     }
 
-    TCPSocket::TCPSocket(int sock, const Address &addr)
+    TCPSocket::TCPSocket(int sock, const SockAddress &addr)
     :Socket(sock, addr), isConnected(true) {
     }
 

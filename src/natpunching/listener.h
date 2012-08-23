@@ -30,8 +30,8 @@ namespace Epyx {
             public:
                 Listener(TCPServer * srv);
                 TCPSocket * getSocket();
-                Address getAddress();
-                Address getLocalAddress();
+                SockAddress getAddress();
+                SockAddress getLocalAddress();
                 char* getData();
                 bool hasAccepted();
             protected:

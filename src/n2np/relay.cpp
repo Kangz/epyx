@@ -8,7 +8,7 @@ namespace Epyx
     namespace N2NP
     {
 
-        Relay::Relay(const Address& addr)
+        Relay::Relay(const SockAddress& addr)
         :WorkerPool(1, true, "Relay@" + addr.toString()),
         relayAddr(addr), relayId(addr), nodeNextId(1) {
             log::info << "Relay: Start " << relayId << log::endl;
@@ -100,7 +100,7 @@ namespace Epyx
             // TODO: Send a message back to from node when an error happens
 
             // Send packet to another relay
-            const Address toAddr = pkt->to.getRelay();
+            const SockAddress toAddr = pkt->to.getRelay();
             if (toAddr != relayAddr) {
                 TCPSocket toSock(toAddr);
                 //log::info << "Relay " << relayId << ": Transmit " << *pkt << log::endl;

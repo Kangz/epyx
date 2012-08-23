@@ -37,7 +37,7 @@ namespace Epyx
          * @param addr IP address and TCP port to bind to
          * @param nbConn maximum connection number
          */
-        TCPServer(const Address& addr, unsigned int nbConn);
+        TCPServer(const SockAddress& addr, unsigned int nbConn);
     };
 
 }

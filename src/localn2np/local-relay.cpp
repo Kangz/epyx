@@ -7,7 +7,7 @@
 namespace Epyx
 {
 
-    LocalRelay::LocalRelay(const Address& addr)
+    LocalRelay::LocalRelay(const SockAddress& addr)
     :WorkerPool(1, true, "Relay" + addr.toString()), addr(addr), id(addr), lastNodeId(0) {
     }
 

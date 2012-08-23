@@ -17,7 +17,7 @@ namespace Epyx
     namespace N2NP
     {
 
-        Node::Node(const Address& addr)
+        Node::Node(const SockAddress& addr)
         :NetSelectSocket(new TCPSocket(addr)), hasId(false), curId(0) {
             this->send(NodeId("", addr), "ID", NULL, 0);
         }
@@ -125,7 +125,7 @@ namespace Epyx
             return hasId;
         }
 
-        const Address& Node::getNodeAddress() const {
+        const SockAddress& Node::getNodeAddress() const {
             return nodeAddressFromRelay;
         }
 
@@ -190,7 +190,7 @@ namespace Epyx
                     value = String::trim(value);
                     if (name == "ip") {
                         // Set IP address as seen
-                        nodeAddressFromRelay = Address(value);
+                        nodeAddressFromRelay = SockAddress(value);
                     }
                 }
                 return;

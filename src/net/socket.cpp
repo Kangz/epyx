@@ -21,22 +21,18 @@ namespace Epyx
     Mutex Socket::init_mutex;
 
     void Socket::init() {
-        if (is_init == 0) {
+        if (!is_init) {
 #if defined (WIN32)
             WSADATA WSAData;
             int error = WSAStartup(MAKEWORD(2, 2), &WSAData);
 #endif
+            is_init = true;
         }
-        init_mutex.lock();
-        is_init++;
-        init_mutex.unlock();
     }
 
     void Socket::fini() {
-        init_mutex.lock();
-        is_init--;
-        init_mutex.unlock();
-        if (is_init == 0) {
+        if (is_init) {
+            is_init = false;
 #if defined (WIN32)
             WSACleanup();
 #endif
@@ -47,11 +43,11 @@ namespace Epyx
     :sock(-1) {
     }
 
-    Socket::Socket(const Address &addr)
+    Socket::Socket(const SockAddress &addr)
     :sock(-1), address(addr) {
     }
 
-    Socket::Socket(int sock, const Address &addr)
+    Socket::Socket(int sock, const SockAddress &addr)
     :sock(sock), address(addr) {
         EPYX_ASSERT(sock >= 0);
         this->updateLocalAddress();
@@ -76,19 +72,19 @@ namespace Epyx
         return (sock >= 0);
     }
 
-    void Socket::setAddress(const Address& addr) {
+    void Socket::setAddress(const SockAddress& addr) {
         address = addr;
     }
 
-    Address Socket::getAddress() const {
+    SockAddress Socket::getAddress() const {
         return address;
     }
 
-    void Socket::setLocalAddress(const Address& addr) {
+    void Socket::setLocalAddress(const SockAddress& addr) {
         localAddress = addr;
     }
 
-    Address Socket::getLocalAddress() const {
+    SockAddress Socket::getLocalAddress() const {
         return localAddress;
     }
 
@@ -103,7 +99,7 @@ namespace Epyx
             return;
         }
         // Update address
-        localAddress = Address((struct sockaddr *) &saddr);
+        localAddress = SockAddress((struct sockaddr *) &saddr);
     }
 
     void Socket::close() {

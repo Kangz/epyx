@@ -8,7 +8,7 @@ namespace Epyx
     :scheme(""), addr(), path("") {
     }
 
-    URI::URI(const std::string& scheme, const Address& addr, const std::string& path)
+    URI::URI(const std::string& scheme, const SockAddress& addr, const std::string& path)
     :scheme(scheme), addr(addr), path(path) {
         String::toLower(this->scheme);
     }
@@ -30,10 +30,10 @@ namespace Epyx
         // Extract address
         pos = location.find('/');
         if (pos != std::string::npos) {
-            addr = Address(location.substr(0, pos));
+            addr = SockAddress(location.substr(0, pos));
             path = location.substr(pos);
         } else {
-            addr = Address(location);
+            addr = SockAddress(location);
         }
     }
 
@@ -71,7 +71,7 @@ namespace Epyx
      * @brief Get address
      * @return this->addr
      */
-    const Address& URI::getAddress() const {
+    const SockAddress& URI::getAddress() const {
         return addr;
     }
     /**

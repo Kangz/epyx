@@ -7,11 +7,11 @@ namespace Epyx
     UDPSocket::UDPSocket() {
     }
 
-    UDPSocket::UDPSocket(const Address& addr)
+    UDPSocket::UDPSocket(const SockAddress& addr)
     :Socket(addr) {
     }
 
-    UDPSocket::UDPSocket(int sock, const Address &addr)
+    UDPSocket::UDPSocket(int sock, const SockAddress &addr)
     :Socket(sock, addr) {
     }
 
@@ -55,11 +55,11 @@ namespace Epyx
          */
         if (bytes < size)
             ((char*) data)[bytes] = 0;
-        lastRecvAddr = Address((const sockaddr *) &saddr);
+        lastRecvAddr = SockAddress((const sockaddr *) &saddr);
         return bytes;
     }
 
-    Address UDPSocket::getLastRecvAddr() const {
+    SockAddress UDPSocket::getLastRecvAddr() const {
         return lastRecvAddr;
     }
 

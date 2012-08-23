@@ -14,7 +14,7 @@
 int main(int argc, char **argv) {
     Epyx::API epyx;
     try {
-        Epyx::Address relayAddr;
+        Epyx::SockAddress relayAddr;
 
         // Parse options
         int c;
@@ -50,21 +50,21 @@ int main(int argc, char **argv) {
             return 1;
         } else if (optind == argc - 1) {
             // One relay was specified
-            relayAddr = Epyx::Address(argv[optind]);
+            relayAddr = Epyx::SockAddress(argv[optind]);
             if (relayAddr.empty()) {
                 std::cerr << "Empty relay address was given." << std::endl;
                 return 1;
             }
         } else {
             // No specified interface : find one
-            std::vector<Epyx::Address> addrs = Epyx::Address::getIfaceAdresses(RELAY_DEFAULT_PORT);
-            std::vector<Epyx::Address> externAddresses;
-            std::vector<Epyx::Address> localAddresses;
+            std::vector<Epyx::SockAddress> addrs = Epyx::SockAddress::getIfaceAdresses(RELAY_DEFAULT_PORT);
+            std::vector<Epyx::SockAddress> externAddresses;
+            std::vector<Epyx::SockAddress> localAddresses;
 
-            for (std::vector<Epyx::Address>::const_iterator iaddr = addrs.begin();
+            for (std::vector<Epyx::SockAddress>::const_iterator iaddr = addrs.begin();
                 iaddr != addrs.end(); iaddr++) {
                 // Keep only IPv4
-                std::string ipaddr = iaddr->getIp();
+                std::string ipaddr = iaddr->getIpStr();
                 if (ipaddr.empty() || ipaddr.find(':') != std::string::npos)
                     continue;
                 // Difference between local and extern
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
                 if (externAddresses.size() >= 2) {
                     Epyx::log::info << "More than one extern network interface found. Using first of:"
                         << Epyx::log::endl;
-                    for (std::vector<Epyx::Address>::const_iterator iaddr = externAddresses.begin();
+                    for (std::vector<Epyx::SockAddress>::const_iterator iaddr = externAddresses.begin();
                         iaddr != externAddresses.end(); iaddr++) {
                         Epyx::log::info << "* " << *iaddr << Epyx::log::endl;
                     }
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
                 if (localAddresses.size() >= 2) {
                     Epyx::log::info << "More than one local interface found. Using first of:"
                         << Epyx::log::endl;
-                    for (std::vector<Epyx::Address>::const_iterator iaddr = localAddresses.begin();
+                    for (std::vector<Epyx::SockAddress>::const_iterator iaddr = localAddresses.begin();
                         iaddr != localAddresses.end(); iaddr++) {
                         Epyx::log::info << "* " << *iaddr << Epyx::log::endl;
                     }

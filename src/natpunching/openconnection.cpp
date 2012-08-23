@@ -24,7 +24,7 @@ namespace Epyx {
                 if (headMessage == headers.end())
                     throw ParserException("OpenConnection", "No message in headers");
 
-                Address addr(headAddr->second);
+                SockAddress addr(headAddr->second);
                 socket = new TCPSocket(addr);
                 if (socket->send(headMessage->second.c_str(), headMessage->second.size()) != 0){
                     //Success, Do nothing and wait for N2NP confirmation
@@ -70,9 +70,9 @@ namespace Epyx {
         void OpenConnection::serverStateOpen(){
             std::string testMessage ="Test";
             //First we open a listening socket on an available port
-            Listener sockListen(new TCPServer(Address("0.0.0.0:0"),20));
+            Listener sockListen(new TCPServer(SockAddress("0.0.0.0:0"),20));
             sockListen.start();
-            Address addr = Address (node->getNodeAddress().getIp(),sockListen.getLocalAddress().getPort());
+            SockAddress addr = SockAddress(node->getNodeAddress().getIp(),sockListen.getLocalAddress().getPort());
             //If we're using UPNP, we open a port mapping
             if (tested_method == UPNP){
                 Epyx::UPNP::Natpunch nat;

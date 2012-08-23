@@ -21,7 +21,7 @@
 #ifndef EPYX_N2NP_NODE_ID_H
 #define EPYX_N2NP_NODE_ID_H
 
-#include "../net/address.h"
+#include "../net/sockaddress.h"
 #include <string>
 
 namespace Epyx
@@ -47,13 +47,13 @@ namespace Epyx
              * @brief Build a relay ID
              * @param relay relay Address
              */
-            NodeId(const Address& relay);
+            NodeId(const SockAddress& relay);
             /**
              * @brief Build a node ID (with a name and a relay)
              * @param name
              * @param relay
              */
-            NodeId(const std::string& name, const Address& relay);
+            NodeId(const std::string& name, const SockAddress& relay);
             /**
              * @brief Build a node ID from "node@relay" expression
              * @param str string "node@relay"
@@ -118,7 +118,7 @@ namespace Epyx
              * @brief Get relay address
              * @return this->relay
              */
-            const Address& getRelay() const;
+            const SockAddress& getRelay() const;
 
             /**
              * @brief is empty
@@ -128,7 +128,7 @@ namespace Epyx
 
         private:
             std::string name;
-            Address relay;
+            SockAddress relay;
         };
     }
 }

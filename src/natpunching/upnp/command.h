@@ -61,7 +61,7 @@ namespace Epyx
              * @param path
              * @param service
              */
-            Command(const Address& addr, const std::string& service, const std::string& path);
+            Command(const SockAddress& addr, const std::string& service, const std::string& path);
 
             /**
              * @brief Set remote options
@@ -69,7 +69,7 @@ namespace Epyx
              * @param path absolute POST path for requests
              * @param service name of queried service
              */
-            void setRemote(const Address& addr, const std::string& service, const std::string& path);
+            void setRemote(const SockAddress& addr, const std::string& service, const std::string& path);
 
             /**
              * @brief Set action
@@ -96,7 +96,7 @@ namespace Epyx
 
         private:
             // Remote variables
-            Address address;
+            SockAddress address;
             std::string path;
             std::string service;
 

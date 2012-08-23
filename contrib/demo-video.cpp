@@ -272,7 +272,7 @@ int main(int argc, char **argv) {
             std::cerr << "You need to tell me the relay I am intented to connect." << std::endl;
             return 1;
         }
-        Epyx::Address relayAddr(argv[1]);
+        Epyx::SockAddress relayAddr(argv[1]);
         Epyx::N2NP::Node *node = new Epyx::N2NP::Node(relayAddr);
         epyx.addNode(node);
         if (!node->waitReady(5000)) {

@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
             return 1;
             
         }
-        Epyx::Address relayAddr(argv[1]);
+        Epyx::SockAddress relayAddr(argv[1]);
         Epyx::N2NP::Node *node = new Epyx::N2NP::Node(relayAddr);
         epyx.addNode(node);
         if (!node->waitReady(5000)) {

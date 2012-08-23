@@ -52,7 +52,7 @@ namespace Epyx
         mut.unlock();
     }
 
-    void API::spawnRelay(const Address& addr, unsigned int nbConn) {
+    void API::spawnRelay(const SockAddress& addr, unsigned int nbConn) {
         if (netsel == NULL)
             throw FailException("API::spawnRelay", "No NetSelect created");
 
@@ -62,7 +62,7 @@ namespace Epyx
         mut.lock();
         relay = new N2NP::Relay(addr);
         //nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(addr, nbConn), relay));
-        nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(Address("0.0.0.0", addr.getPort()), nbConn), relay));
+        nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(SockAddress("0.0.0.0", addr.getPort()), nbConn), relay));
         mut.unlock();
     }
 

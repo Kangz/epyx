@@ -24,7 +24,7 @@
 #define EPYX_LOCAL_RELAY_H
 
 #include "../n2np/packet.h"
-#include "../net/address.h"
+#include "../net/sockaddress.h"
 #include "../core/mutex.h"
 #include "../core/worker-pool.h"
 #include <ostream>
@@ -45,7 +45,7 @@ namespace Epyx
          * @brief Constructor
          * @param addr Relay address
          */
-        LocalRelay(const Address& addr);
+        LocalRelay(const SockAddress& addr);
 
         /**
          * @brief Display a node in an output stream
@@ -69,7 +69,7 @@ namespace Epyx
         void treat(N2NP::Packet *pkt);
 
     private:
-        Address addr;
+        SockAddress addr;
         N2NP::NodeId id;
 
         std::map<std::string, LocalNode*> nodes;

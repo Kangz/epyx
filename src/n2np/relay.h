@@ -26,7 +26,7 @@
 #include "../core/timeout.h"
 #include "../core/atom/counter.h"
 #include "../core/atom/map.h"
-#include "../net/address.h"
+#include "../net/sockaddress.h"
 #include "../net/socket.h"
 #include "../net/netselecttcpserver.h"
 #include "packet.h"
@@ -47,7 +47,7 @@ namespace Epyx
              * @brief Create a new relay for a listen address
              * @param addr
              */
-            Relay(const Address& addr);
+            Relay(const SockAddress& addr);
 
             ~Relay();
 
@@ -93,7 +93,7 @@ namespace Epyx
 
         private:
             // Relay address and ID
-            Address relayAddr;
+            SockAddress relayAddr;
             NodeId relayId;
 
             // Structure to store information about a node

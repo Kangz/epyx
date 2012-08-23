@@ -48,7 +48,7 @@ namespace Epyx
              * @brief Create a new node
              * @param addr Relay Address (IP:port)
              */
-            Node(const Address& addr);
+            Node(const SockAddress& addr);
 
             /**
              * @brief Send an N2NP packet to another node
@@ -112,7 +112,7 @@ namespace Epyx
              * @brief Get the node address, from the point of view of the relay
              * @return nodeAddressFromRelay
              */
-            const Address& getNodeAddress() const;
+            const SockAddress& getNodeAddress() const;
 
             void askForDirectConnectionIds(std::stack<NodeId>& stackIds);
 
@@ -155,7 +155,7 @@ namespace Epyx
             atom::Map<NodeId, Socket*> directSockets;
 
             // Node address, from the relay point of view
-            Address nodeAddressFromRelay;
+            SockAddress nodeAddressFromRelay;
         };
     }
 }

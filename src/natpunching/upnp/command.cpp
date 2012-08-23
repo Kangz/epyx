@@ -16,13 +16,13 @@ namespace Epyx
         :NetQuery(new TCPSocket()) {
         }
 
-        Command::Command(const Address& addr, const std::string& service,
+        Command::Command(const SockAddress& addr, const std::string& service,
             const std::string& path)
         :NetQuery(new TCPSocket()) {
             this->setRemote(addr, path, service);
         }
 
-        void Command::setRemote(const Address& addr, const std::string& service,
+        void Command::setRemote(const SockAddress& addr, const std::string& service,
             const std::string& path) {
             this->address = addr;
             this->socket().setAddress(addr);

@@ -22,7 +22,7 @@
 #define EPYX_SOCKET_H
 
 #include "../core/mutex.h"
-#include "address.h"
+#include "sockaddress.h"
 #include <string>
 
 namespace Epyx
@@ -52,11 +52,11 @@ namespace Epyx
         /**
          * @brief Initialise a socket with a remote address
          */
-        Socket(const Address& addr);
+        Socket(const SockAddress& addr);
         /**
          * @brief Build a new Socket object from an existing connection
          */
-        Socket(int sock, const Address &addr);
+        Socket(int sock, const SockAddress &addr);
         /**
          * @brief Destructor
          */
@@ -80,19 +80,19 @@ namespace Epyx
         /**
          * @brief Set the remote address
          */
-        void setAddress(const Address& addr);
+        void setAddress(const SockAddress& addr);
         /**
          * @brief Get the remote address
          */
-        Address getAddress() const;
+        SockAddress getAddress() const;
         /**
          * @brief Set the local address
          */
-        void setLocalAddress(const Address& addr);
+        void setLocalAddress(const SockAddress& addr);
         /**
          * @brief Get the local address
          */
-        Address getLocalAddress() const;
+        SockAddress getLocalAddress() const;
         /**
          * @brief Update local address from socket
          */
@@ -148,12 +148,12 @@ namespace Epyx
         /**
          * @brief IP + port associated with the socket
          */
-        Address address;
+        SockAddress address;
 
         /**
          * @brief Local address for the socket or "*" if unknown
          */
-        Address localAddress;
+        SockAddress localAddress;
 
     private:
         // Global initialisation stuff

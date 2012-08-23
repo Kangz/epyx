@@ -20,27 +20,27 @@ namespace Epyx {
             
             ::accept(newfd,(struct sockaddr*) &clientAddr, &clientAddrLen);
             hasAccept = true;
-            sock = new TCPSocket(newfd, Address((struct sockaddr*) &clientAddr));
+            sock = new TCPSocket(newfd, SockAddress((struct sockaddr*) &clientAddr));
             ::getsockname(newfd,(struct sockaddr*) &localAddr,&localAddrLen);
-            sock->setLocalAddress(Address((struct sockaddr*) &localAddr));
+            sock->setLocalAddress(SockAddress((struct sockaddr*) &localAddr));
         }
-        Address Listener::getAddress(){
+        SockAddress Listener::getAddress(){
             if (sock != NULL)
                 return sock->getAddress();
             else
-                return Address();
+                return SockAddress();
         }
         bool Listener::hasAccepted(){
             return this->hasAccept;
         }
 
-        Address Listener::getLocalAddress(){
+        SockAddress Listener::getLocalAddress(){
             struct sockaddr_storage localAddr;
             socklen_t localAddrLen;
             localAddrLen = sizeof localAddr;
             
             ::getsockname(sock->getFd(),(struct sockaddr*) &localAddr,&localAddrLen);
-            return Address ( (struct sockaddr*) &localAddr);
+            return SockAddress ( (struct sockaddr*) &localAddr);
         }
         TCPSocket * Listener::getSocket(){
             return sock;

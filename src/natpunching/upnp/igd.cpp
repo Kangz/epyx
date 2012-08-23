@@ -74,7 +74,7 @@ namespace Epyx
                 }
                 unsigned short extPort = (unsigned short) String::toInt(res->vars["NewExternalPort"]);
                 unsigned short intPort = (unsigned short) String::toInt(res->vars["NewInternalPort"]);
-                Epyx::Address newInternalAddress(res->vars["NewInternalClient"], intPort, 4);
+                SockAddress newInternalAddress(res->vars["NewInternalClient"], intPort, 4);
                 portMap tmp = {!!strcmp(res->vars["NewEnabled"].c_str(), "0"),
                     newInternalAddress,
                     extPort,
@@ -102,7 +102,7 @@ namespace Epyx
                     tmpAddrPtr = &((struct sockaddr_in *) ifa->ifa_addr)->sin_addr;
                     char addressBuffer[INET_ADDRSTRLEN];
                     inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-                    if (memcmp(addressBuffer, this->address.getIp().c_str(), 3) == 0) { // the condition is true is the first 3 bytes of addressBuffer are equal to the first 3 bytes of the ip address.
+                    if (memcmp(addressBuffer, this->address.getIpStr().c_str(), 3) == 0) { // the condition is true is the first 3 bytes of addressBuffer are equal to the first 3 bytes of the ip address.
                         //This is needed to change by comparing the address with netmasks. For example, first comparing the addresses with applied netmask, then, if ok, turn into string with the inet_top method.
                         IPAddress = addressBuffer;
                         break;
@@ -113,11 +113,11 @@ namespace Epyx
             return IPAddress;
         }
 
-        const Address IGD::addPortMap(unsigned short port, protocol proto) {
+        const SockAddress IGD::addPortMap(unsigned short port, protocol proto) {
             return this->addPortMap(port, proto, port);
         }
 
-        const Address IGD::addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port) {
+        const SockAddress IGD::addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port) {
             std::string prot = (proto == Epyx::UPNP::TCP) ? "TCP" : "UDP";
             log::debug << "Entering addPortMap(" << loc_port << "," << prot << "," << ext_port << ")" << log::endl;
             std::string localIP = this->getLocalAdress();
@@ -149,16 +149,16 @@ namespace Epyx
             CommandResult *res = order.queryAnswer(30000);
             if (res == NULL) {
                 log::error << "IGD: Unable to add a port map" << log::endl;
-                return Address();
+                return SockAddress();
             }
             if (res->http_status == 500) {
                 log::error << "IGD: Couldn't add requested port map" << log::endl;
-                return Address();
+                return SockAddress();
             }
-            return Address(this->getExtIPAdress(), ext_port, 4);
+            return SockAddress(this->getExtIPAdress(), ext_port, 4);
         }
 
-        bool IGD::delPortMap(const Address& addr, protocol proto) {
+        bool IGD::delPortMap(const SockAddress& addr, protocol proto) {
             std::string WanIPConnService, WanIPConnCtl;
             for (std::map<std::string, std::string>::iterator it = services.begin(); it != services.end(); ++it) {
                 if (it->first.find("WANIPConn")) {

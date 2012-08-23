@@ -12,7 +12,7 @@
 /**
  * @brief Command-line interface to send packets
  */
-void test_command(Epyx::LocalNode& node, const Epyx::Address& addr) {
+void test_command(Epyx::LocalNode& node, const Epyx::SockAddress& addr) {
     unsigned int id;
     std::string msg;
     std::string method("test");
@@ -89,7 +89,7 @@ void test_local_n2np() {
     Epyx::LocalNode *nodes[nodeNum];
     Epyx::LocalRelay *relay = NULL;
     try {
-        Epyx::Address addr("L0C4L", 0, 0);
+        Epyx::SockAddress addr("L0C4L", 0, 0);
         std::string method("test");
         std::string pongMethod("pong");
 

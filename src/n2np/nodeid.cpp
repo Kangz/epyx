@@ -10,12 +10,12 @@ namespace Epyx
         :name(), relay() {
         }
 
-        NodeId::NodeId(const Address& relay)
+        NodeId::NodeId(const SockAddress& relay)
         :name(), relay(relay) {
             this->name[0] = 0;
         }
 
-        NodeId::NodeId(const std::string& name, const Address& relay)
+        NodeId::NodeId(const std::string& name, const SockAddress& relay)
         :name(name), relay(relay) {
         }
 
@@ -26,7 +26,7 @@ namespace Epyx
                 throw ParserException("N2np::NodeId", "No @ in ID");
             }
             name = str.substr(0, pos);
-            relay = Address(str.substr(pos + 1));
+            relay = SockAddress(str.substr(pos + 1));
         }
 
         NodeId::NodeId(const NodeId& nodeid)
@@ -74,7 +74,7 @@ namespace Epyx
             return name;
         }
 
-        const Address& NodeId::getRelay() const {
+        const SockAddress& NodeId::getRelay() const {
             return relay;
         }
 

@@ -36,7 +36,7 @@ namespace Epyx
          * @brief Create a new UDP server
          * @param addr IP address and UDP port to bind to
          */
-        UDPServer(const Address& addr);
+        UDPServer(const SockAddress& addr);
 
         /**
          * @brief Receive data for the server

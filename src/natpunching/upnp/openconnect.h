@@ -55,7 +55,7 @@ namespace Epyx
              * @param remotePort
              * @return Address of the NAT router
              */
-            const Address openMapPort(unsigned short localPort, unsigned short remotePort =0);
+            const SockAddress openMapPort(unsigned short localPort, unsigned short remotePort =0);
             //Socket OpenConnection(); //Opens a Listening Socket to receive a connection.
         private:
             void testConnection();

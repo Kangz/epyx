@@ -82,7 +82,7 @@ void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const 
 /**
  * @brief Test local N2NP implementation
  */
-void test_n2np(Epyx::API& epyx, const Epyx::Address &addr) {
+void test_n2np(Epyx::API& epyx, const Epyx::SockAddress &addr) {
     // Create relay
     epyx.spawnRelay(addr);
     Epyx::log::info << "Start Relay at " << addr << Epyx::log::endl;
@@ -127,7 +127,7 @@ int main() {
     Epyx::API epyx;
     try {
         epyx.setNetWorkers(50);
-        test_n2np(epyx, Epyx::Address("127.0.0.1:4242"));
+        test_n2np(epyx, Epyx::SockAddress("127.0.0.1:4242"));
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }
