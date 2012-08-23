@@ -47,10 +47,6 @@ namespace Epyx {
                 method tested_method;
                 N2NP::Node *node;
                 TCPSocket *socket;
-
-                // Disable copy
-                OpenConnection(const OpenConnection&);
-                const OpenConnection& operator=(const OpenConnection&);
         };
         
     } // namespace DirectConnection

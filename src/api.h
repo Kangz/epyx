@@ -27,11 +27,12 @@
 #include "net/netselect.h"
 #include "n2np/relay.h"
 #include "n2np/node.h"
+#include <boost/noncopyable.hpp>
 #include <list>
 
 namespace Epyx
 {
-    class API
+    class API : private boost::noncopyable
     {
     public:
         /**
@@ -93,10 +94,6 @@ namespace Epyx
         void waitNet();
 
     private:
-        // Disable copy construction and assignment.
-        API(const API&);
-        const API& operator=(const API&);
-
         // Main mutex, for netsel and relay, NOT for nodes
         Mutex mut;
 

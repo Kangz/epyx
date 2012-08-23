@@ -22,6 +22,7 @@
 #define EPYX_ATOM_COUNTER_H
 
 #include "../mutex.h"
+#include <boost/noncopyable.hpp>
 
 namespace Epyx
 {
@@ -31,7 +32,7 @@ namespace Epyx
          * @class Counter
          * @brief Atomic counter implementation
          */
-        class Counter
+        class Counter : private boost::noncopyable
         {
         public:
             /**
@@ -55,10 +56,6 @@ namespace Epyx
         private:
             Mutex mut;
             unsigned long cnt;
-
-            // Disable copy
-            Counter(const Counter&);
-            const Counter& operator=(const Counter&);
         };
     }
 }

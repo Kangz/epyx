@@ -20,6 +20,7 @@
 #ifndef EPYX_WORKER_POOL_H
 #define EPYX_WORKER_POOL_H
 
+#include <boost/noncopyable.hpp>
 #include <list>
 #include <string>
 #include <sstream>
@@ -39,7 +40,7 @@ namespace Epyx
      *
      * @tparam T the base type of the messages passed to the workers
      */
-    template<typename T>class WorkerPool
+    template<typename T>class WorkerPool : private boost::noncopyable
     {
     public:
 
@@ -101,10 +102,6 @@ namespace Epyx
         virtual void treat(T *message) = 0;
 
     private:
-        // No copy
-        WorkerPool(const WorkerPool&);
-        const WorkerPool& operator=(const WorkerPool&);
-
         void addWorker();
         void removeWorker();
         void bookKeep();

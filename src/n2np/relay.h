@@ -112,10 +112,6 @@ namespace Epyx
 
             // use a counter to attribute nodes
             atom::Counter nodeNextId;
-
-            // Disable copy
-            Relay(const Relay&);
-            const Relay& operator=(const Relay&);
         };
     }
 }

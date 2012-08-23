@@ -21,6 +21,7 @@
 #define EPYX_SERVER_H
 
 #include "sockaddress.h"
+#include <boost/noncopyable.hpp>
 
 namespace Epyx
 {
@@ -28,7 +29,7 @@ namespace Epyx
      * @class Server
      * @brief Server interface
      */
-    class Server
+    class Server : private boost::noncopyable
     {
     public:
         /**
@@ -77,11 +78,6 @@ namespace Epyx
          * @return true on success
          */
         bool _internal_bind(int socktype);
-
-    private:
-        // Disable copy
-        Server(const Server&);
-        const Server& operator=(const Server&);
     };
 
 }

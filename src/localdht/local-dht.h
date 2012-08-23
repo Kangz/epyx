@@ -21,13 +21,15 @@
 #ifndef EPYX_LOCAL_DHT_H
 #define EPYX_LOCAL_DHT_H
 
-#include "../n2np/n2np-packet.h"
+#include <boost/noncopyable.hpp>
+#include "../n2np/packet.h"
 #include "../localn2np/local-node.h"
 #include "../core/thread.h"
 
 namespace Epyx{
 
-    class LocalDHT{
+    class LocalDHT : private boost::noncopyable
+    {
 
     public:
         LocalDHT(LocalNode& n);

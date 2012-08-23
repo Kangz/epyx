@@ -144,10 +144,6 @@ namespace Epyx
             // Each node has a number which corresponds to a weight.
             atom::Map<NodeId, unsigned int> mruNodeIds;
 
-            // Disable copy
-            Node(const Node&);
-            const Node& operator=(const Node&);
-
             atom::Counter curId;
             atom::Map<unsigned long, Packet*> sentMap;
 

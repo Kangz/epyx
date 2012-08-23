@@ -75,10 +75,6 @@ namespace Epyx
         std::map<std::string, LocalNode*> nodes;
         unsigned int lastNodeId;
         Mutex nodesMutex;
-
-        // Disable copy
-        LocalRelay(const LocalRelay&);
-        const LocalRelay& operator=(const LocalRelay&);
     };
 }
 

@@ -22,6 +22,7 @@
 #define EPYX_ATOM_MAP_H
 
 #include "../mutex.h"
+#include <boost/noncopyable.hpp>
 #include <map>
 
 #ifndef EPYX_ATOM_MAP_DEBUG
@@ -39,7 +40,7 @@ namespace Epyx
          * @class Map
          * @brief Thread-safe STL map
          */
-        template <typename TKey, typename TVal> class Map
+        template <typename TKey, typename TVal> class Map : private boost::noncopyable
         {
         public:
             /**

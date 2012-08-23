@@ -23,6 +23,7 @@
 
 #include "socket.h"
 #include "../core/timeout.h"
+#include <boost/noncopyable.hpp>
 
 namespace Epyx
 {
@@ -45,7 +46,7 @@ namespace Epyx
      *     each received data.
      *  5- Destructor or close()
      */
-    template<typename T>class NetQuery
+    template<typename T>class NetQuery : private boost::noncopyable
     {
     public:
         /**
@@ -140,10 +141,6 @@ namespace Epyx
         virtual T* eat(const char *data, long size) = 0;
 
     private:
-        // Disable copy
-        NetQuery(const NetQuery&);
-        const NetQuery& operator=(const NetQuery&);
-
         Socket *sock;
         bool dynamicSock;
     };

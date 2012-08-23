@@ -20,6 +20,7 @@
 #ifndef EPYX_LOG_WORKER_H
 #define EPYX_LOG_WORKER_H
 
+#include <boost/noncopyable.hpp>
 #include <fstream>
 #include <string>
 #include "thread.h"
@@ -42,9 +43,6 @@ namespace log
         virtual void run();
 
     private:
-        Worker(const Worker&);
-        const Worker& operator=(const Worker&);
-
         struct LogEntry
         {
             std::string str;

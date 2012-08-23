@@ -20,6 +20,7 @@
 #ifndef EPYX_BLOCKING_QUEUE_H
 #define EPYX_BLOCKING_QUEUE_H
 
+#include <boost/noncopyable.hpp>
 #include <queue>
 #include <iostream>
 #include "assert.h"
@@ -41,7 +42,7 @@ namespace Epyx
      * @tparam T the base type of the pointers contained in the BlockingQueue
      */
 
-    template<typename T> class BlockingQueue
+    template<typename T> class BlockingQueue : private boost::noncopyable
     {
     public:
 
@@ -150,11 +151,6 @@ namespace Epyx
         Condition cond;
         std::deque<T*> fifo;
         bool opened;
-
-        // Disable copy construction and assignment.
-        BlockingQueue(const BlockingQueue&);
-        const BlockingQueue& operator=(const BlockingQueue&);
-
     };
 }
 

@@ -20,6 +20,7 @@
 #ifndef EPYX_TLS_POINTER_H
 #define EPYX_TLS_POINTER_H
 
+#include <boost/noncopyable.hpp>
 #include <pthread.h>
 #include "assert.h"
 #include "exception.h"
@@ -42,7 +43,7 @@ namespace Epyx
      *
      * @tparam T the base type of the pointers contained in the TLSPointer
      */
-    template<typename T> class TLSPointer
+    template<typename T> class TLSPointer : private boost::noncopyable
     {
     public:
         /**
@@ -82,10 +83,6 @@ namespace Epyx
         T* release();
 
     private:
-        // Disable copy construction and assignment.
-        TLSPointer(const TLSPointer&);
-        const TLSPointer& operator=(const TLSPointer&);
-
         void (*destructor)(T*);
         T* (*constructor)();
         pthread_key_t key;

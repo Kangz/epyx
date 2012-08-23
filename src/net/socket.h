@@ -22,6 +22,7 @@
 #define EPYX_SOCKET_H
 
 #include "sockaddress.h"
+#include <boost/noncopyable.hpp>
 #include <string>
 
 namespace Epyx
@@ -31,7 +32,7 @@ namespace Epyx
      *
      * @brief Socket abstraction layer
      */
-    class Socket
+    class Socket : private boost::noncopyable
     {
     public:
         /**
@@ -157,10 +158,6 @@ namespace Epyx
     private:
         // Global initialisation stuff
         static bool is_init;
-
-        // Disable copy
-        Socket(const Socket&);
-        const Socket& operator=(const Socket&);
 
         // Last end-of-line caracter (\r or \n)
         char last_eol;

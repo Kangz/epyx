@@ -20,6 +20,7 @@
 #ifndef EPYX_MUTEX_H
 #define EPYX_MUTEX_H
 
+#include <boost/noncopyable.hpp>
 #include <pthread.h>
 #include <errno.h>
 
@@ -32,7 +33,7 @@ namespace Epyx
      *
      * This class is simply a wrapper around pthreads' mutex object to ease its use.
      */
-    class Mutex
+    class Mutex : private boost::noncopyable
     {
     public:
         /**
@@ -69,10 +70,6 @@ namespace Epyx
 
     private:
         pthread_mutex_t mutex;
-
-        // Disable copy construction and assignment.
-        Mutex(const Mutex&);
-        const Mutex& operator=(const Mutex&);
     };
 }
 

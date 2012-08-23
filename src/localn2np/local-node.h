@@ -94,11 +94,6 @@ namespace Epyx
         // Callbacks for Recv
         std::map<std::string, ReceiveCbData> recvCallbacks;
         Mutex recvCallbacksMutex;
-
-        // Disable copy
-        LocalNode(const LocalNode&);
-        const LocalNode& operator=(const LocalNode&);
-
     };
 }
 

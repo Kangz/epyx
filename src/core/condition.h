@@ -23,6 +23,7 @@
 #ifndef EPYX_CONDITION_H
 #define EPYX_CONDITION_H
 
+#include <boost/noncopyable.hpp>
 #include <pthread.h>
 #include "mutex.h"
 
@@ -40,7 +41,7 @@ namespace Epyx
      * when notified and exactly when you are notified. For those not convinced,
      * try to see how you could make a blocking queue without this mechanism.
      */
-    class Condition
+    class Condition : private boost::noncopyable
     {
     public:
 
@@ -127,10 +128,6 @@ namespace Epyx
     private:
         Mutex mutex;
         pthread_cond_t cond;
-
-        // Disable copy construction and assignment.
-        Condition(const Condition&);
-        const Condition& operator=(const Condition&);
     };
 }
 

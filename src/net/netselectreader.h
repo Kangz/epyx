@@ -21,6 +21,8 @@
 #ifndef EPYX_NETSELECTREADER_H
 #define EPYX_NETSELECTREADER_H
 
+#include <boost/noncopyable.hpp>
+
 namespace Epyx
 {
     class NetSelect;
@@ -30,7 +32,7 @@ namespace Epyx
      *
      * @brief Container used by NetSelect to remember watched sockets
      */
-    class NetSelectReader
+    class NetSelectReader : private boost::noncopyable
     {
     public:
         NetSelectReader();
@@ -58,10 +60,6 @@ namespace Epyx
          */
         void setOwner(NetSelect *ns);
     private:
-        // Disable copy
-        NetSelectReader(const NetSelectReader&);
-        const NetSelectReader& operator=(const NetSelectReader&);
-
         // NetSelect which owns this reader
         NetSelect *owner;
     };

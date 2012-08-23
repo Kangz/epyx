@@ -20,6 +20,7 @@
 #ifndef EPYX_THREAD_H
 #define EPYX_THREAD_H
 
+#include <boost/noncopyable.hpp>
 #include <string>
 #include <pthread.h>
 #include "tls-pointer.h"
@@ -48,7 +49,7 @@ namespace Epyx
      *
      * To define a thread, you should inherit from this abstract class.
      */
-    class Thread
+    class Thread : private boost::noncopyable
     {
     public:
 
@@ -122,10 +123,6 @@ namespace Epyx
         virtual void run() = 0;
 
     private:
-        // Disable copy construction and assignment.
-        Thread(const Thread&);
-        const Thread& operator=(const Thread&);
-
         /**
          * @brief Thread entry point
          * @param Thread object
