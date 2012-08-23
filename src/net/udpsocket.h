@@ -34,17 +34,29 @@ namespace Epyx
     {
     public:
         /**
-         * @brief Initialise an empty TCP socket
+         * @brief Initialise an empty UDP socket
          */
         UDPSocket();
         /**
-         * @brief Initialise a TCP socket with a remote address
+         * @brief Initialise an UDP socket with a remote address
          */
-        UDPSocket(const SockAddress& addr);
+        UDPSocket(const SockAddress& addr, bool isBroadcast = false);
         /**
          * @brief Build a new Socket object from an existing connection
          */
         UDPSocket(int sock, const SockAddress &addr);
+
+        /**
+         * @brief Initialise the internal socket
+         * @throws ErrException if socket() fails
+         */
+        void create();
+
+        /**
+         * @brief Enable or disable broadcast
+         * @param enable
+         */
+        void setBroadcast(bool enable);
 
         /**
          * @brief Send data through the socket
