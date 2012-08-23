@@ -1,5 +1,5 @@
 #include "framepacket.h"
-#include "../../src/core/string.h"
+#include "../../src/core/common.h"
 #include <cstring>
 
 namespace Epyx
