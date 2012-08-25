@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.6)
 project(Epyx)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 SET(CMAKE_CXX_FLAGS "-g -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable")
 
@@ -28,50 +29,58 @@ file(GLOB_RECURSE crypto_sources src/crypto/*)
 # Contrib files
 file(GLOB_RECURSE webm_sources contrib/webm/*)
 
-# More general file sets, with deps
-file(GLOB epyx_api_sources src/api.cpp
-    ${core_sources} ${crypto_sources} ${dht_sources} ${n2np_sources}
-    ${natpunching_sources} ${net_sources} ${parser_sources} ${tinyxml_sources})
+# Library
+add_library(epyx STATIC src/api.cpp
+    ${core_sources}
+    ${crypto_sources}
+    ${dht_sources}
+    ${n2np_sources}
+    ${natpunching_sources}
+    ${net_sources}
+    ${parser_sources}
+    ${tinyxml_sources}
+)
+target_link_libraries(epyx ${Boost_LIBRARIES} pthread cryptopp)
 
 # Test executables
-add_executable(test-thread ${epyx_api_sources} src/test-thread.cpp)
-target_link_libraries(test-thread ${Boost_LIBRARIES} pthread cryptopp)
+add_executable(test-thread src/test-thread.cpp)
+target_link_libraries(test-thread epyx)
 
-add_executable(test-server ${epyx_api_sources} src/test-server.cpp)
-target_link_libraries(test-server ${Boost_LIBRARIES} pthread cryptopp)
+add_executable(test-server src/test-server.cpp)
+target_link_libraries(test-server epyx)
 
-add_executable(test-parser ${epyx_api_sources} src/test-parser.cpp)
-target_link_libraries(test-parser ${Boost_LIBRARIES} pthread cryptopp)
+add_executable(test-parser src/test-parser.cpp)
+target_link_libraries(test-parser epyx)
 
-add_executable(test-natpunching ${epyx_api_sources} src/test-natpunching.cpp)
-target_link_libraries(test-natpunching ${Boost_LIBRARIES} pthread cryptopp)
+add_executable(test-natpunching src/test-natpunching.cpp)
+target_link_libraries(test-natpunching epyx)
 
-add_executable(test-local-n2np ${epyx_api_sources} src/test-local-n2np.cpp
+add_executable(test-local-n2np src/test-local-n2np.cpp
     ${localn2np_sources})
-target_link_libraries(test-local-n2np ${Boost_LIBRARIES} pthread cryptopp)
+target_link_libraries(test-local-n2np epyx)
 
-add_executable(test-n2np ${epyx_api_sources} src/test-n2np.cpp)
-target_link_libraries(test-n2np ${Boost_LIBRARIES} pthread cryptopp)
+add_executable(test-n2np src/test-n2np.cpp)
+target_link_libraries(test-n2np epyx)
 
-add_executable(demoframe ${epyx_api_sources} src/demoframe.cpp)
-target_link_libraries(demoframe ${Boost_LIBRARIES} pthread cryptopp)
+add_executable(demoframe src/demoframe.cpp)
+target_link_libraries(demoframe epyx)
 
-add_executable(test-dht ${epyx_api_sources} src/test-dht.cpp ${localn2np_sources})
-target_link_libraries(test-dht ${Boost_LIBRARIES} pthread cryptopp)
+add_executable(test-dht src/test-dht.cpp ${localn2np_sources})
+target_link_libraries(test-dht epyx)
 
 #add_executable(test-crypto ${core_sources} ${crypto_sources} src/test-crypto.cpp)
-#target_link_libraries(test-crypto pthread ${Boost_LIBRARIES} cryptopp)
+#target_link_libraries(test-crypto epyx)
 
-add_executable(demo ${epyx_api_sources} src/demo.cpp)
-target_link_libraries(demo ${Boost_LIBRARIES} pthread cryptopp)
+add_executable(demo src/demo.cpp)
+target_link_libraries(demo epyx)
 
 
-add_executable(test-webm ${epyx_api_sources} contrib/test-webm.cpp ${webm_sources})
-target_link_libraries(test-webm ${Boost_LIBRARIES} pthread cryptopp vpx SDL)
+add_executable(test-webm contrib/test-webm.cpp ${webm_sources})
+target_link_libraries(test-webm epyx vpx SDL)
 
-add_executable(demo-video ${epyx_api_sources} ${webm_sources} contrib/demo-video.cpp)
-target_link_libraries(demo-video ${Boost_LIBRARIES} pthread cryptopp vpx SDL)
+add_executable(demo-video ${webm_sources} contrib/demo-video.cpp)
+target_link_libraries(demo-video epyx vpx SDL)
 
 # Real programs
-add_executable(simple-relay ${epyx_api_sources} src/simple-relay.cpp)
-target_link_libraries(simple-relay ${Boost_LIBRARIES} pthread cryptopp)
+add_executable(simple-relay src/simple-relay.cpp)
+target_link_libraries(simple-relay epyx)
