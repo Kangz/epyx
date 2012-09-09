@@ -61,7 +61,7 @@ namespace Epyx
 
             // Create Envelope
             TiXmlElement *envelope = new TiXmlElement(SOAPPREFIX":Envelope");
-            envelope->SetAttribute("xmlns:"SOAPPREFIX, "http://schemas.xmlsoap.org/soap/envelope/");
+            envelope->SetAttribute("xmlns:" SOAPPREFIX, "http://schemas.xmlsoap.org/soap/envelope/");
             envelope->SetAttribute(SOAPPREFIX":encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/");
             dom_command.LinkEndChild(envelope);
 
@@ -72,7 +72,7 @@ namespace Epyx
             // Insert command
             std::string prefixedActiontype = std::string(SERVICEPREFIX":") + actiontype;
             TiXmlElement *action_command = new TiXmlElement(prefixedActiontype.c_str());
-            action_command->SetAttribute("xmlns:"SERVICEPREFIX, service.c_str());
+            action_command->SetAttribute("xmlns:" SERVICEPREFIX, service.c_str());
             body->LinkEndChild(action_command);
             std::list<TiXmlElement *> list_args;
             for (std::map<std::string, std::string>::iterator it = args.begin(); it != args.end(); ++it) {
