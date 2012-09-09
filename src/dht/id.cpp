@@ -164,7 +164,7 @@ namespace DHT
         Id* const i = (Id*) &d;
         os << *i << '%' << d.firstActiveBit();
         return os;
-    };
+    }
 
     bool operator<(const Id &a, const Id &b) {
         uint8_t *a_data = (uint8_t *) a.data;

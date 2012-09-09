@@ -5,7 +5,7 @@ namespace Epyx
 namespace DHT
 {
 
-    Storage::Storage(){};
+    Storage::Storage(){}
 
     bool Storage::has(const std::string& key){
         lock.lock();

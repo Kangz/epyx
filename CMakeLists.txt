@@ -8,7 +8,7 @@ project(Epyx)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-SET(CMAKE_CXX_FLAGS "-g -Wall -Wextra -Wno-unused-parameter -Wno-unused-variable")
+SET(CMAKE_CXX_FLAGS "-g -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-unused-variable")
 
 # Use Boost
 find_package(Boost 1.40.0 COMPONENTS thread)
