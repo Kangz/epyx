@@ -269,9 +269,9 @@ static const int NETWORK_SIZE = 10;
 
 class MyFindCallback: public FindCallback {
     public:
-        void onFound(std::vector<std::pair<Distance, Peer> >& result){
+        void onFound(std::vector<std::pair<Distance, Peer>>& result){
             log::info << "The DHT found the closest Ids with distance : " << log::endl;
-            std::vector<std::pair<Distance, Peer> >::iterator it;
+            std::vector<std::pair<Distance, Peer>>::iterator it;
             for(it = result.begin(); it != result.end(); it ++){
                 log::info << (*it).first << log::endl;
             }

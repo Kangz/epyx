@@ -46,7 +46,7 @@ namespace Epyx
 
     ActorManager::ActorWorkers::ActorWorkers(int num_workers, const std::string& name,
         ActorManager* m)
-    :WorkerPool<std::pair<int, void*> >(num_workers, true, name),
+    :WorkerPool<std::pair<int, void*>>(num_workers, true, name),
     manager(m) {
     }
 

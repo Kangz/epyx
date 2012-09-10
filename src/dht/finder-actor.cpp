@@ -86,14 +86,14 @@ namespace DHT
         //on which I can make a search for an element.
         //I'm making a manual search instead
         ClosestQueue::iterator it;
-        for(it = shortlist.begin(); it != shortlist.end(); it++){
-            if((*it).first == dist){
+        for(it = shortlist.begin(); it != shortlist.end(); it++) {
+            if((*it).first == dist) {
                 return;
             }
         }
 
         heap_push(shortlist, std::make_pair(dist, p));
-        if(shortlist.size() > FIND_PARALLEL_QUERIES) {
+        if((int)shortlist.size() > FIND_PARALLEL_QUERIES) {
             heap_pop_no_res(shortlist);
         }
     }
@@ -101,8 +101,8 @@ namespace DHT
     void FinderActor::addToFoundPeers(Peer& p) {
         Distance dist(requestedId, p.id);
         ClosestQueue::iterator it;
-        for(it = foundPeers.begin(); it != foundPeers.end(); it++){
-            if((*it).second.id == p.id){
+        for(it = foundPeers.begin(); it != foundPeers.end(); it++) {
+            if((*it).second.id == p.id) {
                 return;
             }
         }

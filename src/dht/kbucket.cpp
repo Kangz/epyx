@@ -75,7 +75,7 @@ namespace DHT
     void KBucket::findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n) {
         lock.lock();
 
-        std::priority_queue<std::pair<Distance,Peer>, std::vector<std::pair<Distance, Peer> >,
+        std::priority_queue<std::pair<Distance,Peer>, std::vector<std::pair<Distance, Peer>>,
                 FindNearestComparator> closest;
 
         //Insert EVERY node in the priority_queue with it's distance associated

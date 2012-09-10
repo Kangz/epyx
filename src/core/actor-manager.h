@@ -121,7 +121,7 @@ namespace Epyx
         void post(int id, void* msg);
 
     private:
-        class ActorWorkers : public WorkerPool<std::pair<int, void*> >
+        class ActorWorkers : public WorkerPool<std::pair<int, void*>>
         {
         public:
 
@@ -155,8 +155,8 @@ namespace Epyx
 
         private:
             ActorManager* manager;
-            std::priority_queue<std::pair<Timeout, int>, std::vector<std::pair<Timeout, int> >, ActorTimeoutComparator > timeouts;
-            BlockingQueue<std::pair<Timeout, int> > incoming;
+            std::priority_queue<std::pair<Timeout, int>, std::vector<std::pair<Timeout, int>>, ActorTimeoutComparator > timeouts;
+            BlockingQueue<std::pair<Timeout, int>> incoming;
         };
 
         TimeoutLauncher timeouts;

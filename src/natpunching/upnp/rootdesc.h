@@ -38,7 +38,7 @@ namespace Epyx
          *
          * Answer is a service map
          */
-        class RootDesc : public NetQuery<std::map<std::string, std::string> >
+        class RootDesc : public NetQuery<std::map<std::string, std::string>>
         {
         public:
             /**

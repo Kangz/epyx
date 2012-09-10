@@ -42,7 +42,7 @@ namespace DHT
         ~FinderActorData();
     };
 
-    typedef std::vector<std::pair<Distance, Peer> > ClosestQueue;
+    typedef std::vector<std::pair<Distance, Peer>> ClosestQueue;
 
     /**
      * @class FindCallback

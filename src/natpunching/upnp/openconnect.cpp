@@ -50,7 +50,7 @@ namespace Epyx
                 srand((unsigned)time(0));
                 bool foundValidPort = false;
                 unsigned short remotePort;
-                short range = 65536-1024;
+                unsigned short range = 65536-1024;
                 while (!foundValidPort){
                     remotePort = (unsigned short) 1024+(rand()*range/(RAND_MAX+1.0));
                     foundValidPort = true;
