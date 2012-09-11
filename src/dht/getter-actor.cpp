@@ -34,7 +34,7 @@ namespace DHT
     GetCallback::~GetCallback() {
     }
 
-    GetterSearchCallback::GetterSearchCallback(ActorId<GetterActorData> parent)
+    GetterSearchCallback::GetterSearchCallback(ActorId<GetterActor> parent)
     :parent(parent) {
     }
 
@@ -59,7 +59,7 @@ namespace DHT
         Id id;
         idForString(id, key);
         //Start the FIND process
-        n.findClosest(new GetterSearchCallback(getId()), GET_REDUNDANCY, id);
+        n.findClosest(new GetterSearchCallback(Actor::getId(this)), GET_REDUNDANCY, id);
     }
 
     void GetterActor::treat(GetterActorData& msg) {
@@ -94,7 +94,7 @@ namespace DHT
     }
 
     void GetterActor::ask(Peer& p) {
-        new SingularGetActor(n, getId(), p, key);
+        new SingularGetActor(n, Actor::getId(this), p, key);
     }
 
     void GetterActor::timeout() {

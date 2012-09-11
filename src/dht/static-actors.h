@@ -51,7 +51,7 @@ namespace DHT
      * @class PingActor
      * @brief handles PING queries
      */
-    class PingActor: public Actor<StaticActorData> {
+    class PingActor: public Actor {
     public:
         PingActor(InternalNode& n);
         void treat(StaticActorData& msg);
@@ -64,7 +64,7 @@ namespace DHT
      * @class GetActor
      * @brief handles GET queries
      */
-    class GetActor: public Actor<StaticActorData> {
+    class GetActor: public Actor {
     public:
         GetActor(InternalNode& n);
         void treat(StaticActorData& msg);
@@ -77,7 +77,7 @@ namespace DHT
      * @class StoreActor
      * @brief handles Store queries
      */
-    class StoreActor: public Actor<StaticActorData> {
+    class StoreActor: public Actor {
     public:
         StoreActor(InternalNode& n);
         void treat(StaticActorData& msg);
@@ -90,7 +90,7 @@ namespace DHT
      * @class FindActor
      * @brief handles FIND queries
      */
-    class FindActor: public Actor<StaticActorData> {
+    class FindActor: public Actor {
     public:
         FindActor(InternalNode& n);
         void treat(StaticActorData& msg);

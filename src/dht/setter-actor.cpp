@@ -35,7 +35,7 @@ namespace DHT
     SetCallback::~SetCallback() {
     }
 
-    SetterSearchCallback::SetterSearchCallback(ActorId<SetterActorData> parent)
+    SetterSearchCallback::SetterSearchCallback(ActorId<SetterActor> parent)
     :parent(parent){
     }
 
@@ -60,7 +60,7 @@ namespace DHT
         Id id;
         idForString(id, key);
         //Send the FIND process
-        n.findClosest(new SetterSearchCallback(getId()), SET_REDUNDANCY, id);
+        n.findClosest(new SetterSearchCallback(Actor::getId(this)), SET_REDUNDANCY, id);
     }
 
     void SetterActor::treat(SetterActorData& msg) {
@@ -96,7 +96,7 @@ namespace DHT
     }
 
     void SetterActor::ask(Peer& p) {
-        new SingularSetActor(n, getId(), p, key, value);
+        new SingularSetActor(n, Actor::getId(this), p, key, value);
     }
 
     void SetterActor::timeout() {

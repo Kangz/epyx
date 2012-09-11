@@ -70,17 +70,6 @@ namespace DHT
         virtual ~GetCallback();
     };
 
-    //The FinderActor callback used by the GetterActor
-    class GetterSearchCallback: public FindCallback {
-        public:
-            GetterSearchCallback(ActorId<GetterActorData> parent);
-            void onFound(ClosestQueue& result);
-            void onError();
-
-        private:
-            ActorId<GetterActorData> parent;
-    };
-
     /**
      * @class GetterActor
      * @brief The logic for the get operation
@@ -88,7 +77,7 @@ namespace DHT
      * It first asks for the closest nodes to the key then
      * send a GET query to each of these nodes
      */
-    class GetterActor: public Actor<GetterActorData> {
+    class GetterActor: public Actor {
     public:
         /**
          * @brief the GetterActor constructor
@@ -103,8 +92,8 @@ namespace DHT
          */
         void start();
 
-    protected:
         void treat(GetterActorData& msg);
+    protected:
         void timeout();
 
     private:
@@ -117,6 +106,16 @@ namespace DHT
         bool found;
     };
 
+    //The FinderActor callback used by the GetterActor
+    class GetterSearchCallback: public FindCallback {
+        public:
+            GetterSearchCallback(ActorId<GetterActor> parent);
+            void onFound(ClosestQueue& result);
+            void onError();
+
+        private:
+            ActorId<GetterActor> parent;
+    };
 }
 }
 

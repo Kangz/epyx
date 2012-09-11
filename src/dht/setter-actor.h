@@ -68,25 +68,14 @@ namespace DHT
         virtual ~SetCallback();
     };
 
-    //The FinderActor callback used by the SetterActor
-    class SetterSearchCallback: public FindCallback {
-    public:
-        SetterSearchCallback(ActorId<SetterActorData> parent);
-        void onFound(ClosestQueue& result);
-        void onError();
-
-    private:
-        ActorId<SetterActorData> parent;
-    };
-
-    /**
+   /**
      * @class SetterActor
      * @brief The logic for the set operation
      *
      * It first asks for the closest nodes to the key then
      * send a SET query to each of these nodes
      */
-    class SetterActor: public Actor<SetterActorData> {
+    class SetterActor: public Actor {
     public:
         /**
          * @brief the SetterActor constructor
@@ -102,8 +91,9 @@ namespace DHT
          */
         void start();
 
-    protected:
         void treat(SetterActorData& msg);
+
+    protected:
         void timeout();
 
     private:
@@ -116,6 +106,17 @@ namespace DHT
         int pendingRequests;
         int nErrors;
         bool found;
+    };
+
+    //The FinderActor callback used by the SetterActor
+    class SetterSearchCallback: public FindCallback {
+    public:
+        SetterSearchCallback(ActorId<SetterActor> parent);
+        void onFound(ClosestQueue& result);
+        void onError();
+
+    private:
+        ActorId<SetterActor> parent;
     };
 
 }

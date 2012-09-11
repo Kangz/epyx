@@ -8,12 +8,13 @@ namespace DHT
 {
 
     InternalNode::InternalNode(const Id& id, N2NP::Node& n2npSelf, Node& parent, const std::string& name)
-    :actors(5, name + "Actors"), id(id), myN2np(n2npSelf), parent(parent), kbucket(id) {
-        //Create the actors that will respond to simple requests
-        pingActor = actors.add(new PingActor(*this));
-        getActor = actors.add(new GetActor(*this));
-        storeActor = actors.add(new StoreActor(*this));
-        findActor = actors.add(new FindActor(*this));
+    :actors(5, name + "Actors"), id(id), myN2np(n2npSelf), parent(parent), kbucket(id),
+
+    //Create the actors that will respond to simple requests
+    pingActor(actors.add(new PingActor(*this))),
+    getActor(actors.add(new GetActor(*this))),
+    storeActor(actors.add(new StoreActor(*this))),
+    findActor(actors.add(new FindActor(*this))) {
     }
 
     InternalNode::~InternalNode() {
@@ -96,13 +97,13 @@ namespace DHT
     }
 
     //These methods manage the process actors
-    long InternalNode::registerProcessActor(Actor<ProcessActorData>& actor, int timeout) {
+    long InternalNode::registerProcessActor(ProcessActor& actor, int timeout) {
         //TODO delete all this when the node is destroyed
-        ActorId<ProcessActorData>* a;
+        ActorId<ProcessActor>* a;
         if(timeout > 0){
-            a = new ActorId<ProcessActorData>(actors.add(actor, timeout));
+            a = new ActorId<ProcessActor>(actors.add(actor, timeout));
         }else{
-            a = new ActorId<ProcessActorData>(actors.add(actor));
+            a = new ActorId<ProcessActor>(actors.add(actor));
         }
         long n = processActorsCount.getIncrement();
         processActors.set(n, a);
@@ -110,24 +111,24 @@ namespace DHT
     }
 
     void InternalNode::dispatchToProcessActor(Packet& pkt, Peer& sender){
-        ActorId<ProcessActorData>* id = processActors.getAndLock(pkt.connectionId, NULL);
+        ActorId<ProcessActor>* id = processActors.getAndLock(pkt.connectionId, NULL);
         if(id == NULL){
             processActors.endUnlock();
             return;
         }
-        ActorId<ProcessActorData> saved_id(*id);
+        ActorId<ProcessActor> saved_id(*id);
         processActors.endUnlock();
 
         saved_id.post(*(new ProcessActorData(sender, pkt)));
     }
 
     void InternalNode::unregisterProcessActor(long actorNumber){
-        ActorId<ProcessActorData>* id = processActors.getAndLock(actorNumber, NULL);
+        ActorId<ProcessActor>* id = processActors.getAndLock(actorNumber, NULL);
         if(id == NULL){
             processActors.endUnlock();
             return;
         }
-        ActorId<ProcessActorData> saved_id(*id);
+        ActorId<ProcessActor> saved_id(*id);
         delete id;
         processActors.endUnlock();
 

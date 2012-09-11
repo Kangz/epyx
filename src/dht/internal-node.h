@@ -41,8 +41,11 @@ namespace DHT
 
     class Node;
 
-    struct StaticActorData;
-    struct ProcessActorData;
+    class PingActor;
+    class StoreActor;
+    class GetActor;
+    class FindActor;
+    class ProcessActor;
 
     /**
      * @class InternalNode
@@ -103,7 +106,7 @@ namespace DHT
         void send(Packet& pkt, const Peer& dest);
 
         //Manages the processActors (see InternalNode description)
-        long registerProcessActor(Actor<ProcessActorData>& actor, int timeout = 0);
+        long registerProcessActor(ProcessActor& actor, int timeout = 0);
         void unregisterProcessActor(long actorNumber);
 
         //TODO: avoid making these public
@@ -111,15 +114,9 @@ namespace DHT
         //The actor system
         ActorManager actors;
 
-        //Static actors
-        ActorId<StaticActorData> pingActor;
-        ActorId<StaticActorData> getActor;
-        ActorId<StaticActorData> storeActor;
-        ActorId<StaticActorData> findActor;
-
         //Management for the process actors
         atom::Counter processActorsCount;
-        atom::Map<long, ActorId<ProcessActorData>*> processActors;
+        atom::Map<long, ActorId<ProcessActor>*> processActors;
 
         //This node's identity
         Id id;
@@ -129,6 +126,12 @@ namespace DHT
         //Other components
         KBucket kbucket;
         Storage storage;
+
+        //Static actors
+        ActorId<PingActor> pingActor;
+        ActorId<GetActor> getActor;
+        ActorId<StoreActor> storeActor;
+        ActorId<FindActor> findActor;
 
     private:
         void sendPong(Peer& target);

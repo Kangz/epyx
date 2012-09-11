@@ -33,7 +33,7 @@ namespace DHT
         kill();
     }
 
-    SingularFindActor::SingularFindActor(InternalNode& n, ActorId<FinderActorData> p, Peer& peer, Id& requested)
+    SingularFindActor::SingularFindActor(InternalNode& n, ActorId<FinderActor> p, Peer& peer, Id& requested)
     :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), target(peer), parent(p) {
         //Send the FIND query
         Packet pkt;
@@ -60,7 +60,7 @@ namespace DHT
         destroy();
     }
 
-    SingularGetActor::SingularGetActor(InternalNode& n, ActorId<GetterActorData> p, Peer& peer, const std::string& key)
+    SingularGetActor::SingularGetActor(InternalNode& n, ActorId<GetterActor> p, Peer& peer, const std::string& key)
     :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), parent(p) {
         //Send the GET query
         Packet pkt;
@@ -85,7 +85,7 @@ namespace DHT
         destroy();
     }
 
-    SingularSetActor::SingularSetActor(InternalNode& n, ActorId<SetterActorData> p, Peer& peer, const std::string& key, const std::string& value)
+    SingularSetActor::SingularSetActor(InternalNode& n, ActorId<SetterActor> p, Peer& peer, const std::string& key, const std::string& value)
     :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), parent(p) {
         //Send the SET query
         Packet pkt;

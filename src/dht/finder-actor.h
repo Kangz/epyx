@@ -84,7 +84,7 @@ namespace DHT
      * where each answer will bring new nodes in the shortlist. When the shortlist
      * is empty, we know we are close to the result.
      */
-    class FinderActor: public Actor<FinderActorData> {
+    class FinderActor: public Actor {
     public:
         /**
          * @brief FinderActor constructor
@@ -99,8 +99,9 @@ namespace DHT
          */
         void start();
 
-    protected:
         void treat(FinderActorData& msg);
+
+    protected:
         void timeout();
 
         //helper functions to preserve the heap structure and the size of the lists

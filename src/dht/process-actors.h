@@ -59,7 +59,10 @@ namespace DHT
      * and reports back to its parent actor as it is part of a process.
      * ProcessActor::destroy should be called instead of kill()
      */
-    class ProcessActor: public Actor<ProcessActorData> {
+    class ProcessActor: public Actor {
+    public:
+        virtual void treat(ProcessActorData& msg) = 0;
+
     protected:
         /**
          * @brief register the process actor in the node.
@@ -86,14 +89,14 @@ namespace DHT
      */
     class SingularFindActor: public ProcessActor {
     public:
-        SingularFindActor(InternalNode& n, ActorId<FinderActorData> p, Peer& peer, Id& requested);
+        SingularFindActor(InternalNode& n, ActorId<FinderActor> p, Peer& peer, Id& requested);
 
+        virtual void treat(ProcessActorData& msg);
     protected:
-        void treat(ProcessActorData& msg);
         void timeout();
 
         Peer target;
-        ActorId<FinderActorData> parent;
+        ActorId<FinderActor> parent;
     };
 
     /**
@@ -104,13 +107,13 @@ namespace DHT
      */
     class SingularGetActor: public ProcessActor {
     public:
-        SingularGetActor(InternalNode& n, ActorId<GetterActorData> p, Peer& peer, const std::string& key);
+        SingularGetActor(InternalNode& n, ActorId<GetterActor> p, Peer& peer, const std::string& key);
 
+        virtual void treat(ProcessActorData& msg);
     protected:
-        void treat(ProcessActorData& msg);
         void timeout();
 
-        ActorId<GetterActorData> parent;
+        ActorId<GetterActor> parent;
     };
 
     /**
@@ -121,13 +124,13 @@ namespace DHT
      */
     class SingularSetActor: public ProcessActor {
     public:
-        SingularSetActor(InternalNode& n, ActorId<SetterActorData> p, Peer& peer, const std::string& key, const std::string& value);
+        SingularSetActor(InternalNode& n, ActorId<SetterActor> p, Peer& peer, const std::string& key, const std::string& value);
 
+        virtual void treat(ProcessActorData& msg);
     protected:
-        void treat(ProcessActorData& msg);
         void timeout();
 
-        ActorId<SetterActorData> parent;
+        ActorId<SetterActor> parent;
     };
 
 }

@@ -127,7 +127,7 @@ namespace DHT
     void FinderActor::sendFindQueryTo(Peer& p) {
         addToContactedPeers(p);
         pendingRequests ++;
-        new SingularFindActor(n, getId(), p, requestedId);
+        new SingularFindActor(n, Actor::getId(this), p, requestedId);
     }
 
     bool FinderActor::sendNewQuery() {
