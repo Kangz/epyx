@@ -21,13 +21,13 @@
 #ifndef EPYX_CORE_ACTOR_H
 #define EPYX_CORE_ACTOR_H
 
-#include "actor-base.h"
+#include "actor-id.h"
 #include "actor-manager.h"
 
 #include "common.h"
 namespace Epyx
 {
-    template<typename T>struct ActorId;
+    class ActorManager;
 
     /**
      * @class Actor
@@ -39,19 +39,35 @@ namespace Epyx
      *
      * @tparam T the base type of the messages the actor can receive
      */
-    template<typename T>class Actor : public Actor_base
+    class Actor
     {
     public:
-        virtual void _internal_treat(void* msg);
-        void setId(ActorId<T> id);
-        ActorId<T> getId();
+        virtual ~Actor();
+
+        void setId(ActorId_base id);
+        ActorId_base getBaseId();
+
+        /**
+         * @brief locks this actor
+         *
+         * DO NOT USE INSIDE treat() OR timeout()
+         */
+        void lock();
+
+        /**
+         * @brief unlocks this actor
+         */
+        void unlock();
+
+        bool alive;
+
+        void internal_treat(std::function<void()> msg);
+
+        template<typename T>static ActorId<T> getId(T* actor) {
+            return {actor->self.id, actor->self.manager, actor};
+        }
 
     protected:
-        /**
-         * @brief The method used to process incoming messages
-         * @param msg the message
-         */
-        virtual void treat(T& msg) = 0;
 
         /**
          * @brief the method called when the actor times out
@@ -65,34 +81,9 @@ namespace Epyx
         void kill();
 
     private:
-        ActorId<T> self;
+        Mutex mutex;
+        ActorId_base self;
 
     };
-
-
-    template<typename T> void Actor<T>::_internal_treat(void* msg) {
-        if (msg == NULL) {
-            this->timeout();
-        } else {
-            T* message = static_cast<T*> (msg);
-            this->treat(*message);
-            delete message;
-        }
-    }
-
-    template<typename T> void Actor<T>::setId(ActorId<T> id) {
-        self = id;
-    }
-
-    template<typename T> ActorId<T> Actor<T>::getId() {
-        return self;
-    }
-
-    template<typename T> void Actor<T>::timeout() {}
-
-    template<typename T> void Actor<T>::kill() {
-        this->alive = false;
-        this->self.manager->post(this->self.id, NULL);//Send a message to make sure the actor is destroyed
-    }
 }
 #endif //EPYX_CORE_ACTOR_H

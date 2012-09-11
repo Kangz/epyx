@@ -1,11 +1,26 @@
+/*
+ *   Copyright 2012 Epyx Team
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ */
 /**
  * @file actor-manager.cpp
  * @brief Implementation of the actor framework (non-templated part)
  */
 
 #include "actor-manager.h"
-
-#include "common.h"
+#include "actor-id.h"
+#include "actor.h"
 
 namespace Epyx
 {
@@ -24,13 +39,13 @@ namespace Epyx
     void ActorManager::kill(ActorId_base a) {
         actorsLock.lock();
 
-        std::map<int, Actor_base*>::iterator it;
+        std::map<int, Actor*>::iterator it;
         it = actors.find(a.id);
 
         //If we find the actor we only set the alive flag and send it
         //a message, it will be killed the next time it is processed
         if (it != actors.end()) {
-            Actor_base* actor = (*it).second;
+            Actor* actor = (*it).second;
             actor->alive = false;
             actorsLock.unlock();
 
@@ -40,13 +55,13 @@ namespace Epyx
         }
     }
 
-    void ActorManager::post(int id, void* msg) {
-        wp.post(new std::pair<int, void*>(id, msg));
+    void ActorManager::post(int id, std::function<void()> msg) {
+        wp.post(new std::pair<int, std::function<void()>>(id, msg));
     }
 
     ActorManager::ActorWorkers::ActorWorkers(int num_workers, const std::string& name,
         ActorManager* m)
-    :WorkerPool<std::pair<int, void*>>(num_workers, true, name),
+    :WorkerPool<std::pair<int, std::function<void()>>>(num_workers, true, name),
     manager(m) {
     }
 
@@ -55,17 +70,14 @@ namespace Epyx
     //if he is dead remove it and do nothing
     //if message = null the actor will call timeout()
     //else he will call treat(message)
-    void ActorManager::ActorWorkers::treat(std::pair<int, void*>* msg){
+    void ActorManager::ActorWorkers::treat(std::pair<int, std::function<void()>>* msg){
         ActorManager* m = this->manager;
-
-        Actor_base* a = NULL;
 
         m->actorsLock.lock();
 
-        std::map<int, Actor_base*>::iterator it;
-        it = m->actors.find(msg->first);
+        auto it = m->actors.find(msg->first);
         if (it != m->actors.end()) {
-            Actor_base* actor = (*it).second;
+            Actor* actor = (*it).second;
 
             //KEEP IT IN THIS ORDER, see kill() for more info
             //there won't be deadlocks as we always acquire
@@ -74,7 +86,7 @@ namespace Epyx
             actor->lock();
             if (actor->alive) {
                 m->actorsLock.unlock();
-                actor->_internal_treat(msg->second);
+                actor->internal_treat(msg->second);
                 actor->unlock();
             } else {
                 actor->unlock();
@@ -121,12 +133,11 @@ namespace Epyx
             }
 
             while(!timeouts.empty() && timeouts.top().first.hasExpired()){
-                manager->post(timeouts.top().second, NULL);
+                manager->post(timeouts.top().second, 0);
                 timeouts.pop();
             }
 
         }while(incoming.isOpened());
     }
-
 }
 

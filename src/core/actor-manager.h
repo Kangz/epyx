@@ -21,8 +21,7 @@
 #ifndef EPYX_CORE_ACTOR_MANAGER_H
 #define EPYX_CORE_ACTOR_MANAGER_H
 
-#include "actor.h"
-#include "actor-base.h"
+#include <functional>
 #include "mutex.h"
 #include "worker-pool.h"
 #include "atom/counter.h"
@@ -33,10 +32,9 @@
 
 namespace Epyx
 {
-
+    class Actor;
     struct ActorId_base;
     template<typename T> struct ActorId;
-    template<typename T> class Actor;
     /**
      * @class ActorManager
      *
@@ -78,7 +76,7 @@ namespace Epyx
          * Note: After this call you should only use the ActorId to
          * give commands to your actor.
          */
-        template<typename T> ActorId<T> add(Actor<T>* a);
+        template<typename T> ActorId<T> add(T* a);
 
         /**
          * @brief Adds an Actor (reference no-timeout version)
@@ -88,7 +86,7 @@ namespace Epyx
          * Note: After this call you should only use the ActorId to
          * give commands to your actor.
          */
-        template<typename T> ActorId<T> add(Actor<T>& a);
+        template<typename T> ActorId<T> add(T& a);
 
         /**
          * @brief Adds an Actor (pointer timeout version)
@@ -99,7 +97,7 @@ namespace Epyx
          * Note: After this call you should only use the ActorId to
          * give commands to your actor.
          */
-        template<typename T> ActorId<T> add(Actor<T>* a, Timeout t);
+        template<typename T> ActorId<T> add(T* a, Timeout t);
 
         /**
          * @brief Adds an Actor (reference timeout version)
@@ -110,7 +108,7 @@ namespace Epyx
          * Note: After this call you should only use the ActorId to
          * give commands to your actor.
          */
-        template<typename T> ActorId<T> add(Actor<T>& a, Timeout t);
+        template<typename T> ActorId<T> add(T& a, Timeout t);
 
         /**
          * @brief Kills an Actor contained in this manager, it won't receive anmore messges
@@ -118,22 +116,22 @@ namespace Epyx
          */
         void kill(ActorId_base id);
 
-        void post(int id, void* msg);
+        void post(int id, std::function<void()> msg);
 
     private:
-        class ActorWorkers : public WorkerPool<std::pair<int, void*>>
+        class ActorWorkers : public WorkerPool<std::pair<int, std::function<void()>>>
         {
         public:
 
             ActorWorkers(int num_workers, const std::string& name, ActorManager* m);
-            virtual void treat(std::pair<int, void*>* msg);
+            virtual void treat(std::pair<int, std::function<void()>>* msg);
 
         private:
             ActorManager* manager;
         };
 
         ActorWorkers wp;
-        std::map<int, Actor_base*> actors;
+        std::map<int, Actor*> actors;
         Mutex actorsLock;
         atom::Counter actorCount;
 
@@ -155,50 +153,12 @@ namespace Epyx
 
         private:
             ActorManager* manager;
-            std::priority_queue<std::pair<Timeout, int>, std::vector<std::pair<Timeout, int>>, ActorTimeoutComparator > timeouts;
+            std::priority_queue<std::pair<Timeout, int>, std::vector<std::pair<Timeout, int>>, ActorTimeoutComparator> timeouts;
             BlockingQueue<std::pair<Timeout, int>> incoming;
         };
 
         TimeoutLauncher timeouts;
     };
-    /**
-     * @struct ActorId_base
-     * @brief the base class of the ActorId, do not use directly
-     */
-    struct ActorId_base
-    {
-        int id;
-        ActorManager* manager;
-    };
-    /**
-     * @struct ActorId
-     * @brief Identifies and sends commands to an Actor
-     * @tparam T the template parameter of the corresponding actor
-     */
-    template<typename T> struct ActorId : public ActorId_base
-    {
-        /**
-         * @brief ActorId's default constructor
-         */
-        ActorId();
-
-        /**
-         * @brief ActorId's other constructor
-         */
-        ActorId(ActorManager* m, int i);
-
-        /**
-         * @brief sends a message to its Actor
-         * @param msg the message
-         */
-        void post(T & msg);
-
-        /**
-         * @brief kills its Actor
-         */
-        void kill();
-    };
-
 }
 #include "actor-manager-detail.h"
 
