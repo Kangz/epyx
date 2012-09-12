@@ -33,6 +33,8 @@ namespace Epyx
         ActorId<T> res(i, this, &a);
         a.setId(res);
 
+        a.alive = true;
+
         actorsLock.lock();
         actors[i] = &a;
         actorsLock.unlock();

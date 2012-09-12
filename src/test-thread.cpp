@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "api.h"
 #include "core/actor-manager.h"
+#include "core/actor.h"
 
 using namespace Epyx;
 
@@ -224,9 +225,9 @@ void test_worker_pool(){
     sleep(2);
 }
 
-class SimpleActor: public Actor<int>{
+class SimpleActor: public Actor{
 public:
-    virtual void treat(int& n){
+    virtual void treat(int n){
         log::info << "SimpleActor received something (and is very happy) : " << n << log::endl;
     }
     ~SimpleActor(){
@@ -234,9 +235,9 @@ public:
     }
 };
 
-class TimeoutActor: public Actor<int>{
+class TimeoutActor: public Actor{
 public:
-    virtual void treat(int& n){
+    virtual void treat(int n){
         log::info << "Timeout actor did not time out" << log::endl;
     }
     virtual void timeout(){
@@ -250,28 +251,29 @@ void test_actors(){
 
     {
         log::info<<"Making a simple actor and send it a message and destroy it immediately"<<log::endl;
-        ActorId<int> simple = manager.add(new SimpleActor);
-        simple.post(*(new int(18)));
+        auto simple = manager.add(new SimpleActor);
+        simple.post(18);
         simple.kill();
     }
+    sleep(1);
     log::info<<log::endl;
     {
         log::info<<"Making a simple actor and send it a message and destroy it after some time"<<log::endl;
-        ActorId<int> simple = manager.add(new SimpleActor);
-        simple.post(*(new int(18)));
+        auto simple = manager.add(new SimpleActor);
+        simple.post(18);
         usleep(10000);
         simple.kill();
     }
+    sleep(1);
     log::info<<log::endl;
     {
         log::info<<"Making a timeout actor and send it a message then wait it's timeout before sending it another message"<<log::endl;
-        ActorId<int> timeout = manager.add(new TimeoutActor, 0);
-        timeout.post(*(new int(18)));
-        usleep(100000);
-        timeout.post(*(new int(18)));
+        auto timeout = manager.add(new TimeoutActor, 1);
+        timeout.post(18);
+        usleep(10000);
+        timeout.post(18);
     }
     log::info<<log::endl;
-
 }
 
 int main(){
