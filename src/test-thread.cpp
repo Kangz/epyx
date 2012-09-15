@@ -246,6 +246,16 @@ public:
     }
 };
 
+class QueryActor: public Actor{
+public:
+    virtual void treat(EPYX_ACTOR_QUERY_ARG("foo") q){
+        log::info << "I was queried with FOO" << log::endl;
+    }
+    virtual void treat(EPYX_ACTOR_QUERY_ARG("bar") q){
+        log::info << "I was queried with BAR" << log::endl;
+    }
+};
+
 void test_actors(){
     ActorManager manager(5, "Actors");
 
@@ -267,13 +277,25 @@ void test_actors(){
     sleep(1);
     log::info<<log::endl;
     {
-        log::info<<"Making a timeout actor and send it a message then wait it's timeout before sending it another message"<<log::endl;
+        log::info<<"making a timeout actor and send it a message then wait it's timeout before sending it another message"<<log::endl;
         auto timeout = manager.add(new TimeoutActor, 1);
         timeout.post(18);
         usleep(10000);
         timeout.post(18);
     }
+    sleep(1);
     log::info<<log::endl;
+    {
+        log::info<<"Testing the use of named structs within treat arguments"<<log::endl;
+        auto query = manager.add(new QueryActor);
+        query.post(EPYX_ACTOR_QUERY("foo"));
+        usleep(10000);
+        query.post(EPYX_ACTOR_QUERY("bar"));
+        usleep(10000);
+        query.kill();
+    }
+    log::info<<log::endl;
+    sleep(1);
 }
 
 int main(){

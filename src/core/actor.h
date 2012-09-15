@@ -23,7 +23,7 @@
 
 #include "actor-id.h"
 #include "actor-manager.h"
-
+#include "name-struct.h"
 #include "common.h"
 namespace Epyx
 {
@@ -85,5 +85,9 @@ namespace Epyx
         ActorId_base self;
 
     };
+
+    #define EPYX_ACTOR_QUERY(str1) EPYX_NAME_STRUCT_INSTANCE(str1)
+
+    #define EPYX_ACTOR_QUERY_ARG(str1) EPYX_NAME_STRUCT(str1)
 }
 #endif //EPYX_CORE_ACTOR_H
