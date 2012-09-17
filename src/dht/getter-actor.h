@@ -92,7 +92,7 @@ namespace DHT
          */
         void start();
 
-        void treat(GetterActorData& msg);
+        void treat(GetterActorData* msg);
     protected:
         void timeout();
 

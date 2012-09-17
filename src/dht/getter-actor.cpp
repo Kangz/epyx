@@ -44,11 +44,11 @@ namespace DHT
         for(it = result.begin(); it != result.end(); it ++)  {
             res->push_back((*it).second);
         }
-        parent.post(*(new GetterActorData(res)));
+        parent.post(new GetterActorData(res));
     }
 
     void GetterSearchCallback::onError() {
-        parent.post(*(new GetterActorData()));
+        parent.post(new GetterActorData());
     }
 
     GetterActor::GetterActor(InternalNode& n, const std::string& key, GetCallback* cb)
@@ -62,25 +62,25 @@ namespace DHT
         n.findClosest(new GetterSearchCallback(Actor::getId(this)), GET_REDUNDANCY, id);
     }
 
-    void GetterActor::treat(GetterActorData& msg) {
+    void GetterActor::treat(GetterActorData* msg) {
         //Branch used when we wait for the FIND process
         if(! found) {
-            if (! msg.found) {
+            if (! msg->found) {
                 timeout();
             } else {
                 std::vector<Peer>::iterator it;
-                for(it = msg.peersToAsk->begin(); it != msg.peersToAsk->end(); it ++) {
+                for(it = msg->peersToAsk->begin(); it != msg->peersToAsk->end(); it ++) {
                     ask(*it);
                 }
-                pendingRequests = msg.peersToAsk->size();
+                pendingRequests = msg->peersToAsk->size();
             }
             found = true;
             return;
         }
 
         //For now we stop at the first answer
-        if(msg.answered) {
-            callback->onGot(msg.result);
+        if(msg->answered) {
+            callback->onGot(msg->result);
             delete callback;
             kill();
             return;
@@ -91,6 +91,7 @@ namespace DHT
             timeout();
         }
 
+        delete msg;
     }
 
     void GetterActor::ask(Peer& p) {

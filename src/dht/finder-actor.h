@@ -99,7 +99,7 @@ namespace DHT
          */
         void start();
 
-        void treat(FinderActorData& msg);
+        void treat(FinderActorData* msg);
 
     protected:
         void timeout();

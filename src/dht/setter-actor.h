@@ -91,7 +91,7 @@ namespace DHT
          */
         void start();
 
-        void treat(SetterActorData& msg);
+        void treat(SetterActorData* msg);
 
     protected:
         void timeout();

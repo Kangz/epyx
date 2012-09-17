@@ -54,7 +54,7 @@ namespace DHT
     class PingActor: public Actor {
     public:
         PingActor(InternalNode& n);
-        void treat(StaticActorData& msg);
+        void treat(StaticActorData* msg);
 
     private:
         InternalNode& n;
@@ -67,7 +67,7 @@ namespace DHT
     class GetActor: public Actor {
     public:
         GetActor(InternalNode& n);
-        void treat(StaticActorData& msg);
+        void treat(StaticActorData* msg);
 
     private:
         InternalNode& n;
@@ -80,7 +80,7 @@ namespace DHT
     class StoreActor: public Actor {
     public:
         StoreActor(InternalNode& n);
-        void treat(StaticActorData& msg);
+        void treat(StaticActorData* msg);
 
     private:
         InternalNode& n;
@@ -93,7 +93,7 @@ namespace DHT
     class FindActor: public Actor {
     public:
         FindActor(InternalNode& n);
-        void treat(StaticActorData& msg);
+        void treat(StaticActorData* msg);
 
     private:
         InternalNode& n;

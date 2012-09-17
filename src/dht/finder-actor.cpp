@@ -56,13 +56,13 @@ namespace DHT
         unlock();
     }
 
-    void FinderActor::treat(FinderActorData& msg) {
+    void FinderActor::treat(FinderActorData* msg) {
         pendingRequests --;
 
         //Process the content of the message
-        if(msg.answered) {
-            std::vector<Peer>::iterator peerToAdd = msg.answeredPeers->begin();
-            for(; peerToAdd != msg.answeredPeers->end(); peerToAdd ++) {
+        if(msg->answered) {
+            std::vector<Peer>::iterator peerToAdd = msg->answeredPeers->begin();
+            for(; peerToAdd != msg->answeredPeers->end(); peerToAdd ++) {
                 addToShortList(*peerToAdd);
                 addToFoundPeers(*peerToAdd);
             }
@@ -78,6 +78,8 @@ namespace DHT
                 kill();
             }
         }
+
+        delete msg;
     }
 
     void FinderActor::addToShortList(Peer& p) {

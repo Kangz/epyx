@@ -45,18 +45,20 @@ namespace DHT
         this->n.send(pkt, target);
     }
 
-    void SingularFindActor::treat(ProcessActorData& msg) {
-        if(msg.pkt->method == M_FOUND && msg.pkt->status == 0 && msg.pkt->count > 0) {
-            parent.post(*(new FinderActorData(target, msg.pkt->foundPeers, true)));
-            msg.pkt->foundPeers = NULL;
+    void SingularFindActor::treat(ProcessActorData* msg) {
+        if(msg->pkt->method == M_FOUND && msg->pkt->status == 0 && msg->pkt->count > 0) {
+            parent.post(new FinderActorData(target, msg->pkt->foundPeers, true));
+            msg->pkt->foundPeers = NULL;
             destroy();
         } else {
             timeout();
         }
+
+        delete msg;
     }
 
     void SingularFindActor::timeout() {
-        parent.post(*(new FinderActorData(target, NULL, false)));
+        parent.post(new FinderActorData(target, NULL, false));
         destroy();
     }
 
@@ -71,9 +73,9 @@ namespace DHT
         this->n.send(pkt, peer);
     }
 
-    void SingularGetActor::treat(ProcessActorData& msg) {
-        if(msg.pkt->method == M_GOT && msg.pkt->status == 0) {
-            parent.post(*(new GetterActorData(msg.pkt->value)));
+    void SingularGetActor::treat(ProcessActorData* msg) {
+        if(msg->pkt->method == M_GOT && msg->pkt->status == 0) {
+            parent.post(new GetterActorData(msg->pkt->value));
             destroy();
         } else {
             timeout();
@@ -81,7 +83,7 @@ namespace DHT
     }
 
     void SingularGetActor::timeout() {
-        parent.post(*(new GetterActorData()));
+        parent.post(new GetterActorData());
         destroy();
     }
 
@@ -97,9 +99,9 @@ namespace DHT
         this->n.send(pkt, peer);
     }
 
-    void SingularSetActor::treat(ProcessActorData& msg) {
-        if(msg.pkt->method == M_GOT && msg.pkt->status == 0) {
-            parent.post(*(new SetterActorData(true)));
+    void SingularSetActor::treat(ProcessActorData* msg) {
+        if(msg->pkt->method == M_GOT && msg->pkt->status == 0) {
+            parent.post(new SetterActorData(true));
             kill();
         } else {
             timeout();
@@ -107,7 +109,7 @@ namespace DHT
     }
 
     void SingularSetActor::timeout() {
-        parent.post(*(new SetterActorData(false)));
+        parent.post(new SetterActorData(false));
         kill();
     }
 

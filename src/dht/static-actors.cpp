@@ -23,63 +23,67 @@ namespace DHT
     PingActor::PingActor(InternalNode& n): n(n) {
     }
 
-    void PingActor::treat(StaticActorData& msg) {
+    void PingActor::treat(StaticActorData* msg) {
         //We only need to send back a pong
         Packet pkt;
         pkt.method = M_PONG;
-        this->n.send(pkt, msg.peer);
-        msg.freeData();
+        this->n.send(pkt, msg->peer);
+        msg->freeData();
+        delete msg;
     }
 
     GetActor::GetActor(InternalNode& n): n(n) {
     }
 
-    void GetActor::treat(StaticActorData& msg) {
+    void GetActor::treat(StaticActorData* msg) {
         Packet answer;
         answer.method = M_GOT;
-        answer.connectionId = msg.pkt->connectionId;
+        answer.connectionId = msg->pkt->connectionId;
         answer.status = 1;
 
         //Try to find the value
         Value requested;
-        if(this->n.storage.get(msg.pkt->key, requested)){
+        if(this->n.storage.get(msg->pkt->key, requested)){
             answer.value = requested.content;
             answer.status = 0;
         }
-        this->n.send(answer, msg.peer);
-        msg.freeData();
+        this->n.send(answer, msg->peer);
+        msg->freeData();
+        delete msg;
     }
 
     StoreActor::StoreActor(InternalNode& n): n(n) {
     }
 
-    void StoreActor::treat(StaticActorData& msg) {
+    void StoreActor::treat(StaticActorData* msg) {
         Packet answer;
         answer.method = M_STORED;
-        answer.connectionId = msg.pkt->connectionId;
+        answer.connectionId = msg->pkt->connectionId;
         answer.status = 0;
 
-        this->n.storage.set(msg.pkt->key, msg.pkt->value);
+        this->n.storage.set(msg->pkt->key, msg->pkt->value);
 
-        this->n.send(answer, msg.peer);
-        msg.freeData();
+        this->n.send(answer, msg->peer);
+        msg->freeData();
+        delete msg;
     }
 
     FindActor::FindActor(InternalNode& n): n(n) {
     }
 
-    void FindActor::treat(StaticActorData& msg) {
+    void FindActor::treat(StaticActorData* msg) {
         Packet answer;
         answer.method = M_FOUND;
-        answer.connectionId = msg.pkt->connectionId;
+        answer.connectionId = msg->pkt->connectionId;
         answer.status = 0;
         answer.foundPeers = new std::vector<Peer>();
 
         //Ask the kbucket
-        this->n.kbucket.findNearestNodes(msg.pkt->idToFind, *answer.foundPeers, msg.pkt->count);
+        this->n.kbucket.findNearestNodes(msg->pkt->idToFind, *answer.foundPeers, msg->pkt->count);
 
-        this->n.send(answer, msg.peer);
-        msg.freeData();
+        this->n.send(answer, msg->peer);
+        msg->freeData();
+        delete msg;
     }
 
 }

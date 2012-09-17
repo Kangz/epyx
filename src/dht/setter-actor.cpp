@@ -45,11 +45,11 @@ namespace DHT
         for(it = result.begin(); it != result.end(); it ++)  {
             res->push_back((*it).second);
         }
-        parent.post(*(new SetterActorData(res)));
+        parent.post(new SetterActorData(res));
     }
 
     void SetterSearchCallback::onError() {
-        parent.post(*(new SetterActorData()));
+        parent.post(new SetterActorData());
     }
 
     SetterActor::SetterActor(InternalNode& n, const std::string& key, const std::string& value, SetCallback* cb)
@@ -63,23 +63,23 @@ namespace DHT
         n.findClosest(new SetterSearchCallback(Actor::getId(this)), SET_REDUNDANCY, id);
     }
 
-    void SetterActor::treat(SetterActorData& msg) {
+    void SetterActor::treat(SetterActorData* msg) {
         //While we wait for the FIND process
         if(! found) {
-            if (! msg.found) {
+            if (! msg->found) {
                 timeout();
             } else {
                 std::vector<Peer>::iterator it;
-                for(it = msg.peersToAsk->begin(); it != msg.peersToAsk->end(); it ++) {
+                for(it = msg->peersToAsk->begin(); it != msg->peersToAsk->end(); it ++) {
                     ask(*it);
                 }
-                pendingRequests = msg.peersToAsk->size();
+                pendingRequests = msg->peersToAsk->size();
             }
             found = true;
             return;
         }
 
-        if(!msg.succeded) {
+        if(!msg->succeded) {
             nErrors ++;
         }
 
@@ -93,6 +93,8 @@ namespace DHT
                 timeout();
             }
         }
+
+        delete msg;
     }
 
     void SetterActor::ask(Peer& p) {
