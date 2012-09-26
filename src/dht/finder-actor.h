@@ -30,18 +30,6 @@ namespace DHT
 
     class InternalNode;
 
-    /**
-     * @struct FinderActorData
-     * @brief the type of message that the FinderActor acceptsh
-     */
-    struct FinderActorData {
-        Peer peer;
-        std::vector<Peer>* answeredPeers;
-        bool answered;
-        FinderActorData(Peer& p, std::vector<Peer>* peers, bool ans);
-        ~FinderActorData();
-    };
-
     typedef std::vector<std::pair<Distance, Peer>> ClosestQueue;
 
     /**
@@ -99,7 +87,8 @@ namespace DHT
          */
         void start();
 
-        void treat(FinderActorData* msg);
+        void treat(EPYX_AQA("found"), Peer target, std::vector<Peer>* peers);
+        void treat(EPYX_AQA("not found"), Peer target);
 
     protected:
         void timeout();
@@ -110,6 +99,7 @@ namespace DHT
         void addToContactedPeers(Peer& p);
 
     private:
+        void onResponse();
         void sendFindQueryTo(Peer& p);
         bool sendNewQuery();
 

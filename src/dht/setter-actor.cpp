@@ -11,24 +11,6 @@ namespace Epyx
 namespace DHT
 {
 
-    SetterActorData::SetterActorData()
-    :peersToAsk(NULL), found(false), succeded(false) {
-    }
-
-    SetterActorData::SetterActorData(std::vector<Peer>* peers)
-    :peersToAsk(peers), found(true), succeded(false) {
-    }
-
-    SetterActorData::SetterActorData(bool success)
-    :peersToAsk(NULL), found(false), succeded(success) {
-    }
-
-    SetterActorData::~SetterActorData(){
-        if(peersToAsk != NULL) {
-            delete peersToAsk;
-        }
-    }
-
     void SetCallback::onError() {
     }
 
@@ -45,11 +27,11 @@ namespace DHT
         for(it = result.begin(); it != result.end(); it ++)  {
             res->push_back((*it).second);
         }
-        parent.post(new SetterActorData(res));
+        parent.post(EPYX_AQ("find success"), res);
     }
 
     void SetterSearchCallback::onError() {
-        parent.post(new SetterActorData());
+        parent.post(EPYX_AQ("find failure"));
     }
 
     SetterActor::SetterActor(InternalNode& n, const std::string& key, const std::string& value, SetCallback* cb)
@@ -63,26 +45,30 @@ namespace DHT
         n.findClosest(new SetterSearchCallback(Actor::getId(this)), SET_REDUNDANCY, id);
     }
 
-    void SetterActor::treat(SetterActorData* msg) {
-        //While we wait for the FIND process
-        if(! found) {
-            if (! msg->found) {
-                timeout();
-            } else {
-                std::vector<Peer>::iterator it;
-                for(it = msg->peersToAsk->begin(); it != msg->peersToAsk->end(); it ++) {
-                    ask(*it);
-                }
-                pendingRequests = msg->peersToAsk->size();
-            }
-            found = true;
-            return;
+    void SetterActor::treat(EPYX_AQA("find success"), std::vector<Peer>* peers) {
+        for(auto it = peers->begin(); it != peers->end(); it ++) {
+            ask(*it);
         }
+        pendingRequests = peers->size();
 
-        if(!msg->succeded) {
-            nErrors ++;
-        }
+        found = true;
+        delete peers;
+    }
 
+    void SetterActor::treat(EPYX_AQA("find failure")) {
+        timeout();
+    }
+
+    void SetterActor::treat(EPYX_AQA("set success")) {
+        onSetReceive();
+    }
+
+    void SetterActor::treat(EPYX_AQA("set failure")) {
+        nErrors ++;
+        onSetReceive();
+    }
+
+    void SetterActor::onSetReceive() {
         pendingRequests --;
         if(pendingRequests == 0) {
             if(nErrors > SET_ERROR_THRESHOLD) {
@@ -93,8 +79,6 @@ namespace DHT
                 timeout();
             }
         }
-
-        delete msg;
     }
 
     void SetterActor::ask(Peer& p) {

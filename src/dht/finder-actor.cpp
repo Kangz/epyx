@@ -9,16 +9,6 @@ namespace Epyx
 namespace DHT
 {
 
-    FinderActorData::FinderActorData(Peer& p, std::vector<Peer>* peers, bool ans)
-    :peer(p), answeredPeers(peers), answered(ans) {
-    }
-
-    FinderActorData::~FinderActorData() {
-        if(answeredPeers != NULL){
-            delete answeredPeers;
-        }
-    }
-
     void FindCallback::onError() {}
 
     FindCallback::~FindCallback() {}
@@ -56,30 +46,21 @@ namespace DHT
         unlock();
     }
 
-    void FinderActor::treat(FinderActorData* msg) {
-        pendingRequests --;
-
-        //Process the content of the message
-        if(msg->answered) {
-            std::vector<Peer>::iterator peerToAdd = msg->answeredPeers->begin();
-            for(; peerToAdd != msg->answeredPeers->end(); peerToAdd ++) {
-                addToShortList(*peerToAdd);
-                addToFoundPeers(*peerToAdd);
-            }
+    void FinderActor::treat(EPYX_AQA("found"), Peer target, std::vector<Peer>* peers) {
+        for(auto peerToAdd = peers->begin(); peerToAdd != peers->end(); peerToAdd ++) {
+            addToShortList(*peerToAdd);
+            addToFoundPeers(*peerToAdd);
         }
 
-        //Try to send a query to a new node
-        bool sent = sendNewQuery();
-        if(!sent) {
-            //If we con't and the shortlist is empty that means we finished the search
-            if(pendingRequests == 0) {
-                callback->onFound(foundPeers);
-                delete callback;
-                kill();
-            }
-        }
+        delete peers;
 
-        delete msg;
+        //Acknowledge that we received a query
+        onResponse();
+    }
+
+    void FinderActor::treat(EPYX_AQA("not found"), Peer target) {
+        //Acknowledge that we received a query
+        onResponse();
     }
 
     void FinderActor::addToShortList(Peer& p) {
@@ -124,6 +105,21 @@ namespace DHT
         callback->onError();
         delete callback;
         kill();
+    }
+
+    void FinderActor::onResponse() {
+        pendingRequests --;
+
+        //Try to send a query to a new node
+        bool sent = sendNewQuery();
+        if(!sent) {
+            //If we con't and the shortlist is empty that means we finished the search
+            if(pendingRequests == 0) {
+                callback->onFound(foundPeers);
+                delete callback;
+                kill();
+            }
+        }
     }
 
     void FinderActor::sendFindQueryTo(Peer& p) {

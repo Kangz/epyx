@@ -47,7 +47,7 @@ namespace DHT
 
     void SingularFindActor::treat(ProcessActorData* msg) {
         if(msg->pkt->method == M_FOUND && msg->pkt->status == 0 && msg->pkt->count > 0) {
-            parent.post(new FinderActorData(target, msg->pkt->foundPeers, true));
+            parent.post(EPYX_AQ("found"), target, msg->pkt->foundPeers);
             msg->pkt->foundPeers = NULL;
             destroy();
         } else {
@@ -58,7 +58,7 @@ namespace DHT
     }
 
     void SingularFindActor::timeout() {
-        parent.post(new FinderActorData(target, NULL, false));
+        parent.post(EPYX_AQ("not found"), target);
         destroy();
     }
 
@@ -75,7 +75,7 @@ namespace DHT
 
     void SingularGetActor::treat(ProcessActorData* msg) {
         if(msg->pkt->method == M_GOT && msg->pkt->status == 0) {
-            parent.post(new GetterActorData(msg->pkt->value));
+            parent.post(EPYX_AQ("get success"), msg->pkt->value);
             destroy();
         } else {
             timeout();
@@ -83,7 +83,7 @@ namespace DHT
     }
 
     void SingularGetActor::timeout() {
-        parent.post(new GetterActorData());
+        parent.post(EPYX_AQ("get failure"));
         destroy();
     }
 
@@ -101,7 +101,7 @@ namespace DHT
 
     void SingularSetActor::treat(ProcessActorData* msg) {
         if(msg->pkt->method == M_GOT && msg->pkt->status == 0) {
-            parent.post(new SetterActorData(true));
+            parent.post(EPYX_AQ("set success"));
             kill();
         } else {
             timeout();
@@ -109,7 +109,7 @@ namespace DHT
     }
 
     void SingularSetActor::timeout() {
-        parent.post(new SetterActorData(false));
+        parent.post(EPYX_AQ("set failure"));
         kill();
     }
 

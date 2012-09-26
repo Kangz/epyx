@@ -10,24 +10,6 @@ namespace Epyx
 namespace DHT
 {
 
-    GetterActorData::GetterActorData()
-    :peersToAsk(NULL), found(false), answered(false) {
-    }
-
-    GetterActorData::GetterActorData(std::vector<Peer>* peers)
-    :peersToAsk(peers), found(true), answered(false) {
-    }
-
-    GetterActorData::GetterActorData(const std::string& result)
-    :peersToAsk(NULL), found(false), answered(true), result(result) {
-    }
-
-    GetterActorData::~GetterActorData() {
-        if(peersToAsk != NULL) {
-            delete peersToAsk;
-        }
-    }
-
     void GetCallback::onError() {
     }
 
@@ -44,11 +26,11 @@ namespace DHT
         for(it = result.begin(); it != result.end(); it ++)  {
             res->push_back((*it).second);
         }
-        parent.post(new GetterActorData(res));
+        parent.post(EPYX_AQ("find success"), res);
     }
 
     void GetterSearchCallback::onError() {
-        parent.post(new GetterActorData());
+        parent.post(EPYX_AQ("find failure"));
     }
 
     GetterActor::GetterActor(InternalNode& n, const std::string& key, GetCallback* cb)
@@ -62,36 +44,36 @@ namespace DHT
         n.findClosest(new GetterSearchCallback(Actor::getId(this)), GET_REDUNDANCY, id);
     }
 
-    void GetterActor::treat(GetterActorData* msg) {
-        //Branch used when we wait for the FIND process
-        if(! found) {
-            if (! msg->found) {
-                timeout();
-            } else {
-                std::vector<Peer>::iterator it;
-                for(it = msg->peersToAsk->begin(); it != msg->peersToAsk->end(); it ++) {
-                    ask(*it);
-                }
-                pendingRequests = msg->peersToAsk->size();
-            }
-            found = true;
-            return;
+    void GetterActor::treat(EPYX_AQA("find success"), std::vector<Peer>* peers) {
+        for(auto it = peers->begin(); it != peers->end(); it ++) {
+            ask(*it);
         }
+        pendingRequests = peers->size();
 
-        //For now we stop at the first answer
-        if(msg->answered) {
-            callback->onGot(msg->result);
-            delete callback;
-            kill();
-            return;
-        }
+        found = true;
+        delete peers;
+    }
 
+    void GetterActor::treat(EPYX_AQA("find failure")) {
+        timeout();
+    }
+
+    void GetterActor::treat(EPYX_AQA("get success"), std::string result) {
+        callback->onGot(result);
+        delete callback;
+        kill();
+    }
+
+    void GetterActor::treat(EPYX_AQA("get failure")) {
+        //Acknowledge that we received the result of a query
+        onGetResponse();
+    }
+
+    void GetterActor::onGetResponse() {
         pendingRequests --;
         if(pendingRequests == 0) {
             timeout();
         }
-
-        delete msg;
     }
 
     void GetterActor::ask(Peer& p) {

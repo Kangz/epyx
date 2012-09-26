@@ -34,9 +34,6 @@ namespace DHT
 {
 
     class InternalNode;
-    struct FinderActorData;
-    struct GetterActorData;
-    struct SetterActorData;
 
     /**
      * @struct ProcessActorData

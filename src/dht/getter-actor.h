@@ -34,24 +34,6 @@ namespace DHT
     class InternalNode;
 
     /**
-     * @struct GetterActorData
-     * @brief the type of the messages received by the GetterActor
-     *
-     * It can be sent by the GetterSearchCallback and contain a peer list
-     * or be sent by SingularGetterActor siblings
-     */
-    struct GetterActorData {
-        std::vector<Peer>* peersToAsk;
-        bool found;
-        bool answered;
-        std::string result;
-        GetterActorData();
-        GetterActorData(std::vector<Peer>* peers);
-        GetterActorData(const std::string& result);
-        ~GetterActorData();
-    };
-
-    /**
      * @class GetCallback
      * @brief a user-defined callback for the GET operation
      */
@@ -92,11 +74,16 @@ namespace DHT
          */
         void start();
 
-        void treat(GetterActorData* msg);
+        void treat(EPYX_AQA("find success"), std::vector<Peer>* peers);
+        void treat(EPYX_AQA("find failure"));
+
+        void treat(EPYX_AQA("get success"), std::string result);
+        void treat(EPYX_AQA("get failure"));
     protected:
         void timeout();
 
     private:
+        void onGetResponse();
         void ask(Peer& p);
 
         InternalNode& n;

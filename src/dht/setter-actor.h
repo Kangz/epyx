@@ -34,23 +34,6 @@ namespace DHT
     class InternalNode;
 
     /**
-     * @struct SetterActorData
-     * @brief the type of the messages received by the SetterActor
-     *
-     * It can be sent by the SetterSearchCallback and contain a peer list
-     * or be sent by SingularSetterActor siblings
-     */
-    struct SetterActorData {
-        std::vector<Peer>* peersToAsk;
-        bool found;
-        bool succeded;
-        SetterActorData();
-        SetterActorData(bool success);
-        SetterActorData(std::vector<Peer>* peers);
-        ~SetterActorData();
-    };
-
-    /**
      * @class SetCallback
      * @brief a user-defined callback for the SET operation
      */
@@ -91,9 +74,12 @@ namespace DHT
          */
         void start();
 
-        void treat(SetterActorData* msg);
-
+        void treat(EPYX_AQA("find success"), std::vector<Peer>* peers);
+        void treat(EPYX_AQA("find failure"));
+        void treat(EPYX_AQA("set success"));
+        void treat(EPYX_AQA("set failure"));
     protected:
+        void onSetReceive();
         void timeout();
 
     private:
