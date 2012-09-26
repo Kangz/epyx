@@ -87,7 +87,10 @@ namespace Epyx
     };
 
     #define EPYX_ACTOR_QUERY(str1) EPYX_NAME_STRUCT_INSTANCE(str1)
-
     #define EPYX_ACTOR_QUERY_ARG(str1) EPYX_NAME_STRUCT(str1)
+
+    //Shorcut
+    #define EPYX_AQ(s) EPYX_ACTOR_QUERY(s)
+    #define EPYX_AQA(s) EPYX_ACTOR_QUERY_ARG(s)
 }
 #endif //EPYX_CORE_ACTOR_H
