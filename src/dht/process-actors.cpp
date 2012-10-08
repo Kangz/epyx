@@ -68,6 +68,9 @@ namespace DHT
         } else {
             timeout();
         }
+
+        delete peer;
+        delete pkt;
     }
 
     void SingularGetActor::timeout() {
@@ -94,6 +97,9 @@ namespace DHT
         } else {
             timeout();
         }
+
+        delete peer;
+        delete pkt;
     }
 
     void SingularSetActor::timeout() {

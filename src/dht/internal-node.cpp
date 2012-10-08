@@ -29,7 +29,7 @@ namespace DHT
         //Dispach the packet to the right actor
         switch(pkt.method){
             case M_PING:
-                this->pingActor.post(new StaticActorData(sender, pkt));
+                this->pingActor.post(&sender, &pkt);
                 break;
 
             case M_PONG:
@@ -38,15 +38,15 @@ namespace DHT
                 break;
 
             case M_GET:
-                this->getActor.post(new StaticActorData(sender, pkt));
+                this->getActor.post(&sender, &pkt);
                 break;
 
             case M_STORE:
-                this->storeActor.post(new StaticActorData(sender, pkt));
+                this->storeActor.post(&sender, &pkt);
                 break;
 
             case M_FIND:
-                this->findActor.post(new StaticActorData(sender, pkt));
+                this->findActor.post(&sender, &pkt);
                 break;
 
             case M_GOT:

@@ -35,26 +35,13 @@ namespace DHT
     class InternalNode;
 
     /**
-     * @struct StaticActorData
-     * @brief the messages received by static actors
-     */
-    struct StaticActorData{
-        Peer& peer;
-        Packet* pkt;
-
-        StaticActorData(Peer& peer, Packet* pkt);
-        StaticActorData(Peer& peer, Packet& pkt);
-        void freeData();
-    };
-
-    /**
      * @class PingActor
      * @brief handles PING queries
      */
     class PingActor: public Actor {
     public:
         PingActor(InternalNode& n);
-        void treat(StaticActorData* msg);
+        void treat(Peer* peer, Packet* pkt);
 
     private:
         InternalNode& n;
@@ -67,7 +54,7 @@ namespace DHT
     class GetActor: public Actor {
     public:
         GetActor(InternalNode& n);
-        void treat(StaticActorData* msg);
+        void treat(Peer* peer, Packet* pkt);
 
     private:
         InternalNode& n;
@@ -80,7 +67,7 @@ namespace DHT
     class StoreActor: public Actor {
     public:
         StoreActor(InternalNode& n);
-        void treat(StaticActorData* msg);
+        void treat(Peer* peer, Packet* pkt);
 
     private:
         InternalNode& n;
@@ -93,7 +80,7 @@ namespace DHT
     class FindActor: public Actor {
     public:
         FindActor(InternalNode& n);
-        void treat(StaticActorData* msg);
+        void treat(Peer* peer, Packet* pkt);
 
     private:
         InternalNode& n;
