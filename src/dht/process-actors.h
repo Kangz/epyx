@@ -36,19 +36,6 @@ namespace DHT
     class InternalNode;
 
     /**
-     * @struct ProcessActorData
-     * @brief The common type of message used by proces actors.
-     */
-    struct ProcessActorData{
-        Peer& peer;
-        Packet* pkt;
-
-        ProcessActorData(Peer& peer, Packet* pkt);
-        ProcessActorData(Peer& peer, Packet& pkt);
-        void freeData();
-    };
-
-    /**
      * @class ProcessActor
      * @brief thebase class of every process Actor
      *
@@ -58,7 +45,7 @@ namespace DHT
      */
     class ProcessActor: public Actor {
     public:
-        virtual void treat(ProcessActorData* msg) = 0;
+        virtual void treat(Peer* peer, Packet* pkt) = 0;
 
     protected:
         /**
@@ -88,7 +75,7 @@ namespace DHT
     public:
         SingularFindActor(InternalNode& n, ActorId<FinderActor> p, Peer& peer, Id& requested);
 
-        virtual void treat(ProcessActorData* msg);
+        virtual void treat(Peer* peer, Packet* pkt);
     protected:
         void timeout();
 
@@ -106,7 +93,7 @@ namespace DHT
     public:
         SingularGetActor(InternalNode& n, ActorId<GetterActor> p, Peer& peer, const std::string& key);
 
-        virtual void treat(ProcessActorData* msg);
+        virtual void treat(Peer* peer, Packet* pkt);
     protected:
         void timeout();
 
@@ -123,7 +110,7 @@ namespace DHT
     public:
         SingularSetActor(InternalNode& n, ActorId<SetterActor> p, Peer& peer, const std::string& key, const std::string& value);
 
-        virtual void treat(ProcessActorData* msg);
+        virtual void treat(Peer* peer, Packet* pkt);
     protected:
         void timeout();
 

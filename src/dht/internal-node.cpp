@@ -119,7 +119,7 @@ namespace DHT
         ActorId<ProcessActor> saved_id(*id);
         processActors.endUnlock();
 
-        saved_id.post(new ProcessActorData(sender, pkt));
+        saved_id.post(&sender, &pkt);
     }
 
     void InternalNode::unregisterProcessActor(long actorNumber){

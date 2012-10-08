@@ -10,19 +10,6 @@ namespace Epyx
 namespace DHT
 {
 
-    ProcessActorData::ProcessActorData(Peer& peer, Packet* pkt)
-    :peer(peer), pkt(pkt) {
-    }
-
-    ProcessActorData::ProcessActorData(Peer& peer, Packet& pkt)
-    :peer(peer), pkt(&pkt) {
-    }
-
-    void ProcessActorData::freeData() {
-        delete &peer;
-        delete pkt;
-    }
-
     ProcessActor::ProcessActor(InternalNode& n, int timeout)
     :n(n) {
         processId = n.registerProcessActor(*this, timeout);
@@ -45,16 +32,17 @@ namespace DHT
         this->n.send(pkt, target);
     }
 
-    void SingularFindActor::treat(ProcessActorData* msg) {
-        if(msg->pkt->method == M_FOUND && msg->pkt->status == 0 && msg->pkt->count > 0) {
-            parent.post(EPYX_AQ("found"), target, msg->pkt->foundPeers);
-            msg->pkt->foundPeers = NULL;
+    void SingularFindActor::treat(Peer* peer, Packet* pkt) {
+        if(pkt->method == M_FOUND && pkt->status == 0 && pkt->count > 0) {
+            parent.post(EPYX_AQ("found"), target, pkt->foundPeers);
+            pkt->foundPeers = NULL;
             destroy();
         } else {
             timeout();
         }
 
-        delete msg;
+        delete peer;
+        delete pkt;
     }
 
     void SingularFindActor::timeout() {
@@ -73,9 +61,9 @@ namespace DHT
         this->n.send(pkt, peer);
     }
 
-    void SingularGetActor::treat(ProcessActorData* msg) {
-        if(msg->pkt->method == M_GOT && msg->pkt->status == 0) {
-            parent.post(EPYX_AQ("get success"), msg->pkt->value);
+    void SingularGetActor::treat(Peer* peer, Packet* pkt) {
+        if(pkt->method == M_GOT && pkt->status == 0) {
+            parent.post(EPYX_AQ("get success"), pkt->value);
             destroy();
         } else {
             timeout();
@@ -99,8 +87,8 @@ namespace DHT
         this->n.send(pkt, peer);
     }
 
-    void SingularSetActor::treat(ProcessActorData* msg) {
-        if(msg->pkt->method == M_GOT && msg->pkt->status == 0) {
+    void SingularSetActor::treat(Peer* peer, Packet* pkt) {
+        if(pkt->method == M_GOT && pkt->status == 0) {
             parent.post(EPYX_AQ("set success"));
             kill();
         } else {
