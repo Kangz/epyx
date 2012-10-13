@@ -12,9 +12,9 @@ namespace DHT
 
     void PingActor::treat(Peer* peer, Packet* pkt) {
         //We only need to send back a pong
-        Packet pkt;
-        pkt.method = M_PONG;
-        this->n.send(pkt, peer);
+        Packet answer;
+        answer.method = M_PONG;
+        this->n.send(answer, *peer);
         delete peer;
         delete pkt;
     }
@@ -22,7 +22,7 @@ namespace DHT
     GetActor::GetActor(InternalNode& n): n(n) {
     }
 
-    void GetActor::treat(Peer* peer, Packet* packet) {
+    void GetActor::treat(Peer* peer, Packet* pkt) {
         Packet answer;
         answer.method = M_GOT;
         answer.connectionId = pkt->connectionId;
@@ -34,7 +34,7 @@ namespace DHT
             answer.value = requested.content;
             answer.status = 0;
         }
-        this->n.send(answer, peer);
+        this->n.send(answer, *peer);
         delete peer;
         delete pkt;
     }
@@ -50,7 +50,7 @@ namespace DHT
 
         this->n.storage.set(pkt->key, pkt->value);
 
-        this->n.send(answer, peer);
+        this->n.send(answer, *peer);
         delete peer;
         delete pkt;
     }
@@ -68,7 +68,7 @@ namespace DHT
         //Ask the kbucket
         this->n.kbucket.findNearestNodes(pkt->idToFind, *answer.foundPeers, pkt->count);
 
-        this->n.send(answer, peer);
+        this->n.send(answer, *peer);
         delete peer;
         delete pkt;
     }
