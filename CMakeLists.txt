@@ -18,7 +18,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 # Make some sets of files from directories
 file(GLOB_RECURSE tinyxml_sources include/tinyxml/*)
 file(GLOB_RECURSE core_sources src/core/*)
-file(GLOB_RECURSE localn2np_sources src/localn2np/*)
 file(GLOB_RECURSE n2np_sources src/n2np/*)
 file(GLOB_RECURSE natpunching_sources src/natpunching/*)
 file(GLOB_RECURSE net_sources src/net/*)
@@ -55,17 +54,13 @@ target_link_libraries(test-parser epyx)
 add_executable(test-natpunching src/test-natpunching.cpp)
 target_link_libraries(test-natpunching epyx)
 
-add_executable(test-local-n2np src/test-local-n2np.cpp
-    ${localn2np_sources})
-target_link_libraries(test-local-n2np epyx)
-
 add_executable(test-n2np src/test-n2np.cpp)
 target_link_libraries(test-n2np epyx)
 
 add_executable(demoframe src/demoframe.cpp)
 target_link_libraries(demoframe epyx)
 
-add_executable(test-dht src/test-dht.cpp ${localn2np_sources})
+add_executable(test-dht src/test-dht.cpp)
 target_link_libraries(test-dht epyx)
 
 #add_executable(test-crypto ${core_sources} ${crypto_sources} src/test-crypto.cpp)
