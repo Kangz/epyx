@@ -1,4 +1,4 @@
- /*
+/*
  *   Copyright 2012 Epyx Team
  *
  *   Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +36,11 @@ namespace Epyx
     template<typename T> template <typename ... Args> void ActorId<T>::post(Args ... args) {
         std::function<void(T&, Args ...)> f = (void (T::*)(Args ...))&T::treat;
         manager->post(id, std::bind(f, std::ref(*actor), args ...));
+    }
+
+    template<typename T> template <typename ... Args> void ActorId<T>::timeout(Timeout time, Args ... args) {
+        std::function<void(T&, Args ...)> f = (void (T::*)(Args ...))&T::timeout;
+        manager->postTimeout(id, time, std::bind(f, std::ref(*actor), args ...));
     }
 
     template<typename T> void ActorId<T>::kill() {

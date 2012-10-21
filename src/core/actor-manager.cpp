@@ -59,6 +59,10 @@ namespace Epyx
         wp.post(new std::pair<int, std::function<void()>>(id, msg));
     }
 
+    void ActorManager::postTimeout(int id, Timeout time, std::function<void()> msg) {
+        this->timeouts.addTimeout(time, id, msg);
+    }
+
     ActorManager::ActorWorkers::ActorWorkers(int num_workers, const std::string& name,
         ActorManager* m)
     :WorkerPool<std::pair<int, std::function<void()>>>(num_workers, true, name),
@@ -99,8 +103,8 @@ namespace Epyx
         }
     }
 
-    bool ActorManager::ActorTimeoutComparator::operator()(const std::pair<Timeout, int> a, const std::pair<Timeout, int> b){
-        return ! (a.first < b.first);
+    bool ActorManager::ActorTimeoutComparator::operator()(const TimeoutEntry& a, const TimeoutEntry& b){
+        return ! (a.time < b.time);
     }
 
     ActorManager::TimeoutLauncher::TimeoutLauncher(ActorManager* m, const std::string& name): Thread(name + "Timeouts", 0), manager(m) {
@@ -111,20 +115,20 @@ namespace Epyx
         this->wait();
     }
 
-    void ActorManager::TimeoutLauncher::addTimeout(Timeout t, int id){
-        incoming.push(new std::pair<Timeout, int>(t, id));
+    void ActorManager::TimeoutLauncher::addTimeout(Timeout t, int id, std::function<void()> method){
+        incoming.push(new TimeoutEntry{t, id, method});
     }
 
     void ActorManager::TimeoutLauncher::run(){
         const int epsilon = 2;
 
-        std::pair<Timeout, int>* to_add = NULL;
+        TimeoutEntry* to_add = NULL;
         do{
             //Wait for a new entry or until something times out
             if(timeouts.empty()){
                 to_add = incoming.pop();
             }else{
-                to_add = incoming.pop(timeouts.top().first.remainingMsec() + epsilon);
+                to_add = incoming.pop(timeouts.top().time.remainingMsec() + epsilon);
             }
 
             if(to_add != NULL){
@@ -132,8 +136,8 @@ namespace Epyx
                 delete to_add;
             }
 
-            while(!timeouts.empty() && timeouts.top().first.hasExpired()){
-                manager->post(timeouts.top().second, 0);
+            while(!timeouts.empty() && timeouts.top().time.hasExpired()){
+                manager->post(timeouts.top().id, timeouts.top().method);
                 timeouts.pop();
             }
 

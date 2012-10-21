@@ -40,14 +40,8 @@ namespace Epyx
     Actor::~Actor() {}
 
     void Actor::internal_treat(std::function<void()> msg) {
-        if (msg == 0) {
-            this->timeout();
-        } else {
-            msg();
-        }
+        msg();
     }
-
-    void Actor::timeout() {}
 
     void Actor::kill() {
         this->alive = false;

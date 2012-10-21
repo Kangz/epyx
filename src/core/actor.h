@@ -68,13 +68,6 @@ namespace Epyx
         }
 
     protected:
-
-        /**
-         * @brief the method called when the actor times out
-         */
-        virtual void timeout();
-
-
         /**
          * @brief kills the actor (it won't timeout or receive other messages)
          */

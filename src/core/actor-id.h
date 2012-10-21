@@ -20,6 +20,8 @@
 #ifndef EPYX_CORE_ACTOR_ID_H
 #define EPYX_CORE_ACTOR_ID_H
 
+#include "timeout.h"
+
 namespace Epyx
 {
     class ActorManager;
@@ -55,6 +57,13 @@ namespace Epyx
          * @param msg the message
          */
         template<typename ... Args> void post(Args ... args);
+
+        /**
+         * @brief sends a message to its Actor after a certain time
+         * @param length the length of the timeout
+         * @param msg the message
+         */
+        template<typename ... Args> void timeout(Timeout time, Args ... args);
 
         /**
          * @brief kills its Actor

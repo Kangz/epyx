@@ -49,7 +49,7 @@ namespace Epyx
 
     template<typename T> ActorId<T> ActorManager::add(T& a, Timeout t) {
         ActorId<T> res = this->add(a);
-        this->timeouts.addTimeout(t, res.id);
+        res.timeout(t);
         return res;
     }
 }

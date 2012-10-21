@@ -117,6 +117,7 @@ namespace Epyx
         void kill(ActorId_base id);
 
         void post(int id, std::function<void()> msg);
+        void postTimeout(int id, Timeout time, std::function<void()> msg);
 
     private:
         class ActorWorkers : public WorkerPool<std::pair<int, std::function<void()>>>
@@ -136,25 +137,33 @@ namespace Epyx
         atom::Counter actorCount;
 
         //The thread used to fire timeouts
+        struct TimeoutEntry
+        {
+            Timeout time;
+            int id;
+            std::function<void()> method;
+        };
+
         struct ActorTimeoutComparator
         {
-            bool operator()(const std::pair<Timeout, int> a, const std::pair<Timeout, int> b);
+            bool operator()(const TimeoutEntry& a, const TimeoutEntry& b);
         };
+
 
         class TimeoutLauncher: public Thread
         {
         public:
             TimeoutLauncher(ActorManager* m, const std::string& name);
             ~TimeoutLauncher();
-            void addTimeout(Timeout t, int id);
+            void addTimeout(Timeout t, int id, std::function<void()> method);
 
         protected:
             virtual void run();
 
         private:
             ActorManager* manager;
-            std::priority_queue<std::pair<Timeout, int>, std::vector<std::pair<Timeout, int>>, ActorTimeoutComparator> timeouts;
-            BlockingQueue<std::pair<Timeout, int>> incoming;
+            std::priority_queue<TimeoutEntry, std::vector<TimeoutEntry>, ActorTimeoutComparator> timeouts;
+            BlockingQueue<TimeoutEntry> incoming;
         };
 
         TimeoutLauncher timeouts;
