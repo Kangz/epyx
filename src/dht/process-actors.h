@@ -46,6 +46,7 @@ namespace DHT
     class ProcessActor: public Actor {
     public:
         virtual void treat(Peer* peer, Packet* pkt) = 0;
+        virtual void timeout() = 0;
 
     protected:
         /**
@@ -77,7 +78,7 @@ namespace DHT
 
         virtual void treat(Peer* peer, Packet* pkt);
     protected:
-        void timeout();
+        virtual void timeout();
 
         Peer target;
         ActorId<FinderActor> parent;
@@ -95,7 +96,7 @@ namespace DHT
 
         virtual void treat(Peer* peer, Packet* pkt);
     protected:
-        void timeout();
+        virtual void timeout();
 
         ActorId<GetterActor> parent;
     };
@@ -112,7 +113,7 @@ namespace DHT
 
         virtual void treat(Peer* peer, Packet* pkt);
     protected:
-        void timeout();
+        virtual void timeout();
 
         ActorId<SetterActor> parent;
     };

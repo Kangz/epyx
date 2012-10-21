@@ -78,9 +78,10 @@ namespace DHT
         void treat(EPYX_AQA("find failure"));
         void treat(EPYX_AQA("set success"));
         void treat(EPYX_AQA("set failure"));
+
+        void timeout();
     protected:
         void onSetReceive();
-        void timeout();
 
     private:
         void ask(Peer& p);

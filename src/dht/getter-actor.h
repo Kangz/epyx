@@ -79,7 +79,6 @@ namespace DHT
 
         void treat(EPYX_AQA("get success"), std::string result);
         void treat(EPYX_AQA("get failure"));
-    protected:
         void timeout();
 
     private:

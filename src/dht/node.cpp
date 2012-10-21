@@ -52,7 +52,7 @@ namespace DHT
         return n.getConnectionInfo();
     }
 
-    void Node:: findClosest(FindCallback* cb, int count, Id& idToFind) {
+    void Node::findClosest(FindCallback* cb, int count, Id& idToFind) {
         n.findClosest(cb, count, idToFind);
     }
 

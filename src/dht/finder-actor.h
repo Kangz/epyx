@@ -90,9 +90,8 @@ namespace DHT
         void treat(EPYX_AQA("found"), Peer target, std::vector<Peer>* peers);
         void treat(EPYX_AQA("not found"), Peer target);
 
-    protected:
         void timeout();
-
+    protected:
         //helper functions to preserve the heap structure and the size of the lists
         void addToShortList(Peer& p);
         void addToFoundPeers(Peer& p);
