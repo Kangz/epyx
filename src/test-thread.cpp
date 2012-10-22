@@ -44,7 +44,7 @@ void test_mutex() {
         for (int i = 0; i < threadNumber; i++) {
             log::info << "Spawn thread " << i << log::endl;
             threads[i] = new MutexThread();
-            threads[i]->setName("Mutex", i);
+            //threads[i]->setName("Mutex", i);
             threads[i]->start();
         }
 
@@ -108,10 +108,10 @@ void test_cond(){
             log::info << "Spawn thread " << i << log::endl;
             if(i == 0) {
                 threads[i] = new ImpatientConditionThread();
-                threads[i]->setName("Impatient", i);
+                //threads[i]->setName("Impatient", i);
             } else {
                 threads[i] = new ConditionThread();
-                threads[i]->setName("Condition", i);
+                //threads[i]->setName("Condition", i);
             }
             threads[i]->start();
         }
@@ -164,7 +164,7 @@ void stress_test_logger(){
         for (int i = 0; i < threadNumber; i++) {
             log::info << "Spawn thread " << i << log::endl;
             threads[i] = new SpammingThread();
-            threads[i]->setName("Spamming", i);
+            //threads[i]->setName("Spamming", i);
         }
         for (int i = 0; i < threadNumber; i++) {
             threads[i]->start();

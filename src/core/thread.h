@@ -29,14 +29,11 @@ namespace Epyx
 {
     namespace detail
     {
-        struct ThreadInfo
-        {
-            std::string name;
-        };
         /**
          * @private thread_infos
          */
-        extern TLSPointer<ThreadInfo>* thread_infos;
+        extern TLSPointer<std::string>* thread_name;
+
         /**
          * @private thread_initialized
          */
@@ -71,11 +68,11 @@ namespace Epyx
         virtual ~Thread();
 
         /**
-         * @brief Set name-id if thread was created without one
+         * @brief Set name-id if thread was created without one DEPRECATED
          * @param name given name
          * @param id Thread ID
          */
-        void setName(const std::string& name, int id = -1);
+        void setThreadName(const std::string& name, int id = -1);
 
         /**
          * @brief Start the thread
@@ -97,6 +94,13 @@ namespace Epyx
          * @return this->name
          */
         const std::string& getThisName();
+
+        /**
+         * @brief Set the name of the running thread
+         * @param the name of the thread
+         */
+        static void setName(const std::string& name);
+
 
         /**
          * @brief Get the name of the running thread
@@ -132,7 +136,7 @@ namespace Epyx
 
         //And this is the ofstream of each stream
         pthread_t thread;
-        detail::ThreadInfo* info;
+        std::string name;
     };
 }
 
