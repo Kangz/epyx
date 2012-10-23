@@ -21,9 +21,9 @@
 #ifndef EPYX_ATOM_MAP_H
 #define EPYX_ATOM_MAP_H
 
-#include "../mutex.h"
 #include <boost/noncopyable.hpp>
 #include <map>
+#include <mutex>
 
 #ifndef EPYX_ATOM_MAP_DEBUG
 /**
@@ -150,7 +150,7 @@ namespace Epyx
         private:
             bool readOnly;
             std::map<TKey, TVal> map;
-            Mutex mut;
+            std::mutex mut;
         };
     }
 }

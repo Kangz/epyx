@@ -21,7 +21,7 @@
 #ifndef EPYX_ATOM_COUNTER_H
 #define EPYX_ATOM_COUNTER_H
 
-#include "../mutex.h"
+#include <mutex>
 #include <boost/noncopyable.hpp>
 
 namespace Epyx
@@ -54,7 +54,7 @@ namespace Epyx
             unsigned long getIncrement();
 
         private:
-            Mutex mut;
+            std::mutex mut;
             unsigned long cnt;
         };
     }

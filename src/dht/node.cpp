@@ -1,3 +1,5 @@
+#include <mutex>
+#include <condition_variable>
 #include "node.h"
 
 namespace Epyx
@@ -68,11 +70,11 @@ namespace DHT
     //The synchronous API is using the asynchronous API internally
     class NodeSyncGetCallback: public GetCallback {
     private:
-        Condition* cond;
+        std::condition_variable* cond;
         std::string* whereResultIsStored;
         bool* got;
     public:
-        NodeSyncGetCallback(Condition* c, std::string* storage, bool* b) {
+        NodeSyncGetCallback(std::condition_variable* c, std::string* storage, bool* b) {
             cond = c;
             got = b;
             whereResultIsStored = storage;
@@ -80,58 +82,54 @@ namespace DHT
         void onGot(const std::string& result) {
             *got = true;
             *whereResultIsStored = result;
-            cond->lock();
-            cond->notify();
-            cond->unlock();
+            cond->notify_one();
         }
         void onError() {
             *got = false;
-            cond->lock();
-            cond->notify();
-            cond->unlock();
+            cond->notify_one();
         }
     };
 
     class NodeSyncSetCallback: public SetCallback {
     private:
-        Condition* cond;
+        std::condition_variable* cond;
         bool* set;
     public:
-        NodeSyncSetCallback(Condition* c, bool* b) {
+        NodeSyncSetCallback(std::condition_variable* c, bool* b) {
             cond = c;
             set = b;
         }
         void onSet() {
             *set = true;
-            cond->lock();
-            cond->notify();
-            cond->unlock();
+            cond->notify_one();
         }
         void onError() {
             *set = false;
-            cond->lock();
-            cond->notify();
-            cond->unlock();
+            cond->notify_one();
         }
     };
 
     bool Node::getValueSync(const std::string& key, std::string& result) {
-        Condition cond;
+        std::condition_variable cond;
         bool got;
-        cond.lock();
-        getValue(new NodeSyncGetCallback(&cond, &result, &got), key);
-        cond.wait();
-        cond.unlock();
+        {
+            std::mutex m;
+            std::unique_lock<std::mutex> lock(m);
+            getValue(new NodeSyncGetCallback(&cond, &result, &got), key);
+            cond.wait(lock);
+        }
         return got;
     }
 
     bool Node::setValueSync(const std::string& key, const std::string& value) {
-        Condition cond;
+        std::condition_variable cond;
         bool set;
-        cond.lock();
-        setValue(new NodeSyncSetCallback(&cond, &set), key, value);
-        cond.wait();
-        cond.unlock();
+        {
+            std::mutex m;
+            std::unique_lock<std::mutex> lock(m);
+            setValue(new NodeSyncSetCallback(&cond, &set), key, value);
+            cond.wait(lock);
+        }
         return set;
     }
 

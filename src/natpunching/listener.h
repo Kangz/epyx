@@ -15,7 +15,6 @@
  */
 #ifndef EPYX_DIRECTCONNECTION_LISTENER_H
 #define EPYX_DIRECTCONNECTION_LISTENER_H
-#include "../core/condition.h"
 #include "../net/netselectsocket.h"
 #include "../net/uri.h"
 #include "../net/tcpsocket.h"

@@ -21,6 +21,7 @@
 #ifndef EPYX_CORE_ACTOR_H
 #define EPYX_CORE_ACTOR_H
 
+#include <mutex>
 #include "actor-id.h"
 #include "actor-manager.h"
 #include "name-struct.h"
@@ -74,7 +75,7 @@ namespace Epyx
         void kill();
 
     private:
-        Mutex mutex;
+        std::mutex mutex;
         ActorId_base self;
 
     };

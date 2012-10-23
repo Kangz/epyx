@@ -33,7 +33,6 @@ namespace DHT
     }
 
     void SingularFindActor::treat(Peer* peer, Packet* pkt) {
-        log::debug << "find treat" << log::endl;
         if(pkt->method == M_FOUND && pkt->status == 0 && pkt->count > 0) {
             parent.post(EPYX_AQ("found"), target, pkt->foundPeers);
             pkt->foundPeers = NULL;
@@ -47,7 +46,6 @@ namespace DHT
     }
 
     void SingularFindActor::timeout() {
-        log::debug << "find timeout" << log::endl;
         parent.post(EPYX_AQ("not found"), target);
         destroy();
     }

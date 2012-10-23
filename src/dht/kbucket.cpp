@@ -17,7 +17,7 @@ namespace DHT
     }
 
     void KBucket::seenPeer(const Id& peerId, const N2NP::NodeId& n2npId) {
-        lock.lock();
+        std::lock_guard<std::mutex> guard(lock);
 
         bool add =false;
         time_t now=time(NULL);
@@ -40,7 +40,6 @@ namespace DHT
                 temp->lastReceiveTime = now;
                 temp->n2npId = n2npId;
                 peers.push_back(temp);
-                lock.unlock();
                 return;
             }
         }
@@ -62,7 +61,6 @@ namespace DHT
             peers.push_back(new Peer(peerId, n2npId, now));
         }
 
-        lock.unlock();
     }
 
     struct FindNearestComparator {
@@ -73,7 +71,7 @@ namespace DHT
 
 
     void KBucket::findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n) {
-        lock.lock();
+        std::lock_guard<std::mutex> guard(lock);
 
         std::priority_queue<std::pair<Distance,Peer>, std::vector<std::pair<Distance, Peer>>,
                 FindNearestComparator> closest;
@@ -107,7 +105,6 @@ namespace DHT
             nearest.push_back(closest.top().second);
             closest.pop();
         }
-        lock.unlock();
     }
 
 }

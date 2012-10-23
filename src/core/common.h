@@ -27,8 +27,6 @@
 #include "log-worker.h"
 #include "tls-pointer.h"
 #include "log.h"
-#include "mutex.h"
-#include "condition.h"
 #include "blocking-queue.h"
 #include "thread.h"
 #include "worker-pool.h"

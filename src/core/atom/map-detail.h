@@ -36,10 +36,9 @@ namespace Epyx
 
         template <typename TKey, typename TVal>
         void Map<TKey, TVal>::set(TKey key, TVal value) {
-            mut.lock();
+            std::lock_guard<std::mutex> lock(mut);
             if (!readOnly)
                 map[key] = value;
-            mut.unlock();
         }
 
         template <typename TKey, typename TVal>
@@ -72,18 +71,17 @@ namespace Epyx
         template <typename TKey, typename TVal>
         bool Map<TKey, TVal>::unset(TKey key) {
             bool result;
-            mut.lock();
+            std::lock_guard<std::mutex> lock(mut);
             if (!readOnly) {
                 result = (map.erase(key) > 0);
             }
-            mut.unlock();
             return result;
         }
 
         template <typename TKey, typename TVal>
         TVal Map<TKey, TVal>::getUnset(TKey key, TVal defval) {
             TVal retval;
-            mut.lock();
+            std::lock_guard<std::mutex> lock(mut);
             iterator it = map.find(key);
             if (it == map.end()) {
                 retval = defval;
@@ -92,7 +90,6 @@ namespace Epyx
                 if (!readOnly)
                     map.erase(it);
             }
-            mut.unlock();
             return retval;
         }
 
@@ -108,25 +105,22 @@ namespace Epyx
 
         template <typename TKey, typename TVal>
         void Map<TKey, TVal>::clearForEver() {
-            mut.lock();
+            std::lock_guard<std::mutex> lock(mut);
             readOnly = true;
             map.clear();
-            mut.unlock();
         }
 
         template <typename TKey, typename TVal>
         bool Map<TKey, TVal>::empty() {
-            mut.lock();
+            std::lock_guard<std::mutex> lock(mut);
             bool result = map.empty();
-            mut.unlock();
             return result;
         }
 
         template <typename TKey, typename TVal>
         long unsigned int Map<TKey, TVal>::size() {
-            mut.lock();
+            std::lock_guard<std::mutex> lock(mut);
             long unsigned int result = map.size();
-            mut.unlock();
             return result;
         }
 

@@ -18,21 +18,22 @@ namespace Epyx
     }
 
     API::~API() {
-        mut.lock();
-        // Destroy relay, if it exists
-        if (relay != NULL) {
-            if (netsel != NULL)
-                netsel->kill(nsRelayId);
-            delete relay;
-            relay = NULL;
-        }
+        {
+            std::lock_guard<std::mutex> lock(mut);
+            // Destroy relay, if it exists
+            if (relay != NULL) {
+                if (netsel != NULL)
+                    netsel->kill(nsRelayId);
+                delete relay;
+                relay = NULL;
+            }
 
-        // Destroy NetSelect
-        if (netsel != NULL) {
-            delete netsel;
-            netsel = NULL;
+            // Destroy NetSelect
+            if (netsel != NULL) {
+                delete netsel;
+                netsel = NULL;
+            }
         }
-        mut.unlock();
 
         log::flushAndQuit();
     }
@@ -59,11 +60,12 @@ namespace Epyx
         if (relay != NULL)
             throw FailException("API::spawnRelay", "Spawning multiple relays");
 
-        mut.lock();
-        relay = new N2NP::Relay(addr);
-        //nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(addr, nbConn), relay));
-        nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(SockAddress("0.0.0.0", addr.getPort()), nbConn), relay));
-        mut.unlock();
+        {
+            std::lock_guard<std::mutex> lock(mut);
+            relay = new N2NP::Relay(addr);
+            //nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(addr, nbConn), relay));
+            nsRelayId = netsel->add(new N2NP::RelayServer(new TCPServer(SockAddress("0.0.0.0", addr.getPort()), nbConn), relay));
+        }
     }
 
     void API::destroyRelay(const Timeout& detachTime) {
@@ -73,15 +75,16 @@ namespace Epyx
         if (relay == NULL)
             return;
 
-        mut.lock();
-        if (!relay->waitForAllDetach(detachTime)) {
-            log::info << "Detach remaining nodes" << log::endl;
-            relay->detachAllNodes();
+        {
+            std::lock_guard<std::mutex> lock(mut);
+            if (!relay->waitForAllDetach(detachTime)) {
+                log::info << "Detach remaining nodes" << log::endl;
+                relay->detachAllNodes();
+            }
+            netsel->kill(nsRelayId);
+            delete relay;
+            relay = NULL;
         }
-        netsel->kill(nsRelayId);
-        delete relay;
-        relay = NULL;
-        mut.unlock();
     }
 
     int API::addNode(N2NP::Node *node) {

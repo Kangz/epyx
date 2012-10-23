@@ -22,7 +22,7 @@
 #define EPYX_CORE_ACTOR_MANAGER_H
 
 #include <functional>
-#include "mutex.h"
+#include <mutex>
 #include "worker-pool.h"
 #include "atom/counter.h"
 #include "timeout.h"
@@ -133,7 +133,7 @@ namespace Epyx
 
         ActorWorkers wp;
         std::map<int, Actor*> actors;
-        Mutex actorsLock;
+        std::mutex actorsLock;
         atom::Counter actorCount;
 
         //The thread used to fire timeouts

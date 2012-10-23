@@ -20,7 +20,6 @@
 #ifndef EPYX_UPNP_DISCOVERY_H
 #define EPYX_UPNP_DISCOVERY_H
 
-#include "../../core/condition.h"
 #include "../../net/netquery.h"
 #include "../../net/uri.h"
 #include "../../parser/httpparser.h"

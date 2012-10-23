@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <stdlib.h>
+#include <mutex>
 #define LightGreen "\033[01;33m"
 #define LightBlue "\033[01;34m"
 #define Restore "\033[0m"
@@ -41,7 +42,7 @@ private:
 
     std::string msg;
     std::string historique;
-    Mutex histomut;
+    std::mutex histomut;
     std::string pseudo;
     Epyx::N2NP::Node *node;
 };
@@ -141,11 +142,10 @@ void Demo::configureTerm() {
 }
 
 void Demo::receive(const std::string& pseudo, const std::string& msg, bool isMe) {
-    histomut.lock();
+    std::lock_guard<std::mutex> lock(histomut);
     historique.append(isMe ? LightBlue : LightGreen)
         .append(std::string("<").append(pseudo).append(std::string("> : "))
         .append(msg)).append(Restore);
-    histomut.unlock();
 }
 
 void Demo::updateDisplay() {

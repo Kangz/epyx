@@ -9,17 +9,15 @@ namespace Epyx
         }
 
         unsigned long Counter::get() {
-            mut.lock();
+            std::lock_guard<std::mutex> lock(mut);
             unsigned long val = cnt;
-            mut.unlock();
             return val;
         }
 
         unsigned long Counter::getIncrement() {
-            mut.lock();
+            std::lock_guard<std::mutex> lock(mut);
             unsigned long val = cnt;
             cnt++;
-            mut.unlock();
             return val;
         }
     }

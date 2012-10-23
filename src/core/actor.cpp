@@ -45,7 +45,7 @@ namespace Epyx
 
     void Actor::kill() {
         this->alive = false;
-        this->self.manager->post(this->self.id, NULL);//Send a message to make sure the actor is destroyed
+        this->self.manager->post(this->self.id, nullptr);//Send a message to make sure the actor is destroyed
     }
 }
 

@@ -1,3 +1,4 @@
+#include <mutex>
 #include "../src/api.h"
 #include "webm/videodev.h"
 #include "webm/vpxdecoder.h"
@@ -75,7 +76,7 @@ private:
     std::string msg;
     webm::VpxDecoder decoder;
     std::string historique;
-    Mutex histomut;
+    std::mutex histomut;
     std::string pseudo;
     bool vframe_inited;
     bool running;
@@ -245,11 +246,10 @@ void Demo::configureTerm() {
 }
 
 void Demo::receive(const std::string& pseudo, const std::string& msg, bool isMe) {
-    histomut.lock();
+    std::lock_guard<std::mutex> lock(histomut);
     historique.append(isMe ? LightBlueBold : LightGreenBold)
         .append(std::string("<").append(pseudo).append(std::string("> : "))
         .append(msg)).append(Restore);
-    histomut.unlock();
 }
 
 void Demo::updateDisplay() {

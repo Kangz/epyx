@@ -24,6 +24,7 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <mutex>
 #include "../n2np/nodeid.h"
 #include "id.h"
 #include "peer.h"
@@ -67,7 +68,7 @@ namespace DHT
         static const unsigned int MAX_INACTIVE_PERIOD = 15000;
 
     private:
-        Mutex lock;
+        std::mutex lock;
         std::vector<Bucket> buckets;
         Id ownId;
     };

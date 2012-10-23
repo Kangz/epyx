@@ -30,6 +30,7 @@
 #include "n2np/node.h"
 #include <boost/noncopyable.hpp>
 #include <list>
+#include <mutex>
 
 namespace Epyx
 {
@@ -96,7 +97,7 @@ namespace Epyx
 
     private:
         // Main mutex, for netsel and relay, NOT for nodes
-        Mutex mut;
+        std::mutex mut;
 
         /**
          * @brief NetSelect of every socket

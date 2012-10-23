@@ -48,7 +48,7 @@ namespace webm {
 
     void VideoFrame::showFrame(const vpx_image_t* image)
     {
-        sdl_lock.lock();
+        std::lock_guard<std::mutex> lock(sdl_lock);
         SDL_LockYUVOverlay(overlay);
 
         unsigned char *frame_pointer = (unsigned char *) overlay->pixels[0];
@@ -82,18 +82,16 @@ namespace webm {
 
         SDL_UnlockYUVOverlay(overlay);
         SDL_DisplayYUVOverlay(overlay, &screen_rect);
-        sdl_lock.unlock();
     }
 
     bool VideoFrame::checkSDLQuitAndEvents() {
-        sdl_lock.lock();
+        std::lock_guard<std::mutex> lock(sdl_lock);
 
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch(event.type) {
             case SDL_QUIT:
                 log::info << "SDL_QUIT event received" << log::endl;
-                sdl_lock.unlock();
                 return true;
 
             case SDL_VIDEORESIZE:
@@ -103,7 +101,6 @@ namespace webm {
             }
         }
 
-        sdl_lock.unlock();
         return false;
     }
 

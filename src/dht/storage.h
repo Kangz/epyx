@@ -21,6 +21,7 @@
 
 #include <map>
 #include <string>
+#include <mutex>
 #include "../core/common.h"
 #include "value.h"
 
@@ -61,7 +62,7 @@ namespace DHT
             void set(const std::string& key, const std::string& data);
 
         private:
-            Mutex lock;
+            std::mutex lock;
             std::map<std::string, Value> data;
     };
 

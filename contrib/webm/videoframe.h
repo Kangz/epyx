@@ -49,7 +49,7 @@ namespace webm {
 
     private:
         static const int video_format = SDL_ANYFORMAT | SDL_DOUBLEBUF | SDL_RESIZABLE;
-        Mutex sdl_lock;
+        std::mutex sdl_lock;
         int width, height;
         std::string window_name;
         SDL_Rect screen_rect;

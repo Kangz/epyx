@@ -21,7 +21,6 @@
 #ifndef EPYX_N2NP_RELAY_H
 #define EPYX_N2NP_RELAY_H
 
-#include "../core/mutex.h"
 #include "../core/worker-pool.h"
 #include "../core/timeout.h"
 #include "../core/atom/counter.h"

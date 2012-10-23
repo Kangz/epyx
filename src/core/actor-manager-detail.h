@@ -35,9 +35,10 @@ namespace Epyx
 
         a.alive = true;
 
-        actorsLock.lock();
-        actors[i] = &a;
-        actorsLock.unlock();
+        {
+            std::lock_guard<std::mutex> lock(actorsLock);
+            actors[i] = &a;
+        }
 
         return res;
     }
