@@ -23,9 +23,10 @@
 #include <boost/noncopyable.hpp>
 #include <fstream>
 #include <string>
+#include <thread>
+#include <condition_variable>
 #include "thread.h"
 #include "blocking-queue.h"
-#include "condition.h"
 
 namespace Epyx
 {
@@ -34,7 +35,8 @@ namespace log
     class Worker : public Thread
     {
     public:
-        Worker(int flags, const std::string& file);
+        ~Worker();
+        void init(int flags, const std::string& file);
         void write(const std::string& message, int prio);
         void flush(bool wait);
         void quit();
@@ -43,15 +45,17 @@ namespace log
         virtual void run();
 
     private:
+        //Used to store logs before we print them
         struct LogEntry
         {
             std::string str;
             int prio;
             time_t time;
             std::string thread_name;
-            Condition* cond;
+            std::condition_variable* cond;
         };
 
+        std::thread* thread = nullptr;
         BlockingQueue<LogEntry> entries;
         int flags;
         std::ofstream logFile;

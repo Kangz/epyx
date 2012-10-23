@@ -23,6 +23,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <thread>
 #include "log-worker.h"
 #include "tls-pointer.h"
 #include "assert.h"
@@ -30,18 +31,14 @@
 namespace Epyx {
 namespace log {
 
-    //Other modules should not access these variable
-    //Here is the worker thread
-    class Worker;
-    extern Worker* _worker;
-
     //And this is the ofstream of each stream
     struct BufferContainer {
         std::ostringstream b[5];
     };
-    extern TLSPointer<BufferContainer>* _buffers;
 
+    extern TLSPointer<BufferContainer>* _buffers;
     extern bool initialized;
+    extern Worker _worker;
 
     //Debug levels
     enum {
@@ -141,7 +138,9 @@ namespace log {
      */
     static Stream fatal(FATAL);
 
-    //End of the definition of Stream
+    //End of the definition of Streams
+
+    //Allow to put pretty much everything in a log
     template<typename T> Stream& Stream::operator<<(const T& arg) {
         EPYX_ASSERT_NO_LOG(log::initialized);
         _buffers->get()->b[this->priority] << arg;

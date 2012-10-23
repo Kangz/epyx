@@ -6,52 +6,54 @@ namespace Epyx
 namespace log
 {
 
-    Worker::Worker(int flags, const std::string& file)
-    :Thread("Logging Worker"), flags(flags) {
+    Worker::~Worker() {
+        delete thread;
+    }
+
+    void Worker::init(int flags, const std::string& file) {
+        this->flags = flags;
+
         if (!file.empty() && (this->flags & LOGFILE)) {
             //TODO: Close it
             this->logFile.open(file.c_str());
             EPYX_ASSERT_NO_LOG(logFile.is_open())
         }
+
         // start thread
-        this->start();
+        thread = new std::thread(&Worker::run, this);
     }
 
     void Worker::write(const std::string& message, int prio) {
-        LogEntry initializer = {message, prio, time(NULL), Thread::getName(), NULL};
-        LogEntry* entry = new LogEntry(initializer);
-
-        this->entries.push(entry);
+        this->entries.push(new LogEntry{message, prio, time(NULL), Thread::getName(), nullptr});
     }
 
     void Worker::flush(bool wait) {
-        LogEntry initializer = {"", FLUSH, 0, "", NULL};
-        LogEntry* entry = new LogEntry(initializer);
-        Condition* cond = NULL;
+        LogEntry* entry = new LogEntry{"", FLUSH, 0, "", nullptr};
 
+        //When we are told to wait we will create and wait on a
+        //condition that will be triggered by the logger
+        //TODO: what if the logger exits while still holding a condition?
         if (wait) {
-            entry->cond = new Condition();
-            entry->cond->lock();
-            cond = entry->cond;
-        }
+            entry->cond = new std::condition_variable();
+            auto cond = entry->cond;
 
-        this->entries.push(entry);
+            {
+                std::mutex m;
+                std::unique_lock<std::mutex> lock(m);
+                this->entries.push(entry);
+                cond->wait(lock);
+            }
 
-        //The entry will get destroyed but not the condition
-        if (wait) {
-            cond->wait();
-            cond->unlock();
+            //The entry will get destroyed but not the condition
             delete cond;
+        } else {
+            this->entries.push(entry);
         }
     }
 
     void Worker::quit() {
-        LogEntry initializer = {"", QUIT, 0, "", NULL};
-        LogEntry* entry = new LogEntry(initializer);
-
-        this->entries.push(entry);
-
-        this->wait();
+        this->entries.push(new LogEntry{"", QUIT, 0, "", nullptr});
+        this->thread->join();
     }
 
     std::string logLevelNames[5] = {
@@ -66,18 +68,22 @@ namespace log
         while (1) {
             //Take all the elements from the queue with only one call
             std::deque<LogEntry*>* entries = this->entries.flush();
-            if (entries == NULL) continue;
+            if (entries == nullptr) continue;
 
             while (!entries->empty()) {
                 LogEntry* entry = entries->front();
 
+                //Handles control messages
                 if (entry->prio == FLUSH || entry->prio == QUIT) {
+
+                    //Flush only the streams we are using
                     if (this->flags & CONSOLE) std::cout << std::flush;
                     if (this->flags & ERRORCONSOLE) std::cerr << std::flush;
                     if (this->flags & LOGFILE) logFile << std::flush;
 
-                    if (entry->cond != NULL) {
-                        entry->cond->notify();
+                    //Unlock the thread that asked the flush
+                    if (entry->cond != nullptr) {
+                        entry->cond->notify_one();
                     }
 
                     if (entry->prio == QUIT) {
