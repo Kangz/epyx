@@ -112,12 +112,12 @@ namespace Epyx
         {
         public:
             Workers(NetSelect *owner);
-            void treat(int *nsriId);
+            void treat(std::unique_ptr<int> nsriId);
         private:
             NetSelect *owner;
         } workers;
 
-        friend void Workers::treat(int *nsriId);
+        friend void Workers::treat(std::unique_ptr<int> nsriId);
 
         bool running;
     };

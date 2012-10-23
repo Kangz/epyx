@@ -183,9 +183,7 @@ void stress_test_logger(){
 
 class WaitingWorkerPool: public WorkerPool<int> {
 public:
-    WaitingWorkerPool():WorkerPool<int>(true){}
-
-    virtual void treat(int *t){
+    virtual void treat(std::unique_ptr<int> t){
         sleep(*t);
         log::info << "Worker finished" << log::endl;
         // t is deleted by the caller

@@ -20,11 +20,16 @@
 #ifndef EPYX_WORKER_POOL_H
 #define EPYX_WORKER_POOL_H
 
+#include "blocking-queue.h"
+#include <atomic>
 #include <boost/noncopyable.hpp>
 #include <list>
+#include <map>
+#include <memory>
+#include <mutex>
 #include <string>
 #include <sstream>
-#include "common.h"
+#include <thread>
 
 namespace Epyx
 {
@@ -43,6 +48,7 @@ namespace Epyx
     template<typename T>class WorkerPool : private boost::noncopyable
     {
     public:
+        typedef std::unique_ptr<T> TPtr;
 
         /**
          * @brief The WorkerPool constructor
@@ -50,13 +56,13 @@ namespace Epyx
          * @param deleteMessages tell to delete messages afer a post if set
          * @param name the prefix of the name of the worker threads in the logs
          */
-        WorkerPool(int num_workers, bool deleteMessages, const std::string& name);
+        WorkerPool(int num_workers, const std::string& name);
 
         /**
          * @brief The WorkerPool other constructor
          * @param deleteMessages tell to delete messages afer a post if set
          */
-        WorkerPool(bool deleteMessages);
+        WorkerPool();
 
         /**
          * @brief The WorkerPool destructor
@@ -74,7 +80,13 @@ namespace Epyx
          * @brief Adds a message to be processed
          * @param message the message
          */
-        void post(T *message);
+        void post(T* message);
+
+        /**
+         * @brief Adds a message to be processed
+         * @param message the message
+         */
+        void post(TPtr message);
 
         /**
          * @brief set the name of the workers
@@ -99,39 +111,51 @@ namespace Epyx
          * @brief this is the method to override
          * @param message the message to be processed
          */
-        virtual void treat(T *message) = 0;
+        virtual void treat(TPtr message) = 0;
 
     private:
         void addWorker();
         void removeWorker();
+
+        // Finalise a worker destruction
         void bookKeep();
 
-        BlockingQueue<T> messages;
-        bool deleteMessages;
-
         // Worker threads
-        class Worker : public Thread
+        class Worker
         {
         public:
-            Worker(WorkerPool<T>* pool, int id);
-            void run();
-            void tellStop();
+            // Spawn a new thread
+            Worker(WorkerPool *pool, int id);
 
+            // Tell the worker to stop ASAP, return the previous state
+            bool tellStop();
+
+            // Wait for the thread to terminate
+            void wait();
         private:
-            WorkerPool* pool;
-            Mutex running_mutex;
+            void run(WorkerPool *pool);
+
             bool running;
+            int id;
+            std::thread thread;
         };
 
-        // Everything related to names
-        std::string name;
-        int worker_name_counter;
+        // Message queue
+        BlockingQueue<T> messages;
 
-        int worker_count;
-        Mutex workers_mutex;
-        std::list<Worker*> workers;
-        Mutex workers_to_destroy_mutex;
-        std::list<Worker*> workers_to_destroy;
+        // Name prefix
+        std::string name;
+
+        // Last used ID, to be used for new workers
+        std::atomic<int> lastId;
+
+        // Running workers
+        std::atomic<int> worker_count;
+        std::mutex workers_mutex;
+        std::map<int, std::unique_ptr<Worker> > workers;
+
+        // Terminated workers, waiting a join()
+        BlockingQueue<int> workers_to_destroy;
     };
 
 }

@@ -60,8 +60,7 @@ namespace log
         int flags;
         std::ofstream logFile;
 
-        void printEntry(LogEntry* entry);
-
+        void printEntry(const LogEntry& entry);
     };
 
 }

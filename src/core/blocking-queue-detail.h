@@ -26,132 +26,146 @@ namespace Epyx
 {
 
     template<typename T> BlockingQueue<T>::BlockingQueue()
-    : opened(true) {
+    : fifo(new TQueue()), opened(true) {
     }
 
     template<typename T> BlockingQueue<T>::~BlockingQueue() {
-        // FIXME: Who frees the elements ?
+        this->close();
     }
 
     template<typename T> void BlockingQueue<T>::close() {
-        this->opened = false;
-        // Unlock condition
-        cond.lock();
-        cond.notifyAll();
-        cond.unlock();
+        opened = false;
+        cond.notify_all();
     }
 
     template<typename T> bool BlockingQueue<T>::isOpened() {
-        return this->opened;
+        return opened;
     }
 
-    template<typename T> bool BlockingQueue<T>::push(T* e) {
-        if (!opened)
+    template<typename T> bool BlockingQueue<T>::push(T *e) {
+        TPtr pe(e);
+        return push(pe);
+    }
+
+    template<typename T> bool BlockingQueue<T>::push(TPtr& e) {
+        if (!opened) {
             return false;
-        cond.lock();
-        fifo.push_back(e);
-        cond.notify();
-        cond.unlock();
+        }
+        {
+            std::lock_guard<std::mutex> lock(mut);
+            fifo->push_back(std::move(e));
+        }
+        cond.notify_one();
         return true;
     }
 
-    template<typename T> bool BlockingQueue<T>::tryPush(T* e) {
-        if (opened && cond.tryLock()) {
-            fifo.push_back(e);
-            cond.notify();
-            cond.unlock();
+    template<typename T> bool BlockingQueue<T>::tryPush(TPtr e) {
+        if (opened && mut.try_lock()) {
+            fifo->push_back(e);
+            mut.unlock();
+            cond.notify_one();
             return true;
         }
         return false;
     }
 
-    template<typename T> T* BlockingQueue<T>::pop() {
-        cond.lock();
-        while (opened && fifo.empty()) {
-            cond.wait();
+    template<typename T> typename BlockingQueue<T>::TPtr BlockingQueue<T>::pop() {
+        std::unique_lock<std::mutex> lock(mut);
+        while (opened && fifo->empty()) {
+            cond.wait(lock);
         }
+        if (fifo->empty()) {
+            return TPtr();
+        }
+
         // Continue to pop even if queue is closed
-        if (fifo.empty()) {
-            cond.unlock();
-            return NULL;
-        }
-        T* result = fifo.front();
-        fifo.pop_front();
-        cond.unlock();
+        TPtr result;
+        fifo->front().swap(result);
+        fifo->pop_front();
         return result;
     }
 
-    template<typename T> T* BlockingQueue<T>::pop(int msec) {
-        cond.lock();
-        if (opened && fifo.empty()) {
-            cond.timedWait(msec);
-        }
-        if (fifo.empty()) {
-            cond.unlock();
-            return NULL;
-        }
-        T* result = fifo.front();
-        fifo.pop_front();
-        cond.unlock();
-        return result;
-    }
-
-    template<typename T> T* BlockingQueue<T>::tryPop() {
-        if (opened && cond.tryLock()) {
-            if (fifo.empty()) {
-                cond.unlock();
-                return NULL;
+    template<typename T> typename BlockingQueue<T>::TPtr BlockingQueue<T>::pop(int msec) {
+        std::unique_lock<std::mutex> lock(mut);
+        if (opened && fifo->empty()) {
+            if (cond.wait_for(lock, std::chrono::milliseconds(msec)) == std::cv_status::timeout) {
+                // Timeout
+                return nullptr;
             }
-            T* result = fifo.front();
-            fifo.pop_front();
-            cond.unlock();
-            return result;
         }
-        return NULL;
-    }
+        // There is nothing to return
+        if (fifo->empty()) {
+            return nullptr;
+        }
 
-    template<typename T> std::deque<T*>* BlockingQueue<T>::flush() {
-        cond.lock();
-        while (opened && fifo.empty()) {
-            cond.wait();
-        }
-        if (fifo.empty()) {
-            cond.unlock();
-            return NULL;
-        }
-        std::deque<T*>* result = new std::deque<T*>(fifo);
-        fifo.clear();
-        cond.unlock();
+        // Continue to pop even if queue is closed
+        TPtr result;
+        fifo->front().swap(result);
+        fifo->pop_front();
         return result;
     }
 
-    template<typename T> std::deque<T*>* BlockingQueue<T>::flush(int msec) {
-        cond.lock();
-        if (opened && fifo.empty()) {
-            cond.timedWait(msec);
-        }
-        if (fifo.empty()) {
-            cond.unlock();
-            return NULL;
-        }
-        std::deque<T*>* result = new std::deque<T*>(fifo);
-        fifo.clear();
-        cond.unlock();
-        return result;
-    }
-
-    template<typename T> std::deque<T*>* BlockingQueue<T>::tryFlush() {
-        if (opened && cond.tryLock()) {
-            if (fifo.empty()) {
-                cond.unlock();
-                return NULL;
+    template<typename T> typename BlockingQueue<T>::TPtr BlockingQueue<T>::tryPop() {
+        TPtr result = NULL;
+        if (mut.try_lock()) {
+            if (!fifo->empty()) {
+                fifo->front().swap(result);
+                fifo->pop_front();
             }
-            std::deque<T*>* result = new std::deque<T*>(fifo);
-            fifo.clear();
-            cond.unlock();
-            return result;
+            mut.unlock();
         }
-        return NULL;
+        return result;
+    }
+
+    template<typename T> typename BlockingQueue<T>::TQueuePtr BlockingQueue<T>::flush() {
+        TQueuePtr result;
+        std::unique_lock<std::mutex> lock(mut);
+        while (opened && fifo->empty()) {
+            cond.wait(lock);
+        }
+        if (!fifo->empty()) {
+            result.swap(fifo);
+            fifo.reset(new TQueue());
+        }
+        return result;
+    }
+
+    template<typename T> typename BlockingQueue<T>::TQueuePtr BlockingQueue<T>::flush(int msec) {
+        TQueuePtr result;
+        std::unique_lock<std::mutex> lock(mut);
+        while (opened && fifo->empty()) {
+            if (cond.wait_for(lock, std::chrono::milliseconds(msec)) == std::cv_status::timeout) {
+                // Timeout
+                return result;
+            }
+        }
+        if (!fifo->empty()) {
+            result.swap(fifo);
+            fifo.reset(new TQueue());
+        }
+        return result;
+    }
+
+    template<typename T> typename BlockingQueue<T>::TQueuePtr BlockingQueue<T>::tryFlush() {
+        TQueuePtr result;
+        if (mut.try_lock()) {
+            if (!fifo->empty()) {
+                result.swap(fifo);
+                fifo.reset(new TQueue());
+            }
+            mut.unlock();
+        }
+        return result;
+    }
+
+    template<typename T > size_t BlockingQueue<T>::size() {
+        std::unique_lock<std::mutex> lock(mut);
+        return fifo->size();
+    }
+
+    template<typename T> bool BlockingQueue<T>::empty() {
+        std::unique_lock<std::mutex> lock(mut);
+        return fifo->empty();
     }
 }
 

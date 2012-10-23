@@ -65,7 +65,7 @@ namespace Epyx
 
     ActorManager::ActorWorkers::ActorWorkers(int num_workers, const std::string& name,
         ActorManager* m)
-    :WorkerPool<std::pair<int, std::function<void()>>>(num_workers, true, name),
+    :WorkerPool<std::pair<int, std::function<void()>>>(num_workers, name),
     manager(m) {
     }
 
@@ -74,7 +74,7 @@ namespace Epyx
     //if he is dead remove it and do nothing
     //if message = null the actor will call timeout()
     //else he will call treat(message)
-    void ActorManager::ActorWorkers::treat(std::pair<int, std::function<void()>>* msg){
+    void ActorManager::ActorWorkers::treat(std::unique_ptr<std::pair<int, std::function<void()>>> msg){
         ActorManager* m = this->manager;
 
         m->actorsLock.lock();
@@ -122,7 +122,7 @@ namespace Epyx
     void ActorManager::TimeoutLauncher::run(){
         const int epsilon = 2;
 
-        TimeoutEntry* to_add = NULL;
+        std::unique_ptr<TimeoutEntry> to_add = nullptr;
         do{
             //Wait for a new entry or until something times out
             if(timeouts.empty()){
@@ -131,9 +131,9 @@ namespace Epyx
                 to_add = incoming.pop(timeouts.top().time.remainingMsec() + epsilon);
             }
 
-            if(to_add != NULL){
+            if(to_add){
                 timeouts.push(*to_add);
-                delete to_add;
+                to_add.reset();
             }
 
             while(!timeouts.empty() && timeouts.top().time.hasExpired()){

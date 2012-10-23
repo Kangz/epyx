@@ -89,7 +89,7 @@ namespace Epyx
              * @brief Treat a N2NP packet
              * @param pkt the packet to be processed
              */
-            void treat(Packet *pkt);
+            void treat(std::unique_ptr<Packet> pkt);
 
         private:
             // Relay address and ID

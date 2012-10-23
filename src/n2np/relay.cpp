@@ -9,7 +9,7 @@ namespace Epyx
     {
 
         Relay::Relay(const SockAddress& addr)
-        :WorkerPool(1, true, "Relay@" + addr.toString()),
+        :WorkerPool(1, "Relay@" + addr.toString()),
         relayAddr(addr), relayId(addr), nodeNextId(1) {
             log::info << "Relay: Start " << relayId << log::endl;
         }
@@ -95,8 +95,8 @@ namespace Epyx
             return relayId;
         }
 
-        void Relay::treat(Packet *pkt) {
-            EPYX_ASSERT(pkt != NULL);
+        void Relay::treat(std::unique_ptr<Packet> pkt) {
+            EPYX_ASSERT(pkt);
             // TODO: Send a message back to from node when an error happens
 
             // Send packet to another relay

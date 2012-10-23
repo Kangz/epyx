@@ -67,11 +67,12 @@ namespace log
     void Worker::run() {
         while (1) {
             //Take all the elements from the queue with only one call
-            std::deque<LogEntry*>* entries = this->entries.flush();
+            auto entries = this->entries.flush();
             if (entries == nullptr) continue;
 
             while (!entries->empty()) {
-                LogEntry* entry = entries->front();
+                std::unique_ptr<LogEntry> entry;
+                entry.swap(entries->front());
 
                 //Handles control messages
                 if (entry->prio == FLUSH || entry->prio == QUIT) {
@@ -91,42 +92,40 @@ namespace log
                         return;
                     }
                 } else {
-                    this->printEntry(entry);
+                    this->printEntry(*entry);
                 }
-
-                delete entry;
 
                 entries->pop_front();
             }
         }
     }
 
-    void Worker::printEntry(LogEntry* entry) {
+    void Worker::printEntry(const LogEntry& entry) {
         //As this function is called from only one thread I can use static variables to avoid allocations
         static char time_buffer[20];
         static char date_buffer[20];
 
         //This returns a pointer to a static struct, I hope I'm the only one using it
         //TODO: fix this!
-        tm* timeinfo = localtime(&entry->time);
+        tm* timeinfo = localtime(&entry.time);
         strftime(time_buffer, 20, "%H:%M:%S", timeinfo);
         strftime(date_buffer, 20, "%Y-%m-%d", timeinfo);
 
         //Make the part with the thread's name
         std::ostringstream info_buffer;
-        info_buffer << "[" << logLevelNames[entry->prio] << "] ";
-        info_buffer << "[" << entry->thread_name << "]";
+        info_buffer << "[" << logLevelNames[entry.prio] << "] ";
+        info_buffer << "[" << entry.thread_name << "]";
 
         //TODO: Flush control commands
         //Do the actual IO
         if (this->flags & CONSOLE) {
-            std::cout << "[" << time_buffer << "] " << info_buffer.str() << " " << entry->str << "\n";
+            std::cout << "[" << time_buffer << "] " << info_buffer.str() << " " << entry.str << "\n";
         }
         if (this->flags & ERRORCONSOLE) {
-            std::cerr << "[" << time_buffer << "] " << info_buffer.str() << " " << entry->str << "\n";
+            std::cerr << "[" << time_buffer << "] " << info_buffer.str() << " " << entry.str << "\n";
         }
         if (this->flags & LOGFILE) {
-            logFile << "[" << date_buffer << " " << time_buffer << "] " << info_buffer.str() << " " << entry->str << "\n";
+            logFile << "[" << date_buffer << " " << time_buffer << "] " << info_buffer.str() << " " << entry.str << "\n";
         }
     }
 

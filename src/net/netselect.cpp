@@ -148,12 +148,12 @@ namespace Epyx
     }
 
     NetSelect::Workers::Workers(NetSelect *owner)
-    :WorkerPool(true), owner(owner) {
+    :owner(owner) {
     }
 
-    void NetSelect::Workers::treat(int *nsriId) {
+    void NetSelect::Workers::treat(std::unique_ptr<int> nsriId) {
         EPYX_ASSERT(owner != NULL);
-        EPYX_ASSERT(nsriId != NULL);
+        EPYX_ASSERT(nsriId);
         NetSelectReaderInfo *nsri = owner->readers.get(*nsriId, NULL);
         if (nsri == NULL || !nsri->alive)
             return;

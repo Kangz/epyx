@@ -125,7 +125,7 @@ namespace Epyx
         public:
 
             ActorWorkers(int num_workers, const std::string& name, ActorManager* m);
-            virtual void treat(std::pair<int, std::function<void()>>* msg);
+            virtual void treat(std::unique_ptr<std::pair<int, std::function<void()>>> msg);
 
         private:
             ActorManager* manager;
