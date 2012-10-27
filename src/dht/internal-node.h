@@ -115,7 +115,7 @@ namespace DHT
         ActorManager actors;
 
         //Management for the process actors
-        atom::Counter processActorsCount;
+        std::atomic<long> processActorsCount;
         atom::Map<long, ActorId<ProcessActor>*> processActors;
 
         //This node's identity

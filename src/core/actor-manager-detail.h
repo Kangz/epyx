@@ -29,7 +29,7 @@ namespace Epyx
     }
 
     template<typename T> ActorId<T> ActorManager::add(T& a) {
-        unsigned int i = actorCount.getIncrement();
+        unsigned int i = std::atomic_fetch_add(&actorCount, 1U);
         ActorId<T> res(i, this, &a);
         a.setId(res);
 

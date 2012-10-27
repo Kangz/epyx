@@ -1,7 +1,6 @@
 #include "relay.h"
 #include "../net/tcpsocket.h"
 #include "../core/timeout.h"
-#include <stdlib.h>
 
 namespace Epyx
 {
@@ -19,12 +18,11 @@ namespace Epyx
 
             // Build a random unique node name
             std::ostringstream nodeNameStream;
-            long number = nodeNextId.getIncrement();
+            unsigned long number = std::atomic_fetch_add(&nodeNextId, 1UL);
             if (number == 1) {
                 nodeNameStream << "self";
             } else {
-                nodeNameStream << String::fromInt(nodeNextId.getIncrement())
-                    << '-' << sock->getAddress();
+                nodeNameStream << number << '-' << sock->getAddress();
             }
             const std::string nodeName = nodeNameStream.str();
             const NodeId nodeid(nodeName.c_str(), relayAddr);

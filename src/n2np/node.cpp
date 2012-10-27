@@ -3,7 +3,6 @@
 #include "../net/tcpsocket.h"
 #include "../core/string.h"
 #include <cstring>
-#include <stack>
 
 #ifndef EPYX_N2NP_NODE_DEBUG
 /**
@@ -31,7 +30,7 @@ namespace Epyx
             std::shared_ptr<Packet> n2npPkt(new Packet(method, data));
             n2npPkt->from = nodeid;
             n2npPkt->to = to;
-            n2npPkt->pktID = curId.getIncrement();
+            n2npPkt->pktID = std::atomic_fetch_add(&curId, 1UL);
 
             //log::info << "Node " << nodeid << ": Send " << n2npPkt << log::endl;
             if (store) {

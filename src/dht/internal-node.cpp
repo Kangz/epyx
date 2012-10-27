@@ -105,7 +105,7 @@ namespace DHT
         }else{
             a = new ActorId<ProcessActor>(actors.add(actor));
         }
-        long n = processActorsCount.getIncrement();
+        long n = std::atomic_fetch_add(&processActorsCount, 1L);
         processActors.set(n, a);
         return n;
     }

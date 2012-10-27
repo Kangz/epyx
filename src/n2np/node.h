@@ -25,9 +25,9 @@
 #include "module.h"
 #include "../net/netselectsocket.h"
 #include "../parser/gttparser.h"
-#include "../core/atom/counter.h"
 #include "../core/atom/map.h"
 #include "../core/timeout.h"
+#include <atomic>
 #include <stack>
 
 namespace Epyx
@@ -144,7 +144,7 @@ namespace Epyx
             // Each node has a number which corresponds to a weight.
             atom::Map<NodeId, unsigned int> mruNodeIds;
 
-            atom::Counter curId;
+            std::atomic<unsigned long> curId;
             atom::Map<unsigned long, std::shared_ptr<Packet> > sentMap;
 
             // Stockage for sockets

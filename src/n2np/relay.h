@@ -23,12 +23,12 @@
 
 #include "../core/worker-pool.h"
 #include "../core/timeout.h"
-#include "../core/atom/counter.h"
 #include "../net/sockaddress.h"
 #include "../net/socket.h"
 #include "../net/netselecttcpserver.h"
 #include "packet.h"
 #include "relaysocket.h"
+#include <atomic>
 #include <map>
 
 namespace Epyx
@@ -108,7 +108,7 @@ namespace Epyx
             std::map<std::string, std::unique_ptr<NodeInfo> > nodes;
 
             // use a counter to attribute nodes
-            atom::Counter nodeNextId;
+            std::atomic<unsigned long> nodeNextId;
         };
     }
 }

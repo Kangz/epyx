@@ -24,8 +24,8 @@
 #include <functional>
 #include <mutex>
 #include "worker-pool.h"
-#include "atom/counter.h"
 #include "timeout.h"
+#include <atomic>
 #include <string>
 #include <map>
 #include <vector>
@@ -134,7 +134,7 @@ namespace Epyx
         ActorWorkers wp;
         std::map<int, Actor*> actors;
         std::mutex actorsLock;
-        atom::Counter actorCount;
+        std::atomic<unsigned int> actorCount;
 
         //The thread used to fire timeouts
         struct TimeoutEntry
