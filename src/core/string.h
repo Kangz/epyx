@@ -21,6 +21,7 @@
 #ifndef EPYX_STRING_H
 #define EPYX_STRING_H
 
+#include "byte.h"
 #include <ctype.h>
 #include <string>
 
@@ -31,7 +32,8 @@ namespace Epyx
      *
      * @brief Useful string functions
      */
-    class String {
+    class String
+    {
     public:
         /**
          * @brief space characters
@@ -41,7 +43,11 @@ namespace Epyx
         /**
          * @brief ASCII CR LF
          */
-        static const char crlf[];
+        static const std::string crlf;
+        /**
+         * @brief ASCII CR LF, in bytes
+         */
+        static const byte_str crlf_bytes;
 
         /**
          * @brief Removes left spaces
@@ -78,18 +84,18 @@ namespace Epyx
         /**
          * @brief Converts a string to an integer
          * @param str
-         * @return (int)str
+         * @return (long)str
          * @throw ParserException if str is not an integer
          */
         static long toInt(const std::string& str);
 
-       /**
-         * @brief Converts a string to an integer
+        /**
+         * @brief Converts a string to an unsigned long
          * @param str
-         * @return (int)str
+         * @return (unisgned long)str
          * @throw ParserException if str is not an integer
          */
-        static long toInt(const char *str);
+        static unsigned long toULong(const std::string& str);
 
         /**
          * @brief Converts an integer to a string
@@ -103,13 +109,6 @@ namespace Epyx
          * @return (string)n
          */
         static std::string fromUnsignedLong(unsigned long n);
-
-        /**
-         * @brief Returns a new copy of the content of the argument
-         * @param str
-         * @return A copy of the content of the argument
-         */
-        static char* toNewChar(const std::string& str);
 
     private:
         // Forbid instanciation

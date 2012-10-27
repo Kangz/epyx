@@ -21,11 +21,11 @@
 #ifndef EPYX_LINEPARSER_H
 #define EPYX_LINEPARSER_H
 
+#include "../core/byte.h"
 #include <string>
 
 namespace Epyx
 {
-
     /**
      * @class LineParser
      *
@@ -38,10 +38,6 @@ namespace Epyx
          * @brief Constructor
          */
         LineParser();
-        /**
-         * @brief Destructor
-         */
-        ~LineParser();
 
         /**
          * @brief Reset everything
@@ -51,9 +47,8 @@ namespace Epyx
         /**
          * @brief Push raw data into this object
          * @param data pushed data
-         * @param size data size
          */
-        void push(const char *data, long size);
+        void push(const byte_str& data);
 
         /**
          * @brief Pop one line
@@ -65,20 +60,14 @@ namespace Epyx
         /**
          * @brief Pop raw data
          * @param data data to be written
-         * @param size data size
+         * @param size data size to write
          * @return true if there is enough internal data
          */
-        bool popData(char *data, long size);
+        bool popData(byte_str *data, size_t size);
 
     private:
-        /**
-         * @brief Skip some data bytes
-         * @param n number of bytes to discard
-         */
-        void skip(long n);
-
-        char *buffer;
-        long bufsize;
+        // Internal buffer
+        byte_str buffer;
     };
 }
 

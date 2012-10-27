@@ -23,10 +23,10 @@
 
 #include "netselectreader.h"
 #include "socket.h"
+#include <memory>
 
 namespace Epyx
 {
-
     /**
      * @class NetSelectSocket
      *
@@ -36,26 +36,15 @@ namespace Epyx
     {
     public:
         /**
-         * @brief Constructor with a reference
-         *
-         * Create a new NetSelectSocket with a socket whose allocation is NOT
-         * managed by this object.
-         *
-         * @param sock socket reference
+         * @param sock socket shared pointer
          */
-        NetSelectSocket(Socket &sock);
+        NetSelectSocket(const std::shared_ptr<Socket>& sock);
 
         /**
          * @brief Constructor used with new Socket()
-         *
-         * Create a new NetSelectSocket with a socket whose allocation is
-         * managed by this object: the socket is DELETED in the destructor.
-         *
          * @param psock socket pointer
          */
         NetSelectSocket(Socket *psock);
-
-        virtual ~NetSelectSocket();
 
         int getFileDescriptor() const;
 
@@ -65,17 +54,15 @@ namespace Epyx
         /**
          * @brief Eat read data
          */
-        virtual void eat(const char *data, long size) = 0;
+        virtual void eat(const byte_str& data) = 0;
 
         /**
          * @brief Get internal socket
          */
-        Socket& socket() const;
+        const std::shared_ptr<Socket>& socket() const;
 
     private:
-        // sock may be deleted by this object to prevent memory leak
-        Socket *sock;
-        bool dynamicSock;
+        std::shared_ptr<Socket> sock;
     };
 }
 #endif /* EPYX_NETSELECTREADER_H */

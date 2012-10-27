@@ -67,18 +67,6 @@ namespace Epyx
         }
     }
 
-    IpAddress::IpAddress(const IpAddress& addr)
-    :ip(addr.ip), ipVersion(addr.ipVersion) {
-    }
-
-    IpAddress& IpAddress::operator=(const IpAddress& addr) {
-        if (this != &addr) {
-            this->ip = addr.ip;
-            this->ipVersion = addr.ipVersion;
-        }
-        return *this;
-    }
-
     int IpAddress::getVersion() const {
         return ipVersion;
     }

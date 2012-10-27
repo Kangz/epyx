@@ -32,24 +32,17 @@ int main() {
 
                 encoder.encode(rawImage, utime, 0);
                 while ((fpkt = encoder.getPacket()) != NULL) {
+                    Epyx::byte_str netdata = fpkt->build();
 
-                    // Convert packet
-                    char *netdata;
-                    unsigned long netsize = fpkt->build(&netdata);
-                    delete fpkt;
-
-                    Epyx::log::info << "Net Packet of " << netsize << " bytes" << Epyx::log::endl;
+                    Epyx::log::info << "Net Packet of " << netdata.size() << " bytes" << Epyx::log::endl;
 
                     // Receive packet
                     Epyx::GTTParser parser;
-                    parser.eat(netdata, netsize);
-                    Epyx::GTTPacket *gttpkt;
-                    while ((gttpkt = parser.getPacket()) != NULL) {
+                    parser.eat(netdata);
+                    std::unique_ptr<Epyx::GTTPacket> gttpkt;
+                    while ((gttpkt = parser.getPacket())) {
                         Epyx::webm::FramePacket recvFPkt(*gttpkt);
                         decoder.decode(recvFPkt);
-                        delete gttpkt;
-
-
                         vpx_image_t *img = decoder.getFrame();
                         if (img != NULL) {
                             vframe.showFrame(img);

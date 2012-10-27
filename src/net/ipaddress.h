@@ -38,18 +38,18 @@ namespace Epyx
     {
     public:
         IpAddress();
+
+        /**
+         * @brief Constructor by parsing a string
+         * @param ip
+         * @param ipVersion
+         */
         IpAddress(const std::string& ip, int ipVersion = 0);
+        /**
+         * @brief Constructor with a sockaddr structure
+         * @param saddr a sockaddr{_in,_in6,...} pointer
+         */
         IpAddress(const struct sockaddr *saddr);
-
-        /**
-         * @brief Copy constructor
-         */
-        IpAddress(const IpAddress& addr);
-
-        /**
-         * @brief Assignment constructor
-         */
-        IpAddress& operator=(const IpAddress& addr);
 
         /**
          * @brief Fill in a sockaddr struct, without the port

@@ -127,6 +127,10 @@ namespace Epyx
         return true;
     }
 
+    bool Socket::sendBytes(const byte_str& bytes) {
+        return this->sendAll(bytes.c_str(), bytes.size());
+    }
+
     bool Socket::write(const std::string& message) {
         // Do not send \0 character through the network
         return this->sendAll(message.c_str(), message.length());
@@ -146,6 +150,14 @@ namespace Epyx
             EPYX_ASSERT(recvBytes <= size);
             size -= recvBytes;
         }
+        return true;
+    }
+
+    bool Socket::recvBytes(byte_str *data, int size) {
+        EPYX_ASSERT(data != NULL);
+        std::unique_ptr<byte[]> bytes(new byte[size]);
+        if (!this->recvAll(bytes.get(), size)) return false;
+        data->assign(bytes.get());
         return true;
     }
 }

@@ -22,7 +22,7 @@ namespace Epyx
 {
 
     template<class T, typename TP>
-    NetSelectTCPServer<T, TP>::NetSelectTCPServer(TCPServer *srv, TP *param)
+    NetSelectTCPServer<T, TP>::NetSelectTCPServer(TCPServer *srv, TP param)
     : srv(srv), param(param) {
         EPYX_ASSERT(srv != NULL);
         // Force bind

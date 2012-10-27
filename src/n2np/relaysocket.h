@@ -43,15 +43,15 @@ namespace Epyx
              * @param sock new socket
              * @param relay associated relay
              */
-            RelaySocket(Socket *sock, Relay *relay);
+            RelaySocket(Socket *sock, const std::shared_ptr<Relay>& relay);
             ~RelaySocket();
 
         protected:
-            void eat(const char *data, long size);
+            void eat(const byte_str& data);
 
         private:
             NodeId nodeid;
-            Relay *relay;
+            std::shared_ptr<Relay> relay;
 
             GTTParser gttparser;
         };
@@ -59,7 +59,7 @@ namespace Epyx
         /**
          * @brief NetSelectTCPServer for relay
          */
-        typedef NetSelectTCPServer<RelaySocket, Relay> RelayServer;
+        typedef NetSelectTCPServer<RelaySocket, std::shared_ptr<Relay> > RelayServer;
     }
 }
 

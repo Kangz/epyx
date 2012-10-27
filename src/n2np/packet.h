@@ -39,23 +39,9 @@ namespace Epyx
             /**
              * @brief Constructor
              * @param method
-             * @param size
              * @param data
              */
-            Packet(const std::string method, unsigned int size,
-                    const char *data);
-
-            /**
-             * @brief Packet deep copy
-             * @param pkt
-             */
-            Packet(const Packet& pkt);
-            /**
-             * @brief Assignment with a deep copy
-             * @param pkt
-             * @return *this
-             */
-            const Packet& operator=(const Packet& pkt);
+            Packet(const std::string& method, const byte_str& data);
 
             /**
              * @brief Build a N2NP packet from a GTT Packet
@@ -66,8 +52,6 @@ namespace Epyx
              */
             Packet(const GTTPacket& pkt);
 
-            ~Packet();
-
             /**
              * @brief Print a short packet desciption in an output stream
              * @param os output stream
@@ -77,19 +61,9 @@ namespace Epyx
 
             /**
              * @brief Build the raw text query for this N2NP Packet
-             * @param newData newly-allocated buffer with ready-to-send data
-             * @return size of *data
-             *
-             * Note: Please delete *newData with delete[]
+             * @return bytes string
              */
-            unsigned long build(char **newData) const;
-
-            /**
-             * @brief Send packet with a Socket
-             * @param sock
-             * @return true if it succeeded
-             */
-            bool send(Socket& sock) const;
+            byte_str build() const;
 
             /**
              * @brief GTT Method
@@ -117,23 +91,9 @@ namespace Epyx
             unsigned long pktID;
 
             /**
-             * @brief Content size
-             */
-            unsigned int size;
-            /**
              * @brief Content
              */
-            const char *data;
-
-        private:
-            /**
-             * @brief Private function to get a GTT packet from a N2NP packet
-             * @param gttpkt (out) GTT packet
-             *
-             * Use this function with care: as this->data = gttpkt.body, you need
-             * to reset gttpkt.body to NULL before destroying it
-             */
-            void fillGTTPacket(GTTPacket &gttpkt) const;
+            byte_str data;
         };
     }
 }

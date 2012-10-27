@@ -59,14 +59,6 @@ namespace Epyx
              * @param str string "node@relay"
              */
             NodeId(const std::string& str);
-            /**
-             * @brief Copy constructor
-             */
-            NodeId(const NodeId& nodeid);
-            /**
-             * @brief Assignment
-             */
-            NodeId& operator=(const NodeId& nodeid);
 
             /**
              * @brief Print the node ID in an output stream
@@ -83,7 +75,7 @@ namespace Epyx
 
             /**
              * @brief compare this and nodeid
-             * @param addr
+             * @param nodeid
              */
             int compare(const NodeId& nodeid) const;
 

@@ -6,11 +6,7 @@ namespace Epyx
 {
 
     GTTParser::GTTParser()
-    :currentPkt(NULL), hasError(false) {
-        this->reset();
-    }
-
-    GTTParser::~GTTParser() {
+    :hasError(false) {
         this->reset();
     }
 
@@ -21,17 +17,15 @@ namespace Epyx
     }
 
     void GTTParser::startPacket() {
-        // Set up inernal state
-        if (currentPkt != NULL) {
-            delete currentPkt;
-            currentPkt = NULL;
-        }
+        // Set up internal state
+        currentPkt.reset();
+        currentSize = 0;
         datapos = dataposFirstLine;
         hasError = false;
         errorMessage = "";
     }
 
-    bool GTTParser::getError(std::string& userErr) {
+    bool GTTParser::getError(std::string& userErr) const {
         if (!hasError) {
             userErr.assign("");
             return false;
@@ -41,20 +35,21 @@ namespace Epyx
         }
     }
 
-    void GTTParser::eat(const char *data, long size) {
-        EPYX_ASSERT(data != NULL && size > 0);
-        lineParser.push(data, size);
+    void GTTParser::eat(const byte_str& data) {
+        lineParser.push(data);
     }
 
-    GTTPacket* GTTParser::getPacket() {
+    std::unique_ptr<GTTPacket> GTTParser::getPacket() {
         std::string line;
         try {
             while (true) {
                 switch (datapos) {
                     case dataposFirstLine:
                         // Allocate a new packet
-                        if (currentPkt == NULL)
-                            currentPkt = new GTTPacket();
+                        if (!currentPkt) {
+                            currentPkt.reset(new GTTPacket());
+                        }
+                        currentSize = 0;
 
                         // Read first line
                         if (!lineParser.popLine(line))
@@ -76,18 +71,18 @@ namespace Epyx
                         datapos = dataposContent;
                         /* Go through */
                     case dataposContent:
-                        if (currentPkt->size > 0) {
+                        if (currentSize > 0) {
                             // Read body
-                            char *body = new char[currentPkt->size];
-                            if (!lineParser.popData(body, currentPkt->size)) {
-                                delete[] body;
+                            byte_str body;
+                            if (!lineParser.popData(&body, currentSize)) {
                                 return NULL;
                             }
-                            currentPkt->body = body;
-                            body = NULL;
+                            currentPkt->body.swap(body);
                         }
-                        GTTPacket* pkt = currentPkt;
-                        currentPkt = NULL;
+                        std::unique_ptr<GTTPacket> pkt;
+                        pkt.swap(currentPkt);
+                        currentPkt.reset();
+                        currentSize = 0;
                         this->startPacket();
                         return pkt;
                 }
@@ -168,10 +163,10 @@ namespace Epyx
 
         // Content length
         if (!strcasecmp(flagName.c_str(), "content-length")) {
-            if (currentPkt->size > 0)
+            if (currentSize > 0)
                 throw ParserException("GTTParser", "content-length flag has already appeared");
-            currentPkt->size = String::toInt(flagValue.c_str());
-            if (currentPkt->size <= 0)
+            currentSize = String::toInt(flagValue);
+            if (currentSize <= 0)
                 throw ParserException("GTTParser", "not valid body size, body size should be a positive integer");
         } else {
             currentPkt->headers[flagName] = flagValue;

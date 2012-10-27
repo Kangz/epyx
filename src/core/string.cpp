@@ -9,7 +9,8 @@
 namespace Epyx
 {
     const char String::spaces[] = " \t\n\v\f\r";
-    const char String::crlf[] = "\r\n";
+    const std::string String::crlf("\r\n");
+    const byte_str String::crlf_bytes((byte*) "\r\n");
 
     std::string& String::ltrim(std::string& str) {
         str.erase(0, str.find_first_not_of(spaces));
@@ -38,20 +39,29 @@ namespace Epyx
     }
 
     long String::toInt(const std::string& s) {
-        return String::toInt(s.c_str());
+        std::stringstream ss(s);
+        long l;
+        try {
+            ss >> l;
+            if (ss.fail())
+                throw new std::exception();
+        } catch (std::exception& e) {
+            throw ParserException("String::toInt", "Invalid characters");
+        }
+        return l;
     }
 
-    long String::toInt(const char* str) {
-        char *endptr = NULL;
-        long l = strtol(str, &endptr, 10);
-        EPYX_ASSERT(endptr != NULL);
-        if (*endptr == '\0')
-            return l;
-
-        // An error happened
-        if (endptr == str && l == 0)
-            throw ParserException("String::toInt", "strtol");
-        throw ParserException("String::toInt", "Invalid characters");
+    unsigned long String::toULong(const std::string& s) {
+        std::stringstream ss(s);
+        unsigned long l;
+        try {
+            ss >> l;
+            if (ss.fail())
+                throw new std::exception();
+        } catch (std::exception& e) {
+            throw ParserException("String::toInt", "Invalid characters");
+        }
+        return l;
     }
 
     std::string String::fromInt(int n) {
@@ -64,11 +74,5 @@ namespace Epyx
         std::stringstream out;
         out << n;
         return out.str();
-    }
-
-    char* String::toNewChar(const std::string& s) {
-        char* res = new char[s.length()];
-        memcpy(res, s.c_str(), s.length());
-        return res;
     }
 }

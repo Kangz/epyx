@@ -71,9 +71,8 @@ namespace DHT
          * @param myself the N2np node that received the message (in case we forgot)
          * @param senderId the N2NP sender id
          * @param data the raw data
-         * @param dataSize and its size
          */
-        void fromN2NP(N2NP::Node& myself, N2NP::NodeId senderId, const char* data, unsigned int dataSize);
+        void fromN2NP(N2NP::Node& myself, N2NP::NodeId senderId, const byte_str& data);
 
         /**
          * @private send

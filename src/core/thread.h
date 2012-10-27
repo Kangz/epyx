@@ -97,7 +97,7 @@ namespace Epyx
 
         /**
          * @brief Set the name of the running thread
-         * @param the name of the thread
+         * @param name the name of the thread
          */
         static void setName(const std::string& name);
 

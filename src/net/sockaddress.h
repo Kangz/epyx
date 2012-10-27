@@ -52,7 +52,7 @@ namespace Epyx
         /**
          * @brief Create an address with an Address instance and port
          * @param addr Address instance
-         * @param ipVersion 4 or 6
+         * @param port
          */
         SockAddress(const IpAddress& addr, unsigned short port);
         /**

@@ -37,18 +37,18 @@ void test_command(Epyx::N2NP::Node& myNode, Epyx::N2NP::NodeId nodeids[], unsign
             Epyx::log::debug << "[Cli] Sending " << msg << " to " << nodeid << Epyx::log::endl;
 
             // Send !
-            myNode.send(nodeid, "TEST", msg.c_str(), msg.length() + 1);
+            myNode.send(nodeid, "TEST", string2bytes_c(msg));
         }
     }
 }
 class Ponger :public Epyx::N2NP::Module
 {
 public:
-    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size);
+    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const Epyx::byte_str& data);
 };
 
-void Ponger::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size) {
-    if (data == NULL) {
+void Ponger::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const Epyx::byte_str& data) {
+    if (data.empty()) {
         // If no data was received, pong with null
         Epyx::log::debug << "[Node " << node.getId() << "] Recv from " << from
             << ": (null)" << Epyx::log::endl;
@@ -56,27 +56,26 @@ void Ponger::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const cha
         return;
     }
     Epyx::log::debug << "[Node " << node.getId() << "] Recv from " << from << ": `"
-        << data << "'" << Epyx::log::endl;
+        << bytes2string_c(data) << "'" << Epyx::log::endl;
     // Send a pong with the same data
     // .. or not
-    std::string pongstr(data, size);
+    std::string msg = bytes2string_c(data);
+    if (!strcasecmp(msg.c_str(), "o<"))
+        msg = "PAN !";
+    else if (!strcasecmp(msg.c_str(), "Question?"))
+        msg = "The answer is 42.";
 
-    if (!strcasecmp(data, "o<"))
-        pongstr = "PAN !";
-    else if (!strcasecmp(data, "Question?"))
-        pongstr = "The answer is 42.";
-
-    node.send(from, "PONG", pongstr.c_str(), pongstr.length() + 1);
+    node.send(from, "PONG", string2bytes_c(msg));
 }
 class Displayer :public Epyx::N2NP::Module
 {
 public:
-    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size);
+    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const Epyx::byte_str& data);
 };
 
-void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size) {
+void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const Epyx::byte_str& data) {
     Epyx::log::debug << "[Node " << node.getId() << "] Pong from " << from << ": `"
-        << data << "'" << Epyx::log::endl;
+        << bytes2string_c(data) << "'" << Epyx::log::endl;
 }
 
 /**

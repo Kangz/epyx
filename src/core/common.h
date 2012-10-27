@@ -21,6 +21,7 @@
 #define EPYX_CORE_COMMON_H
 
 #include <unistd.h>
+#include "byte.h"
 #include "assert.h"
 #include "string.h"
 #include "exception.h"

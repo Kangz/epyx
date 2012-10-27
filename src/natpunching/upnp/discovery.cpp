@@ -29,9 +29,9 @@ namespace Epyx
             //log::debug << data << log::endl;
 
             // Eat data with HTTP parser
-            htpars.eat(data, size);
-            GTTPacket *pkt = htpars.getPacket();
-            if (pkt == NULL) {
+            htpars.eat(byte_str((const byte*)data, size));
+            std::unique_ptr<GTTPacket> pkt = htpars.getPacket();
+            if (pkt) {
                 // Incomplete packet, there may be an error
                 if (htpars.getError(error)) {
                     log::error << "HTTP Parser error during discovery:\n"
@@ -48,7 +48,6 @@ namespace Epyx
                 // Return location
                 uri = new URI(pkt->headers["location"]);
             }
-            delete pkt;
             return uri;
         }
     }

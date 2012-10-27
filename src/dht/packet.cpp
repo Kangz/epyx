@@ -96,7 +96,7 @@ namespace DHT
         }else if(pkt.method == "FOUND"){
             method = M_FOUND;
             if(pkt.headers.count("connectionid") == 0 || pkt.headers.count("count") == 0 ||
-               pkt.headers.count("status") == 0 || !pkt.body){
+               pkt.headers.count("status") == 0 || pkt.body.empty()){
                 throw;
             }
             this->getValueFromGTT(pkt);
@@ -198,7 +198,8 @@ namespace DHT
             status = String::toInt(pkt.headers["status"]);
         }
         if(! useStatus || status == 0){
-            value = std::string(pkt.body, pkt.size);
+            // TO SEE
+            value = std::string((const char*)(pkt.body.c_str()), pkt.body.size());
         }else{
             value = std::string("");
         }
@@ -209,11 +210,9 @@ namespace DHT
             pkt->headers["status"] = String::fromInt(status);
         }
         if (! useStatus || status == 0) {
-            pkt->body = String::toNewChar(value);
-            pkt->size = value.size();
+            pkt->body = string2bytes_c(value);
         } else {
-            pkt->body = NULL;
-            pkt->size = 0;
+            pkt->body = byte_str();
         }
     }
 

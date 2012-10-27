@@ -102,16 +102,17 @@ namespace Epyx
         /**
          * @brief NetSelect of every socket
          */
-        NetSelect *netsel;
+        std::unique_ptr<NetSelect> netsel;
 
         /**
          * @brief Relay (one or none)
          */
-        N2NP::Relay *relay;
+        std::shared_ptr<N2NP::Relay> relay;
         int nsRelayId;
 
         // Node index (map index => index)
         atom::Map<int, int> nodeIndexes;
+
         class OpenConnThread : public Thread
         {
         public:

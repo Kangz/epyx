@@ -27,7 +27,6 @@
 
 namespace Epyx
 {
-
     /**
      * @class NetSelectTCPServer
      *
@@ -41,7 +40,7 @@ namespace Epyx
      *
      * TSelSock needs to have a constructor TSelSock(Socket *sock, TParam *param)
      */
-    template<class T ,typename TP>class NetSelectTCPServer : public NetSelectReader
+    template<class T, typename TP>class NetSelectTCPServer : public NetSelectReader
     {
     public:
         /**
@@ -49,7 +48,7 @@ namespace Epyx
          *
          * NOTE: TCPServer *srv is DELETED by the desctructor
          */
-        NetSelectTCPServer(TCPServer *srv, TP *param);
+        NetSelectTCPServer(TCPServer *srv, TP param);
         ~NetSelectTCPServer();
 
         int getFileDescriptor() const;
@@ -63,7 +62,7 @@ namespace Epyx
         TCPServer *srv;
 
         // Constructor parameter
-        TP *param;
+        TP param;
     };
 }
 

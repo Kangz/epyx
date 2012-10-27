@@ -24,7 +24,7 @@ namespace Epyx {
         class Dispatcher : public N2NP::Module
         {
             public:
-                void fromN2NP(N2NP::Node &node, N2NP::NodeId from, const char *data, unsigned int size);
+                void fromN2NP(N2NP::Node &node, N2NP::NodeId from, const byte_str& data);
         };
         
     } // namespace DirectConnection

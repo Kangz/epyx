@@ -25,9 +25,9 @@ namespace Epyx
             std::string error;
 
             // Eat data with HTTP parser
-            htpars.eat(data, size);
-            GTTPacket *pkt = htpars.getPacket();
-            if (pkt == NULL) {
+            htpars.eat(byte_str((const byte*)data, size));
+            std::unique_ptr<GTTPacket> pkt = htpars.getPacket();
+            if (pkt) {
                 // Incomplete packet, there may be an error
                 if (htpars.getError(error)) {
                     log::error << "HTTP Parser error during rootDesc parsing:\n"
@@ -40,10 +40,9 @@ namespace Epyx
             std::map<std::string, std::string> *services = new std::map<std::string, std::string>();
 
             TiXmlDocument domRootDesc;
-            domRootDesc.Parse(pkt->body);
+            domRootDesc.Parse((const char*)pkt->body.c_str());
             TiXmlElement *node = domRootDesc.FirstChildElement()->FirstChildElement();
             this->parseRootDescFile(node, services);
-            delete pkt;
             return services;
         }
 

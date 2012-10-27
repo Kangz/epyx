@@ -85,7 +85,7 @@ namespace Epyx
             // XML Data Built. Now we export it into command
             TiXmlPrinter printer = TiXmlPrinter();
             printer.SetIndent("    ");
-            printer.SetLineBreak(String::crlf);
+            printer.SetLineBreak(String::crlf.c_str());
             dom_command.Accept(&printer);
             std::string command = printer.CStr();
 
@@ -112,9 +112,9 @@ namespace Epyx
 
         CommandResult* Command::eat(const char *data, long size) {
             // Eat data with HTTP parser
-            htpars.eat(data, size);
-            GTTPacket *pkt = htpars.getPacket();
-            if (pkt == NULL) {
+            htpars.eat(byte_str((const byte*)data, size));
+            std::unique_ptr<GTTPacket> pkt = htpars.getPacket();
+            if (pkt) {
                 // Incomplete packet, there may be an error
                 std::string error;
                 if (htpars.getError(error)) {
@@ -125,12 +125,12 @@ namespace Epyx
             }
 
             TiXmlDocument dom_answer;
-            dom_answer.Parse(pkt->body, 0, TIXML_DEFAULT_ENCODING);
+            dom_answer.Parse((const char*)pkt->body.c_str(), 0, TIXML_DEFAULT_ENCODING);
 
             // DEBUG
             TiXmlPrinter printer = TiXmlPrinter();
             printer.SetIndent("    ");
-            printer.SetLineBreak(String::crlf);
+            printer.SetLineBreak(String::crlf.c_str());
             dom_answer.Accept(&printer);
             log::debug << "UPnP::cmd::answer has code " << pkt->method << log::endl;
             //log::debug << printer.CStr() << log::endl;
@@ -150,8 +150,6 @@ namespace Epyx
                 // Normally, child is of form <Name>Value</Name>
                 res->vars[child->Value()] = child->FirstChild()->Value();
             }
-
-            delete pkt;
             return res;
         }
     }

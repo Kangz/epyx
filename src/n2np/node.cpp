@@ -19,16 +19,16 @@ namespace Epyx
 
         Node::Node(const SockAddress& addr)
         :NetSelectSocket(new TCPSocket(addr)), hasId(false), curId(0) {
-            this->send(NodeId("", addr), "ID", NULL, 0);
+            this->send(NodeId("", addr), "ID", byte_str());
         }
 
         bool Node::send(const NodeId& to, const std::string& method,
-            const char *data, unsigned long size, bool store) {
+            const byte_str& data, bool store) {
             if (method != "ID")
                 EPYX_ASSERT(hasId);
 
             // Send packet to the relay by default
-            Packet *n2npPkt = new Packet(method, size, data);
+            std::shared_ptr<Packet> n2npPkt(new Packet(method, data));
             n2npPkt->from = nodeid;
             n2npPkt->to = to;
             n2npPkt->pktID = curId.getIncrement();
@@ -45,53 +45,48 @@ namespace Epyx
 #endif
             }
 
+            // Statistics
+            unsigned int weight = (data.size() > 1000) ? 1000 : data.size();
+            unsigned int cnt = mruNodeIds.getAndLock(to, 0);
+            mruNodeIds.setLocked(to, cnt + weight);
+            mruNodeIds.endUnlock();
+
             //We need to select a socket to send to.
             Socket *selected = directSockets.get(to, NULL);
             if (selected == NULL) {
                 selected = directSockets.get(NodeId(to.getRelay()), NULL);
                 if (selected == NULL) {
-                    selected = &(this->socket());
+                    selected = this->socket().get();
                 }
             }
             EPYX_ASSERT(selected != NULL);
-
-            // Statistics
-            unsigned int weight = (size > 1000) ? 1000 : size;
-            unsigned int cnt = mruNodeIds.getAndLock(to, 0);
-            mruNodeIds.setLocked(to, cnt + weight);
-            mruNodeIds.endUnlock();
-
-            return n2npPkt->send(*selected);
+            return selected->sendBytes(n2npPkt->build());
         }
 
-        void Node::sendAck(Packet *pkt) {
+        void Node::sendAck(const Packet& pkt) {
 #if EPYX_N2NP_NODE_DEBUG
             log::debug << "Acknowledging a packet !" << log::endl;
 #endif
-            std::string s = String::fromUnsignedLong(pkt->pktID);
-            this->send(pkt->from, "ACK", String::toNewChar(s), s.length(), false);
+            std::string s = String::fromUnsignedLong(pkt.pktID);
+            this->send(pkt.from, "ACK", string2bytes_c(s), false);
         }
 
-        void Node::sendErr(Packet *pkt) {
+        void Node::sendErr(const Packet& pkt) {
 #if EPYX_N2NP_NODE_DEBUG
             log::debug << "Erroring a packet !" << log::endl;
 #endif
-            std::string s = String::fromUnsignedLong(pkt->pktID);
-            this->send(pkt->from, "ERR", String::toNewChar(s), s.length(), false);
+            std::string s = String::fromUnsignedLong(pkt.pktID);
+            this->send(pkt.from, "ERR", string2bytes_c(s), false);
         }
 
         bool Node::send(const NodeId& to, const std::string& method,
             const GTTPacket& pkt) {
-            char *data = NULL;
-            unsigned long size = pkt.build(&data);
-            if (data == NULL) {
+            const byte_str payload = pkt.build();
+            if (payload.empty()) {
                 log::error << "N2NP node: Unable to build GTT packet to send" << log::endl;
                 return false;
             }
-            bool result = this->send(to, method, data, size);
-            delete[] data;
-
-            return result;
+            return this->send(to, method, payload);
         }
 
         void Node::addModule(const std::string& method, Module *m) {
@@ -140,15 +135,14 @@ namespace Epyx
             mruNodeIds.endUnlock();
         }
 
-        void Node::eat(const char *data, long size) {
-            gttparser.eat(data, size);
-            GTTPacket *gttpkt = NULL;
+        void Node::eat(const byte_str& data) {
+            gttparser.eat(data);
+            std::unique_ptr<GTTPacket> gttpkt;
             // Loop over each packet
-            while ((gttpkt = gttparser.getPacket()) != NULL) {
+            while (gttpkt = gttparser.getPacket()) {
                 // Build a N2NP packet and post it to the Relay
-                Packet *n2nppkt = new Packet(*gttpkt);
+                std::unique_ptr<Packet> n2nppkt(new Packet(*gttpkt));
                 this->treat(n2nppkt);
-                delete n2nppkt;
             }
             std::string error;
             if (gttparser.getError(error)) {
@@ -158,8 +152,8 @@ namespace Epyx
             }
         }
 
-        void Node::treat(Packet *pkt) {
-            EPYX_ASSERT(pkt != NULL);
+        void Node::treat(const std::unique_ptr<Packet>& pkt) {
+            EPYX_ASSERT(pkt);
 
             // Set node ID
             if (!hasId) {
@@ -174,8 +168,8 @@ namespace Epyx
 
                 // Decode data
                 LineParser parser;
-                parser.push(pkt->data, pkt->size);
-                parser.push(String::crlf, strlen(String::crlf));
+                parser.push(pkt->data);
+                parser.push(String::crlf_bytes);
                 std::string line;
                 while (parser.popLine(line)) {
                     line = String::trim(line);
@@ -207,13 +201,8 @@ namespace Epyx
 
             //Special treatment for internal method ERR and ACK
             if (pkt->method == "ACK") {
-                char* charId = new char[pkt->size + 1];
-                memcpy(charId, pkt->data, pkt->size);
-                charId[pkt->size] = '\0';
-                unsigned long idAcked = String::toInt(charId);
-                Packet *ackedPkt = sentMap.getUnset(idAcked, NULL);
-                if (ackedPkt != NULL) {
-                    delete ackedPkt;
+                unsigned long idAcked = String::toULong(bytes2string_c(pkt->data));
+                if (sentMap.unset(idAcked)) {
 #if EPYX_N2NP_NODE_DEBUG
                     log::debug << "Succesfully erased an acked packed" << log::endl;
 #endif
@@ -224,7 +213,7 @@ namespace Epyx
             }
 
             // Statistics
-            unsigned int weight = (pkt->size > 1000) ? 1000 : pkt->size;
+            size_t weight = (pkt->data.size() > 1000) ? 1000 : pkt->data.size();
             unsigned int cnt = mruNodeIds.getAndLock(pkt->from, 0);
             mruNodeIds.setLocked(pkt->from, cnt + weight);
             mruNodeIds.endUnlock();
@@ -234,19 +223,19 @@ namespace Epyx
             if (moduleToCall == NULL) {
                 log::error << "[Node " << nodeid << "] Unhandled method "
                     << pkt->method << log::endl;
-                this->sendErr(pkt);
+                this->sendErr(*pkt);
                 return;
             }
 
             // Call the module
             try {
-                moduleToCall->fromN2NP(*this, pkt->from, pkt->data, pkt->size);
+                moduleToCall->fromN2NP(*this, pkt->from, pkt->data);
             } catch (MinorException e) {
                 log::error << "[Node " << nodeid << "] Exception " << e << log::endl;
             }
 
             //Everything went right, let's acknowledge the packet.
-            this->sendAck(pkt);
+            this->sendAck(*pkt);
         }
     }
 }

@@ -7,11 +7,9 @@ namespace Epyx
     namespace webm
     {
 
-        FramePacket::FramePacket(void *data, size_t size, unsigned long timestamp,
+        FramePacket::FramePacket(const byte_str& data, unsigned long timestamp,
             unsigned long duration)
-        :data(NULL), size(size), timestamp(timestamp), duration(duration) {
-            this->data = new unsigned char[size];
-            memcpy(this->data, data, size);
+        :data(data), timestamp(timestamp), duration(duration) {
         }
 
         FramePacket::FramePacket(GTTPacket& pkt) {
@@ -20,22 +18,18 @@ namespace Epyx
                 throw ParserException("WebM::FramePacket", "Invalid packet");
 
             }
-            if (pkt.headers.count("duration") == 0 || pkt.headers.count("timestamp") == 0 || pkt.size == 0) {
+            if (pkt.headers.count("duration") == 0 || pkt.headers.count("timestamp") == 0 || pkt.body.empty()) {
                 throw ParserException("WebM::FramePacket", "Invalid packet headers");
             }
 
             //Copy everything from the GTT packet
             timestamp = String::toInt(pkt.headers["timestamp"]);
             duration = String::toInt(pkt.headers["duration"]);
-            size = pkt.size;
-            data = (unsigned char*) pkt.body;
-
-            //Dereference the content of the GTT packet
-            pkt.body = NULL;
-            pkt.size = 0;
+            // Swap packet body
+            data.swap(pkt.body);
         }
 
-        unsigned long FramePacket::build(char **newData) const {
+        byte_str FramePacket::build() const {
             GTTPacket pkt;
 
             //Fill the GTT packet
@@ -43,18 +37,8 @@ namespace Epyx
             pkt.method = "FRAME_PACKET";
             pkt.headers["duration"] = String::fromInt(duration);
             pkt.headers["timestamp"] = String::fromInt(timestamp);
-            pkt.body = (char*) data;
-            pkt.size = size;
-
-            //Return pkt.build()
-            unsigned long result = pkt.build(newData);
-            pkt.body = NULL;
-            pkt.size = 0;
-            return result;
-        }
-
-        FramePacket::~FramePacket() {
-            delete[] data;
+            pkt.body = data;
+            return pkt.build();
         }
     }
 }

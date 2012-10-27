@@ -12,7 +12,6 @@ namespace Epyx
 
         NodeId::NodeId(const SockAddress& relay)
         :name(), relay(relay) {
-            this->name[0] = 0;
         }
 
         NodeId::NodeId(const std::string& name, const SockAddress& relay)
@@ -27,18 +26,6 @@ namespace Epyx
             }
             name = str.substr(0, pos);
             relay = SockAddress(str.substr(pos + 1));
-        }
-
-        NodeId::NodeId(const NodeId& nodeid)
-        :name(nodeid.name), relay(nodeid.relay) {
-        }
-
-        NodeId& NodeId::operator=(const NodeId& nodeid) {
-            if (this != &nodeid) {
-                this->name = nodeid.name;
-                this->relay = nodeid.relay;
-            }
-            return *this;
         }
 
         std::ostream& operator<<(std::ostream& os, const NodeId& nodeid) {
@@ -70,7 +57,6 @@ namespace Epyx
         }
 
         const std::string& NodeId::getName() const {
-
             return name;
         }
 

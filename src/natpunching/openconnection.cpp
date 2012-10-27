@@ -3,6 +3,8 @@
 #include "upnp/openconnect.h"
 #include "../parser/gttpacket.h"
 #include "listener.h"
+#include <unistd.h>
+
 namespace Epyx {
     namespace DirectConnection {
         // In this protocol, the client is stupid and just obey orders

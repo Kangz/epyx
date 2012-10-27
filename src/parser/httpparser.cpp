@@ -4,6 +4,7 @@
 
 namespace Epyx
 {
+
     void HTTPParser::parseFirstLine(const std::string& line) {
         const char *l = line.c_str();
         EPYX_ASSERT(line.length() != 0);
@@ -59,9 +60,9 @@ namespace Epyx
         // Skip spaces
         while (l[i] == ' ')
             i++;
-        if (l[i] == 0){
+        if (l[i] == 0) {
             //throw ParserException("HTTPParser", "flag without value"); // Why should it bug?
-            currentPkt->headers[flagName]="";
+            currentPkt->headers[flagName] = "";
             return;
         }
         // Read value
@@ -75,12 +76,11 @@ namespace Epyx
 
         // Content length
         if (!strcasecmp(flagName.c_str(), "content-length")) {
-            if (currentPkt->size > 0)
+            if (currentSize > 0)
                 throw ParserException("HTTPParser", "content-length flag has already appeared");
-            currentPkt->size = String::toInt(flagValue.c_str());
-            if (currentPkt->size <= 0)
+            currentSize = String::toInt(flagValue);
+            if (currentSize <= 0)
                 throw ParserException("HTTPParser", "not valid body size, body size should be a positive integer");
-            currentPkt->body = new char[currentPkt->size];
         } else {
             currentPkt->headers[flagName] = flagValue;
         }

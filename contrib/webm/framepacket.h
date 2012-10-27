@@ -5,32 +5,28 @@
 #ifndef EPYX_WEBM_FRAMEPACKET_H
 #define EPYX_WEBM_FRAMEPACKET_H
 
+#include <boost/noncopyable.hpp>
 #include <stddef.h>
+#include "../../src/core/byte.h"
 #include "../../src/parser/gttpacket.h"
 
 namespace Epyx
 {
     namespace webm
     {
-        class FramePacket
+        class FramePacket : private boost::noncopyable
         {
         public:
-            FramePacket(void *data, size_t size, unsigned long timestamp, unsigned long duration);
+            FramePacket(const byte_str& data, unsigned long timestamp, unsigned long duration);
             FramePacket(GTTPacket& pkt);
-            ~FramePacket();
 
-            unsigned long build(char **newData) const;
+            byte_str build() const;
 
-            unsigned char *data;
-            size_t size;
+            byte_str data;
 
             // Timestamp in miliseconds
             unsigned long timestamp;
             unsigned long duration;
-
-        private:
-            FramePacket(const FramePacket&);
-            const FramePacket& operator=(const FramePacket&);
         };
     }
 }

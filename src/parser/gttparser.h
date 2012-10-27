@@ -24,6 +24,7 @@
 #include "gttpacket.h"
 #include "lineparser.h"
 #include <ctype.h>
+#include <memory>
 #include <string>
 
 namespace Epyx
@@ -40,10 +41,6 @@ namespace Epyx
          * @brief Constructor
          */
         GTTParser();
-        /**
-         * @brief Destructor
-         */
-        ~GTTParser();
 
         /**
          * @brief reset internal state
@@ -54,20 +51,19 @@ namespace Epyx
          * @brief get error, if any
          * @return true if there is an error
          */
-        bool getError(std::string& userErr);
+        bool getError(std::string& userErr) const;
 
         /**
          * @brief eat some fresh data
          * @param data data to eat
-         * @param size available size
          */
-        void eat(const char *data, long size);
+        void eat(const byte_str& data);
 
         /**
          * @brief get the last read packet
-         * @return a packet or NULL. If not NULL, the caller is responsible of delete this packet
+         * @return a packet or an empty shared pointer.
          */
-        GTTPacket* getPacket();
+        std::unique_ptr<GTTPacket> getPacket();
 
     protected:
         /**
@@ -75,7 +71,12 @@ namespace Epyx
          *
          * This is protected to allow children parsers to fill this structure.
          */
-        GTTPacket *currentPkt;
+        std::unique_ptr<GTTPacket> currentPkt;
+
+        /**
+         * @brief Current GTT Packet body size
+         */
+        size_t currentSize;
 
         /**
          * @brief Parse the first line of GTT
@@ -110,8 +111,6 @@ namespace Epyx
          * @brief start a new packet, without cleaning read data
          */
         void startPacket();
-
-        void setError(const char *msg);
     };
 }
 

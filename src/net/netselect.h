@@ -21,9 +21,10 @@
 #ifndef EPYX_NETSELECT_H
 #define EPYX_NETSELECT_H
 
-#include "../core/common.h"
-#include "../core/atom/counter.h"
-#include "../core/atom/map.h"
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include "../core/worker-pool.h"
 #include "netselectreader.h"
 
 namespace Epyx
@@ -46,7 +47,7 @@ namespace Epyx
          */
         NetSelect(int numworkers, const std::string& workerName);
         /**
-         * @brief Desctructor
+         * @brief Destructor
          */
         ~NetSelect();
 
@@ -56,8 +57,16 @@ namespace Epyx
          * After this call, nsr belongs to this NetSelect and shoulf no longer
          * be used by the caller. Moreover, nsr needs to have been created with
          * new (because it is destroyed by delete)
+         * 
+         * @param nsr
          */
         int add(NetSelectReader *nsr);
+
+        /**
+         * @brief add a new reader
+         * @param nsr shared pointer
+         */
+        int add(const std::shared_ptr<NetSelectReader>& nsr);
 
         /**
          * @brief Kill a reader
@@ -70,7 +79,7 @@ namespace Epyx
          * @param id
          * @return the reader, or NULL if it does not exist
          */
-        NetSelectReader* get(int id);
+        std::shared_ptr<NetSelectReader> get(int id);
 
         /**
          * @brief Get the number of workers
@@ -93,8 +102,8 @@ namespace Epyx
          */
         struct NetSelectReaderInfo
         {
-            // Reader
-            NetSelectReader* reader;
+            // Reader, which is shared to avoid lock between workers
+            std::shared_ptr<NetSelectReader> reader;
 
             // It is alive
             bool alive;
@@ -102,12 +111,14 @@ namespace Epyx
             // It has data to be read (it is in the blocking queue)
             bool inQueue;
 
-            NetSelectReaderInfo(NetSelectReader * nsr);
-            ~NetSelectReaderInfo();
+            NetSelectReaderInfo(const std::shared_ptr<NetSelectReader>& nsr);
         };
 
-        atom::Counter readersId;
-        atom::Map<int, NetSelectReaderInfo*> readers;
+        std::atomic<int> lastId;
+        std::mutex readersMutex;
+        std::map<int, std::unique_ptr<NetSelectReaderInfo> > readers;
+
+        // Workers class
         class Workers : public WorkerPool<int>
         {
         public:

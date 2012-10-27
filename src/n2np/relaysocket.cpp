@@ -6,35 +6,34 @@ namespace Epyx
     namespace N2NP
     {
 
-        RelaySocket::RelaySocket(Socket *sock, Relay *relay)
+        RelaySocket::RelaySocket(Socket *sock, const std::shared_ptr<Relay>& relay)
         :NetSelectSocket(sock), relay(relay) {
         }
 
         RelaySocket::~RelaySocket() {
-            // Dettach node
-            EPYX_ASSERT(relay != NULL);
+            // Detach node
+            EPYX_ASSERT(relay);
             relay->detachNode(nodeid);
-            relay = NULL;
         }
 
-        void RelaySocket::eat(const char *data, long size) {
-            EPYX_ASSERT(relay != NULL);
+        void RelaySocket::eat(const byte_str& data) {
+            EPYX_ASSERT(relay);
 
-            gttparser.eat(data, size);
-            GTTPacket *gttpkt = NULL;
+            gttparser.eat(data);
+            std::unique_ptr<GTTPacket> gttpkt;
             // Loop over each packet
-            while ((gttpkt = gttparser.getPacket()) != NULL) {
+            while ((gttpkt = gttparser.getPacket())) {
                 // Build a N2NP packet and post it to the Relay
-                Packet *n2nppkt = new Packet(*gttpkt);
+                std::unique_ptr<Packet> n2nppkt(new Packet(*gttpkt));
                 //There is a special packet that we must treat here
-                if(n2nppkt->method == "ID" && n2nppkt->to == relay->getId()) {
-                    nodeid = relay->attachNode(&this->socket());
-                    if (nodeid.empty())
+                if (n2nppkt->method == "ID" && n2nppkt->to == relay->getId()) {
+                    nodeid = relay->attachNode(this->socket());
+                    if (nodeid.empty()) {
                         log::error << "N2NP: No node ID found" << log::endl;
+                    }
                 } else {
-                    relay->post(n2nppkt);
+                    relay->post(std::move(n2nppkt));
                 }
-                delete gttpkt;
             }
             std::string error;
             if (gttparser.getError(error)) {

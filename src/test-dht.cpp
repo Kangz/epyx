@@ -168,10 +168,9 @@ void test_dhtpacket(){
 class FakeDht : public Epyx::N2NP::Module
 {
 public:
-    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size){
+    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const byte_str& data){
         log::info<<"The fakeDHT received a message:"<<log::endl;
-        std::string toPrint(data, size);
-        log::info<<toPrint<<log::endl;
+        log::info<<bytes2string_c(data)<<log::endl;
     }
 };
 
@@ -184,7 +183,7 @@ void test_dht_n2np(){
 
     // Create relay
     SockAddress addr("127.0.0.1:4242");
-    N2NP::Relay *relay = new N2NP::Relay(addr);
+    std::shared_ptr<N2NP::Relay> relay(new N2NP::Relay(addr));
     selectRelay->add(new N2NP::RelayServer(new TCPServer(addr, 50), relay));
     log::info << "Start Relay " << relay->getId() << log::endl;
 
@@ -222,10 +221,9 @@ void test_dht_n2np(){
         std::string msg = (message); \
         o << "DHT " << (method) << "\r\n"; \
         o << "from: " << fakeId << "\r\n"; \
-        if(msg.length() != 0) o << (msg); \
-        else o << "\r\n"; \
+        o << (msg.empty() ?  "\r\n" : msg); \
         std::string s = o.str(); \
-        dht.fromN2NP(node0, node1.getId(), s.c_str(), s.length()); \
+        dht.fromN2NP(node0, node1.getId(), string2bytes_c(s)); \
     }
 
     log::info << "Sending a PING to the DHT" << log::endl;

@@ -24,12 +24,12 @@
 #include "../core/worker-pool.h"
 #include "../core/timeout.h"
 #include "../core/atom/counter.h"
-#include "../core/atom/map.h"
 #include "../net/sockaddress.h"
 #include "../net/socket.h"
 #include "../net/netselecttcpserver.h"
 #include "packet.h"
 #include "relaysocket.h"
+#include <map>
 
 namespace Epyx
 {
@@ -48,15 +48,13 @@ namespace Epyx
              */
             Relay(const SockAddress& addr);
 
-            ~Relay();
-
             /**
              * @brief Attach a new node to the relay
              * @param sock socket to communicate with
              * @return new node ID
              * @throw Exception if there is a problem
              */
-            NodeId attachNode(Socket *sock);
+            NodeId attachNode(const std::shared_ptr<Socket>& sock);
 
             /**
              * @brief Detach a node
@@ -99,15 +97,15 @@ namespace Epyx
             typedef struct NodeInfo
             {
                 NodeId id;
-                // Important: NEVER delete this socket as it is managed by
-                // RelaySocket (and NetSelect)
-                Socket *sock;
-                NodeInfo(const NodeId& id, Socket * sock);
+                // This socket as it is shared with RelaySocket (and NetSelect)
+                std::shared_ptr<Socket> sock;
+                NodeInfo(const NodeId& id, const std::shared_ptr<Socket>& sock);
                 ~NodeInfo();
             } NodeInfo;
 
             // Map of known nodes (with its Mutex)
-            atom::Map<std::string, NodeInfo*> nodes;
+            std::mutex nodesMutex;
+            std::map<std::string, std::unique_ptr<NodeInfo> > nodes;
 
             // use a counter to attribute nodes
             atom::Counter nodeNextId;

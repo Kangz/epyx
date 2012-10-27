@@ -55,11 +55,11 @@ namespace Epyx
              * @param to destination Node ID
              * @param method
              * @param data
-             * @param size
+             * @param store
              * @return true on success
              */
             bool send(const NodeId& to, const std::string& method,
-                    const char *data, unsigned long size, bool store = true);
+                    const byte_str& data, bool store = true);
 
             /**
              * @brief Send an ancapsulated GTT packet packet to another node
@@ -87,7 +87,7 @@ namespace Epyx
              * @param recipient The other end of the link, as a nodeId
              * @param socket The socket to be given
              */
-            void offerDirectConn(const NodeId& recipient, Socket *socket);
+            void offerDirectConn(const NodeId& recipient, Socket* socket);
 
             /**
              * @brief Get node ID
@@ -120,15 +120,15 @@ namespace Epyx
             /**
              * @brief Eat data and treat each N2NP packet it contains
              */
-            void eat(const char *data, long size);
+            void eat(const byte_str& data);
 
         private:
             /**
              * @brief Treat a N2NP packet
              */
-            void treat(Packet *pkt);
-            void sendAck(Packet *pkt);
-            void sendErr(Packet *pkt);
+            void treat(const std::unique_ptr<Packet>& pkt);
+            void sendAck(const Packet& pkt);
+            void sendErr(const Packet& pkt);
 
             // This ID
             NodeId nodeid;
@@ -145,7 +145,7 @@ namespace Epyx
             atom::Map<NodeId, unsigned int> mruNodeIds;
 
             atom::Counter curId;
-            atom::Map<unsigned long, Packet*> sentMap;
+            atom::Map<unsigned long, std::shared_ptr<Packet> > sentMap;
 
             // Stockage for sockets
             atom::Map<NodeId, Socket*> directSockets;

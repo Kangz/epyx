@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 #include <ostream>
+#include "../core/byte.h"
 #include "../net/socket.h"
 
 namespace Epyx
@@ -37,14 +38,7 @@ namespace Epyx
     {
     public:
         /**
-         * @brief Constructor
-         */
-        GTTPacket();
-
-        ~GTTPacket();
-
-        /**
-         * @brief Print a short packet desciption in an output stream (for debug)
+         * @brief Print a short packet description in an output stream (for debug)
          * @param os output stream
          * @param pkt
          */
@@ -52,12 +46,9 @@ namespace Epyx
 
         /**
          * @brief Build the raw text query for this GTT Packet
-         * @param newData newly-allocated buffer with ready-to-send data
-         * @return size of *data
-         *
-         * Note: Please delete *newData with delete[]
+         * @return bytes string
          */
-        unsigned long build(char **newData) const;
+        byte_str build() const;
 
         /**
          * @brief Protocol name
@@ -72,13 +63,9 @@ namespace Epyx
          */
         std::map<std::string, std::string> headers;
         /**
-         * @brief Content size
-         */
-        unsigned long size;
-        /**
          * @brief Content body
          */
-        const char *body;
+        byte_str body;
     };
 }
 

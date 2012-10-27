@@ -13,14 +13,14 @@ namespace DHT
     Node::~Node() {
     }
 
-    void Node::fromN2NP(N2NP::Node& myself, N2NP::NodeId senderId, const char* data, unsigned int dataSize) {
+    void Node::fromN2NP(N2NP::Node& myself, N2NP::NodeId senderId, const byte_str& data) {
         //Preprocess the packet for the InternalNode
         //first make it a GTTPacket
-        gttParser.eat(data, dataSize);
-        GTTPacket* gtt_packet = gttParser.getPacket();
+        gttParser.eat(data);
+        std::unique_ptr<GTTPacket> gtt_packet = gttParser.getPacket();
         gttParser.reset();
 
-        if(gtt_packet == NULL){
+        if(!gtt_packet){
             log::error << "The DHT received an incomplete packet" << log::endl;
             return;
         }
@@ -28,9 +28,6 @@ namespace DHT
         //TODO: check that the packet is well-formed
         //Then make it a DHT Packet
         Packet* pkt = new Packet(*gtt_packet);
-        delete gtt_packet;
-
-        //Process it
         n.processPacket(*pkt, *(new Peer(pkt->from, senderId)));
     }
 

@@ -14,30 +14,27 @@ namespace Epyx
             log::info << "Relay: Start " << relayId << log::endl;
         }
 
-        Relay::~Relay() {
-            this->detachAllNodes();
-        }
-
-        NodeId Relay::attachNode(Socket *sock) {
-            EPYX_ASSERT(sock != NULL);
+        NodeId Relay::attachNode(const std::shared_ptr<Socket>& sock) {
+            EPYX_ASSERT(sock);
 
             // Build a random unique node name
             std::ostringstream nodeNameStream;
             long number = nodeNextId.getIncrement();
-            if(number == 1){
+            if (number == 1) {
                 nodeNameStream << "self";
-            }else{
+            } else {
                 nodeNameStream << String::fromInt(nodeNextId.getIncrement())
                     << '-' << sock->getAddress();
             }
             const std::string nodeName = nodeNameStream.str();
             const NodeId nodeid(nodeName.c_str(), relayAddr);
 
-            // Make node information
-            NodeInfo *node = new NodeInfo(nodeid, sock);
-
-            // Insert node
-            nodes.set(nodeName, node);
+            // Insert new node information
+            {
+                std::unique_ptr<NodeInfo> node(new NodeInfo(nodeid, sock));
+                std::lock_guard<std::mutex> lock(nodesMutex);
+                nodes[nodeName].swap(node);
+            }
 
             log::info << "Relay: Attach node " << nodeid
                 << " from " << sock->getAddress() << log::endl;
@@ -46,13 +43,10 @@ namespace Epyx
             std::ostringstream dataStream;
             dataStream << "IP: " << sock->getAddress() << String::crlf;
             const std::string dataString = dataStream.str();
-
-            // Send node ID to node
-            Packet pkt("ID", dataString.length(), dataString.c_str());
-            pkt.method = "ID";
+            Packet pkt("ID", string2bytes_c(dataString));
             pkt.from = relayId;
             pkt.to = nodeid;
-            pkt.send(*sock);
+            sock->sendBytes(pkt.build());
 
             // Return ID
             return nodeid;
@@ -63,16 +57,14 @@ namespace Epyx
                 return false;
 
             log::info << "Relay: Detach node " << nodeid << log::endl;
-
-            NodeInfo *node = nodes.getUnset(nodeid.getName(), NULL);
-            if (node != NULL) {
-                delete node;
-            }
+            std::lock_guard<std::mutex> lock(nodesMutex);
+            nodes.erase(nodeid.getName());
             return true;
         }
 
         bool Relay::waitForAllDetach(const Timeout& timeout) {
             while (!timeout.hasExpired()) {
+                std::lock_guard<std::mutex> lock(nodesMutex);
                 if (nodes.empty())
                     return true;
             }
@@ -81,14 +73,8 @@ namespace Epyx
 
         void Relay::detachAllNodes() {
             // Delete every Node information
-            for (atom::Map<std::string, NodeInfo*>::iterator i = nodes.beginLock();
-                !nodes.isEnd(i); i++) {
-                if (i->second != NULL) {
-                    delete(i->second);
-                    i->second = NULL;
-                }
-            }
-            nodes.endUnlock();
+            std::lock_guard<std::mutex> lock(nodesMutex);
+            nodes.clear();
         }
 
         const NodeId& Relay::getId() const {
@@ -104,7 +90,7 @@ namespace Epyx
             if (toAddr != relayAddr) {
                 TCPSocket toSock(toAddr);
                 //log::info << "Relay " << relayId << ": Transmit " << *pkt << log::endl;
-                if (!pkt->send(toSock)) {
+                if (!toSock.sendBytes(pkt->build())) {
                     log::error << "[Relay " << relayId << "] Unable to transmit packet "
                         << *pkt << log::endl;
                     return;
@@ -114,9 +100,10 @@ namespace Epyx
             }
 
             // Packet is for one of my nodes. Let's find it in the map !
-            NodeInfo *node = nodes.get(pkt->to.getName(), NULL);
-
-            if (node == NULL) {
+            std::lock_guard<std::mutex> lock(nodesMutex);
+            // node is an iterator on a map
+            auto nodeit = nodes.find(pkt->to.getName());
+            if (nodeit == nodes.end()) {
                 log::error << "[Relay " << relayId << "] Destination not found: "
                     << *pkt << log::endl;
                 return;
@@ -124,23 +111,21 @@ namespace Epyx
 
             // Send packet
             //log::info << "Relay " << relayId << ": Send " << *pkt << log::endl;
-            EPYX_ASSERT(node->sock != NULL);
-            if (!pkt->send(*(node->sock))) {
+            if (!nodeit->second->sock->sendBytes(pkt->build())) {
                 log::error << "[Relay " << relayId << "] Unable to send packet "
                     << *pkt << log::endl;
                 return;
             }
         }
 
-        Relay::NodeInfo::NodeInfo(const NodeId& id, Socket *sock)
+        Relay::NodeInfo::NodeInfo(const NodeId& id, const std::shared_ptr<Socket>& sock)
         :id(id), sock(sock) {
         }
 
         Relay::NodeInfo::~NodeInfo() {
+            // Close the socket
             if (sock) {
-                // NEVER DELETE THIS SOCKET, but you may close it
                 sock->close();
-                sock = NULL;
             }
         }
     }

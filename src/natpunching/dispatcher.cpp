@@ -9,10 +9,10 @@
 
 namespace Epyx {
     namespace DirectConnection {
-        void Dispatcher::fromN2NP(N2NP::Node &node, N2NP::NodeId from, const char *data, unsigned int size){
+        void Dispatcher::fromN2NP(N2NP::Node &node, N2NP::NodeId from, const byte_str& data){
             GTTParser gttpars;
-            gttpars.eat(data,size);
-            GTTPacket* packet = gttpars.getPacket();
+            gttpars.eat(data);
+            std::unique_ptr<GTTPacket> packet = gttpars.getPacket();
             std::string method = packet->method;
             if (method == "OPENCONNECTION"){
                 DirectConnection::Module::NodeConnect.set(from, DirectConnection::Module::openDirectConnection(node,from));

@@ -35,15 +35,14 @@ namespace Epyx
          */
         class Module
         {
-            public:
-                /**
-                 * @brief Gets relevant info from N2NP
-                 * @param node the node which received the message (useful for replying)
-                 * @param from the nodeId of the sender
-                 * @param data your data
-                 * @param size the data size
-                 */
-                virtual void fromN2NP(Node& node, NodeId from, const char* data, unsigned int size)=0;
+        public:
+            /**
+             * @brief Gets relevant info from N2NP
+             * @param node the node which received the message (useful for replying)
+             * @param from the nodeId of the sender
+             * @param data your data
+             */
+            virtual void fromN2NP(Node& node, NodeId from, const byte_str& data) = 0;
         };
     }
 }

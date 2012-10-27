@@ -19,7 +19,7 @@ class Displayer :public Epyx::N2NP::Module
 {
 public:
     Displayer(Demo *demo, const std::string& pseudo_ext);
-    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size);
+    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const byte_str& data);
 private:
     Demo *demo;
     std::string pseudo_ext;
@@ -52,8 +52,8 @@ Displayer::Displayer(Demo *demo, const std::string& pseudo_ext)
     EPYX_ASSERT(demo != NULL);
 }
 
-void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size) {
-    demo->receive(pseudo_ext, data);
+void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const byte_str& data) {
+    demo->receive(pseudo_ext, bytes2string_c(data));
     demo->updateDisplay();
 }
 
@@ -118,11 +118,9 @@ bool Demo::run() {
             if(msg.length()>=1)
             msg.erase(msg.length()-1);
             
-        }
-        else
-        msg.append(1,c);
+        } else msg.append(1,c);
         if (c == '\n') {
-            node->send(remoteNodeid, "DISPLAY", msg.c_str(), msg.length() + 1);
+            node->send(remoteNodeid, "DISPLAY", string2bytes(msg));
             receive(pseudo, msg, true);
             msg.assign("");
         }

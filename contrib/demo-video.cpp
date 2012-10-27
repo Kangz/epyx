@@ -24,7 +24,7 @@ class Displayer :public Epyx::N2NP::Module
 {
 public:
     Displayer(Demo *demo, const std::string& pseudo_ext);
-    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size);
+    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const byte_str& data);
 private:
     Demo *demo;
     std::string pseudo_ext;
@@ -34,7 +34,7 @@ class VideoDisplayer :public Epyx::N2NP::Module
 {
 public:
     VideoDisplayer(Demo *demo);
-    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size);
+    virtual void fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const byte_str& data);
 private:
     Demo *demo;
 };
@@ -87,8 +87,8 @@ Displayer::Displayer(Demo *demo, const std::string& pseudo_ext)
     EPYX_ASSERT(demo != NULL);
 }
 
-void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size) {
-    demo->receive(pseudo_ext, data);
+void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const byte_str& data) {
+    demo->receive(pseudo_ext, bytes2string_c(data));
     demo->updateDisplay();
 }
 
@@ -96,13 +96,12 @@ VideoDisplayer::VideoDisplayer(Demo* demo)
 :demo(demo) {
 }
 
-void VideoDisplayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const char* data, unsigned int size) {
+void VideoDisplayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const byte_str& data) {
     Epyx::GTTParser parser;
-    parser.eat(data, size);
-    GTTPacket* gttpkt = parser.getPacket();
+    parser.eat(data);
+    std::unique_ptr<Epyx::GTTPacket> gttpkt = parser.getPacket();
     webm::FramePacket fpkt(*gttpkt);
     demo->newFrame(fpkt);
-    delete gttpkt;
 }
 
 
@@ -128,10 +127,8 @@ void SenderAndUIThread::run() {
             encoder.encode(rawImage, utime, 0);
             webm::FramePacket* fpkt;
             while ((fpkt = encoder.getPacket()) != NULL) {
-                char* netdata;
-                unsigned long netsize = fpkt->build(&netdata);
-
-                demo->node->send(demo->remoteNodeid, "VIDEO", netdata, netsize);
+                byte_str netdata = fpkt->build();
+                demo->node->send(demo->remoteNodeid, "VIDEO", netdata);
             }
         }
         usleep(1000);
@@ -212,7 +209,7 @@ bool Demo::run() {
         else
         msg.append(1, c);
         if (c == '\n') {
-            node->send(remoteNodeid, "DISPLAY", msg.c_str(), msg.length() + 1);
+            node->send(remoteNodeid, "DISPLAY", string2bytes(msg));
             receive(pseudo, msg, true);
             msg.assign("");
         }

@@ -48,19 +48,20 @@ namespace Epyx
     template<typename T>class WorkerPool : private boost::noncopyable
     {
     public:
+        /**
+         * @brief Internal shortcut for unique_ptr to type T
+         */
         typedef std::unique_ptr<T> TPtr;
 
         /**
          * @brief The WorkerPool constructor
          * @param num_workers the initial number of worker threads
-         * @param deleteMessages tell to delete messages afer a post if set
          * @param name the prefix of the name of the worker threads in the logs
          */
         WorkerPool(int num_workers, const std::string& name);
 
         /**
          * @brief The WorkerPool other constructor
-         * @param deleteMessages tell to delete messages afer a post if set
          */
         WorkerPool();
 

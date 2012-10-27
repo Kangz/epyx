@@ -22,6 +22,7 @@
 #define EPYX_SOCKET_H
 
 #include "sockaddress.h"
+#include "../core/byte.h"
 #include <boost/noncopyable.hpp>
 #include <string>
 
@@ -118,6 +119,12 @@ namespace Epyx
          */
         bool sendAll(const void *data, int size);
         /**
+         * @brief Send all bytes through the network
+         * @param bytes
+         * @return true if all data was sent
+         */
+        bool sendBytes(const byte_str& bytes);
+        /**
          * @brief Send text through the network
          * @param message text to send
          * @return true on success
@@ -138,6 +145,13 @@ namespace Epyx
          * @return true if the buffer is filled
          */
         bool recvAll(void *data, int size);
+        /**
+         * @brief Receive exactly (size) bytes from the network
+         * @param data byte_str pointer
+         * @param size buffer size
+         * @return true if the buffer is filled
+         */
+        bool recvBytes(byte_str *data, int size);
 
     protected:
         /**

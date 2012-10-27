@@ -63,8 +63,8 @@ namespace Epyx
                 // Only use frame packets
                 if (pkt->kind != VPX_CODEC_CX_FRAME_PKT)
                     continue;
-                return new FramePacket(pkt->data.frame.buf, pkt->data.frame.sz,
-                    pkt->data.frame.pts, pkt->data.frame.duration);
+                byte_str data((const byte*)pkt->data.frame.buf, pkt->data.frame.sz);
+                return new FramePacket(data, pkt->data.frame.pts, pkt->data.frame.duration);
             }
             // End of iteration
             iter = NULL;

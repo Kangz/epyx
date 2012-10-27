@@ -7,7 +7,7 @@ bool test_parser() {
     // Build a N2NP packet
     std::string testmethod("Test");
     std::string message("Hello World. Let me introduce you to Epyx.");
-    Epyx::N2NP::Packet pkt(testmethod, message.length(), message.c_str());
+    Epyx::N2NP::Packet pkt(testmethod, string2bytes_c(message));
     pkt.from = Epyx::N2NP::NodeId("Epyx@129.104.13.37:42");
     pkt.to = Epyx::N2NP::NodeId("World@");
     pkt.method = "PING";
@@ -16,26 +16,22 @@ bool test_parser() {
 
     // Raw packet
     Epyx::log::info << "Building packet " << pkt << Epyx::log::endl;
-    char *data = NULL;
-    unsigned long size = pkt.build(&data);
-    Epyx::log::info << "Raw packet:\n" << std::string(data, size) << Epyx::log::endl;
+    Epyx::byte_str data = pkt.build();
+    Epyx::log::info << "Raw packet:\n" << bytes2string_c(data) << Epyx::log::endl;
 
     // Parse
     Epyx::GTTParser parser;
-    Epyx::GTTPacket *gttpkt = NULL;
-    parser.eat(data, size);
+    std::unique_ptr<Epyx::GTTPacket> gttpkt;
+    parser.eat(data);
     gttpkt = parser.getPacket();
-    delete[] data;
-    data = NULL;
-    if (gttpkt == NULL) {
+    data.clear();
+    if (!gttpkt) {
         Epyx::log::info << "Incomplete raw packet :(" << Epyx::log::endl;
         return false;
     }
     Epyx::log::info << "Parsed GTT packet:\n" << *gttpkt << Epyx::log::endl;
     // Create N2NP packet from GTT
     Epyx::N2NP::Packet n2nppkt(*gttpkt);
-    delete gttpkt;
-    gttpkt = NULL;
     Epyx::log::info << "Parsed N2NP packet: " << n2nppkt << Epyx::log::endl;
     return true;
 }

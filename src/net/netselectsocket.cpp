@@ -5,30 +5,23 @@
 namespace Epyx
 {
 
-    NetSelectSocket::NetSelectSocket(Socket& sock)
-    :sock(&sock), dynamicSock(false) {
+    NetSelectSocket::NetSelectSocket(const std::shared_ptr<Socket>& sock)
+    :sock(sock) {
     }
 
-    NetSelectSocket::NetSelectSocket(Socket *sock)
-    :sock(sock), dynamicSock(true) {
-    }
-
-    NetSelectSocket::~NetSelectSocket() {
-        if (sock != NULL && dynamicSock) {
-            delete sock;
-            sock = NULL;
-        }
+    NetSelectSocket::NetSelectSocket(Socket *psock)
+    :sock(psock) {
     }
 
     int NetSelectSocket::getFileDescriptor() const {
-        EPYX_ASSERT(sock != NULL);
+        EPYX_ASSERT(sock);
         return sock->getFd();
     }
 
     bool NetSelectSocket::read() {
-        EPYX_ASSERT(sock != NULL);
+        EPYX_ASSERT(sock);
         const int size = 4096;
-        char data[size];
+        byte data[size];
         int recvSize = sock->recv(data, size);
 
         // Quit on End-Of-File
@@ -37,7 +30,7 @@ namespace Epyx
 
         // Eat data
         try {
-            this->eat(data, recvSize);
+            this->eat(byte_str(data, recvSize));
         } catch (MinorException e) {
             log::error << e << log::endl;
             log::error << "Closing socket to " << sock->getAddress() <<
@@ -47,8 +40,8 @@ namespace Epyx
         return sock->isOpened();
     }
 
-    Socket& NetSelectSocket::socket() const {
-        EPYX_ASSERT(sock != NULL);
-        return *sock;
+    const std::shared_ptr<Socket>& NetSelectSocket::socket() const {
+        EPYX_ASSERT(sock);
+        return sock;
     }
 }
