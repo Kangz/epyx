@@ -145,12 +145,21 @@ namespace Epyx
 
     template<typename T> void WorkerPool<T>::Worker::run(WorkerPool *pool) {
         EPYX_ASSERT(pool != NULL);
-        // TODO: Thread::setName(pool->name, id)
-        while (running) {
-            TPtr msg = pool->messages.pop();
-            if (msg) {
-                pool->treat(std::move(msg));
+        std::ostringstream str;
+        str << pool->name << " " << id;
+        Thread::setName(str.str());
+        try {
+            while (running) {
+                TPtr msg = pool->messages.pop();
+                if (msg) {
+                    pool->treat(std::move(msg));
+                }
             }
+        } catch (std::exception& e) {
+            // Log message and crash
+            log::fatal << "[Exception] Unhandled exception: " << e.what() << log::endl;
+            log::waitFlush();
+            throw e;
         }
         pool->workers_to_destroy.push(new int(id));
     }

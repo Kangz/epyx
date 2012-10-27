@@ -92,9 +92,9 @@ namespace Epyx
             EPYX_ASSERT(self != NULL);
             Thread::setName(self->name);
             self->run();
-        } catch (Exception e) {
+        } catch (std::exception& e) {
             log::fatal << "Thread exception !" << log::endl;
-            log::fatal << e << log::endl;
+            log::fatal << e.what() << log::endl;
         }
         return NULL;
     }

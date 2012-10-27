@@ -25,6 +25,10 @@ namespace Epyx
         return message;
     }
 
+    const char* Exception::what() const throw() {
+        return message.c_str();
+    }
+
     FailException::FailException(const char *module, const char *message)
     :Exception("Epyx fails", module, message) {
     }

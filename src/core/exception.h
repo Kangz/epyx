@@ -28,7 +28,7 @@ namespace Epyx
      * @class Exception
      * @brief Epyx raw exception
      */
-    class Exception
+    class Exception : public std::exception
     {
     public:
         /**
@@ -56,6 +56,12 @@ namespace Epyx
          * @brief Get message
          */
         const std::string& getMessage() const;
+
+        /**
+         * @brief std::exception inheritance
+         * @return message
+         */
+        virtual const char* what() const throw();
 
     protected:
         /**
