@@ -113,6 +113,9 @@ void test_n2np(Epyx::API& epyx, const Epyx::SockAddress &addr) {
 
     test_command(*firstNode, nodeids, nodeNum);
 
+    // Release the first node to allow good program ending
+    firstNode.reset();
+
     Epyx::log::info << "Destroy everything for " << addr << Epyx::log::endl;
     epyx.destroyAllNodes();
     epyx.destroyRelay(2000);

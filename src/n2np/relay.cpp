@@ -1,6 +1,7 @@
 #include "relay.h"
 #include "../net/tcpsocket.h"
 #include "../core/timeout.h"
+#include <chrono>
 
 namespace Epyx
 {
@@ -46,6 +47,9 @@ namespace Epyx
             pkt.to = nodeid;
             sock->sendBytes(pkt.build());
 
+            // Notify everybody there's a new node
+            nodesCond.notify_all();
+
             // Return ID
             return nodeid;
         }
@@ -57,22 +61,26 @@ namespace Epyx
             log::info << "Relay: Detach node " << nodeid << log::endl;
             std::lock_guard<std::mutex> lock(nodesMutex);
             nodes.erase(nodeid.getName());
+            nodesCond.notify_all();
             return true;
         }
 
-        bool Relay::waitForAllDetach(const Timeout& timeout) {
-            while (!timeout.hasExpired()) {
-                std::lock_guard<std::mutex> lock(nodesMutex);
-                if (nodes.empty())
-                    return true;
+        bool Relay::waitForAllDetach(int msec) {
+            std::unique_lock<std::mutex> lock(nodesMutex);
+            while (!nodes.empty()) {
+                if (nodesCond.wait_for(lock, std::chrono::milliseconds(msec)) == std::cv_status::timeout) {
+                    // Timeout
+                    return nodes.empty();
+                }
             }
-            return false;
+            return true;
         }
 
         void Relay::detachAllNodes() {
             // Delete every Node information
             std::lock_guard<std::mutex> lock(nodesMutex);
             nodes.clear();
+            nodesCond.notify_all();
         }
 
         const NodeId& Relay::getId() const {

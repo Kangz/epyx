@@ -58,7 +58,7 @@ namespace Epyx
         nsRelayId = netsel->add(srv);
     }
 
-    void API::destroyRelay(const Timeout& detachTime) {
+    void API::destroyRelay(int msec) {
         std::lock_guard<std::mutex> lock(mut);
         if (!netsel)
             throw FailException("API::destroyRelay", "No NetSelect created");
@@ -66,7 +66,7 @@ namespace Epyx
         if (!relay)
             return;
 
-        if (!relay->waitForAllDetach(detachTime)) {
+        if (!relay->waitForAllDetach(msec)) {
             log::info << "Detach remaining nodes" << log::endl;
             relay->detachAllNodes();
         }

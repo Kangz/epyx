@@ -64,9 +64,9 @@ namespace Epyx
         /**
          * @brief Destroy specified relay
          * @param addr
-         * @param detachTime timeout to wait for detach nodes
+         * @param msec number of msecs to wait for detach nodes
          */
-        void destroyRelay(const Timeout& detachTime);
+        void destroyRelay(int msec);
 
         /**
          * @brief Add a new node

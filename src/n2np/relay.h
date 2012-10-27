@@ -29,6 +29,7 @@
 #include "packet.h"
 #include "relaysocket.h"
 #include <atomic>
+#include <condition_variable>
 #include <map>
 
 namespace Epyx
@@ -65,10 +66,10 @@ namespace Epyx
 
             /**
              * @brief Wait for all nodes to close connections
-             * @param timeout maximum number of seconds to wait
+             * @param msec maximum number of milliseconds to wait
              * @return true if there are no more node
              */
-            bool waitForAllDetach(const Timeout& timeout);
+            bool waitForAllDetach(int msec);
 
             /**
              * @brief Force to dettach all nodes
@@ -105,6 +106,7 @@ namespace Epyx
 
             // Map of known nodes (with its Mutex)
             std::mutex nodesMutex;
+            std::condition_variable nodesCond;
             std::map<std::string, std::unique_ptr<NodeInfo> > nodes;
 
             // use a counter to attribute nodes
