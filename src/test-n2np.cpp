@@ -91,14 +91,14 @@ void test_n2np(Epyx::API& epyx, const Epyx::SockAddress &addr) {
     std::shared_ptr<Epyx::N2NP::Node> firstNode;
     Epyx::N2NP::NodeId nodeids[nodeNum];
     Epyx::log::info << "Create nodes..." << Epyx::log::endl;
-    Ponger testModule;
-    Displayer testModule2;
+    std::shared_ptr<Ponger> testModule(new Ponger);
+    std::shared_ptr<Displayer> testModule2(new Displayer);
     for (int i = 0; i < nodeNum; i++) {
         std::shared_ptr<Epyx::N2NP::Node> node(new Epyx::N2NP::Node(addr));
         if (!firstNode)
             firstNode = node;
-        node->addModule("TEST", &testModule);
-        node->addModule("PONG", &testModule2);
+        node->addModule("TEST", testModule);
+        node->addModule("PONG", testModule2);
         //node->registerRecv(pongType, nodeRecvPong, NULL);
         epyx.addNode(node);
         if (!node->waitReady(5000)) {

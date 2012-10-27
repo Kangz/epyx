@@ -80,7 +80,7 @@ namespace Epyx
              * @param method Which method to use
              * @param m The module to call
              */
-            void addModule(const std::string& method, Module *m);
+            void addModule(const std::string& method, const std::shared_ptr<Module>& m);
 
             /**
              * @brief Offer a new direct connection to use
@@ -135,7 +135,8 @@ namespace Epyx
             bool hasId;
 
             // Callbacks for Recv
-            atom::Map<std::string, Module*> modules;
+            std::mutex modulesMutex;
+            std::map<std::string, std::shared_ptr<Module> > modules;
 
             // GTT parser
             GTTParser gttparser;

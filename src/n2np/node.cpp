@@ -99,11 +99,12 @@ namespace Epyx
             return this->send(to, method, payload);
         }
 
-        void Node::addModule(const std::string& method, Module *m) {
-            EPYX_ASSERT(m != NULL);
-            if (modules.get(method, NULL) != NULL)
+        void Node::addModule(const std::string& method, const std::shared_ptr<Module>& m) {
+            EPYX_ASSERT(m);
+            std::lock_guard<std::mutex> lock(modulesMutex);
+            if (modules.find(method) != modules.end())
                 throw FailException("N2NP::Node", "Cannot add a module to an already bound key");
-            modules.set(method, m);
+            modules[method] = m;
         }
 
         void Node::offerDirectConn(const NodeId& recipient, Socket *socket) {
@@ -227,19 +228,22 @@ namespace Epyx
             mruNodeIds.endUnlock();
 
             // Find the relevant module
-            Module* moduleToCall = modules.get(pkt->method, NULL);
-            if (moduleToCall == NULL) {
-                log::error << "[Node " << nodeid << "] Unhandled method "
-                    << pkt->method << log::endl;
-                this->sendErr(*pkt);
-                return;
-            }
+            {
+                std::lock_guard<std::mutex> lock(modulesMutex);
+                auto moduleToCall = modules.find(pkt->method);
+                if (moduleToCall == modules.end() || !moduleToCall->second) {
+                    log::error << "[Node " << nodeid << "] Unhandled method "
+                        << pkt->method << log::endl;
+                    this->sendErr(*pkt);
+                    return;
+                }
 
-            // Call the module
-            try {
-                moduleToCall->fromN2NP(*this, pkt->from, pkt->data);
-            } catch (MinorException e) {
-                log::error << "[Node " << nodeid << "] Exception " << e << log::endl;
+                // Call the module
+                try {
+                    moduleToCall->second->fromN2NP(*this, pkt->from, pkt->data);
+                } catch (MinorException e) {
+                    log::error << "[Node " << nodeid << "] Exception " << e << log::endl;
+                }
             }
 
             //Everything went right, let's acknowledge the packet.

@@ -6,7 +6,7 @@ namespace Epyx {
         
         void Module::init(N2NP::Node &node)
         {
-            Dispatcher * dispatch = new Dispatcher;
+            std::shared_ptr<Dispatcher> dispatch(new Dispatcher);
             node.addModule("DIRECTCONNECTION", dispatch);
         }
         OpenConnection* Module::openDirectConnection(N2NP::Node &node, N2NP::NodeId &remoteHost){ //As Client

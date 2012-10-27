@@ -148,7 +148,7 @@ bool Demo::run() {
 
     // Create DHT node
     DHT::Id id(DHT::Id::INIT_RANDOM);
-    DHT::Node *dhtNode = new DHT::Node(id, *node, "DHT");
+    std::shared_ptr<DHT::Node> dhtNode(new DHT::Node(id, *node, "DHT"));
     node->addModule("DHT", dhtNode);
 
     // Send ping ro the relay
@@ -156,8 +156,8 @@ bool Demo::run() {
     DHT::Peer relayPeer(relayNodeId);
     dhtNode->sendPing(relayPeer);
 
-    VideoDisplayer videoModule(this);
-    node->addModule("VIDEO", &videoModule);
+    std::shared_ptr<VideoDisplayer> videoModule(new VideoDisplayer(this));
+    node->addModule("VIDEO", videoModule);
 
     // Wait the ping to be proceeded
     sleep(1);
@@ -183,8 +183,8 @@ bool Demo::run() {
     log::debug << pseudo_ext << " est dans " << remoteNodeid << log::endl;
 
     // Add displayer module to my N2NP node
-    Displayer displayModule(this, pseudo_ext);
-    node->addModule("DISPLAY", &displayModule);
+    std::shared_ptr<Displayer> displayModule(new Displayer(this, pseudo_ext));
+    node->addModule("DISPLAY", displayModule);
 
     // Let's run !
     running = true;

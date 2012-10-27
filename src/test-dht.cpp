@@ -208,12 +208,12 @@ void test_dht_n2np(){
     }
 
     DHT::Id id(DHT::Id::INIT_RANDOM);
-    DHT::Node dht(id, *node0, "DHT");
+    std::shared_ptr<DHT::Node> dht(new DHT::Node(id, *node0, "DHT"));
 
-    node0->addModule("DHT", &dht);
+    node0->addModule("DHT", dht);
 
-    FakeDht fakeDHT;
-    node1->addModule("DHT", &fakeDHT);
+    std::shared_ptr<FakeDht> fakeDHT(new FakeDht);
+    node1->addModule("DHT", fakeDHT);
 
     Id fakeId(DHT::Id::INIT_RANDOM);
 
@@ -225,7 +225,7 @@ void test_dht_n2np(){
         o << "from: " << fakeId << "\r\n"; \
         o << (msg.empty() ?  "\r\n" : msg); \
         std::string s = o.str(); \
-        dht.fromN2NP(*node0, node1->getId(), string2bytes_c(s)); \
+        dht->fromN2NP(*node0, node1->getId(), string2bytes_c(s)); \
     }
 
     log::info << "Sending a PING to the DHT" << log::endl;
@@ -335,14 +335,14 @@ void test_dht_network(Epyx::API& epyx, bool prod){
 
     //Create DHTs
     log::info << "Creating DHTs" << log::endl;
-    DHT::Node* dhtNodes[NETWORK_SIZE];
+    std::shared_ptr<DHT::Node> dhtNodes[NETWORK_SIZE];
     for(int i=0; i<NETWORK_SIZE; i++) {
         DHT::Id id((prod && i == 0) ? DHT::Id::INIT_ZERO : DHT::Id::INIT_RANDOM);
         log::debug<<id<<log::endl;
         std::ostringstream o;
         o << "DHT";
         o << i;
-        dhtNodes[i] = new DHT::Node(id, *n2npNodes[i], o.str());
+        dhtNodes[i].reset(new DHT::Node(id, *n2npNodes[i], o.str()));
         n2npNodes[i]->addModule("DHT", dhtNodes[i]);
     }
 
