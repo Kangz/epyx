@@ -18,16 +18,8 @@ namespace Epyx
     }
 
     API::~API() {
-        {
-            std::lock_guard<std::mutex> lock(mut);
-            // Destroy relay, if it exists
-            if (relay) {
-                if (netsel)
-                    netsel->kill(nsRelayId);
-                relay.reset();
-            }
-        }
-
+        this->destroyAllNodes();
+        this->destroyRelay(2000);
         log::flushAndQuit();
     }
 
@@ -35,7 +27,7 @@ namespace Epyx
         std::lock_guard<std::mutex> lock(mut);
         if (!netsel) {
             netsel.reset(new NetSelect(numworkers, "NetSelectWorker"));
-            netsel->setName("NetSelect");
+            netsel->setThreadName("NetSelect");
             if (!netsel->start()) {
                 throw FailException("API::NetSelect", "failed to start");
             }
@@ -60,10 +52,7 @@ namespace Epyx
 
     void API::destroyRelay(int msec) {
         std::lock_guard<std::mutex> lock(mut);
-        if (!netsel)
-            throw FailException("API::destroyRelay", "No NetSelect created");
-
-        if (!relay)
+        if (!netsel || !relay)
             return;
 
         if (!relay->waitForAllDetach(msec)) {
@@ -84,19 +73,31 @@ namespace Epyx
         return index;
     }
 
+    std::shared_ptr<N2NP::Node> API::spawnN2NPNode(const SockAddress& addr, int timeout) {
+        std::shared_ptr<N2NP::Node> node(new N2NP::Node(addr));
+        this->addNode(node);
+
+        // Wait until connection
+        if (timeout > 0 && !node->waitReady(timeout)) {
+            throw FailException("API::spawnN2NPNode", "Node initialisation timed out");
+        }
+        return node;
+    }
+
     void API::destroyNode(int nodeId) {
         std::lock_guard<std::mutex> lock(mut);
         if (!netsel)
-            throw FailException("API::killNode", "No NetSelect created");
+            throw FailException("API::destroyNode", "No NetSelect created");
         nodeIndexes.erase(nodeId);
         netsel->kill(nodeId);
     }
 
     void API::destroyAllNodes() {
         std::lock_guard<std::mutex> lock(mut);
-        EPYX_ASSERT(netsel);
-        for (auto i = nodeIndexes.begin(); i != nodeIndexes.end(); i++) {
-            netsel->kill(i->first);
+        if (netsel) {
+            for (auto i = nodeIndexes.begin(); i != nodeIndexes.end(); i++) {
+                netsel->kill(i->first);
+            }
         }
         nodeIndexes.clear();
     }

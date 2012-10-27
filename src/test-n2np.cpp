@@ -4,43 +4,7 @@
  */
 
 #include "api.h"
-#include "n2np/relay.h"
-#include "n2np/node.h"
-#include <strings.h>
-
-/**
- * @brief Command-line interface to send packets
- */
-void test_command(Epyx::N2NP::Node& myNode, Epyx::N2NP::NodeId nodeids[], unsigned int nodeNum) {
-    unsigned int nodeIndex;
-    std::string msg;
-
-    Epyx::log::debug << "[Cli:motd] Command-line interface" << Epyx::log::endl;
-    Epyx::log::debug << "[Cli:motd] You are on " << myNode.getId() << Epyx::log::endl;
-    Epyx::log::debug << "[Cli:motd] There are " << nodeNum << " nodes" << Epyx::log::endl;
-    Epyx::log::debug << "[Cli:motd] 2 Hello sends `Hello' to node 2" << Epyx::log::endl;
-    Epyx::log::debug << "[Cli:motd] 0 quits." << Epyx::log::endl;
-
-    while (true) {
-        std::cin >> nodeIndex;
-        if (nodeIndex <= 0) {
-            Epyx::log::debug << "[Cli] Bye :)" << Epyx::log::endl;
-            return;
-        } else {
-            std::cin >> msg;
-            if (nodeIndex > nodeNum) {
-                Epyx::log::debug << "[Cli] Too high index. Max is "
-                    << nodeNum << Epyx::log::endl;
-                continue;
-            }
-            const Epyx::N2NP::NodeId& nodeid = nodeids[nodeIndex - 1];
-            Epyx::log::debug << "[Cli] Sending " << msg << " to " << nodeid << Epyx::log::endl;
-
-            // Send !
-            myNode.send(nodeid, "TEST", string2bytes_c(msg));
-        }
-    }
-}
+#include <cstring>
 class Ponger :public Epyx::N2NP::Module
 {
 public:
@@ -90,35 +54,47 @@ void test_n2np(Epyx::API& epyx, const Epyx::SockAddress &addr) {
     const int nodeNum = 42;
     std::shared_ptr<Epyx::N2NP::Node> firstNode;
     Epyx::N2NP::NodeId nodeids[nodeNum];
-    Epyx::log::info << "Create nodes..." << Epyx::log::endl;
+    Epyx::log::info << "Create " << nodeNum << " nodes..." << Epyx::log::endl;
     std::shared_ptr<Ponger> testModule(new Ponger);
     std::shared_ptr<Displayer> testModule2(new Displayer);
     for (int i = 0; i < nodeNum; i++) {
-        std::shared_ptr<Epyx::N2NP::Node> node(new Epyx::N2NP::Node(addr));
+        std::shared_ptr<Epyx::N2NP::Node> node = epyx.spawnN2NPNode(addr);
         if (!firstNode)
             firstNode = node;
         node->addModule("TEST", testModule);
         node->addModule("PONG", testModule2);
-        //node->registerRecv(pongType, nodeRecvPong, NULL);
-        epyx.addNode(node);
-        if (!node->waitReady(5000)) {
-            Epyx::log::error << "Initialisation of node " << i << " took too much time"
-                << Epyx::log::endl;
-            epyx.destroyAllNodes();
-            epyx.destroyRelay(2000);
-            return;
-        }
         nodeids[i] = node->getId();
     }
 
-    test_command(*firstNode, nodeids, nodeNum);
+    // Let's run a Command-Line Interface !
+    int nodeIndex;
+    std::string msg;
 
-    // Release the first node to allow good program ending
-    firstNode.reset();
+    Epyx::log::debug << "[Cli:motd] Command-line interface" << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] You are on " << firstNode->getId() << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] There are " << nodeNum << " nodes" << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] 2 Hello sends `Hello' to node 2" << Epyx::log::endl;
+    Epyx::log::debug << "[Cli:motd] 0 quits." << Epyx::log::endl;
 
-    Epyx::log::info << "Destroy everything for " << addr << Epyx::log::endl;
-    epyx.destroyAllNodes();
-    epyx.destroyRelay(2000);
+    while (true) {
+        std::cin >> nodeIndex;
+        if (nodeIndex <= 0) {
+            Epyx::log::debug << "[Cli] Bye :)" << Epyx::log::endl;
+            return;
+        } else {
+            std::cin >> msg;
+            if (nodeIndex > nodeNum) {
+                Epyx::log::debug << "[Cli] Too high index. Max is "
+                    << nodeNum << Epyx::log::endl;
+                continue;
+            }
+
+            // Send !
+            const Epyx::N2NP::NodeId& nodeid = nodeids[nodeIndex - 1];
+            Epyx::log::debug << "[Cli] Sending " << msg << " to " << nodeid << Epyx::log::endl;
+            firstNode->send(nodeid, "TEST", string2bytes_c(msg));
+        }
+    }
 }
 
 /**
@@ -129,6 +105,7 @@ int main() {
     try {
         epyx.setNetWorkers(50);
         test_n2np(epyx, Epyx::SockAddress("127.0.0.1:4242"));
+        Epyx::log::info << "Destroy everything !" << Epyx::log::endl;
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }

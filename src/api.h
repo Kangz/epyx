@@ -72,11 +72,17 @@ namespace Epyx
          * @brief Add a new node
          * @param node a dynamicaly-allocated node
          *
-         * node is deleted by API, NOT by the caller
-         *
          * @return identifier
          */
         int addNode(std::shared_ptr<N2NP::Node>& node);
+
+        /**
+         * @brief Create a new N2NP node
+         * @param addr relay address
+         * @param timeout milliseconds to wait until creation is alleged to have failed
+         * @return the new node
+         */
+        std::shared_ptr<N2NP::Node> spawnN2NPNode(const SockAddress& addr, int timeout = 5000);
 
         /**
          * @brief Kill a node

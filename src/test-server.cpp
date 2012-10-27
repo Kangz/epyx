@@ -2,9 +2,7 @@
  * This program tests Server class
  */
 
-#include <iostream>
-#include <sstream>
-#include <strings.h>
+#include <cstring>
 #include "api.h"
 #include "net/netselect.h"
 #include "net/netselectsocket.h"
