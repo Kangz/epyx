@@ -53,17 +53,6 @@ namespace Epyx
 
         /**
          * @brief add a new reader
-         *
-         * After this call, nsr belongs to this NetSelect and shoulf no longer
-         * be used by the caller. Moreover, nsr needs to have been created with
-         * new (because it is destroyed by delete)
-         * 
-         * @param nsr
-         */
-        int add(NetSelectReader *nsr);
-
-        /**
-         * @brief add a new reader
          * @param nsr shared pointer
          */
         int add(const std::shared_ptr<NetSelectReader>& nsr);

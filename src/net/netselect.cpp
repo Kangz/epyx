@@ -22,10 +22,6 @@ namespace Epyx
         readers.clear();
     }
 
-    int NetSelect::add(NetSelectReader *nsr) {
-        return this->add(std::shared_ptr<NetSelectReader>(nsr));
-    }
-
     int NetSelect::add(const std::shared_ptr<NetSelectReader>& nsr) {
         EPYX_ASSERT(nsr != NULL);
         nsr->setOwner(this);

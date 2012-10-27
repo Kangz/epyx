@@ -66,7 +66,7 @@ namespace Epyx
             newSock = new TCPSocket(newfd, SockAddress((struct sockaddr*) &clientAddr));
             if (newSock->getLocalAddress().empty())
                 newSock->setLocalAddress(srv->getAddress());
-            T *nsSocket = new T(newSock, param);
+            std::shared_ptr<T> nsSocket(new T(newSock, param));
             this->getOwner()->add(nsSocket);
         } catch (Exception e) {
             log::error << "Unable to setup the link:\n" << e << log::endl;

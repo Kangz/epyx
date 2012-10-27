@@ -52,7 +52,7 @@ private:
 class Demo
 {
 public:
-    Demo(Epyx::N2NP::Node *node);
+    Demo(const std::shared_ptr<Epyx::N2NP::Node>& node);
     bool run();
 
     void updateDisplay();
@@ -64,7 +64,7 @@ public:
     void newFrame(const webm::FramePacket& fpkt);
 
     webm::VideoFrame vframe;
-    Epyx::N2NP::Node *node;
+    std::shared_ptr<Epyx::N2NP::Node> node;
     N2NP::NodeId remoteNodeid;
 
 private:
@@ -136,7 +136,7 @@ void SenderAndUIThread::run() {
     demo->stop();
 }
 
-Demo::Demo(Epyx::N2NP::Node *node)
+Demo::Demo(const std::shared_ptr<Epyx::N2NP::Node>& node)
 :vframe(640, 480, "Epyx Chat"), node(node), vframe_inited(false) {
 }
 
@@ -203,8 +203,8 @@ bool Demo::run() {
         if(c==8 || c== 127||c==126){
             if(msg.length()>=1)
                 msg.erase(msg.length()-1);
-            
-            
+
+
         }
         else
         msg.append(1, c);
@@ -270,7 +270,7 @@ int main(int argc, char **argv) {
             return 1;
         }
         Epyx::SockAddress relayAddr(argv[1]);
-        Epyx::N2NP::Node *node = new Epyx::N2NP::Node(relayAddr);
+        std::shared_ptr<Epyx::N2NP::Node> node(new Epyx::N2NP::Node(relayAddr));
         epyx.addNode(node);
         if (!node->waitReady(5000)) {
             Epyx::log::error << "Initialisation of node took too much time"
@@ -295,30 +295,30 @@ void welcome(void)
     std::cout<<Yellow;
     std::cout<<"                                                                           "<<std::endl;
     std::cout<<"                                                                           "<<std::endl;
-    
+
     std::cout<<"       Welcome to ";
     std::cout<<MagentaBold;
     std::cout<<"EPYX";
     std::cout<<Yellow;
     std::cout<<" !                                              "<<std::endl;
-    
+
     std::cout<<"                                                                        "<<std::endl;
     std::cout<<"                                                                        "<<std::endl;
     std::cout<<"       A Fancy Free Net Environment                  ┊ ┊  ┊ ┊┊ ┊ ┊  "<<std::endl;
     std::cout<<"                                                    ┊ ┊ ┊ ┊┊ ┆ ┊ "<<std::endl;
     std::cout<<"                                                  ☆ ┊ ☆ ┊☆ ┆ ┊  "<<std::endl;
-    std::cout<<"                                                   ☆  ☆  ┆ ┊     "<<std::endl; 
+    std::cout<<"                                                   ☆  ☆  ┆ ┊     "<<std::endl;
     std::cout<<"       │★☆   ╮。。...                                 ☆   ┊  "<<std::endl;
     std::cout<<"      ╭╯☆★☆★╭╯。。...                                     ┊  "<<std::endl;
     std::cout<<"      ╰╮★☆★╭╯。。。...                                     ┊  "<<std::endl;
     std::cout<<"       │☆╭—╯                                                    ☆  "<<std::endl;
     std::cout<<"      ╭╯╭╯                                                          "<<std::endl;
-    std::cout<<"     ╔╝★╚╗                                                         "<<std::endl; 
-    std::cout<<"     ║★☆★║╔═══╗ ╔═══╗ ╔═══╗ ╔═══╗           "<<std::endl; 
+    std::cout<<"     ╔╝★╚╗                                                         "<<std::endl;
+    std::cout<<"     ║★☆★║╔═══╗ ╔═══╗ ╔═══╗ ╔═══╗           "<<std::endl;
     std::cout<<"     ║☆★☆║║ E ║ ║ P ║ ║ Y ║ ║ X ║           "<<std::endl;
     std::cout<<"    ◢◎══◎╝╚◎═◎╝═╚◎═◎╝═╚◎═◎╝═╚◎═◎╝           "<<std::endl;
 
-   
+
     std::cout << Restore;
     fflush(stdout);
     sleep(1);

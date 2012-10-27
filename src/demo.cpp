@@ -13,7 +13,7 @@
 #define Restore "\033[0m"
 
 using namespace Epyx;
-                
+
 class Demo;
 class Displayer :public Epyx::N2NP::Module
 {
@@ -27,7 +27,7 @@ private:
 class Demo
 {
 public:
-    Demo(Epyx::N2NP::Node *node);
+    Demo(const std::shared_ptr<Epyx::N2NP::Node>& node);
     bool run();
 
     void updateDisplay();
@@ -44,7 +44,7 @@ private:
     std::string historique;
     std::mutex histomut;
     std::string pseudo;
-    Epyx::N2NP::Node *node;
+    std::shared_ptr<Epyx::N2NP::Node> node;
 };
 
 Displayer::Displayer(Demo *demo, const std::string& pseudo_ext)
@@ -57,7 +57,7 @@ void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const 
     demo->updateDisplay();
 }
 
-Demo::Demo(Epyx::N2NP::Node *node)
+Demo::Demo(const std::shared_ptr<Epyx::N2NP::Node>& node)
 :node(node) {
 }
 
@@ -117,7 +117,7 @@ bool Demo::run() {
             read(STDIN_FILENO,&back, 1);*/
             if(msg.length()>=1)
             msg.erase(msg.length()-1);
-            
+
         } else msg.append(1,c);
         if (c == '\n') {
             node->send(remoteNodeid, "DISPLAY", string2bytes(msg));
@@ -147,7 +147,7 @@ void Demo::receive(const std::string& pseudo, const std::string& msg, bool isMe)
 }
 
 void Demo::updateDisplay() {
-    
+
     clear();
     std::cout << historique;
     std::cout << "<" << pseudo << "> : " << msg;
@@ -159,16 +159,16 @@ int main(int argc, char **argv) {
     try {
         Epyx::API epyx;
         epyx.setNetWorkers(50);
-        
+
         char * addr;
         // Create my node
         if (argc < 2) {
             std::cerr << "You need to tell me the relay I am intented to connect." << std::endl;
             return 1;
-            
+
         }
         Epyx::SockAddress relayAddr(argv[1]);
-        Epyx::N2NP::Node *node = new Epyx::N2NP::Node(relayAddr);
+        std::shared_ptr<Epyx::N2NP::Node> node(new Epyx::N2NP::Node(relayAddr));
         epyx.addNode(node);
         if (!node->waitReady(5000)) {
             Epyx::log::error << "Initialisation of node took too much time"

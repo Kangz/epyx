@@ -22,14 +22,13 @@
 #define EPYX_API_H
 
 #include "core/common.h"
-#include "core/atom/counter.h"
-#include "core/atom/map.h"
 #include "net/netselect.h"
 #include "net/netif.h"
 #include "n2np/relay.h"
 #include "n2np/node.h"
 #include <boost/noncopyable.hpp>
 #include <list>
+#include <map>
 #include <mutex>
 
 namespace Epyx
@@ -77,7 +76,7 @@ namespace Epyx
          *
          * @return identifier
          */
-        int addNode(N2NP::Node *node);
+        int addNode(std::shared_ptr<N2NP::Node>& node);
 
         /**
          * @brief Kill a node
@@ -111,8 +110,7 @@ namespace Epyx
         int nsRelayId;
 
         // Node index (map index => index)
-        atom::Map<int, int> nodeIndexes;
-
+        std::map<int, int> nodeIndexes;
         class OpenConnThread : public Thread
         {
         public:

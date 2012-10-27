@@ -83,8 +83,9 @@ int main()
         Epyx::TCPServer *tcpServer = new Epyx::TCPServer(addr, 20);
         Epyx::log::debug << "ServerWorker listening at " << tcpServer->getAddress() <<
             Epyx::log::endl;
-        selectThread.add(new Epyx::NetSelectTCPServer<TestNetSelectSocket, void*>(tcpServer, NULL));
-        selectThread.setName("NetSelect");
+        std::shared_ptr<Epyx::NetSelectReader> srv(new Epyx::NetSelectTCPServer<TestNetSelectSocket, void*>(tcpServer, NULL));
+        selectThread.add(srv);
+        selectThread.setThreadName("NetSelect");
         Epyx::log::debug << "Start " << selectThread.getThisName() <<
             Epyx::log::endl;
         selectThread.start();

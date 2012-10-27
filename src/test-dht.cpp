@@ -184,7 +184,8 @@ void test_dht_n2np(){
     // Create relay
     SockAddress addr("127.0.0.1:4242");
     std::shared_ptr<N2NP::Relay> relay(new N2NP::Relay(addr));
-    selectRelay->add(new N2NP::RelayServer(new TCPServer(addr, 50), relay));
+    std::shared_ptr<N2NP::RelayServer> srv(new N2NP::RelayServer(new TCPServer(addr, 50), relay));
+    selectRelay->add(srv);
     log::info << "Start Relay " << relay->getId() << log::endl;
 
     // Create Net Select for nodes
@@ -194,24 +195,25 @@ void test_dht_n2np(){
 
     // Create nodes
     Epyx::log::info << "Create nodes..." << Epyx::log::endl;
-    Epyx::N2NP::Node node0(addr), node1(addr);
-    selectNodes->add(&node0);
-    selectNodes->add(&node1);
+    std::shared_ptr<Epyx::N2NP::Node> node0(new Epyx::N2NP::Node(addr));
+    std::shared_ptr<Epyx::N2NP::Node> node1(new Epyx::N2NP::Node(addr));
+    selectNodes->add(node0);
+    selectNodes->add(node1);
 
     // Wait for node IDs
     Epyx::log::info << "Waiting for nodes..." << Epyx::log::endl;
     Epyx::N2NP::NodeId nodeids[2];
-    while (!node0.isReady() || !node1.isReady()){
+    while (!node0->isReady() || !node1->isReady()){
         usleep(100);
     }
 
     DHT::Id id(DHT::Id::INIT_RANDOM);
-    DHT::Node dht(id, node0, "DHT");
+    DHT::Node dht(id, *node0, "DHT");
 
-    node0.addModule("DHT", &dht);
+    node0->addModule("DHT", &dht);
 
     FakeDht fakeDHT;
-    node1.addModule("DHT", &fakeDHT);
+    node1->addModule("DHT", &fakeDHT);
 
     Id fakeId(DHT::Id::INIT_RANDOM);
 
@@ -223,7 +225,7 @@ void test_dht_n2np(){
         o << "from: " << fakeId << "\r\n"; \
         o << (msg.empty() ?  "\r\n" : msg); \
         std::string s = o.str(); \
-        dht.fromN2NP(node0, node1.getId(), string2bytes_c(s)); \
+        dht.fromN2NP(*node0, node1->getId(), string2bytes_c(s)); \
     }
 
     log::info << "Sending a PING to the DHT" << log::endl;
@@ -316,9 +318,9 @@ void test_dht_network(Epyx::API& epyx, bool prod){
 
     // Create nodes
     Epyx::log::info << "Create nodes..." << Epyx::log::endl;
-    Epyx::N2NP::Node* n2npNodes[NETWORK_SIZE];
+    std::shared_ptr<Epyx::N2NP::Node> n2npNodes[NETWORK_SIZE];
     for(int i=0; i<NETWORK_SIZE; i++){
-        n2npNodes[i] = new Epyx::N2NP::Node(addr);
+        n2npNodes[i].reset(new Epyx::N2NP::Node(addr));
         selectNodes->add(n2npNodes[i]);
     }
 

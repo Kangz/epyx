@@ -88,21 +88,20 @@ void test_n2np(Epyx::API& epyx, const Epyx::SockAddress &addr) {
 
     // Create nodes
     const int nodeNum = 42;
-    Epyx::N2NP::Node* firstNode = NULL;
+    std::shared_ptr<Epyx::N2NP::Node> firstNode;
     Epyx::N2NP::NodeId nodeids[nodeNum];
     Epyx::log::info << "Create nodes..." << Epyx::log::endl;
     Ponger testModule;
     Displayer testModule2;
     for (int i = 0; i < nodeNum; i++) {
-        Epyx::N2NP::Node *node = new Epyx::N2NP::Node(addr);
-        if (firstNode == NULL)
+        std::shared_ptr<Epyx::N2NP::Node> node(new Epyx::N2NP::Node(addr));
+        if (!firstNode)
             firstNode = node;
         node->addModule("TEST", &testModule);
         node->addModule("PONG", &testModule2);
         //node->registerRecv(pongType, nodeRecvPong, NULL);
         epyx.addNode(node);
         if (!node->waitReady(5000)) {
-            delete node;
             Epyx::log::error << "Initialisation of node " << i << " took too much time"
                 << Epyx::log::endl;
             epyx.destroyAllNodes();
