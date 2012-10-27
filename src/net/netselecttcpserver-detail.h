@@ -30,24 +30,16 @@ namespace Epyx
             throw FailException("NetSelectTCPServer", "Unbinded server");
     }
 
-    template<class T, typename TP> NetSelectTCPServer<T, TP>::~NetSelectTCPServer() {
-        if (srv != NULL) {
-            delete srv;
-            srv = NULL;
-        }
-    }
-
     template<class T, typename TP> int NetSelectTCPServer<T, TP>::getFileDescriptor() const {
-        EPYX_ASSERT(srv != NULL);
+        EPYX_ASSERT(srv);
         return srv->getFd();
     }
 
     template<class T, typename TP> bool NetSelectTCPServer<T, TP>::read() {
-        EPYX_ASSERT(srv != NULL);
+        EPYX_ASSERT(srv);
         struct sockaddr_storage clientAddr;
         socklen_t clientAddrLen;
         int newfd = -1;
-        TCPSocket *newSock = NULL;
 
         clientAddrLen = sizeof clientAddr;
         int srvfd = srv->getFd();
@@ -62,21 +54,15 @@ namespace Epyx
         }
 
         // Encapsulate socket
+        std::shared_ptr<TCPSocket> newSock(new TCPSocket(newfd, SockAddress((struct sockaddr*) &clientAddr)));
+        if (newSock->getLocalAddress().empty())
+            newSock->setLocalAddress(srv->getAddress());
+
         try {
-            newSock = new TCPSocket(newfd, SockAddress((struct sockaddr*) &clientAddr));
-            if (newSock->getLocalAddress().empty())
-                newSock->setLocalAddress(srv->getAddress());
             std::shared_ptr<T> nsSocket(new T(newSock, param));
             this->getOwner()->add(nsSocket);
-        } catch (Exception e) {
-            log::error << "Unable to setup the link:\n" << e << log::endl;
-            if (newSock != NULL) {
-                // newfd is managed by newSock
-                delete newSock;
-                newfd = -1;
-            } else if (newfd >= 0) {
-                ::close(newfd);
-            }
+        } catch (std::exception e) {
+            log::error << "Unable to setup the link:\n" << e.what() << log::endl;
             return true;
         }
         return true;

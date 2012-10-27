@@ -148,7 +148,8 @@ namespace Epyx
             atom::Map<unsigned long, std::shared_ptr<Packet> > sentMap;
 
             // Stockage for sockets
-            atom::Map<NodeId, Socket*> directSockets;
+            std::mutex directSocketsMutex;
+            std::map<NodeId, std::unique_ptr<Socket> > directSockets;
 
             // Node address, from the relay point of view
             SockAddress nodeAddressFromRelay;

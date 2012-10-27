@@ -43,7 +43,7 @@ namespace Epyx
              * @param sock new socket
              * @param relay associated relay
              */
-            RelaySocket(Socket *sock, const std::shared_ptr<Relay>& relay);
+            RelaySocket(const std::shared_ptr<Socket>& sock, const std::shared_ptr<Relay>& relay);
             ~RelaySocket();
 
         protected:

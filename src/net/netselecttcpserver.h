@@ -24,6 +24,7 @@
 #include "netselectsocket.h"
 #include "tcpserver.h"
 #include "tcpsocket.h"
+#include <memory>
 
 namespace Epyx
 {
@@ -45,11 +46,10 @@ namespace Epyx
     public:
         /**
          * @brief Create a NetSelectTCPServer with a new TCPServer
-         *
-         * NOTE: TCPServer *srv is DELETED by the desctructor
+         * @param srv TCP server which will be a unique_ptr
+         * @param param parameter to build new sockets
          */
         NetSelectTCPServer(TCPServer *srv, TP param);
-        ~NetSelectTCPServer();
 
         int getFileDescriptor() const;
 
@@ -59,7 +59,7 @@ namespace Epyx
         /**
          * @brief Monitored TCPServer
          */
-        TCPServer *srv;
+        std::unique_ptr<TCPServer> srv;
 
         // Constructor parameter
         TP param;

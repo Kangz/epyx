@@ -6,7 +6,7 @@ namespace Epyx
     namespace N2NP
     {
 
-        RelaySocket::RelaySocket(Socket *sock, const std::shared_ptr<Relay>& relay)
+        RelaySocket::RelaySocket(const std::shared_ptr<Socket>& sock, const std::shared_ptr<Relay>& relay)
         :NetSelectSocket(sock), relay(relay) {
         }
 

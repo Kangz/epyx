@@ -51,11 +51,22 @@ namespace Epyx
             mruNodeIds.endUnlock();
 
             //We need to select a socket to send to.
-            Socket *selected = directSockets.get(to, NULL);
-            if (selected == NULL) {
-                selected = directSockets.get(NodeId(to.getRelay()), NULL);
-                if (selected == NULL) {
-                    selected = this->socket().get();
+            Socket *selected = NULL;
+            {
+                std::lock_guard<std::mutex> lock(directSocketsMutex);
+                auto iter = directSockets.find(to);
+                if (iter != directSockets.end()) {
+                    // Direct connection to the node
+                    selected = iter->second.get();
+                } else {
+                    iter = directSockets.find(to.getRelay());
+                    if (iter != directSockets.end()) {
+                        // Use destination relay
+                        selected = iter->second.get();
+                    } else {
+                        // Use my relay
+                        selected = this->socket().get();
+                    }
                 }
             }
             EPYX_ASSERT(selected != NULL);
@@ -96,11 +107,8 @@ namespace Epyx
         }
 
         void Node::offerDirectConn(const NodeId& recipient, Socket *socket) {
-            Socket *oldsocket = directSockets.getAndLock(recipient, NULL);
-            directSockets.setLocked(recipient, socket);
-            directSockets.endUnlock();
-            if (oldsocket != NULL)
-                delete oldsocket;
+            std::lock_guard<std::mutex> lock(directSocketsMutex);
+            directSockets[recipient].reset(socket);
         }
 
         const NodeId& Node::getId() const {
@@ -124,9 +132,10 @@ namespace Epyx
         }
 
         void Node::askForDirectConnectionIds(std::stack<NodeId>& stackIds) {
-            for (atom::Map<NodeId, unsigned int>::iterator i = mruNodeIds.beginLock();
-                !mruNodeIds.isEnd(i); i++) {
-                if (directSockets.get(i->first, NULL) == NULL) {
+            std::lock_guard<std::mutex> lock(directSocketsMutex);
+            // mruNodeIds is a map NodeId => weight
+            for (auto i = mruNodeIds.beginLock(); mruNodeIds.isEnd(i); i++) {
+                if (directSockets.find(i->first) == directSockets.end()) {
                     stackIds.push(i->first);
                     i->second = 0;
                 }

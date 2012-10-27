@@ -23,7 +23,7 @@ public:
      * @param sock Incomming
      * @param unused
      */
-    TestNetSelectSocket(Epyx::Socket *sock, void *unused)
+    TestNetSelectSocket(std::shared_ptr<Epyx::Socket> sock, void *unused)
         :NetSelectSocket(sock)
     {
         Epyx::log::debug << "[" << socket()->getAddress() << "] " <<
