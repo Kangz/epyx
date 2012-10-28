@@ -22,6 +22,7 @@
 #define EPYX_API_H
 
 #include "core/common.h"
+#include "dht/node.h"
 #include "net/netselect.h"
 #include "net/netif.h"
 #include "n2np/relay.h"
@@ -77,12 +78,22 @@ namespace Epyx
         int addNode(std::shared_ptr<N2NP::Node>& node);
 
         /**
-         * @brief Create a new N2NP node
+         * @brief Create a new N2NP node and add it to the NetSelect
          * @param addr relay address
          * @param timeout milliseconds to wait until creation is alleged to have failed
          * @return the new node
          */
         std::shared_ptr<N2NP::Node> spawnN2NPNode(const SockAddress& addr, int timeout = 5000);
+
+        /**
+         * @brief Create a new DHT node on an existing NNP node
+         * @param id DHT ID
+         * @param name thread name
+         * @param node N2NP node
+         * @return shared pointer to a new DHT::Node
+         */
+        std::shared_ptr<DHT::Node> createDHTNode(const std::string& name,
+                std::shared_ptr<N2NP::Node> node);
 
         /**
          * @brief Kill a node

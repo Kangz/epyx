@@ -84,6 +84,22 @@ namespace Epyx
         return node;
     }
 
+    std::shared_ptr<DHT::Node> API::createDHTNode(const std::string& name,
+        std::shared_ptr<N2NP::Node> node) {
+        EPYX_ASSERT(node && !name.empty());
+
+        // Create a DHT node with a random ID
+        DHT::Id id(DHT::Id::INIT_RANDOM);
+        std::shared_ptr<DHT::Node> dhtNode(new DHT::Node(id, *node, name));
+        node->addModule("DHT", dhtNode);
+
+        // Send ping to the relay
+        N2NP::NodeId relayNodeId("self", node->getId().getRelay());
+        DHT::Peer peer(relayNodeId);
+        dhtNode->sendPing(peer);
+        return dhtNode;
+    }
+
     void API::destroyNode(int nodeId) {
         std::lock_guard<std::mutex> lock(mut);
         if (!netsel)

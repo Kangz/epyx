@@ -1,8 +1,5 @@
 #include "api.h"
-#include "n2np/relay.h"
-#include "n2np/node.h"
-#include "dht/node.h"
-#include <strings.h>
+#include <cstring>
 #include <stdio.h>
 #include <unistd.h>
 #include <termios.h>
@@ -27,8 +24,7 @@ private:
 class Demo
 {
 public:
-    Demo(const std::shared_ptr<Epyx::N2NP::Node>& node);
-    bool run();
+    bool run(Epyx::API& epyx, const Epyx::SockAddress& relayAddr);
 
     void updateDisplay();
 
@@ -57,25 +53,14 @@ void Displayer::fromN2NP(Epyx::N2NP::Node& node, Epyx::N2NP::NodeId from, const 
     demo->updateDisplay();
 }
 
-Demo::Demo(const std::shared_ptr<Epyx::N2NP::Node>& node)
-:node(node) {
-}
-
-bool Demo::run() {
-    EPYX_ASSERT(node != NULL);
+bool Demo::run(Epyx::API& epyx, const Epyx::SockAddress& relayAddr) {
     // Log in
     std::cout << "Entrez votre pseudo : ";
     std::cin >> pseudo;
 
     // Create DHT node
-    DHT::Id id(DHT::Id::INIT_RANDOM);
-    std::shared_ptr<DHT::Node> dhtNode(new DHT::Node(id, *node, "DHT"));
-    node->addModule("DHT", dhtNode);
-
-    // Send ping ro the relay
-    N2NP::NodeId relayNodeId("self", node->getId().getRelay());
-    DHT::Peer relayPeer(relayNodeId);
-    dhtNode->sendPing(relayPeer);
+    node = epyx.spawnN2NPNode(relayAddr);
+    std::shared_ptr<DHT::Node> dhtNode = epyx.createDHTNode("DHT", node);
 
     // Wait the ping to be proceeded
     sleep(1);
@@ -110,15 +95,10 @@ bool Demo::run() {
     while (true) {
         updateDisplay();
         read(STDIN_FILENO, &c, 1);
-        if(c=='\b'||c==127){
-          //  std::cout<<"here i am";
-          /*  read(STDIN_FILENO,&back, 1);
-            read(STDIN_FILENO,&space, 1);
-            read(STDIN_FILENO,&back, 1);*/
-            if(msg.length()>=1)
-            msg.erase(msg.length()-1);
-
-        } else msg.append(1,c);
+        if (c == '\b' || c == 127) {
+            if (msg.length() >= 1)
+                msg.erase(msg.length() - 1);
+        } else msg.append(1, c);
         if (c == '\n') {
             node->send(remoteNodeid, "DISPLAY", string2bytes(msg));
             receive(pseudo, msg, true);
@@ -134,7 +114,6 @@ void Demo::clear() {
 void Demo::configureTerm() {
     struct termios tios;
     tcgetattr(STDIN_FILENO, &tios);
-    //tcflag_t old_c_lflag = tios.c_lflag;
     tios.c_lflag &= ~ICANON;
     tcsetattr(STDIN_FILENO, TCSANOW, &tios);
 }
@@ -147,42 +126,24 @@ void Demo::receive(const std::string& pseudo, const std::string& msg, bool isMe)
 }
 
 void Demo::updateDisplay() {
-
     clear();
     std::cout << historique;
     std::cout << "<" << pseudo << "> : " << msg;
     fflush(stdout);
-
 }
 
 int main(int argc, char **argv) {
+    Epyx::API epyx;
     try {
-        Epyx::API epyx;
         epyx.setNetWorkers(50);
-
-        char * addr;
-        // Create my node
         if (argc < 2) {
             std::cerr << "You need to tell me the relay I am intented to connect." << std::endl;
             return 1;
-
         }
-        Epyx::SockAddress relayAddr(argv[1]);
-        std::shared_ptr<Epyx::N2NP::Node> node(new Epyx::N2NP::Node(relayAddr));
-        epyx.addNode(node);
-        if (!node->waitReady(5000)) {
-            Epyx::log::error << "Initialisation of node took too much time"
-                << Epyx::log::endl;
-            epyx.destroyAllNodes();
-            epyx.destroyRelay(2000);
-            return 1;
-        }
-
-        // Now start demo
-        Demo demo(node);
-        demo.run();
+        Demo demo;
+        demo.run(epyx, Epyx::SockAddress(argv[1]));
     } catch (Epyx::Exception e) {
-        std::cout << e << std::endl;
+        Epyx::log::fatal << e << Epyx::log::endl;
     }
     return 0;
 }
