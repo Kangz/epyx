@@ -73,21 +73,21 @@ void test_kbucket(){
 
     for(int i=10000; i-->0;){
         Id a(DHT::Id::INIT_RANDOM);
-        std::vector<Peer> nearest;
+        std::vector<Peer::SPtr> nearest;
         kb.findNearestNodes(a, nearest, 20);
     }
 
     log::info<<"Done making 10.000 lookups in the routing table"<<log::endl;
 
     Id a(DHT::Id::INIT_RANDOM);
-    std::vector<Peer> nearest;
+    std::vector<Peer::SPtr> nearest;
     kb.findNearestNodes(a, nearest, 20);
 
-    std::vector<Peer>::iterator it = nearest.begin();
+    auto it = nearest.begin();
 
     log::info<<"Searching for a: "<<a<<log::endl;
     for(int i=0; i<20; it++, i++){
-        Id id = (*it).id;
+        Id id = (*it)->id;
         Distance d(&a, &id);
         log::info<<"      id: "<<id<<log::endl;
         log::info<<"d(id, a): "<<d<<log::endl;
@@ -154,10 +154,10 @@ void test_dhtpacket(){
     pkt.method = M_FOUND;
     pkt.connectionId = 42;
     pkt.status = 0;
-    pkt.foundPeers = new std::vector<Peer>();
+    pkt.foundPeers = new std::vector<Peer::SPtr>();
     for(int i=0; i<20; i++){
-        Peer temp;
-        temp.id.randomize();
+        Peer::SPtr temp(new Peer);
+        temp->id.randomize();
         pkt.foundPeers->push_back(temp);
     }
     pkt.idToFind.randomize();
@@ -269,10 +269,9 @@ static const int NETWORK_SIZE = 10;
 
 class MyFindCallback: public FindCallback {
     public:
-        void onFound(std::vector<std::pair<Distance, Peer>>& result){
+        void onFound(std::vector<std::pair<Distance, Peer::SPtr>>& result){
             log::info << "The DHT found the closest Ids with distance : " << log::endl;
-            std::vector<std::pair<Distance, Peer>>::iterator it;
-            for(it = result.begin(); it != result.end(); it ++){
+            for(auto it = result.begin(); it != result.end(); it ++){
                 log::info << (*it).first << log::endl;
             }
         }
@@ -415,7 +414,7 @@ int main(){
         //test_dhtpacket();
         //test_dht_n2np();
         epyx.setNetWorkers(20);
-        test_dht_network(epyx, true); // HACK for the presentation
+        test_dht_network(epyx, false); // HACK for the presentation
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }

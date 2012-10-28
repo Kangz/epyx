@@ -42,6 +42,8 @@ namespace DHT
 
         friend std::ostream& operator<<(std::ostream& os, const Peer& peer);
         friend std::istream& operator>>(std::istream& is, Peer& peer);
+
+        typedef std::shared_ptr<Peer> SPtr;
     };
 
 }

@@ -84,7 +84,7 @@ namespace DHT
         int connectionId;
         int status;
         int count;
-        std::vector<Peer>* foundPeers;
+        std::vector<Peer::SPtr>* foundPeers;
 
         std::string value;
         std::string key;

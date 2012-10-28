@@ -74,7 +74,7 @@ namespace DHT
          */
         void start();
 
-        void treat(EPYX_AQA("find success"), std::vector<Peer>* peers);
+        void treat(EPYX_AQA("find success"), std::vector<Peer::SPtr>* peers);
         void treat(EPYX_AQA("find failure"));
 
         void treat(EPYX_AQA("get success"), std::string result);

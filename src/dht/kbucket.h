@@ -62,7 +62,7 @@ namespace DHT
          * @param nearest where the results will be stored (maybe make it a result instead of an argument)
          * @param n the number of peers we want to get
          */
-        void findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n);
+        void findNearestNodes(const Id& id, std::vector<Peer::SPtr> &nearest, int n);
 
         static const unsigned int NODES_PER_BUCKET = 20;
         static const unsigned int MAX_INACTIVE_PERIOD = 15000;
@@ -77,7 +77,7 @@ namespace DHT
     class Bucket
     {
         public:
-            std::list<Peer*> peers;
+            std::list<Peer::SPtr> peers;
     };
 }
 }

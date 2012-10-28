@@ -63,7 +63,7 @@ namespace DHT
         answer.method = M_FOUND;
         answer.connectionId = pkt->connectionId;
         answer.status = 0;
-        answer.foundPeers = new std::vector<Peer>();
+        answer.foundPeers = new std::vector<Peer::SPtr>();
 
         //Ask the kbucket
         this->n.kbucket.findNearestNodes(pkt->idToFind, *answer.foundPeers, pkt->count);

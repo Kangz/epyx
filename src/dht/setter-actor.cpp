@@ -22,9 +22,8 @@ namespace DHT
     }
 
     void SetterSearchCallback::onFound(ClosestQueue& result) {
-        std::vector<Peer>* res = new std::vector<Peer>();
-        ClosestQueue::iterator it;
-        for(it = result.begin(); it != result.end(); it ++)  {
+        std::vector<Peer::SPtr>* res = new std::vector<Peer::SPtr>();
+        for(auto it = result.begin(); it != result.end(); it ++)  {
             res->push_back((*it).second);
         }
         parent.post(EPYX_AQ("find success"), res);
@@ -45,9 +44,9 @@ namespace DHT
         n.findClosest(new SetterSearchCallback(Actor::getId(this)), SET_REDUNDANCY, id);
     }
 
-    void SetterActor::treat(EPYX_AQA("find success"), std::vector<Peer>* peers) {
+    void SetterActor::treat(EPYX_AQA("find success"), std::vector<Peer::SPtr>* peers) {
         for(auto it = peers->begin(); it != peers->end(); it ++) {
-            ask(*it);
+            ask(**it);
         }
         pendingRequests = peers->size();
 

@@ -103,11 +103,11 @@ namespace DHT
             connectionId = String::toInt(pkt.headers["connectionid"]);
             count = String::toInt(pkt.headers["count"]);
 
-            foundPeers = new std::vector<Peer>();
-            Peer p;
+            foundPeers = new std::vector<Peer::SPtr>();
             std::istringstream ssdata(value);
             for(int i=0; i<count; i++){
-                p.unserialize(ssdata);
+                std::shared_ptr<Peer> p(new Peer);
+                p->unserialize(ssdata);
                 foundPeers->push_back(p);
             }
 
@@ -181,8 +181,8 @@ namespace DHT
                 pkt->headers["connectionid"] = String::fromInt(connectionId);
                 pkt->headers["count"] = String::fromInt(foundPeers->size());
 
-                for(std::vector<Peer>::iterator i=foundPeers->begin(); i != foundPeers->end(); ++i){
-                    (*i).serialize(oss);
+                for(auto i=foundPeers->begin(); i != foundPeers->end(); ++i){
+                    (*i)->serialize(oss);
                 }
 
                 value = oss.str();
