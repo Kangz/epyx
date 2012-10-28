@@ -17,16 +17,45 @@
 #define EPYX_DIRECTCONNECTION_DISPATCHER_H
 
 #include "../n2np/module.h"
+#include "openconnection.h"
 
-namespace Epyx {
-    namespace DirectConnection {
-        
+namespace Epyx
+{
+    namespace DirectConnection
+    {
+        /**
+         * @brief N2NP Module used to manage a Direct Connection
+         */
         class Dispatcher : public N2NP::Module
         {
-            public:
-                void fromN2NP(N2NP::Node &node, N2NP::NodeId from, const byte_str& data);
+        public:
+            /**
+             * @brief Add DIRECTCONNECTION module to a N2NP node
+             * @param node shared pointer to an N2NP node
+             */
+            static void addModule(const std::shared_ptr<N2NP::Node>& node);
+
+            /**
+             * @brief Receive data from N2NP
+             * @param node
+             * @param from
+             * @param data
+             */
+            void fromN2NP(N2NP::Node& node, N2NP::NodeId from, const byte_str& data);
+
+        private:
+            /**
+             * @brief Private constructor, use create instead
+             * @param node N2NP shared pointer to be associated with
+             */
+            Dispatcher(const std::shared_ptr<N2NP::Node>& node);
+
+            std::shared_ptr<N2NP::Node> node;
+
+            // Map of state machines in node connection
+            std::mutex nodeConnectMutex;
+            std::map<N2NP::NodeId, std::shared_ptr<OpenConnection> > nodeConnect;
         };
-        
     } // namespace DirectConnection
 } // namespace Epyx
 

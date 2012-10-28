@@ -148,13 +148,13 @@ namespace Epyx
 
             // Treat each node
             for (auto i = nodesList.begin(); i != nodesList.end(); i++) {
-                N2NP::Node *node = static_cast<N2NP::Node*> (i->get());
+                std::shared_ptr<N2NP::Node> node = std::static_pointer_cast<N2NP::Node> (*i);
                 std::stack<N2NP::NodeId> idLists;
                 node->askForDirectConnectionIds(idLists);
                 while (!idLists.empty()) {
                     N2NP::NodeId id = idLists.top();
                     idLists.pop();
-                    DirectConnection::Module::openDirectConnection(*node, id);
+                    DirectConnection::Module::openDirectConnection(node, id);
                     sleep(2);
                 }
             }

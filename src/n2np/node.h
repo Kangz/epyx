@@ -87,7 +87,7 @@ namespace Epyx
              * @param recipient The other end of the link, as a nodeId
              * @param socket The socket to be given
              */
-            void offerDirectConn(const NodeId& recipient, Socket* socket);
+            void offerDirectConn(const NodeId& recipient, std::unique_ptr<Socket>&& socket);
 
             /**
              * @brief Get node ID

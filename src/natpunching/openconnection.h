@@ -21,34 +21,48 @@
 #include <map>
 #include "../n2np/nodeid.h"
 #include "../n2np/node.h"
-namespace Epyx {
-    namespace DirectConnection {
-        typedef enum state{STATE_CLIENT, 
-                           STATE_SERVER
-                          }state;
-        typedef enum method{DIRECT,
-                            UPNP
-                           }method;
+
+namespace Epyx
+{
+    namespace DirectConnection
+    {
+        typedef enum state
+        {
+            STATE_CLIENT,
+            STATE_SERVER
+        } state;
+        typedef enum method
+        {
+            DIRECT,
+            UPNP
+        } method;
         class OpenConnection : public Thread
         {
-            public:
-                //Initialising the state Machine
-                OpenConnection(N2NP::Node& node, N2NP::NodeId & remoteHost, bool client = true);
-                //Avancing from a state to another
-                void getMessage(const std::string& command, const std::map<std::string,std::string>& headers);
-            protected:
-                void run();
-            private:
-                void serverStateOpen();
-                N2NP::NodeId remoteHost;
-                state etat;
-                bool client_tried;
-                bool server_tried;
-                method tested_method;
-                N2NP::Node *node;
-                TCPSocket *socket;
+        public:
+            /**
+             * @brief Initialise the state Machine
+             */
+            OpenConnection(const std::shared_ptr<N2NP::Node>& node,
+                    const N2NP::NodeId& remoteHost, bool clients = true);
+
+            /**
+             * @brief Advance from a state to another
+             * @param command
+             * @param headers
+             */
+            void getMessage(const std::string& command, const std::map<std::string, std::string>& headers);
+        protected:
+            void run();
+        private:
+            void serverStateOpen();
+            N2NP::NodeId remoteHost;
+            state etat;
+            bool client_tried;
+            bool server_tried;
+            method tested_method;
+            std::unique_ptr<TCPSocket> socket;
+            std::shared_ptr<N2NP::Node> node;
         };
-        
     } // namespace DirectConnection
 } // namespace Epyx
 

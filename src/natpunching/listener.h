@@ -21,27 +21,27 @@
 #include "../net/tcpserver.h"
 #include "../n2np/node.h"
 
-namespace Epyx {
-    namespace DirectConnection {
-        
+namespace Epyx
+{
+    namespace DirectConnection
+    {
         class Listener : public Thread
         {
-            public:
-                Listener(TCPServer * srv);
-                TCPSocket * getSocket();
-                SockAddress getAddress();
-                SockAddress getLocalAddress();
-                char* getData();
-                bool hasAccepted();
-            protected:
-                void run();
-            private:
-                TCPServer* srv;
-                TCPSocket * sock;
-                bool hasAccept;
-                char* data;
+        public:
+            Listener(TCPServer *srv);
+            std::unique_ptr<TCPSocket>& getSocket();
+            SockAddress getAddress();
+            SockAddress getLocalAddress();
+            bool hasAccepted();
+        protected:
+            void run();
+        private:
+            std::unique_ptr<TCPServer> srv;
+            std::unique_ptr<TCPSocket> sock;
+            bool hasAccept;
+            char* data;
         };
-        
+
     } // namespace DirectConnection
 } // namespace Epyx
 

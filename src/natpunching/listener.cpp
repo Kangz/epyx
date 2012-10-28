@@ -1,48 +1,41 @@
 #include "listener.h"
 
-namespace Epyx {
-    namespace DirectConnection {
-        
+namespace Epyx
+{
+    namespace DirectConnection
+    {
+
         Listener::Listener(TCPServer *srv)
-            :srv(srv), hasAccept(false)
-        {
+        :srv(srv), hasAccept(false) {
         }
-        void Listener::run(){
+
+        void Listener::run() {
             struct sockaddr_storage clientAddr;
             socklen_t clientAddrLen;
-            struct sockaddr_storage localAddr;
-            socklen_t localAddrLen;
-            
+
             clientAddrLen = sizeof clientAddr;
-            localAddrLen = sizeof localAddr;
-            
+
             int newfd = srv->getFd();
-            
-            ::accept(newfd,(struct sockaddr*) &clientAddr, &clientAddrLen);
+
+            ::accept(newfd, (struct sockaddr*) &clientAddr, &clientAddrLen);
             hasAccept = true;
-            sock = new TCPSocket(newfd, SockAddress((struct sockaddr*) &clientAddr));
-            ::getsockname(newfd,(struct sockaddr*) &localAddr,&localAddrLen);
-            sock->setLocalAddress(SockAddress((struct sockaddr*) &localAddr));
+            sock.reset(new TCPSocket(newfd, SockAddress((struct sockaddr*) &clientAddr)));
         }
-        SockAddress Listener::getAddress(){
-            if (sock != NULL)
-                return sock->getAddress();
-            else
-                return SockAddress();
+
+        SockAddress Listener::getAddress() {
+            return sock ? sock->getAddress() : SockAddress();
         }
-        bool Listener::hasAccepted(){
+
+        bool Listener::hasAccepted() {
             return this->hasAccept;
         }
 
-        SockAddress Listener::getLocalAddress(){
-            struct sockaddr_storage localAddr;
-            socklen_t localAddrLen;
-            localAddrLen = sizeof localAddr;
-            
-            ::getsockname(sock->getFd(),(struct sockaddr*) &localAddr,&localAddrLen);
-            return SockAddress ( (struct sockaddr*) &localAddr);
+        SockAddress Listener::getLocalAddress() {
+            sock->updateLocalAddress();
+            return sock->getLocalAddress();
         }
-        TCPSocket * Listener::getSocket(){
+
+        std::unique_ptr<TCPSocket>& Listener::getSocket() {
             return sock;
         }
     } // namespace DirectConnection

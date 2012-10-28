@@ -107,9 +107,9 @@ namespace Epyx
             modules[method] = m;
         }
 
-        void Node::offerDirectConn(const NodeId& recipient, Socket *socket) {
+        void Node::offerDirectConn(const NodeId& recipient, std::unique_ptr<Socket>&& socket) {
             std::lock_guard<std::mutex> lock(directSocketsMutex);
-            directSockets[recipient].reset(socket);
+            directSockets[recipient].swap(socket);
         }
 
         const NodeId& Node::getId() const {

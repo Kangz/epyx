@@ -1,24 +1,24 @@
 #include "module.h"
 #include "dispatcher.h"
-namespace Epyx {
-    namespace DirectConnection {
-        atom::Map<N2NP::NodeId,OpenConnection*> Module::NodeConnect;
-        
-        void Module::init(N2NP::Node &node)
-        {
-            std::shared_ptr<Dispatcher> dispatch(new Dispatcher);
-            node.addModule("DIRECTCONNECTION", dispatch);
-        }
-        OpenConnection* Module::openDirectConnection(N2NP::Node &node, N2NP::NodeId &remoteHost){ //As Client
-            OpenConnection* opener = new OpenConnection(node,remoteHost);
+
+namespace Epyx
+{
+    namespace DirectConnection
+    {
+
+        std::shared_ptr<OpenConnection> Module::openDirectConnection(const std::shared_ptr<N2NP::Node>& node,
+            const N2NP::NodeId& remoteHost) { //As Client
+            std::shared_ptr<OpenConnection> opener(new OpenConnection(node, remoteHost));
             opener->start();
             return opener;
         }
-        OpenConnection* Module::openDirectConnectionServer(N2NP::Node &node, N2NP::NodeId &remoteHost){ //As Server
-            OpenConnection* opener = new OpenConnection(node,remoteHost,false);
+
+        std::shared_ptr<OpenConnection> Module::openDirectConnectionServer(const std::shared_ptr<N2NP::Node>& node,
+            const N2NP::NodeId&remoteHost) { //As Server
+            std::shared_ptr<OpenConnection> opener(new OpenConnection(node, remoteHost, false));
             opener->start();
             return opener;
         }
-        
+
     } // namespace DirectConnection
 } // namespace Epyx

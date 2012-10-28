@@ -15,29 +15,30 @@
  */
 #ifndef EPYX_DIRECTCONNECTION_MODULE_H
 #define EPYX_DIRECTCONNECTION_MODULE_H
-#include "../core/atom/map.h"
+
 #include "openconnection.h"
 #include "../n2np/nodeid.h"
 #include "../net/netselect.h"
+#include <map>
+#include <memory>
 #include <stack>
-namespace Epyx {
-    namespace DirectConnection {
-        
+
+namespace Epyx
+{
+    namespace DirectConnection
+    {
         class Module
         {
-            public:
-                // Will Call DirectConnection::OpenConnection class which opens an independant Thread
-                // Use to be the Client
-                static OpenConnection* openDirectConnection(N2NP::Node &node, N2NP::NodeId &remoteHost); 
-                // Use to be the server
-                static OpenConnection* openDirectConnectionServer(N2NP::Node &node, N2NP::NodeId &remoteHost);
-                static atom::Map<N2NP::NodeId,OpenConnection*> NodeConnect;
-                static void init(N2NP::Node &node);
-                //static Epyx::NetSelect ConnectionListeners;
-            private:
-                
+        public:
+            // Will Call DirectConnection::OpenConnection class which opens an independant Thread
+            // Use to be the Client
+            static std::shared_ptr<OpenConnection> openDirectConnection(const std::shared_ptr<N2NP::Node>& node,
+                    const N2NP::NodeId& remoteHost);
+            // Use to be the server
+            static std::shared_ptr<OpenConnection> openDirectConnectionServer(const std::shared_ptr<N2NP::Node>& node,
+                    const N2NP::NodeId& remoteHost);
         };
-        
+
     } // namespace DirectConnection
 } // namespace Epyx
 
