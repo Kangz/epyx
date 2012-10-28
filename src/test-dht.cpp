@@ -301,7 +301,7 @@ class MySetCallback: public SetCallback {
 void test_dht_network(Epyx::API& epyx, bool prod){
     // Create Net Select for relay
     NetSelect *selectRelay = new NetSelect(10, "wRelay");
-    selectRelay->setName("NetSelectRelay");
+    selectRelay->setThreadName("NetSelectRelay");
     selectRelay->start();
 
     // Create relay
@@ -313,7 +313,7 @@ void test_dht_network(Epyx::API& epyx, bool prod){
 
     // Create Net Select for nodes
     Epyx::NetSelect *selectNodes = new Epyx::NetSelect(10, "WNodes");
-    selectNodes->setName("NetSelectNodes");
+    selectNodes->setThreadName("NetSelectNodes");
     selectNodes->start();
 
     // Create nodes

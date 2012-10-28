@@ -90,10 +90,11 @@ namespace Epyx
          * @param id DHT ID
          * @param name thread name
          * @param node N2NP node
+         * @param first true if it is the first DHT node
          * @return shared pointer to a new DHT::Node
          */
         std::shared_ptr<DHT::Node> createDHTNode(const std::string& name,
-                std::shared_ptr<N2NP::Node> node);
+                std::shared_ptr<N2NP::Node> node, bool first = false);
 
         /**
          * @brief Kill a node

@@ -79,3 +79,6 @@ target_link_libraries(demo-video epyx vpx SDL)
 # Real programs
 add_executable(simple-relay src/simple-relay.cpp)
 target_link_libraries(simple-relay epyx)
+
+add_executable(bootstrap src/bootstrap.cpp)
+target_link_libraries(bootstrap epyx)

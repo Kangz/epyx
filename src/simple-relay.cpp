@@ -18,22 +18,22 @@ int main(int argc, char **argv) {
 
         // Parse options
         int c;
-        int nbConn = 50;
-        while ((c = getopt(argc, argv, "hn:")) != -1) {
+        int nbWorkers = 50;
+        while ((c = getopt(argc, argv, "hw:")) != -1) {
             switch (c) {
                 case 'h':
                     std::cout << "Usage: relay [options] address:port" << std::endl
                         << "options:" << std::endl
-                        << " -h  Display help" << std::endl
-                        << " -n number Set up the number of network workers"
-                        << "(which treat packets, " << nbConn << " by default)" << std::endl
+                        << " -h   Display help" << std::endl
+                        << " -w number Set the number of network workers"
+                        << " (which treat packets, " << nbWorkers << " by default)" << std::endl
                         << "address:port Binded interface" << std::endl;
                     return 0;
-                case 'n':
-                    nbConn = Epyx::String::toInt(optarg);
+                case 'w':
+                    nbWorkers = Epyx::String::toInt(optarg);
                     break;
                 case '?':
-                    if (optopt == 'n')
+                    if (optopt == 'w')
                         std::cerr << "Option -" << optopt << " requires an argument." << std::endl;
                     else if (isprint(optopt))
                         std::cerr << "Unknown option `-" << optopt << "'." << std::endl;
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
             }
         }
 
-        if (optind < argc -1) {
+        if (optind < argc - 1) {
             std::cerr << "Too many parameters." << std::endl;
             return 1;
         } else if (optind == argc - 1) {
@@ -63,8 +63,8 @@ int main(int argc, char **argv) {
 
         // Spawn relay
         EPYX_VERIFY(!relayAddr.empty());
-        epyx.setNetWorkers(nbConn);
-        epyx.spawnRelay(relayAddr, nbConn);
+        epyx.setNetWorkers(nbWorkers);
+        epyx.spawnRelay(relayAddr, nbWorkers);
         epyx.waitNet();
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
@@ -72,4 +72,3 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
-
