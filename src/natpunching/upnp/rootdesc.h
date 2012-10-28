@@ -38,7 +38,7 @@ namespace Epyx
          *
          * Answer is a service map
          */
-        class RootDesc : public NetQuery<std::map<std::string, std::string>>
+        class RootDesc : public NetQuery<std::map<std::string, std::string> >
         {
         public:
             /**
@@ -50,7 +50,7 @@ namespace Epyx
             bool query();
 
         protected:
-            std::map<std::string, std::string>* eat(const char *data, long size);
+            std::unique_ptr<std::map<std::string, std::string> > eat(const byte_str& data);
 
         private:
             /**

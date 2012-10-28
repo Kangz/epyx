@@ -21,44 +21,44 @@ namespace Epyx
 {
 
     template<typename T> NetQuery<T>::NetQuery()
-    : sock(NULL), dynamicSock(false) {
+    : sock(NULL) {
     }
 
-    template<typename T> NetQuery<T>::NetQuery(Socket& sock)
-    : sock(&sock), dynamicSock(false) {
+    template<typename T> NetQuery<T>::NetQuery(const std::shared_ptr<Socket>& sock)
+    : sock(sock) {
     }
 
-    template<typename T> NetQuery<T>::NetQuery(Socket *psock)
-    : sock(psock), dynamicSock(true) {
+    template<typename T> NetQuery<T>::NetQuery(Socket* sock)
+    : sock(sock) {
     }
 
     template<typename T> NetQuery<T>::~NetQuery() {
         this->close();
     }
 
-    template<typename T> void NetQuery<T>::setSocket(Socket& sock) {
-        EPYX_ASSERT(this->sock == NULL);
-        this->sock = &sock;
+    template<typename T> void NetQuery<T>::setSocket(const std::shared_ptr<Socket>& sock) {
+        EPYX_ASSERT(!this->sock && sock);
+        this->sock = sock;
     }
 
     template<typename T> void NetQuery<T>::close() {
-        if (sock != NULL) {
+        if (sock) {
             sock->close();
-            if (dynamicSock)
-                delete sock;
-            sock = NULL;
+            sock.reset();
         }
     }
 
-    template<typename T> T* NetQuery<T>::answer(const Timeout& timeout) {
+    template<typename T> std::unique_ptr<T> NetQuery<T>::answer(const Timeout& timeout) {
         struct timeval tv;
         fd_set rfds;
         const int size = 4096;
-        char data[size];
+        byte data[size];
+        std::unique_ptr<T> ans;
+
         EPYX_ASSERT(sock != NULL);
         int sockfd = sock->getFd();
         if (sockfd < 0)
-            return NULL;
+            return ans;
 
         // select() loop
         while (!timeout.hasExpired()) {
@@ -77,38 +77,37 @@ namespace Epyx
                 try {
                     // Eat data and return any answer
                     // Note: if recvSize = 0, this is the last call to eat()
-                    T* ans = this->eat(data, recvSize);
-                    if (ans != NULL)
+                    ans = this->eat(byte_str(data, recvSize));
+                    if (ans)
                         return ans;
 
                     // Close on End-Of-File
                     if (recvSize == 0) {
                         this->close();
-                        return NULL;
+                        return ans;
                     }
                 } catch (Exception e) {
                     log::error << e << log::endl;
                     log::error << "Closing socket to " << sock->getAddress() <<
                             " due to an exception" << log::endl;
                     this->close();
-                    return NULL;
+                    return ans;
                 }
             }
         }
-        return NULL;
+        return ans;
     }
 
     template<typename T> bool NetQuery<T>::answerIn(const Timeout& timeout, T *ans) {
-        T *result = this->answer(timeout);
-        if (result == NULL)
+        std::unique_ptr<T> result = this->answer(timeout);
+        if (!result)
             return false;
         if (ans != NULL)
             *ans = *result;
-        delete result;
         return true;
     }
 
-    template<typename T> T* NetQuery<T>::queryAnswer(const Timeout& timeout) {
+    template<typename T> std::unique_ptr<T> NetQuery<T>::queryAnswer(const Timeout& timeout) {
         if (!this->query()) {
             log::error << "NetQuery: Unable to send query" << log::endl;
             return NULL;
@@ -124,8 +123,8 @@ namespace Epyx
         return this->answerIn(timeout, ans);
     }
 
-    template<typename T> Socket& NetQuery<T>::socket() const {
-        EPYX_ASSERT(sock != NULL);
-        return *sock;
+    template<typename T> const std::shared_ptr<Socket>& NetQuery<T>::socket() const {
+        EPYX_ASSERT(sock);
+        return sock;
     }
 }

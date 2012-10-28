@@ -20,33 +20,29 @@ namespace Epyx
                 << "MAN: \"ssdp:discover\"" << String::crlf
                 << "MX: 2" << String::crlf
                 << String::crlf;
-            return socket().write(message.str());
+            return socket()->write(message.str());
         }
 
-        URI* Discovery::eat(const char *data, long size) {
-            std::string error;
-            //log::debug << "Eating : " << size << " bytes" << log::endl;
-            //log::debug << data << log::endl;
+        std::unique_ptr<URI> Discovery::eat(const byte_str& data) {
+            std::unique_ptr<URI> uri;
 
             // Eat data with HTTP parser
-            htpars.eat(byte_str((const byte*)data, size));
+            htpars.eat(data);
             std::unique_ptr<GTTPacket> pkt = htpars.getPacket();
-            if (pkt) {
+            if (!pkt) {
                 // Incomplete packet, there may be an error
+                std::string error;
                 if (htpars.getError(error)) {
                     log::error << "HTTP Parser error during discovery:\n"
                         << error << log::endl;
                 }
-                return NULL;
+                return uri;
             }
 
-            // Here, pkt is an HTTP packet.
-            URI *uri = NULL;
-
-            // Filter in Internet Gateways
+            // Here, pkt is an HTTP packet. Filter in Internet Gateways
             if (pkt->headers["usn"].find("InternetGateway")) {
                 // Return location
-                uri = new URI(pkt->headers["location"]);
+                uri.reset(new URI(pkt->headers["location"]));
             }
             return uri;
         }

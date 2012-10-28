@@ -25,7 +25,7 @@ namespace Epyx
         void Command::setRemote(const SockAddress& addr, const std::string& service,
             const std::string& path) {
             this->address = addr;
-            this->socket().setAddress(addr);
+            this->socket()->setAddress(addr);
             this->path = path;
             this->service = service;
         }
@@ -107,25 +107,27 @@ namespace Epyx
                 << address << log::endl;
             //log::debug << httpcommand.str() << log::endl;
 
-            return socket().write(httpcommand.str());
+            return socket()->write(httpcommand.str());
         }
 
-        CommandResult* Command::eat(const char *data, long size) {
+        std::unique_ptr<CommandResult> Command::eat(const byte_str& data) {
+            std::unique_ptr<CommandResult> res;
+
             // Eat data with HTTP parser
-            htpars.eat(byte_str((const byte*)data, size));
+            htpars.eat(data);
             std::unique_ptr<GTTPacket> pkt = htpars.getPacket();
-            if (pkt) {
+            if (!pkt) {
                 // Incomplete packet, there may be an error
                 std::string error;
                 if (htpars.getError(error)) {
                     log::error << "HTTP Parser error in UPnP::command:\n"
                         << error << log::endl;
                 }
-                return NULL;
+                return res;
             }
 
             TiXmlDocument dom_answer;
-            dom_answer.Parse((const char*)pkt->body.c_str(), 0, TIXML_DEFAULT_ENCODING);
+            dom_answer.Parse((const char*) pkt->body.c_str(), 0, TIXML_DEFAULT_ENCODING);
 
             // DEBUG
             TiXmlPrinter printer = TiXmlPrinter();
@@ -136,7 +138,7 @@ namespace Epyx
             //log::debug << printer.CStr() << log::endl;
 
             // Create result
-            CommandResult *res = new CommandResult();
+            res.reset(new CommandResult());
             res->headers = pkt->headers;
             res->http_status = String::toInt(pkt->method);
 

@@ -44,20 +44,19 @@ namespace Epyx
             }
             Command order(address, WanIPConnService, WanIPConnCtl);
             order.setAction(UPNP::UPNP_ACTION_GET_EXT_IP);
-            CommandResult *res = order.queryAnswer(10000);
-            if (res == NULL) {
+            std::unique_ptr<CommandResult> res = order.queryAnswer(10000);
+            if (!res) {
                 log::error << "UPnP: Unable to get external IP address" << log::endl;
                 return "";
             }
             std::string ip = res->vars["NewExternalIPAddress"];
-            delete res;
             return ip;
         }
 
         std::list<portMap> IGD::getListPortMap() {
             std::list<portMap> portMapList;
             std::string WanIPConnService, WanIPConnCtl;
-            for (std::map<std::string, std::string>::iterator it = services.begin(); it != services.end(); ++it) {
+            for (auto it = services.begin(); it != services.end(); ++it) {
                 if (it->first.find("WANIPConn")) {
                     WanIPConnService = it->first;
                     WanIPConnCtl = it->second;
@@ -67,13 +66,13 @@ namespace Epyx
             do {
                 Command order(address, WanIPConnService, WanIPConnCtl);
                 order.setAction(Epyx::UPNP::UPNP_ACTION_GET_EXT_IP); // FIXME: Is it a bug ?
-                CommandResult *res = order.queryAnswer(10000);
-                if (res == NULL) {
+                std::unique_ptr<CommandResult> res = order.queryAnswer(10000);
+                if (!res) {
                     log::error << "UPnP: Unable to get portmap list" << log::endl;
                     break;
                 }
-                unsigned short extPort = (unsigned short) String::toInt(res->vars["NewExternalPort"]);
-                unsigned short intPort = (unsigned short) String::toInt(res->vars["NewInternalPort"]);
+                unsigned short extPort = static_cast<unsigned short> (String::toInt(res->vars["NewExternalPort"]));
+                unsigned short intPort = static_cast<unsigned short> (String::toInt(res->vars["NewInternalPort"]));
                 SockAddress newInternalAddress(res->vars["NewInternalClient"], intPort, 4);
                 portMap tmp = {!!strcmp(res->vars["NewEnabled"].c_str(), "0"),
                     newInternalAddress,
@@ -82,17 +81,15 @@ namespace Epyx
                     res->vars["NewPortMappingDescription"]};
                 portMapList.push_back(tmp);
                 httpStatus = res->http_status;
-                delete res;
-                res = NULL;
             } while (httpStatus != 500);
             return portMapList;
         }
 
         std::string IGD::getLocalAdress() {
             std::string IPAddress;
-            struct ifaddrs * ifAddrStruct = NULL;
-            struct ifaddrs * ifa = NULL;
-            void * tmpAddrPtr = NULL;
+            struct ifaddrs *ifAddrStruct = NULL;
+            struct ifaddrs *ifa = NULL;
+            void *tmpAddrPtr = NULL;
 
             getifaddrs(&ifAddrStruct);
 
@@ -146,8 +143,8 @@ namespace Epyx
             order.addArgument("NewEnabled", "1");
             order.addArgument("NewPortMappingDescription", EPYX_MSG);
             order.addArgument("NewLeaseDuration", "0");
-            CommandResult *res = order.queryAnswer(30000);
-            if (res == NULL) {
+            std::unique_ptr<CommandResult> res = order.queryAnswer(30000);
+            if (!res) {
                 log::error << "IGD: Unable to add a port map" << log::endl;
                 return SockAddress();
             }
@@ -160,7 +157,7 @@ namespace Epyx
 
         bool IGD::delPortMap(const SockAddress& addr, protocol proto) {
             std::string WanIPConnService, WanIPConnCtl;
-            for (std::map<std::string, std::string>::iterator it = services.begin(); it != services.end(); ++it) {
+            for (auto it = services.begin(); it != services.end(); ++it) {
                 if (it->first.find("WANIPConn")) {
                     WanIPConnService = it->first;
                     WanIPConnCtl = it->second;
@@ -176,8 +173,8 @@ namespace Epyx
             order.addArgument("NewExternalPort", portString);
             order.addArgument("NewProtocol", prot);
 
-            CommandResult *res = order.queryAnswer(30000);
-            if (res == NULL) {
+            std::unique_ptr<CommandResult> res = order.queryAnswer(30000);
+            if (!res) {
                 log::error << "IGD: Unable to delete a port map" << log::endl;
                 return false;
             }

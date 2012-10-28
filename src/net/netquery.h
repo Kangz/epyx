@@ -24,6 +24,7 @@
 #include "socket.h"
 #include "../core/timeout.h"
 #include <boost/noncopyable.hpp>
+#include <memory>
 
 namespace Epyx
 {
@@ -55,24 +56,16 @@ namespace Epyx
         NetQuery();
 
         /**
-         * @brief Constructor with a reference
-         *
-         * Create a new NetQuery with a socket whose allocation is NOT
-         * managed by this object.
-         *
-         * @param sock socket reference
+         * @brief Constructor with a socket
+         * @param sock socket shared pointer
          */
-        NetQuery(Socket &sock);
+        NetQuery(const std::shared_ptr<Socket>& sock);
 
         /**
-         * @brief Constructor used with new Socket()
-         *
-         * Create a new NetQuery with a socket whose allocation is
-         * managed by this object: the socket is DELETED in the destructor.
-         *
-         * @param psock socket pointer
+         * @brief Constructor with a newsocket
+         * @param sock new socket
          */
-        NetQuery(Socket *psock);
+        NetQuery(Socket* sock);
 
         /**
          * @brief Desctructor
@@ -83,7 +76,7 @@ namespace Epyx
          * @brief Set socket
          * @param sock
          */
-        void setSocket(Socket& sock);
+        void setSocket(const std::shared_ptr<Socket>& sock);
 
         /**
          * @brief Close everything
@@ -101,7 +94,7 @@ namespace Epyx
          * @param timeout maximum number of seconds to wait for an answer
          * @return the answer, or NULL if there is a timeout or an error
          */
-        T* answer(const Timeout& timeout);
+        std::unique_ptr<T> answer(const Timeout& timeout);
 
         /**
          * @brief Same as answer(), but modify the given reference
@@ -116,7 +109,7 @@ namespace Epyx
          * @param timeout
          * @return answer
          */
-        T* queryAnswer(const Timeout& timeout);
+        std::unique_ptr<T> queryAnswer(const Timeout& timeout);
         /**
          * @brief query() and answerIn() in one call
          * @param timeout
@@ -130,7 +123,7 @@ namespace Epyx
          * @brief Get internal socket
          * @return sock
          */
-        Socket& socket() const;
+        const std::shared_ptr<Socket>& socket() const;
 
         /**
          * @brief Eat data and return an answer once it is ready
@@ -138,11 +131,10 @@ namespace Epyx
          * @param size available size
          * @return NULL if data is incomplete, the newly-allocated answer otherwise
          */
-        virtual T* eat(const char *data, long size) = 0;
+        virtual std::unique_ptr<T> eat(const byte_str& data) = 0;
 
     private:
-        Socket *sock;
-        bool dynamicSock;
+        std::shared_ptr<Socket> sock;
     };
 }
 

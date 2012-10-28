@@ -46,7 +46,7 @@ namespace Epyx
             bool query();
 
         protected:
-            URI* eat(const char *data, long size);
+            std::unique_ptr<URI> eat(const byte_str& data);
 
         private:
             HTTPParser htpars;

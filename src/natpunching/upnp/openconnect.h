@@ -44,10 +44,6 @@ namespace Epyx
              * @brief constructor
              */
             Natpunch();
-            /**
-             * @brief destructor
-             */
-            ~Natpunch();
 
             /**
              * @brief creating a port mapping behind a NAT
@@ -55,13 +51,13 @@ namespace Epyx
              * @param remotePort
              * @return Address of the NAT router
              */
-            const SockAddress openMapPort(unsigned short localPort, unsigned short remotePort =0);
+            const SockAddress openMapPort(unsigned short localPort, unsigned short remotePort = 0);
             //Socket OpenConnection(); //Opens a Listening Socket to receive a connection.
         private:
             void testConnection();
             void closeMapPort();
 
-            IGD *igd;
+            std::unique_ptr<IGD> igd;
             URI uri;
             bool success;
         };

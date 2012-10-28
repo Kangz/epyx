@@ -92,7 +92,7 @@ namespace Epyx
 
             bool query();
         protected:
-            CommandResult* eat(const char *data, long size);
+            std::unique_ptr<CommandResult> eat(const byte_str& data);
 
         private:
             // Remote variables
