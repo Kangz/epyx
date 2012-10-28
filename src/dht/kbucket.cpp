@@ -45,11 +45,11 @@ namespace DHT
         }
 
         //We want to add the peer to the bucket if it is not full or if the oldest peer in it is too old
-        if (peers.size()<NODES_PER_BUCKET) {
+        if (peers.size() < NODES_PER_BUCKET) {
             add=true;
         } else {
             Peer* peerFront = peers.front();
-            if (now - peerFront->lastReceiveTime>MAX_INACTIVE_PERIOD) {
+            if (now - peerFront->lastReceiveTime > (int)MAX_INACTIVE_PERIOD) {
                 peers.pop_front();
                 add=true;
                 delete peerFront;
