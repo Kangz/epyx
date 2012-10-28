@@ -5,22 +5,23 @@
 #include "webm/videoframe.h"
 
 int main() {
+    Epyx::API epyx;
     try {
         unsigned int width = 640, height = 480, frame_rate = 30, video_bitrate = 400;
-        Epyx::API epyx;
         Epyx::webm::VideoDev vdev(width, height, frame_rate);
         Epyx::webm::VpxEncoder encoder(width, height, video_bitrate);
         Epyx::webm::VpxDecoder decoder;
 
+        // Allocate image
         vpx_image_t rawImage;
         vpx_img_alloc(&rawImage, IMG_FMT_YV12, width, height, 1);
         EPYX_ASSERT(vdev.start_capture());
 
-        Epyx::webm::FramePacket *fpkt;
-
+        // Create a video frame
         Epyx::webm::VideoFrame vframe(width, height, "Epyx");
         EPYX_ASSERT(vframe.init());
 
+        // Loop
         while (!vframe.checkSDLQuitAndEvents()) {
             // Get frame
             if (vdev.get_frame(&rawImage)) {
@@ -31,7 +32,8 @@ int main() {
                 long int utime = tv.tv_sec * 1000 + tv.tv_usec;
 
                 encoder.encode(rawImage, utime, 0);
-                while ((fpkt = encoder.getPacket()) != NULL) {
+                std::unique_ptr<Epyx::webm::FramePacket> fpkt;
+                while ((fpkt = encoder.getPacket())) {
                     Epyx::byte_str netdata = fpkt->build();
 
                     Epyx::log::info << "Net Packet of " << netdata.size() << " bytes" << Epyx::log::endl;
@@ -52,6 +54,7 @@ int main() {
             }
         }
 
+        // Stop
         EPYX_ASSERT(vdev.stop_capture());
         vpx_img_free(&rawImage);
     } catch (Epyx::Exception e) {

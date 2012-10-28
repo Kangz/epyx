@@ -10,15 +10,16 @@
 #include <SDL/SDL.h>
 #include "../../src/core/common.h"
 
-namespace Epyx {
-
-namespace webm {
-
+namespace Epyx
+{
+namespace webm
+{
     /**
      * @class VideoFrame
      * @brief A screen that simply shows a vpx_image
      */
-    class VideoFrame {
+    class VideoFrame
+    {
     public:
         /**
          * @brief the VideoFrame constructor

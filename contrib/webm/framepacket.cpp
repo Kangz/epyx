@@ -7,9 +7,10 @@ namespace Epyx
     namespace webm
     {
 
-        FramePacket::FramePacket(const byte_str& data, unsigned long timestamp,
+        FramePacket::FramePacket(byte_str& data, unsigned long timestamp,
             unsigned long duration)
-        :data(data), timestamp(timestamp), duration(duration) {
+        :timestamp(timestamp), duration(duration) {
+            this->data.swap(data);
         }
 
         FramePacket::FramePacket(GTTPacket& pkt) {
@@ -23,20 +24,18 @@ namespace Epyx
             }
 
             //Copy everything from the GTT packet
-            timestamp = String::toInt(pkt.headers["timestamp"]);
-            duration = String::toInt(pkt.headers["duration"]);
+            timestamp = String::toULong(pkt.headers["timestamp"]);
+            duration = String::toULong(pkt.headers["duration"]);
             // Swap packet body
             data.swap(pkt.body);
         }
 
         byte_str FramePacket::build() const {
             GTTPacket pkt;
-
-            //Fill the GTT packet
             pkt.protocol = "WEBM";
             pkt.method = "FRAME_PACKET";
-            pkt.headers["duration"] = String::fromInt(duration);
-            pkt.headers["timestamp"] = String::fromInt(timestamp);
+            pkt.headers["duration"] = String::fromUnsignedLong(duration);
+            pkt.headers["timestamp"] = String::fromUnsignedLong(timestamp);
             pkt.body = data;
             return pkt.build();
         }

@@ -1,5 +1,5 @@
 /**
- * @file webm/vpx_decoder.h
+ * @file webm/vpxdecoder.h
  * @brief Abstraction layer to vpx codec decoder
  */
 
@@ -13,6 +13,9 @@ namespace Epyx
 {
     namespace webm
     {
+        /**
+         * @brief Decode a FramePacket to several vpx_image_t
+         */
         class VpxDecoder
         {
         public:

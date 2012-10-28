@@ -14,23 +14,51 @@ namespace Epyx
 {
     namespace webm
     {
+        /**
+         * @brief Video device interaction
+         */
         class VideoDev
         {
         public:
-            static const unsigned int FRAME_SIZE = 1280 * 720 * 3 / 2;
+            /**
+             * @brief Number of buffer for capture
+             */
             static const unsigned int NB_BUFFER = 4;
 
+            /**
+             * @brief Initialize everything
+             * @param display_width
+             * @param display_height
+             * @param capture_frame_rate
+             * @param video_bitrate
+             */
             VideoDev(unsigned int display_width, unsigned int display_height,
                     unsigned int capture_frame_rate = 30, unsigned int video_bitrate = 400);
 
             ~VideoDev();
 
+            /**
+             * @brief Close file descriptor
+             */
             void close();
 
+            /**
+             * @brief Start a live capture
+             * @return true on success
+             */
             bool start_capture();
 
+            /**
+             * @brief Stop a live capture
+             * @return true on success
+             */
             bool stop_capture();
 
+            /**
+             * @brief Get a frame
+             * @param raw pointer to a vpx_image_t structure
+             * @return true on success
+             */
             bool get_frame(vpx_image_t *raw);
 
         private:
@@ -42,8 +70,8 @@ namespace Epyx
             // File descriptor
             int fd;
 
-            const void* mem[NB_BUFFER];
-            char frame[FRAME_SIZE];
+            void* mem[NB_BUFFER];
+            size_t mem_size[NB_BUFFER];
 
             unsigned int count_captured_frames;
         };

@@ -17,14 +17,14 @@ namespace Epyx
          * @param w
          * @param h
          */
-        static void uyvy2yv12(unsigned char *yv12, const unsigned char *uyvy,
+        static void uyvy2yv12(byte *yv12, const byte *uyvy,
             unsigned int w, unsigned int h) {
-            unsigned char *y = yv12;
-            unsigned char *u = y + (w * h);
-            unsigned char *v = w / 2 * h / 2 + u;
+            byte *y = yv12;
+            byte *u = y + (w * h);
+            byte *v = w / 2 * h / 2 + u;
             unsigned int i, j;
 
-            const unsigned char *p = uyvy;
+            const byte *p = uyvy;
             for (; y < u; p += 4) {
                 *y++ = p[0];
                 *y++ = p[2];
@@ -48,6 +48,7 @@ namespace Epyx
         fd(-1) {
             for (unsigned int i = 0; i < NB_BUFFER; i++) {
                 mem[i] = NULL;
+                mem_size[i] = 0;
             }
             count_captured_frames = 0;
         }
@@ -106,7 +107,7 @@ namespace Epyx
                 return false;
             }
 
-            //Request MemoryMapping with 4 buffers
+            //Request MemoryMapping with NB_BUFFER buffers
             struct v4l2_requestbuffers rb;
             memset(&rb, 0, sizeof (struct v4l2_requestbuffers));
             rb.count = NB_BUFFER;
@@ -136,6 +137,7 @@ namespace Epyx
                         << ": " << log::errstd << log::endl;
                     return false;
                 }
+                mem_size[i] = buf.length;
             }
 
             // Queue the buffers
@@ -168,9 +170,18 @@ namespace Epyx
 
             int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
             if (ioctl(fd, VIDIOC_STREAMOFF, &type) < 0) {
-                // No need tolog, because this may happen when there is a problem at start
+                // No need to log, because this may happen when there is a problem at start
                 //log::warn << "[VideoDev] Unable to stop streaming: " << log::errstd << log::endl;
                 return false;
+            }
+
+            // Unmap buffers
+            for (unsigned int i = 0; i < NB_BUFFER; i++) {
+                if (mem_size[i] > 0 && mem[i] != NULL && mem[i] != MAP_FAILED) {
+                    munmap(mem[i], mem_size[i]);
+                    mem_size[i] = 0;
+                    mem[i] = NULL;
+                }
             }
             return true;
         }
@@ -194,7 +205,7 @@ namespace Epyx
 
             // super ugly conversion :)
             if (buf.bytesused > 0) {
-                uyvy2yv12(raw->img_data, (const unsigned char*) mem[buf.index],
+                uyvy2yv12(raw->img_data, (const byte*) mem[buf.index],
                     display_width, display_height);
             }
 

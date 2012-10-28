@@ -125,10 +125,9 @@ void SenderAndUIThread::run() {
             long int utime = tv.tv_sec * 1000 + tv.tv_usec;
 
             encoder.encode(rawImage, utime, 0);
-            webm::FramePacket* fpkt;
-            while ((fpkt = encoder.getPacket()) != NULL) {
-                byte_str netdata = fpkt->build();
-                demo->node->send(demo->remoteNodeid, "VIDEO", netdata);
+            std::unique_ptr<webm::FramePacket> fpkt;
+            while ((fpkt = encoder.getPacket())) {
+                demo->node->send(demo->remoteNodeid, "VIDEO", fpkt->build());
             }
         }
         usleep(1000);

@@ -57,18 +57,19 @@ namespace Epyx
             return true;
         }
 
-        FramePacket* VpxEncoder::getPacket() {
+        std::unique_ptr<FramePacket> VpxEncoder::getPacket() {
             const vpx_codec_cx_pkt_t *pkt;
             while ((pkt = vpx_codec_get_cx_data(&encoder, &iter))) {
                 // Only use frame packets
                 if (pkt->kind != VPX_CODEC_CX_FRAME_PKT)
                     continue;
-                byte_str data((const byte*)pkt->data.frame.buf, pkt->data.frame.sz);
-                return new FramePacket(data, pkt->data.frame.pts, pkt->data.frame.duration);
+                byte_str data((const byte*) pkt->data.frame.buf, pkt->data.frame.sz);
+                return std::unique_ptr<FramePacket>(new FramePacket(data,
+                    pkt->data.frame.pts, pkt->data.frame.duration));
             }
             // End of iteration
             iter = NULL;
-            return NULL;
+            return std::unique_ptr<FramePacket>();
         }
     }
 }

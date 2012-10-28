@@ -20,7 +20,7 @@ namespace Epyx
         }
 
         bool VpxDecoder::decode(const FramePacket& pkt) {
-            if (vpx_codec_decode(&decoder, pkt.data.c_str(), pkt.data.size(), 0, 0)) {
+            if (vpx_codec_decode(&decoder, pkt.data.data(), pkt.data.size(), 0, 0)) {
                 log::error << "[VPX decoder] Failed to decode frame: "
                     << vpx_codec_error(&decoder) << log::endl;
                 return false;
