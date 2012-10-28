@@ -27,15 +27,13 @@ namespace DHT
         //Find the bucket the peer belongs to
         Bucket& bucket = buckets[d.firstActiveBit()];
 
-        std::list<Peer*>::iterator peer_it;
-
-        std::list<Peer*>& peers = bucket.peers;
+        std::list<Peer::SPtr>& peers = bucket.peers;
 
         //Search for the peer in the bucket to update its lastReceiveTime
-        for (peer_it = peers.begin(); peer_it != peers.end(); ++peer_it) {
-            Peer* peer = *peer_it;
+        for (auto peer_it = peers.begin(); peer_it != peers.end(); ++peer_it) {
+            Peer::SPtr peer = *peer_it;
             if (peerId == peer->id) {
-                Peer* temp = peer;
+                Peer::SPtr temp = peer;
                 peer_it = peers.erase(peer_it);
                 temp->lastReceiveTime = now;
                 temp->n2npId = n2npId;
@@ -48,32 +46,32 @@ namespace DHT
         if (peers.size() < NODES_PER_BUCKET) {
             add=true;
         } else {
-            Peer* peerFront = peers.front();
+            Peer::SPtr peerFront = peers.front();
             if (now - peerFront->lastReceiveTime > (int)MAX_INACTIVE_PERIOD) {
                 peers.pop_front();
                 add=true;
-                delete peerFront;
             }
         }
 
         //Finally add the peer to the KBucket
         if (add) {
-            peers.push_back(new Peer(peerId, n2npId, now));
+            peers.push_back(Peer::SPtr(new Peer(peerId, n2npId, now)));
         }
 
     }
 
     struct FindNearestComparator {
-        bool operator()(const std::pair<Distance, Peer> a, const std::pair<Distance, Peer> b) const {
+        bool operator()(const std::pair<Distance, Peer::SPtr> a, const std::pair<Distance, Peer::SPtr> b) const {
             return a.first < b.first;
         }
     };
 
+    typedef std::pair<Distance, Peer::SPtr> SearchCandidate;
 
-    void KBucket::findNearestNodes(const Id& id, std::vector<Peer> &nearest, int n) {
+    void KBucket::findNearestNodes(const Id& id, std::vector<Peer::SPtr> &nearest, int n) {
         std::lock_guard<std::mutex> guard(lock);
 
-        std::priority_queue<std::pair<Distance,Peer>, std::vector<std::pair<Distance, Peer>>,
+        std::priority_queue<SearchCandidate, std::vector<SearchCandidate>,
                 FindNearestComparator> closest;
 
         //Insert EVERY node in the priority_queue with it's distance associated
@@ -81,22 +79,20 @@ namespace DHT
         //Optimization n°1 : Never store more than n nodes in the map
         //TODO opti2 : split kbuckets when they are full
         //TODO opti3: with split buckets restrain the search
-        std::vector<Bucket>::iterator bucket;
-        std::list<Peer*>::iterator peer;
-        for ( bucket=buckets.begin(); bucket!=buckets.end(); bucket++ ) {
-            for ( peer=bucket->peers.begin(); peer!=bucket->peers.end(); peer++ ) {
+        for (auto bucket=buckets.begin(); bucket!=buckets.end(); bucket++ ) {
+            for (auto peer=bucket->peers.begin(); peer!=bucket->peers.end(); peer++ ) {
 
                 Distance dist(id, (*peer)->id);
 
                 if (closest.size() >= (unsigned long)n) {
-                    std::pair<Distance,Peer> farthest = closest.top();
+                    SearchCandidate farthest = closest.top();
                     if (dist < farthest.first) {
                         closest.pop();
                     }
                 }
 
                 if (closest.size() < (unsigned long)n) {
-                    closest.push(std::pair<Distance,Peer>(dist,*(*peer)));
+                    closest.push(SearchCandidate(dist,Peer::SPtr(*peer)));
                 }
             }
         }

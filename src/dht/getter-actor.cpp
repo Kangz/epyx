@@ -21,7 +21,7 @@ namespace DHT
     }
 
     void GetterSearchCallback::onFound(ClosestQueue& result) {
-        std::vector<Peer>* res = new std::vector<Peer>();
+        std::vector<Peer::SPtr>* res = new std::vector<Peer::SPtr>();
         ClosestQueue::iterator it;
         for(it = result.begin(); it != result.end(); it ++)  {
             res->push_back((*it).second);
@@ -44,9 +44,9 @@ namespace DHT
         n.findClosest(new GetterSearchCallback(Actor::getId(this)), GET_REDUNDANCY, id);
     }
 
-    void GetterActor::treat(EPYX_AQA("find success"), std::vector<Peer>* peers) {
+    void GetterActor::treat(EPYX_AQA("find success"), std::vector<Peer::SPtr>* peers) {
         for(auto it = peers->begin(); it != peers->end(); it ++) {
-            ask(*it);
+            ask(**it);
         }
         pendingRequests = peers->size();
 

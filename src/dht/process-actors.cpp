@@ -20,7 +20,7 @@ namespace DHT
         kill();
     }
 
-    SingularFindActor::SingularFindActor(InternalNode& n, ActorId<FinderActor> p, Peer& peer, Id& requested)
+    SingularFindActor::SingularFindActor(InternalNode& n, ActorId<FinderActor> p, Peer::SPtr peer, Id& requested)
     :ProcessActor(n, SINGLE_REQUEST_TIMEOUT), target(peer), parent(p) {
         //Send the FIND query
         Packet pkt;
@@ -29,7 +29,7 @@ namespace DHT
         pkt.count = FIND_NB_NODE_REQUESTED;
         pkt.idToFind = requested;
 
-        this->n.send(pkt, target);
+        this->n.send(pkt, *target);
     }
 
     void SingularFindActor::treat(Peer* peer, Packet* pkt) {

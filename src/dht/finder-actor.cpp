@@ -29,24 +29,22 @@ namespace DHT
         heap_make(foundPeers);
 
         //Initialize the shortlist and foundPeers
-        std::vector<Peer> nearest;
+        std::vector<Peer::SPtr> nearest;
         n.kbucket.findNearestNodes(requestedId, nearest, countToFind);
 
-        std::vector<Peer>::iterator it;
-        for(it = nearest.begin(); it != nearest.end(); it ++) {
+        for(auto it = nearest.begin(); it != nearest.end(); it ++) {
             addToShortList(*it);
             addToFoundPeers(*it);
         }
 
         //Send queries to the nodes closest to the target
-        ClosestQueue::iterator i;
-        for(i = shortlist.begin(); i != shortlist.end(); i++) {
+        for(auto i = shortlist.begin(); i != shortlist.end(); i++) {
             sendFindQueryTo((*i).second);
         }
         unlock();
     }
 
-    void FinderActor::treat(EPYX_AQA("found"), Peer target, std::vector<Peer>* peers) {
+    void FinderActor::treat(EPYX_AQA("found"), Peer::SPtr target, std::vector<Peer::SPtr>* peers) {
         for(auto peerToAdd = peers->begin(); peerToAdd != peers->end(); peerToAdd ++) {
             addToShortList(*peerToAdd);
             addToFoundPeers(*peerToAdd);
@@ -58,18 +56,17 @@ namespace DHT
         onResponse();
     }
 
-    void FinderActor::treat(EPYX_AQA("not found"), Peer target) {
+    void FinderActor::treat(EPYX_AQA("not found"), Peer::SPtr target) {
         //Acknowledge that we received a query
         onResponse();
     }
 
-    void FinderActor::addToShortList(Peer& p) {
-        Distance dist(requestedId, p.id);
+    void FinderActor::addToShortList(Peer::SPtr p) {
+        Distance dist(requestedId, p->id);
         //I have a problem with containers here I need a container that can be a priority_queue
         //on which I can make a search for an element.
         //I'm making a manual search instead
-        ClosestQueue::iterator it;
-        for(it = shortlist.begin(); it != shortlist.end(); it++) {
+        for(auto it = shortlist.begin(); it != shortlist.end(); it++) {
             if((*it).first == dist) {
                 return;
             }
@@ -81,11 +78,10 @@ namespace DHT
         }
     }
 
-    void FinderActor::addToFoundPeers(Peer& p) {
-        Distance dist(requestedId, p.id);
-        ClosestQueue::iterator it;
-        for(it = foundPeers.begin(); it != foundPeers.end(); it++) {
-            if((*it).second.id == p.id) {
+    void FinderActor::addToFoundPeers(Peer::SPtr p) {
+        Distance dist(requestedId, p->id);
+        for(auto it = foundPeers.begin(); it != foundPeers.end(); it++) {
+            if((*it).second->id == p->id) {
                 return;
             }
         }
@@ -96,8 +92,8 @@ namespace DHT
         }
     }
 
-    void FinderActor::addToContactedPeers(Peer& p) {
-        Distance dist(requestedId, p.id);
+    void FinderActor::addToContactedPeers(Peer::SPtr p) {
+        Distance dist(requestedId, p->id);
         contactedPeers.insert(std::make_pair(dist, p));
     }
 
@@ -122,15 +118,14 @@ namespace DHT
         }
     }
 
-    void FinderActor::sendFindQueryTo(Peer& p) {
+    void FinderActor::sendFindQueryTo(Peer::SPtr p) {
         addToContactedPeers(p);
         pendingRequests ++;
         new SingularFindActor(n, Actor::getId(this), p, requestedId);
     }
 
     bool FinderActor::sendNewQuery() {
-        ClosestQueue::iterator it;
-        for(it = shortlist.begin(); it != shortlist.end(); it ++) {
+        for(auto it = shortlist.begin(); it != shortlist.end(); it ++) {
             if(contactedPeers.find((*it).first) == contactedPeers.end()) {
                 sendFindQueryTo((*it).second);
                 return true;

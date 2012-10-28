@@ -30,7 +30,7 @@ namespace DHT
 
     class InternalNode;
 
-    typedef std::vector<std::pair<Distance, Peer>> ClosestQueue;
+    typedef std::vector<std::pair<Distance, Peer::SPtr>> ClosestQueue;
 
     /**
      * @class FindCallback
@@ -57,7 +57,7 @@ namespace DHT
 
     //A comparator used in the algorithm
     struct FindNearestComparator {
-        bool operator()(const std::pair<Distance, Peer> a, const std::pair<Distance, Peer> b) const;
+        bool operator()(const std::pair<Distance, Peer::SPtr> a, const std::pair<Distance, Peer::SPtr> b) const;
     };
 
     static FindNearestComparator heap_comp;
@@ -87,24 +87,24 @@ namespace DHT
          */
         void start();
 
-        void treat(EPYX_AQA("found"), Peer target, std::vector<Peer>* peers);
-        void treat(EPYX_AQA("not found"), Peer target);
+        void treat(EPYX_AQA("found"), Peer::SPtr target, std::vector<Peer::SPtr>* peers);
+        void treat(EPYX_AQA("not found"), Peer::SPtr target);
 
         void timeout();
     protected:
         //helper functions to preserve the heap structure and the size of the lists
-        void addToShortList(Peer& p);
-        void addToFoundPeers(Peer& p);
-        void addToContactedPeers(Peer& p);
+        void addToShortList(Peer::SPtr p);
+        void addToFoundPeers(Peer::SPtr p);
+        void addToContactedPeers(Peer::SPtr p);
 
     private:
         void onResponse();
-        void sendFindQueryTo(Peer& p);
+        void sendFindQueryTo(Peer::SPtr p);
         bool sendNewQuery();
 
         ClosestQueue foundPeers;
         ClosestQueue shortlist;
-        std::map<Distance, Peer> contactedPeers; //Index them by the distance which should be unique
+        std::map<Distance, Peer::SPtr> contactedPeers; //Index them by the distance which should be unique
         InternalNode& n;
         int countToFind;
         int pendingRequests;

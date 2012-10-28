@@ -74,13 +74,13 @@ namespace DHT
      */
     class SingularFindActor: public ProcessActor {
     public:
-        SingularFindActor(InternalNode& n, ActorId<FinderActor> p, Peer& peer, Id& requested);
+        SingularFindActor(InternalNode& n, ActorId<FinderActor> p, Peer::SPtr peer, Id& requested);
 
         virtual void treat(Peer* peer, Packet* pkt);
     protected:
         virtual void timeout();
 
-        Peer target;
+        Peer::SPtr target;
         ActorId<FinderActor> parent;
     };
 
