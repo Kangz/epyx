@@ -21,7 +21,7 @@ namespace DHT
         //TODO
     }
 
-    void InternalNode::processPacket(Packet& pkt, Peer& sender) {
+    void InternalNode::processPacket(Packet& pkt, const Peer& sender) {
 
         //Update the routing table
         this->kbucket.seenPeer(sender.id, sender.n2npId);
@@ -67,18 +67,18 @@ namespace DHT
         this->parent.send(pkt, dest, myN2np);
     }
 
-    void InternalNode::sendPing(Peer& p){
+    void InternalNode::sendPing(const Peer& p){
         Packet pkt;
         pkt.method = M_PING;
         send(pkt, p);
     }
 
-    Peer InternalNode::getConnectionInfo() {
+    Peer InternalNode::getConnectionInfo() const {
         return Peer(id, myN2np.getId());
     }
 
     //These methods spawn actors for the "long" operations
-    void InternalNode::findClosest(FindCallback* cb, int count, Id& idToFind) {
+    void InternalNode::findClosest(FindCallback* cb, int count, const Id& idToFind) {
         FinderActor* a = new FinderActor(*this, idToFind, count, cb);
         actors.add(a, FIND_CALLBACK_TIMEOUT);
         a->start();
@@ -110,7 +110,7 @@ namespace DHT
         return n;
     }
 
-    void InternalNode::dispatchToProcessActor(Packet& pkt, Peer& sender){
+    void InternalNode::dispatchToProcessActor(Packet& pkt, const Peer& sender){
         ActorId<ProcessActor>* id = processActors.getAndLock(pkt.connectionId, NULL);
         if(id == NULL){
             processActors.endUnlock();

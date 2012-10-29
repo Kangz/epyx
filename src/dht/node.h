@@ -59,7 +59,7 @@ namespace DHT
          * @param n2npSelf the N2NP Node associated with this Node
          * @param name the name to be used for the threads
          */
-        Node(Id& id, N2NP::Node& n2npSelf, const std::string& name);
+        Node(const Id& id, N2NP::Node& n2npSelf, const std::string& name);
 
         /**
          * @brief the Node destructor
@@ -90,13 +90,13 @@ namespace DHT
          * This is mainly used to boostrap our connection (as the remote DHT
          * will answer a PONG and get registered in our KBucket)
          */
-        void sendPing(Peer& p);
+        void sendPing(const Peer& p);
 
         /**
          * @brief gets the DHT peer describing this DHT
          * @return itself, as a Peer
          */
-        Peer getConnectionInfo();
+        Peer getConnectionInfo() const;
 
         /**
          * @brief Asks a FIND operation on the DHT
@@ -104,7 +104,7 @@ namespace DHT
          * @param count the number of neighbors to find
          * @param idToFind the neighborhood to scan
          */
-        void findClosest(FindCallback* cb, int count, Id& idToFind);
+        void findClosest(FindCallback* cb, int count, const Id& idToFind);
 
         /**
          * @brief Asks a GET operation on the DHT

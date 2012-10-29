@@ -19,7 +19,7 @@ namespace DHT
     #define heap_pop_no_res(list) std::pop_heap((list).begin(), (list).end(), heap_comp); (list).pop_back()
     #define heap_pop(list, variable) std::pop_heap((list).begin(), (list).end(), heap_comp); (variable) = (list).pop_back()
 
-    FinderActor::FinderActor(InternalNode& n, Id& idToFind, int count, FindCallback* cb)
+    FinderActor::FinderActor(InternalNode& n, const Id& idToFind, int count, FindCallback* cb)
     :n(n), countToFind(count), pendingRequests(0), requestedId(idToFind), callback(cb) {
     }
 

@@ -80,7 +80,7 @@ namespace DHT
          * @param idToFind
          * @param cb te user-defined callback
          */
-        FinderActor(InternalNode& n, Id& idToFind, int count, FindCallback* cb);
+        FinderActor(InternalNode& n, const Id& idToFind, int count, FindCallback* cb);
 
         /**
          * @brief start the FinderActor after it has been added in a manager

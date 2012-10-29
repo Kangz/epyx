@@ -7,7 +7,8 @@ namespace Epyx
 namespace DHT
 {
 
-    Node::Node(Id& id, N2NP::Node& n2npSelf, const std::string& name): id(id), n(id, n2npSelf, *this, name) {
+    Node::Node(const Id& id, N2NP::Node& n2npSelf, const std::string& name)
+    : id(id), n(id, n2npSelf, *this, name) {
     }
 
     Node::~Node() {
@@ -43,15 +44,15 @@ namespace DHT
     }
 
     //These are simply proxies for the InternalNode
-    void Node::sendPing(Peer& p){
+    void Node::sendPing(const Peer& p){
         n.sendPing(p);
     }
 
-    Peer Node::getConnectionInfo() {
+    Peer Node::getConnectionInfo() const {
         return n.getConnectionInfo();
     }
 
-    void Node::findClosest(FindCallback* cb, int count, Id& idToFind) {
+    void Node::findClosest(FindCallback* cb, int count, const Id& idToFind) {
         n.findClosest(cb, count, idToFind);
     }
 

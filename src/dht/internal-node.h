@@ -93,14 +93,14 @@ namespace DHT
          * @param pkt the DHT packet received
          * @param sender the connection information for the sender
          */
-        void processPacket(Packet& pkt, Peer& sender);
+        void processPacket(Packet& pkt, const Peer& sender);
 
         //Is proxied by Node
-        void sendPing(Peer& p);
-        void findClosest(FindCallback* cb, int count, Id& idToFind);
+        void sendPing(const Peer& p);
+        void findClosest(FindCallback* cb, int count, const Id& idToFind);
         void getValue(GetCallback* cb, const std::string& key);
         void setValue(SetCallback* cb, const std::string& key, const std::string& value);
-        Peer getConnectionInfo();
+        Peer getConnectionInfo() const;
 
         //proxy for Node
         void send(Packet& pkt, const Peer& dest);
@@ -134,9 +134,9 @@ namespace DHT
         ActorId<FindActor> findActor;
 
     private:
-        void sendPong(Peer& target);
+        void sendPong(const Peer& target);
 
-        void dispatchToProcessActor(Packet& pkt, Peer& target);
+        void dispatchToProcessActor(Packet& pkt, const Peer& target);
    };
 
 }
