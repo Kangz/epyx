@@ -94,13 +94,6 @@ namespace Epyx
         DHT::Id id(first ? DHT::Id::INIT_ZERO : DHT::Id::INIT_RANDOM);
         std::shared_ptr<DHT::Node> dhtNode(new DHT::Node(id, *node, name));
         node->addModule("DHT", dhtNode);
-
-        if (!first) {
-            // Send ping to the relay
-            N2NP::NodeId relayNodeId("self", node->getId().getRelay());
-            DHT::Peer peer(relayNodeId);
-            dhtNode->sendPing(peer);
-        }
         return dhtNode;
     }
 

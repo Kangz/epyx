@@ -62,6 +62,10 @@ bool Demo::run(Epyx::API& epyx, const Epyx::SockAddress& relayAddr) {
     node = epyx.spawnN2NPNode(relayAddr);
     std::shared_ptr<DHT::Node> dhtNode = epyx.createDHTNode("DHT", node);
 
+    // Send ping to the relay
+    N2NP::NodeId relayNodeId("self", node->getId().getRelay());
+    dhtNode->sendPing(DHT::Peer(relayNodeId));
+
     // Wait the ping to be proceeded
     sleep(1);
 
