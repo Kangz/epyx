@@ -297,7 +297,7 @@ class MySetCallback: public SetCallback {
         }
 };
 
-void test_dht_network(Epyx::API& epyx, bool prod){
+void test_dht_network(Epyx::API& epyx){
     // Create Net Select for relay
     NetSelect *selectRelay = new NetSelect(10, "wRelay");
     selectRelay->setThreadName("NetSelectRelay");
@@ -336,7 +336,7 @@ void test_dht_network(Epyx::API& epyx, bool prod){
     log::info << "Creating DHTs" << log::endl;
     std::shared_ptr<DHT::Node> dhtNodes[NETWORK_SIZE];
     for(int i=0; i<NETWORK_SIZE; i++) {
-        DHT::Id id((prod && i == 0) ? DHT::Id::INIT_ZERO : DHT::Id::INIT_RANDOM);
+        DHT::Id id(DHT::Id::INIT_RANDOM);
         log::debug<<id<<log::endl;
         std::ostringstream o;
         o << "DHT";
@@ -357,51 +357,43 @@ void test_dht_network(Epyx::API& epyx, bool prod){
 
     sleep(10); //Wait for the processing of the messages
 
-    if(!prod){
+    log::info << "Launching the FIND query" << log::endl;
 
-        log::info << "Launching the FIND query" << log::endl;
+    Id idToFind(DHT::Id::INIT_RANDOM);
 
-        Id idToFind(DHT::Id::INIT_RANDOM);
+    dhtNodes[0]->findClosest(new MyFindCallback(), 5, idToFind);
 
-        dhtNodes[0]->findClosest(new MyFindCallback(), 5, idToFind);
+    sleep(3);
 
-        sleep(3);
+    log::info << "Launching the GET query (should fail)" << log::endl;
 
-        log::info << "Launching the GET query (should fail)" << log::endl;
+    dhtNodes[0]->getValue(new MyGetCallback(), "value1");
 
-        dhtNodes[0]->getValue(new MyGetCallback(), "value1");
+    sleep(3);
 
-        sleep(3);
+    log::info << "Launching the SET query" << log::endl;
 
-        log::info << "Launching the SET query" << log::endl;
+    dhtNodes[1]->setValue(new MySetCallback(), "value1", "42");
 
-        dhtNodes[1]->setValue(new MySetCallback(), "value1", "42");
+    sleep(3);
 
-        sleep(3);
+    log::info << "Launching the GET query (should work)" << log::endl;
 
-        log::info << "Launching the GET query (should work)" << log::endl;
+    dhtNodes[0]->getValue(new MyGetCallback(), "value1");
 
-        dhtNodes[0]->getValue(new MyGetCallback(), "value1");
+    sleep(3);
 
-        sleep(3);
+    log::info << "Launching a synchronous SET query" << log::endl;
 
-        log::info << "Launching a synchronous SET query" << log::endl;
+    dhtNodes[1]->setValueSync("value1", "42<-w00t");
 
-        dhtNodes[1]->setValueSync("value1", "42<-w00t");
+    log::info << "Launching a synchronous GET query" << log::endl;
 
-        log::info << "Launching a synchronous GET query" << log::endl;
+    std::string value;
 
-        std::string value;
+    dhtNodes[0]->getValueSync("value1", value);
 
-        dhtNodes[0]->getValueSync("value1", value);
-
-        log::info << "dht[\"value1\"]=\"" << value << "\"" << log::endl;
-    } else {
-        log::info<<"Prod environnement STARTED"<<log::endl;
-        while(true){
-            sleep(1);
-        }
-    }
+    log::info << "dht[\"value1\"]=\"" << value << "\"" << log::endl;
 }
 
 
@@ -414,7 +406,7 @@ int main(){
         //test_dhtpacket();
         //test_dht_n2np();
         epyx.setNetWorkers(20);
-        test_dht_network(epyx, false); // HACK for the presentation
+        test_dht_network(epyx);
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }
