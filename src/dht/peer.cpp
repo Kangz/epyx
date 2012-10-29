@@ -26,7 +26,7 @@ namespace DHT
 
     //TODO after we have a serialize/unserialize for N2npNodeId
 
-    void Peer::serialize(std::ostream& o) {
+    void Peer::serialize(std::ostream& o) const {
         o << n2npId;
         o << DHT_FOUND_PEERS_DELIM;
         o << id;
@@ -41,5 +41,13 @@ namespace DHT
         i >> id;
     }
 
+    std::ostream& operator<<(std::ostream& os, const Peer& peer) {
+        return os << peer.n2npId << DHT_FOUND_PEERS_DELIM << peer.id;
+    }
+
+    std::istream& operator>>(std::istream& is, Peer& peer) {
+        peer.unserialize(is);
+        return is;
+    }
 }
 }

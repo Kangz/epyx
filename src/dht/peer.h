@@ -37,8 +37,11 @@ namespace DHT
         Peer(const Id& id, const N2NP::NodeId& n2npId);
         Peer(const N2NP::NodeId& n2npId);
 
-        void serialize(std::ostream& o);
+        void serialize(std::ostream& o) const;
         void unserialize(std::istream& i);
+
+        friend std::ostream& operator<<(std::ostream& os, const Peer& peer);
+        friend std::istream& operator>>(std::istream& is, Peer& peer);
     };
 
 }
