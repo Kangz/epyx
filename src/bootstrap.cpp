@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
                         << " (which treat packets, " << nbWorkers << " by default)" << std::endl
                         << " -n number Set the network size"
                         << " (number of nodes to be created, " << nbNodes << " by default)" << std::endl
-                        << "address:port Binded interface" << std::endl;
+                        << "address:port Bound interface" << std::endl;
                     return 0;
                 case 'n':
                     nbNodes = Epyx::String::toInt(optarg);
