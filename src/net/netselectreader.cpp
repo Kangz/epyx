@@ -11,6 +11,13 @@ namespace Epyx
     NetSelectReader::~NetSelectReader() {
     }
 
+    void NetSelectReader::close() {
+        int fd = this->getFileDescriptor();
+        if (fd >= 0) {
+            ::close(fd);
+        }
+    }
+
     NetSelect* NetSelectReader::getOwner() const {
         EPYX_ASSERT(owner != NULL);
         return owner;

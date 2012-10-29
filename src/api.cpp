@@ -5,6 +5,7 @@
 
 #include "api.h"
 #include "natpunching/openconnection.h"
+#include "natpunching/dispatcher.h"
 
 namespace Epyx
 {
@@ -81,6 +82,7 @@ namespace Epyx
         if (timeout > 0 && !node->waitReady(timeout)) {
             throw FailException("API::spawnN2NPNode", "Node initialisation timed out");
         }
+        DirectConnection::Dispatcher::addModule(node);
         return node;
     }
 

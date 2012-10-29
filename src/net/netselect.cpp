@@ -37,6 +37,7 @@ namespace Epyx
         auto nsri = readers.find(id);
         if (nsri != readers.end()) {
             nsri->second->alive = false;
+            nsri->second->reader->close();
             readers.erase(nsri);
         }
     }

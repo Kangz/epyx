@@ -26,7 +26,6 @@
 namespace Epyx
 {
     class NetSelect;
-
     /**
      * @class NetSelectReader
      *
@@ -49,6 +48,11 @@ namespace Epyx
          * @return true on success, false on error or end of file
          */
         virtual bool read() = 0;
+
+        /**
+         * @brief Close the read channel
+         */
+        void close();
 
         /**
          * @brief Get the NetSelect objects which owns this object
