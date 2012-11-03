@@ -90,6 +90,13 @@ namespace Epyx
             TVal get(TKey key, TVal defval);
 
             /**
+             * @brief mimics the std::map::find function and locks
+             * @param key
+             * @return an iterator pointing the the corresponding key or the end if does not exists.
+             */
+            iterator findAndLock(TKey key);
+
+            /**
              * @brief Erase an element
              * @param key
              * @return true if there was an element which is now deleted
