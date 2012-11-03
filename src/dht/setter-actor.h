@@ -58,7 +58,7 @@ namespace DHT
      * It first asks for the closest nodes to the key then
      * send a SET query to each of these nodes
      */
-    class SetterActor: public Actor {
+    class SetterActor: public ProcessActor {
     public:
         /**
          * @brief the SetterActor constructor
@@ -76,9 +76,9 @@ namespace DHT
 
         void treat(EPYX_AQA("find success"), std::vector<Peer::SPtr>* peers);
         void treat(EPYX_AQA("find failure"));
-        void treat(EPYX_AQA("set success"));
-        void treat(EPYX_AQA("set failure"));
 
+        virtual void onNewAnswer(Peer* peer, Packet* pkt);
+        virtual void onAnswerTimeout(long id);
         void timeout();
     protected:
         void onSetReceive();
@@ -86,7 +86,6 @@ namespace DHT
     private:
         void ask(Peer& p);
 
-        InternalNode& n;
         SetCallback* callback;
         std::string key;
         std::string value;

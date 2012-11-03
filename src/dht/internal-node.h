@@ -59,16 +59,17 @@ namespace DHT
      * Static actors are spawned once and are used to reply to incoming queries.
      * Using actors allows us to defer the operation and return immediately.
      *
-     * Process actors are used to wait for a message with a specific connection Id
-     * they are spawned and the result of the function call is used to set the
-     * Connection-Id parameter in the query. When a packet with a valid connection
-     * id is recieved, the actor is called upon it.
-     * An actor is expcted to call unregisterProcessActor when it kills itself.
+     * Process actors are used to wait for an answer to a message with a specific
+     * connection id. There are created when we need long processes. Then they can
+     * be used to send packets with connection ids which will be given by the
+     * internal node (the internal node register the process actor at the same time
+     * to deliver the packets afterward). When a packet arrives or a query times
+     * out, a process actor will call a callback on its children class.
      *
      * Long network processes such a FIND operation are handled by an actor that is
      * given the user's callback for this operation. Sometimes the network just
      * fails and the actor can decide to time out. This first-level actor can
-     * then spawn multiple other actors for suboperations
+     * then spawn other actors for suboperations (e.g. GET spawns a FIND).
      */
     class InternalNode
     {
@@ -106,9 +107,10 @@ namespace DHT
         void send(Packet& pkt, const Peer& dest);
 
         //Manages the processActors (see InternalNode description)
-        long registerProcessActor(ProcessActor& actor, int timeout = 0);
-        void unregisterProcessActor(long actorNumber);
-
+        //long registerProcessActor(ProcessActor& actor, int timeout = 0);
+        //void unregisterProcessActor(long actorNumber);
+        long registerNewConnectionId(ActorId<ProcessActor> actor);
+        void unregisterConnectionId(long id);
         //TODO: avoid making these public
 
         //The actor system
@@ -116,7 +118,7 @@ namespace DHT
 
         //Management for the process actors
         std::atomic<long> processActorsCount;
-        atom::Map<long, ActorId<ProcessActor>*> processActors;
+        atom::Map<long, ActorId<ProcessActor>> processActors;
 
         //This node's identity
         Id id;

@@ -34,7 +34,7 @@ namespace DHT
     }
 
     GetterActor::GetterActor(InternalNode& n, const std::string& key, GetCallback* cb)
-    :n(n), callback(cb), key(key), found(false) {
+    :ProcessActor(n), callback(cb), key(key), found(false) {
     }
 
     void GetterActor::start() {
@@ -58,13 +58,20 @@ namespace DHT
         timeout();
     }
 
-    void GetterActor::treat(EPYX_AQA("get success"), std::string result) {
-        callback->onGot(result);
-        delete callback;
-        kill();
+    void GetterActor::onNewAnswer(Peer* peer, Packet* pkt) {
+        if (pkt->method == M_GOT && pkt->status == 0) {
+            callback->onGot(pkt->value);
+            delete callback;
+            kill();
+        } else {
+            onGetResponse();
+        }
+
+        delete peer;
+        delete pkt;
     }
 
-    void GetterActor::treat(EPYX_AQA("get failure")) {
+    void GetterActor::onAnswerTimeout(long id) {
         //Acknowledge that we received the result of a query
         onGetResponse();
     }
@@ -77,7 +84,14 @@ namespace DHT
     }
 
     void GetterActor::ask(Peer& p) {
-        new SingularGetActor(n, Actor::getId(this), p, key);
+        Packet pkt;
+        pkt.method = M_GET;
+        pkt.key = key;
+
+        //HACK!!!
+        Peer::SPtr peer(new Peer(p));
+
+        this->sendQuery(peer, pkt, SINGLE_REQUEST_TIMEOUT);
     }
 
     void GetterActor::timeout() {

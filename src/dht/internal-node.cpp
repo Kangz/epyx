@@ -96,44 +96,27 @@ namespace DHT
         a->start();
     }
 
-    //These methods manage the process actors
-    long InternalNode::registerProcessActor(ProcessActor& actor, int timeout) {
-        //TODO delete all this when the node is destroyed
-        ActorId<ProcessActor>* a;
-        if(timeout > 0){
-            a = new ActorId<ProcessActor>(actors.add(actor, timeout));
-        }else{
-            a = new ActorId<ProcessActor>(actors.add(actor));
-        }
+    long InternalNode::registerNewConnectionId(ActorId<ProcessActor> actor) {
         long n = std::atomic_fetch_add(&processActorsCount, 1L);
-        processActors.set(n, a);
+        processActors.set(n, actor);
         return n;
     }
 
     void InternalNode::dispatchToProcessActor(Packet& pkt, const Peer& sender){
-        ActorId<ProcessActor>* id = processActors.getAndLock(pkt.connectionId, NULL);
-        if(id == NULL){
+        auto it = processActors.findAndLock(pkt.connectionId);
+        if(processActors.isEnd(it)){
             processActors.endUnlock();
             return;
         }
-        ActorId<ProcessActor> saved_id(*id);
+
+        ActorId<ProcessActor> saved_id((*it).second);
         processActors.endUnlock();
 
-        saved_id.post(&sender, &pkt);
+        saved_id.post(EPYX_AQ("process receive"), &sender, &pkt);
     }
 
-    void InternalNode::unregisterProcessActor(long actorNumber){
-        ActorId<ProcessActor>* id = processActors.getAndLock(actorNumber, NULL);
-        if(id == NULL){
-            processActors.endUnlock();
-            return;
-        }
-        ActorId<ProcessActor> saved_id(*id);
-        delete id;
-        processActors.endUnlock();
-
-        saved_id.kill();
-        processActors.unset(actorNumber);
+    void InternalNode::unregisterConnectionId(long id) {
+        processActors.unset(id);
     }
 
 }
