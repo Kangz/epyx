@@ -25,20 +25,26 @@
 namespace Epyx
 {
 
+    template<typename T> ActorId<T>::ActorId()
+    :ActorId_base{0, nullptr}, actor(nullptr) {}
+
     template<typename T> ActorId<T>::ActorId(int id, ActorManager* manager, T* actor)
     :ActorId_base{id, manager}, actor(actor) {}
 
-    template<typename T> ActorId<T>::ActorId(ActorManager* m, int i) {
-        manager = m;
-        id = i;
-    }
-
     template<typename T> template <typename ... Args> void ActorId<T>::post(Args ... args) {
+        if (actor == nullptr) {
+            return;
+        }
+
         std::function<void(T&, Args ...)> f = (void (T::*)(Args ...))&T::treat;
         manager->post(id, std::bind(f, std::ref(*actor), args ...));
     }
 
     template<typename T> template <typename ... Args> void ActorId<T>::timeout(Timeout time, Args ... args) {
+        if (actor == nullptr) {
+            return;
+        }
+
         std::function<void(T&, Args ...)> f = (void (T::*)(Args ...))&T::timeout;
         manager->postTimeout(id, time, std::bind(f, std::ref(*actor), args ...));
     }

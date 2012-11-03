@@ -45,6 +45,11 @@ namespace Epyx
         /**
          * @brief ActorId's default constructor
          */
+        ActorId();
+
+        /**
+         * @brief ActorId's default constructor
+         */
         ActorId(int id, ActorManager* manager, T* actor);
 
         /**
