@@ -16,7 +16,7 @@ namespace DHT
         buckets.resize(Id::LENGTH);
     }
 
-    void KBucket::seenPeer(const Id& peerId, const N2NP::NodeId& n2npId) {
+    Peer::SPtr KBucket::seenPeer(const Id& peerId, const N2NP::NodeId& n2npId) {
         std::lock_guard<std::mutex> guard(lock);
 
         bool add =false;
@@ -38,7 +38,7 @@ namespace DHT
                 temp->lastReceiveTime = now;
                 temp->n2npId = n2npId;
                 peers.push_back(temp);
-                return;
+                return temp;
             }
         }
 
@@ -54,10 +54,12 @@ namespace DHT
         }
 
         //Finally add the peer to the KBucket
+        Peer::SPtr newPeer = Peer::SPtr(new Peer(peerId, n2npId, now));
         if (add) {
-            peers.push_back(Peer::SPtr(new Peer(peerId, n2npId, now)));
+            peers.push_back(newPeer);
         }
 
+        return newPeer;
     }
 
     struct FindNearestComparator {
