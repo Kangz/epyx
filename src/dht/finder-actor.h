@@ -22,6 +22,7 @@
 #include "../n2np/nodeid.h"
 #include "../n2np/node.h"
 #include "value.h"
+#include "process-actors.h"
 
 namespace Epyx
 {
@@ -72,7 +73,7 @@ namespace DHT
      * where each answer will bring new nodes in the shortlist. When the shortlist
      * is empty, we know we are close to the result.
      */
-    class FinderActor: public Actor {
+    class FinderActor: public ProcessActor {
     public:
         /**
          * @brief FinderActor constructor
@@ -87,11 +88,11 @@ namespace DHT
          */
         void start();
 
-        void treat(EPYX_AQA("found"), Peer::SPtr target, std::vector<Peer::SPtr>* peers);
-        void treat(EPYX_AQA("not found"), Peer::SPtr target);
-
         void timeout();
     protected:
+        virtual void onNewAnswer(Peer* peer, Packet* pkt);
+        virtual void onAnswerTimeout(long id);
+
         //helper functions to preserve the heap structure and the size of the lists
         void addToShortList(Peer::SPtr p);
         void addToFoundPeers(Peer::SPtr p);
@@ -105,7 +106,6 @@ namespace DHT
         ClosestQueue foundPeers;
         ClosestQueue shortlist;
         std::map<Distance, Peer::SPtr> contactedPeers; //Index them by the distance which should be unique
-        InternalNode& n;
         int countToFind;
         int pendingRequests;
         Id requestedId;

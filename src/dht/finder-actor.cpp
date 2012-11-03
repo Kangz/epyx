@@ -20,7 +20,7 @@ namespace DHT
     #define heap_pop(list, variable) std::pop_heap((list).begin(), (list).end(), heap_comp); (variable) = (list).pop_back()
 
     FinderActor::FinderActor(InternalNode& n, const Id& idToFind, int count, FindCallback* cb)
-    :n(n), countToFind(count), pendingRequests(0), requestedId(idToFind), callback(cb) {
+    :ProcessActor(n), countToFind(count), pendingRequests(0), requestedId(idToFind), callback(cb) {
     }
 
     void FinderActor::start(){
@@ -44,19 +44,24 @@ namespace DHT
         unlock();
     }
 
-    void FinderActor::treat(EPYX_AQA("found"), Peer::SPtr target, std::vector<Peer::SPtr>* peers) {
-        for(auto peerToAdd = peers->begin(); peerToAdd != peers->end(); peerToAdd ++) {
-            addToShortList(*peerToAdd);
-            addToFoundPeers(*peerToAdd);
+    void FinderActor::onNewAnswer(Peer* peer, Packet* pkt) {
+
+        if (pkt->method == M_FOUND && pkt->status == 0 && pkt->count > 0) {
+            auto peers = pkt->foundPeers;
+            for(auto peerToAdd = peers->begin(); peerToAdd != peers->end(); peerToAdd ++) {
+                addToShortList(*peerToAdd);
+                addToFoundPeers(*peerToAdd);
+            }
         }
 
-        delete peers;
+        delete peer;
+        delete pkt;
 
         //Acknowledge that we received a query
         onResponse();
     }
 
-    void FinderActor::treat(EPYX_AQA("not found"), Peer::SPtr target) {
+    void FinderActor::onAnswerTimeout(long id) {
         //Acknowledge that we received a query
         onResponse();
     }
@@ -121,7 +126,13 @@ namespace DHT
     void FinderActor::sendFindQueryTo(Peer::SPtr p) {
         addToContactedPeers(p);
         pendingRequests ++;
-        new SingularFindActor(n, Actor::getId(this), p, requestedId);
+
+        Packet pkt;
+        pkt.method = M_FIND;
+        pkt.count = FIND_NB_NODE_REQUESTED;
+        pkt.idToFind = requestedId;
+
+        this->sendQuery(p, pkt, SINGLE_REQUEST_TIMEOUT);
     }
 
     bool FinderActor::sendNewQuery() {

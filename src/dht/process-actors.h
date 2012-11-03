@@ -15,18 +15,16 @@
  */
 /*
  * @file dht/process-actors.h
- * @brief define process actors that handle answers to queries this Node sent.
+ * @brief define process actors.
  */
 #ifndef EPYX_DHT_PROCESS_ACTORS_H
 #define EPYX_DHT_PROCESS_ACTORS_H
 
 #include "../core/common.h"
 #include "../core/actor.h"
-#include "internal-node.h"
 #include "../n2np/nodeid.h"
-#include "finder-actor.h"
-#include "getter-actor.h"
-#include "setter-actor.h"
+#include "peer.h"
+#include "packet.h"
 
 namespace Epyx
 {
@@ -37,85 +35,33 @@ namespace DHT
 
     /**
      * @class ProcessActor
-     * @brief thebase class of every process Actor
+     * @brief the base class of every process Actor
      *
-     * A process actor waits for a single message (or a timeout)
-     * and reports back to its parent actor as it is part of a process.
-     * ProcessActor::destroy should be called instead of kill()
+     * A process actor sends messages with a specific connectionId
+     * and waits for the answer or timeouts.
      */
     class ProcessActor: public Actor {
     public:
-        virtual void treat(Peer* peer, Packet* pkt) = 0;
-        virtual void timeout() = 0;
+        ProcessActor(InternalNode& n);
+        ~ProcessActor();
+
+        //Fired by internal node when there is a new packet for this actor
+        void treat(EPYX_AQA("process receive"), Peer* peer, Packet* pkt);
+        //Fired by the actor manager when a query timed out
+        void timeout(EPYX_AQA("process timeout"), long pNumber);
 
     protected:
-        /**
-         * @brief register the process actor in the node.
-         * @param n the InternalNode
-         * @param timeout the process actor timeout if it has one
-         */
-        ProcessActor(InternalNode& n, int timeout = 0);
-
-        /**
-         * @brief destroys the actor and unregisters it from the process
-         * actor list
-         */
-        void destroy();
+        //To be used when we want to send a message, adds the connectionId
+        long sendQuery(Peer::SPtr peer, Packet& pkt, Timeout timeout);
+        //Callback for when we receive a message
+        virtual void onNewAnswer(Peer* peer, Packet* pkt) = 0;
+        //Callback for when a query times out
+        virtual void onAnswerTimeout(long id);
 
         InternalNode& n;
-        long processId;
-    };
 
-    /**
-     * @class SingulerFindActor
-     * @brief part of a FIND process
-     *
-     * It sends the query and reports back to its parent
-     */
-    class SingularFindActor: public ProcessActor {
-    public:
-        SingularFindActor(InternalNode& n, ActorId<FinderActor> p, Peer::SPtr peer, Id& requested);
-
-        virtual void treat(Peer* peer, Packet* pkt);
-    protected:
-        virtual void timeout();
-
-        Peer::SPtr target;
-        ActorId<FinderActor> parent;
-    };
-
-    /**
-     * @class SingulerGetActor
-     * @brief part of a GET process
-     *
-     * It sends the query and reports back to its parent
-     */
-    class SingularGetActor: public ProcessActor {
-    public:
-        SingularGetActor(InternalNode& n, ActorId<GetterActor> p, Peer& peer, const std::string& key);
-
-        virtual void treat(Peer* peer, Packet* pkt);
-    protected:
-        virtual void timeout();
-
-        ActorId<GetterActor> parent;
-    };
-
-    /**
-     * @class SingulerSetActor
-     * @brief part of a SET process
-     *
-     * It sends the query and reports back to its parent
-     */
-    class SingularSetActor: public ProcessActor {
-    public:
-        SingularSetActor(InternalNode& n, ActorId<SetterActor> p, Peer& peer, const std::string& key, const std::string& value);
-
-        virtual void treat(Peer* peer, Packet* pkt);
-    protected:
-        virtual void timeout();
-
-        ActorId<SetterActor> parent;
+    private:
+        std::map<long, bool> queries;
     };
 
 }

@@ -59,7 +59,7 @@ namespace DHT
      * It first asks for the closest nodes to the key then
      * send a GET query to each of these nodes
      */
-    class GetterActor: public Actor {
+    class GetterActor: public ProcessActor {
     public:
         /**
          * @brief the GetterActor constructor
@@ -77,15 +77,14 @@ namespace DHT
         void treat(EPYX_AQA("find success"), std::vector<Peer::SPtr>* peers);
         void treat(EPYX_AQA("find failure"));
 
-        void treat(EPYX_AQA("get success"), std::string result);
-        void treat(EPYX_AQA("get failure"));
+        virtual void onNewAnswer(Peer* peer, Packet* pkt);
+        virtual void onAnswerTimeout(long id);
         void timeout();
 
     private:
         void onGetResponse();
         void ask(Peer& p);
 
-        InternalNode& n;
         GetCallback* callback;
         std::string key;
         int pendingRequests;

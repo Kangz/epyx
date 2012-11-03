@@ -34,7 +34,7 @@ namespace DHT
     }
 
     SetterActor::SetterActor(InternalNode& n, const std::string& key, const std::string& value, SetCallback* cb)
-    :n(n), callback(cb), key(key), value(value), nErrors(0), found(false) {
+    :ProcessActor(n), callback(cb), key(key), value(value), nErrors(0), found(false) {
     }
 
     void SetterActor::start() {
@@ -58,11 +58,14 @@ namespace DHT
         timeout();
     }
 
-    void SetterActor::treat(EPYX_AQA("set success")) {
+    void SetterActor::onNewAnswer(Peer* peer, Packet* pkt) {
+        if (pkt->method != M_STORED || pkt->status != 0) {
+            nErrors ++;
+        }
         onSetReceive();
     }
 
-    void SetterActor::treat(EPYX_AQA("set failure")) {
+    void SetterActor::onAnswerTimeout(long id) {
         nErrors ++;
         onSetReceive();
     }
@@ -70,7 +73,7 @@ namespace DHT
     void SetterActor::onSetReceive() {
         pendingRequests --;
         if(pendingRequests == 0) {
-            if(nErrors > SET_ERROR_THRESHOLD) {
+            if(nErrors < SET_ERROR_THRESHOLD) {
                 callback->onSet();
                 delete callback;
                 kill();
@@ -81,7 +84,15 @@ namespace DHT
     }
 
     void SetterActor::ask(Peer& p) {
-        new SingularSetActor(n, Actor::getId(this), p, key, value);
+        Packet pkt;
+        pkt.method = M_STORE;
+        pkt.key = key;
+        pkt.value = value;
+
+        //HACK!!!
+        Peer::SPtr peer(new Peer(p));
+
+        this->sendQuery(peer, pkt, SINGLE_REQUEST_TIMEOUT);
     }
 
     void SetterActor::timeout() {
