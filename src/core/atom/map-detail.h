@@ -69,6 +69,13 @@ namespace Epyx
         }
 
         template <typename TKey, typename TVal>
+        typename Map<TKey, TVal>::iterator Map<TKey, TVal>::findAndLock(TKey key) {
+            mut.lock();
+            return map.find(key);
+        }
+
+
+        template <typename TKey, typename TVal>
         bool Map<TKey, TVal>::unset(TKey key) {
             bool result;
             std::lock_guard<std::mutex> lock(mut);
