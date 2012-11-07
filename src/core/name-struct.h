@@ -32,7 +32,7 @@ namespace Epyx
         static const NameStruct<I> instance;
     };
 
-    #define EPYX_NAME_STRUCT(str) Epyx::NameStruct<compileTimeHash(str)>
+    #define EPYX_NAME_STRUCT(str) Epyx::NameStruct<Epyx::compileTimeHash(str)>
     #define EPYX_NAME_STRUCT_INSTANCE(str) EPYX_NAME_STRUCT(str)::instance
 }
 #endif //EPYX_CORE_NAME_STRUCT_H
