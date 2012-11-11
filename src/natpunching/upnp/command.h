@@ -43,6 +43,30 @@ namespace Epyx
             std::map<std::string, std::string> headers;
             // Result variables
             std::map<std::string, std::string> vars;
+
+            /**
+             * @brief Get String variable
+             * @param key
+             * @param def Default value
+             * @return
+             */
+            const std::string& getString(const std::string& key, const std::string& def = "") const;
+
+            /**
+             * @brief Get Boolean
+             * @param key
+             * @param def Default value
+             * @return
+             */
+            bool getBoolean(const std::string& key, bool def = 0) const;
+
+            /**
+             * @brief Get unsigned short
+             * @param key
+             * @param def Default value
+             * @return
+             */
+            unsigned short getUShort(const std::string& key, unsigned short def = 0) const;
         } CommandResult;
         /**
          * @class Command

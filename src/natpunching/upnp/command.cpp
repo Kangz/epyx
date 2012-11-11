@@ -11,6 +11,20 @@ namespace Epyx
 {
     namespace UPNP
     {
+        const std::string& CommandResult::getString(const std::string& key, const std::string& def) const {
+            std::map<std::string, std::string>::const_iterator it = vars.find(key);
+            return (it == vars.end()) ? def : it->second;
+        }
+
+        bool CommandResult::getBoolean(const std::string& key, bool def) const {
+            std::map<std::string, std::string>::const_iterator it = vars.find(key);
+            return (it == vars.end()) ? def : it->second.compare("0") != 0;
+        }
+
+        unsigned short CommandResult::getUShort(const std::string& key, unsigned short def) const {
+            std::map<std::string, std::string>::const_iterator it = vars.find(key);
+            return (it == vars.end()) ? def : static_cast<unsigned short> (String::toInt(it->second));
+        }
 
         Command::Command()
         :NetQuery(new TCPSocket()) {
@@ -103,8 +117,8 @@ namespace Epyx
             httpcommand << String::crlf;
             httpcommand << command << String::crlf;
 
-            log::debug << "UPnP::cmd::send " << actiontype << " to "
-                << address << log::endl;
+            //log::debug << "UPnP::cmd::send " << actiontype << " to "
+            //    << address << log::endl;
             //log::debug << httpcommand.str() << log::endl;
 
             return socket()->write(httpcommand.str());
@@ -130,11 +144,11 @@ namespace Epyx
             dom_answer.Parse((const char*) pkt->body.c_str(), 0, TIXML_DEFAULT_ENCODING);
 
             // DEBUG
-            TiXmlPrinter printer = TiXmlPrinter();
-            printer.SetIndent("    ");
-            printer.SetLineBreak(String::crlf.c_str());
-            dom_answer.Accept(&printer);
-            log::debug << "UPnP::cmd::answer has code " << pkt->method << log::endl;
+            //TiXmlPrinter printer = TiXmlPrinter();
+            //printer.SetIndent("    ");
+            //printer.SetLineBreak(String::crlf.c_str());
+            //dom_answer.Accept(&printer);
+            //log::debug << "UPnP::cmd::answer has code " << pkt->method << log::endl;
             //log::debug << printer.CStr() << log::endl;
 
             // Create result
@@ -150,7 +164,8 @@ namespace Epyx
             node = node->FirstChild();
             for (TiXmlNode *child = node->FirstChild(); child; child = child->NextSibling()) {
                 // Normally, child is of form <Name>Value</Name>
-                res->vars[child->Value()] = child->FirstChild()->Value();
+                TiXmlNode *value = child->FirstChild();
+                res->vars[child->Value()] = (value ? value->Value() : "");
             }
             return res;
         }
