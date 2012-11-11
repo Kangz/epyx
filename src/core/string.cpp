@@ -44,7 +44,7 @@ namespace Epyx
         try {
             ss >> l;
             if (ss.fail())
-                throw new std::exception();
+                throw std::exception();
         } catch (std::exception& e) {
             throw ParserException("String::toInt", "Invalid characters");
         }
@@ -57,7 +57,7 @@ namespace Epyx
         try {
             ss >> l;
             if (ss.fail())
-                throw new std::exception();
+                throw std::exception();
         } catch (std::exception& e) {
             throw ParserException("String::toInt", "Invalid characters");
         }
