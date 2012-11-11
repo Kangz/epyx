@@ -26,16 +26,12 @@
 #include <list>
 #include "../../net/uri.h"
 #include "../../../include/tinyxml/tinyxml.h"
+#include "command.h"
 
 namespace Epyx
 {
     namespace UPNP
     {
-        /*typedef struct serviceInfo{
-                std::string def_path;
-                std::string ctl_path;
-        }serviceInfo;
-         */ // I think the struct might be useless. we'll see
         typedef struct portMap
         {
             bool enabled;
@@ -72,7 +68,7 @@ namespace Epyx
              * @brief Get external IP address
              * @return string
              */
-            std::string getExtIPAdress();
+            IpAddress getExtIPAdress();
 
             /**
              * @brief Get list of port map
@@ -92,7 +88,7 @@ namespace Epyx
              * @brief Gets the local IP adress which communicates with the IGD.
              * @return
              */
-            std::string getLocalAdress();
+            IpAddress getLocalAdress();
 
             /**
              * @brief Delete a port map
@@ -128,6 +124,13 @@ namespace Epyx
              * Let's Assume all commands of a service are always supported...
              */
             std::map<std::string, std::string> services;
+
+            /**
+             * @brief Retrieve urn:schemas-upnp-org:service:WANIPConnection
+             * @param command Filled Command object
+             * @return true on success
+             */
+            bool initWanIPConnCommand(Command *command) const;
         };
     }
 }

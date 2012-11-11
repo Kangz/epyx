@@ -47,11 +47,22 @@ bool test_IGD() {
     }
 
     Epyx::log::debug << "External IP addr is " << igd.getExtIPAdress() << Epyx::log::endl;
+    Epyx::log::debug << "Local IP addr is " << igd.getLocalAdress() << Epyx::log::endl;
 
     // PortMap
     Epyx::SockAddress addr = igd.addPortMap(22, Epyx::UPNP::TCP, 1337);
     Epyx::log::debug << "External " << addr << " now maps to local port 22" << Epyx::log::endl;
-    Epyx::log::debug << "Does it work? " << Epyx::log::endl;
+
+    // List
+    Epyx::log::info << "List of mappings:" << Epyx::log::endl;
+    std::list<Epyx::UPNP::portMap> mappings = igd.getListPortMap();
+    for (auto it = mappings.begin(); it != mappings.end(); ++it) {
+        Epyx::log::info << (it->enabled ? "*" : "O") << " "
+            << it->protocol << " " << it->nat_port << " to " << it->destination
+            << " " << it->description << Epyx::log::endl;
+    }
+
+    Epyx::log::info << "Does it work? " << Epyx::log::endl;
     std::string blah;
     std::cin >> blah;
     if (!igd.delPortMap(addr, Epyx::UPNP::TCP)) {
