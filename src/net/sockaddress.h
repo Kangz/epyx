@@ -144,13 +144,6 @@ namespace Epyx
          */
         friend bool operator<(const SockAddress& addr1, const SockAddress& addr2);
 
-        /**
-         * @brief Get interface addresses
-         * @param port
-         * @return a std::vector of addresses
-         */
-        static std::vector<SockAddress> getIfaceAdresses(int port = 0);
-
     private:
         // IP
         IpAddress ip;

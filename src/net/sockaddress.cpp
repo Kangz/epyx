@@ -141,22 +141,4 @@ namespace Epyx
     bool operator<(const SockAddress& addr1, const SockAddress& addr2) {
         return addr1.compare(addr2) < 0;
     }
-
-    std::vector<SockAddress> SockAddress::getIfaceAdresses(int port) {
-        std::vector<SockAddress> addrs;
-        struct ifaddrs *ifAddrStruct = NULL;
-        struct ifaddrs *ifa = NULL;
-
-        getifaddrs(&ifAddrStruct);
-        for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next) {
-            if (ifa->ifa_addr->sa_family == AF_INET || ifa->ifa_addr->sa_family == AF_INET6) {
-                SockAddress addr(ifa->ifa_addr);
-                addr.port = port;
-                addrs.push_back(addr);
-            }
-        }
-        if (ifAddrStruct != NULL)
-            freeifaddrs(ifAddrStruct);
-        return addrs;
-    }
 }
