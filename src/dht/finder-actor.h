@@ -90,7 +90,7 @@ namespace DHT
 
         void timeout();
     protected:
-        virtual void onNewAnswer(Peer* peer, Packet* pkt);
+        virtual void onNewAnswer(Peer::SPtr peer, Packet::UPtr pkt);
         virtual void onAnswerTimeout(long id);
 
         //helper functions to preserve the heap structure and the size of the lists

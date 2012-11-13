@@ -90,6 +90,8 @@ namespace DHT
         std::string key;
         Id idToFind;
 
+        typedef std::unique_ptr<Packet> UPtr;
+
     private:
         void getValueFromGTT(GTTPacket& pkt, bool useStatus = true);
         void setValueForGTT(GTTPacket* pkt, bool useStatus = true);

@@ -58,7 +58,7 @@ namespace DHT
         timeout();
     }
 
-    void SetterActor::onNewAnswer(Peer* peer, Packet* pkt) {
+    void SetterActor::onNewAnswer(Peer::SPtr peer, Packet::UPtr pkt) {
         if (pkt->method != M_STORED || pkt->status != 0) {
             nErrors ++;
         }

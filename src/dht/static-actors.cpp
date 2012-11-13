@@ -10,19 +10,17 @@ namespace DHT
     PingActor::PingActor(InternalNode& n): n(n) {
     }
 
-    void PingActor::treat(Peer* peer, Packet* pkt) {
+    void PingActor::treat(Peer::SPtr peer, Packet::UPtr pkt) {
         //We only need to send back a pong
         Packet answer;
         answer.method = M_PONG;
         this->n.send(answer, *peer);
-        delete peer;
-        delete pkt;
     }
 
     GetActor::GetActor(InternalNode& n): n(n) {
     }
 
-    void GetActor::treat(Peer* peer, Packet* pkt) {
+    void GetActor::treat(Peer::SPtr peer, Packet::UPtr pkt) {
         Packet answer;
         answer.method = M_GOT;
         answer.connectionId = pkt->connectionId;
@@ -35,14 +33,12 @@ namespace DHT
             answer.status = 0;
         }
         this->n.send(answer, *peer);
-        delete peer;
-        delete pkt;
     }
 
     StoreActor::StoreActor(InternalNode& n): n(n) {
     }
 
-    void StoreActor::treat(Peer* peer, Packet* pkt) {
+    void StoreActor::treat(Peer::SPtr peer, Packet::UPtr pkt) {
         Packet answer;
         answer.method = M_STORED;
         answer.connectionId = pkt->connectionId;
@@ -51,14 +47,12 @@ namespace DHT
         this->n.storage.set(pkt->key, pkt->value);
 
         this->n.send(answer, *peer);
-        delete peer;
-        delete pkt;
     }
 
     FindActor::FindActor(InternalNode& n): n(n) {
     }
 
-    void FindActor::treat(Peer* peer, Packet* pkt) {
+    void FindActor::treat(Peer::SPtr peer, Packet::UPtr pkt) {
         Packet answer;
         answer.method = M_FOUND;
         answer.connectionId = pkt->connectionId;
@@ -69,8 +63,6 @@ namespace DHT
         this->n.kbucket.findNearestNodes(pkt->idToFind, *answer.foundPeers, pkt->count);
 
         this->n.send(answer, *peer);
-        delete peer;
-        delete pkt;
     }
 
 }
