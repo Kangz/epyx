@@ -94,7 +94,7 @@ namespace DHT
          * @param pkt the DHT packet received
          * @param sender the connection information for the sender
          */
-        void processPacket(Packet& pkt, const Peer& sender);
+        void processPacket(Packet::UPtr pkt, const Peer& sender);
 
         //Is proxied by Node
         void sendPing(const Peer& p);
@@ -138,7 +138,7 @@ namespace DHT
     private:
         void sendPong(const Peer& target);
 
-        void dispatchToProcessActor(Packet& pkt, const Peer& target);
+        void dispatchToProcessActor(Packet::UPtr pkt, Peer::SPtr target);
    };
 
 }

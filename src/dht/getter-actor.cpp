@@ -58,7 +58,7 @@ namespace DHT
         timeout();
     }
 
-    void GetterActor::onNewAnswer(Peer* peer, Packet* pkt) {
+    void GetterActor::onNewAnswer(Peer::SPtr peer, Packet::UPtr pkt) {
         if (pkt->method == M_GOT && pkt->status == 0) {
             callback->onGot(pkt->value);
             delete callback;
@@ -66,9 +66,6 @@ namespace DHT
         } else {
             onGetResponse();
         }
-
-        delete peer;
-        delete pkt;
     }
 
     void GetterActor::onAnswerTimeout(long id) {

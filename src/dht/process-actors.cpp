@@ -15,7 +15,7 @@ namespace DHT
         }
     }
 
-    void ProcessActor::treat(EPYX_AQA("process receive"), Peer* peer, Packet* pkt) {
+    void ProcessActor::treat(EPYX_AQA("process receive"), Peer::SPtr peer, Packet* pkt) {
         auto it = queries.find(pkt->connectionId);
         if (it == queries.end() || (! (*it).second)) {
             return;

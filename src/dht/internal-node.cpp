@@ -21,44 +21,39 @@ namespace DHT
         //TODO
     }
 
-    void InternalNode::processPacket(Packet& pkt, const Peer& sender) {
-
+    void InternalNode::processPacket(Packet::UPtr pkt, const Peer& origSender) {
         //Update the routing table
-        this->kbucket.seenPeer(sender.id, sender.n2npId);
+        Peer::SPtr sender = this->kbucket.seenPeer(origSender.id, origSender.n2npId);
 
         //Dispach the packet to the right actor
-        switch(pkt.method){
+        switch(pkt->method){
             case M_PING:
-                this->pingActor.post(&sender, &pkt);
+                this->pingActor.post(sender, std::move(pkt));
                 break;
 
             case M_PONG:
-                delete &pkt;
-                delete &sender;
                 break;
 
             case M_GET:
-                this->getActor.post(&sender, &pkt);
+                this->getActor.post(sender, std::move(pkt));
                 break;
 
             case M_STORE:
-                this->storeActor.post(&sender, &pkt);
+                this->storeActor.post(sender, std::move(pkt));
                 break;
 
             case M_FIND:
-                this->findActor.post(&sender, &pkt);
+                this->findActor.post(sender, std::move(pkt));
                 break;
 
             case M_GOT:
             case M_STORED:
             case M_FOUND:
-                this->dispatchToProcessActor(pkt, sender);
+                this->dispatchToProcessActor(std::move(pkt), sender);
                 break;
 
             default:
                 log::error << "The DHT received a packet with an unknown method" << log::endl;
-                delete &pkt;
-                delete &sender;
                 break;
         }
     }
@@ -102,8 +97,8 @@ namespace DHT
         return n;
     }
 
-    void InternalNode::dispatchToProcessActor(Packet& pkt, const Peer& sender){
-        auto it = processActors.findAndLock(pkt.connectionId);
+    void InternalNode::dispatchToProcessActor(Packet::UPtr pkt, Peer::SPtr sender){
+        auto it = processActors.findAndLock(pkt->connectionId);
         if(processActors.isEnd(it)){
             processActors.endUnlock();
             return;
@@ -112,7 +107,7 @@ namespace DHT
         ActorId<ProcessActor> saved_id((*it).second);
         processActors.endUnlock();
 
-        saved_id.post(EPYX_AQ("process receive"), &sender, &pkt);
+        saved_id.post(EPYX_AQ("process receive"), sender, std::move(pkt));
     }
 
     void InternalNode::unregisterConnectionId(long id) {

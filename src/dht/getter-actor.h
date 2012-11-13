@@ -77,7 +77,7 @@ namespace DHT
         void treat(EPYX_AQA("find success"), std::vector<Peer::SPtr>* peers);
         void treat(EPYX_AQA("find failure"));
 
-        virtual void onNewAnswer(Peer* peer, Packet* pkt);
+        virtual void onNewAnswer(Peer::SPtr peer, Packet::UPtr pkt);
         virtual void onAnswerTimeout(long id);
         void timeout();
 

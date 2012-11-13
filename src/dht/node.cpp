@@ -28,8 +28,10 @@ namespace DHT
 
         //TODO: check that the packet is well-formed
         //Then make it a DHT Packet
-        Packet* pkt = new Packet(*gtt_packet);
-        n.processPacket(*pkt, *(new Peer(pkt->from, senderId)));
+        Packet::UPtr pkt = new Packet(*gtt_packet);
+        const Peer& peer(pkt->from, senderId);
+
+        n.processPacket(pkt, peer);
     }
 
     void Node::send(Packet& pkt, const Peer& dest, N2NP::Node& myN2np) {

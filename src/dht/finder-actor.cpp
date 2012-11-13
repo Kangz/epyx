@@ -44,7 +44,7 @@ namespace DHT
         unlock();
     }
 
-    void FinderActor::onNewAnswer(Peer* peer, Packet* pkt) {
+    void FinderActor::onNewAnswer(Peer::SPtr peer, Packet::UPtr pkt) {
 
         if (pkt->method == M_FOUND && pkt->status == 0 && pkt->count > 0) {
             auto peers = pkt->foundPeers;
@@ -53,9 +53,6 @@ namespace DHT
                 addToFoundPeers(*peerToAdd);
             }
         }
-
-        delete peer;
-        delete pkt;
 
         //Acknowledge that we received a query
         onResponse();
