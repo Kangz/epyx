@@ -94,17 +94,17 @@ namespace DHT
          * @param pkt the DHT packet received
          * @param sender the connection information for the sender
          */
-        void processPacket(Packet::UPtr pkt, const Peer& sender);
+        void processPacket(Packet* pkt, const Peer& sender);
 
         //Is proxied by Node
-        void sendPing(const Peer& p);
+        void sendPing(Peer::SPtr p);
         void findClosest(FindCallback* cb, int count, const Id& idToFind);
         void getValue(GetCallback* cb, const std::string& key);
         void setValue(SetCallback* cb, const std::string& key, const std::string& value);
-        Peer getConnectionInfo() const;
+        Peer::SPtr getConnectionInfo() const;
 
         //proxy for Node
-        void send(Packet& pkt, const Peer& dest);
+        void send(Packet& pkt, Peer::SPtr dest);
 
         //Manages the processActors (see InternalNode description)
         //long registerProcessActor(ProcessActor& actor, int timeout = 0);
@@ -123,6 +123,7 @@ namespace DHT
         //This node's identity
         Id id;
         N2NP::Node& myN2np;
+        Peer::SPtr myPeer;
         Node& parent;
 
         //Other components
@@ -138,7 +139,7 @@ namespace DHT
     private:
         void sendPong(const Peer& target);
 
-        void dispatchToProcessActor(Packet::UPtr pkt, Peer::SPtr target);
+        void dispatchToProcessActor(Packet::SPtr pkt, Peer::SPtr target);
    };
 
 }

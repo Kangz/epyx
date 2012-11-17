@@ -21,7 +21,7 @@ namespace DHT
     }
 
     void GetterSearchCallback::onFound(ClosestQueue& result) {
-        std::vector<Peer::SPtr>* res = new std::vector<Peer::SPtr>();
+        std::shared_ptr<std::vector<Peer::SPtr>> res(new std::vector<Peer::SPtr>());
         ClosestQueue::iterator it;
         for(it = result.begin(); it != result.end(); it ++)  {
             res->push_back((*it).second);
@@ -37,6 +37,10 @@ namespace DHT
     :ProcessActor(n), callback(cb), key(key), found(false) {
     }
 
+    GetterActor::~GetterActor(){
+        delete callback;
+    }
+
     void GetterActor::start() {
         Id id;
         idForString(id, key);
@@ -44,24 +48,22 @@ namespace DHT
         n.findClosest(new GetterSearchCallback(Actor::getId(this)), GET_REDUNDANCY, id);
     }
 
-    void GetterActor::treat(EPYX_AQA("find success"), std::vector<Peer::SPtr>* peers) {
+    void GetterActor::treat(EPYX_AQA("find success"), std::shared_ptr<std::vector<Peer::SPtr>> peers) {
         for(auto it = peers->begin(); it != peers->end(); it ++) {
-            ask(**it);
+            ask(*it);
         }
         pendingRequests = peers->size();
 
         found = true;
-        delete peers;
     }
 
     void GetterActor::treat(EPYX_AQA("find failure")) {
         timeout();
     }
 
-    void GetterActor::onNewAnswer(Peer::SPtr peer, Packet::UPtr pkt) {
+    void GetterActor::onNewAnswer(Peer::SPtr peer, Packet::SPtr pkt) {
         if (pkt->method == M_GOT && pkt->status == 0) {
             callback->onGot(pkt->value);
-            delete callback;
             kill();
         } else {
             onGetResponse();
@@ -80,20 +82,16 @@ namespace DHT
         }
     }
 
-    void GetterActor::ask(Peer& p) {
+    void GetterActor::ask(Peer::SPtr peer) {
         Packet pkt;
         pkt.method = M_GET;
         pkt.key = key;
-
-        //HACK!!!
-        Peer::SPtr peer(new Peer(p));
 
         this->sendQuery(peer, pkt, SINGLE_REQUEST_TIMEOUT);
     }
 
     void GetterActor::timeout() {
         callback->onError();
-        delete callback;
         kill();
     }
 }

@@ -81,7 +81,7 @@ namespace DHT
          * @param dest the target of the message
          * @param myN2np self explaining
          */
-        void send(Packet& pkt, const Peer& dest, N2NP::Node& myN2np);
+        void send(Packet& pkt, Peer::SPtr dest, N2NP::Node& myN2np);
 
         /**
          * @brief sends a ping to a remote DHT
@@ -90,13 +90,13 @@ namespace DHT
          * This is mainly used to boostrap our connection (as the remote DHT
          * will answer a PONG and get registered in our KBucket)
          */
-        void sendPing(const Peer& p);
+        void sendPing(Peer::SPtr p);
 
         /**
          * @brief gets the DHT peer describing this DHT
          * @return itself, as a Peer
          */
-        Peer getConnectionInfo() const;
+        Peer::SPtr getConnectionInfo() const;
 
         /**
          * @brief Asks a FIND operation on the DHT

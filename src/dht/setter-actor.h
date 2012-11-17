@@ -69,22 +69,24 @@ namespace DHT
          */
         SetterActor(InternalNode& n, const std::string& key, const std::string& value, SetCallback* cb);
 
+        virtual ~SetterActor();
+
         /**
          * @brief called after the actor is added to the manager
          */
         void start();
 
-        void treat(EPYX_AQA("find success"), std::vector<Peer::SPtr>* peers);
+        void treat(EPYX_AQA("find success"), std::shared_ptr<std::vector<Peer::SPtr>> peers);
         void treat(EPYX_AQA("find failure"));
 
-        virtual void onNewAnswer(Peer::SPtr peer, Packet::UPtr pkt);
+        virtual void onNewAnswer(Peer::SPtr peer, Packet::SPtr pkt);
         virtual void onAnswerTimeout(long id);
         void timeout();
     protected:
         void onSetReceive();
 
     private:
-        void ask(Peer& p);
+        void ask(Peer::SPtr p);
 
         SetCallback* callback;
         std::string key;

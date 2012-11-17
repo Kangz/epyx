@@ -349,7 +349,7 @@ void test_dht_network(Epyx::API& epyx){
     log::info << "Building the network" << log::endl;
     for(int i=0; i<NETWORK_SIZE; i++) {
         for(int j=i+1; j<NETWORK_SIZE; j++) {
-            Peer p = dhtNodes[j]->getConnectionInfo();
+            Peer::SPtr p = dhtNodes[j]->getConnectionInfo();
             dhtNodes[i]->sendPing(p);
         }
     }

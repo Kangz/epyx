@@ -28,13 +28,13 @@ namespace DHT
 
         //TODO: check that the packet is well-formed
         //Then make it a DHT Packet
-        Packet::UPtr pkt = new Packet(*gtt_packet);
-        const Peer& peer(pkt->from, senderId);
+        Packet* pkt = new Packet(*gtt_packet);
+        Peer peer(pkt->from, senderId);
 
         n.processPacket(pkt, peer);
     }
 
-    void Node::send(Packet& pkt, const Peer& dest, N2NP::Node& myN2np) {
+    void Node::send(Packet& pkt, Peer::SPtr dest, N2NP::Node& myN2np) {
         //We just need to add ourself to the packet
         pkt.from = this->id;
 
@@ -42,15 +42,15 @@ namespace DHT
         GTTPacket* gtt = pkt.toGTTPacket();
 
         //And send it
-        myN2np.send(dest.n2npId, "DHT", *gtt);
+        myN2np.send(dest->n2npId, "DHT", *gtt);
     }
 
     //These are simply proxies for the InternalNode
-    void Node::sendPing(const Peer& p){
+    void Node::sendPing(Peer::SPtr p){
         n.sendPing(p);
     }
 
-    Peer Node::getConnectionInfo() const {
+    Peer::SPtr Node::getConnectionInfo() const {
         return n.getConnectionInfo();
     }
 
