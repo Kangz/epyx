@@ -148,7 +148,7 @@ namespace Epyx
             gttparser.eat(data);
             std::unique_ptr<GTTPacket> gttpkt;
             // Loop over each packet
-            while (gttpkt = gttparser.getPacket()) {
+            while ( (gttpkt = gttparser.getPacket()) ) {
                 // Build a N2NP packet and post it to the Relay
                 std::unique_ptr<Packet> n2nppkt(new Packet(*gttpkt));
                 this->treat(n2nppkt);
