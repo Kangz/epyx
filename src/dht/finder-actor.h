@@ -83,14 +83,17 @@ namespace DHT
          */
         FinderActor(InternalNode& n, const Id& idToFind, int count, FindCallback* cb);
 
+        virtual ~FinderActor();
+
         /**
          * @brief start the FinderActor after it has been added in a manager
          */
         void start();
 
         void timeout();
+
     protected:
-        virtual void onNewAnswer(Peer::SPtr peer, Packet::UPtr pkt);
+        virtual void onNewAnswer(Peer::SPtr peer, Packet::SPtr pkt);
         virtual void onAnswerTimeout(long id);
 
         //helper functions to preserve the heap structure and the size of the lists

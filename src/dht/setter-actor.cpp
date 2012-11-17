@@ -22,7 +22,7 @@ namespace DHT
     }
 
     void SetterSearchCallback::onFound(ClosestQueue& result) {
-        std::vector<Peer::SPtr>* res = new std::vector<Peer::SPtr>();
+        std::shared_ptr<std::vector<Peer::SPtr>> res(new std::vector<Peer::SPtr>());
         for(auto it = result.begin(); it != result.end(); it ++)  {
             res->push_back((*it).second);
         }
@@ -37,6 +37,10 @@ namespace DHT
     :ProcessActor(n), callback(cb), key(key), value(value), nErrors(0), found(false) {
     }
 
+    SetterActor::~SetterActor(){
+        delete callback;
+    }
+
     void SetterActor::start() {
         Id id;
         idForString(id, key);
@@ -44,21 +48,20 @@ namespace DHT
         n.findClosest(new SetterSearchCallback(Actor::getId(this)), SET_REDUNDANCY, id);
     }
 
-    void SetterActor::treat(EPYX_AQA("find success"), std::vector<Peer::SPtr>* peers) {
+    void SetterActor::treat(EPYX_AQA("find success"), std::shared_ptr<std::vector<Peer::SPtr>> peers) {
         for(auto it = peers->begin(); it != peers->end(); it ++) {
-            ask(**it);
+            ask(*it);
         }
         pendingRequests = peers->size();
 
         found = true;
-        delete peers;
     }
 
     void SetterActor::treat(EPYX_AQA("find failure")) {
         timeout();
     }
 
-    void SetterActor::onNewAnswer(Peer::SPtr peer, Packet::UPtr pkt) {
+    void SetterActor::onNewAnswer(Peer::SPtr peer, Packet::SPtr pkt) {
         if (pkt->method != M_STORED || pkt->status != 0) {
             nErrors ++;
         }
@@ -75,7 +78,6 @@ namespace DHT
         if(pendingRequests == 0) {
             if(nErrors < SET_ERROR_THRESHOLD) {
                 callback->onSet();
-                delete callback;
                 kill();
             } else {
                 timeout();
@@ -83,21 +85,17 @@ namespace DHT
         }
     }
 
-    void SetterActor::ask(Peer& p) {
+    void SetterActor::ask(Peer::SPtr peer) {
         Packet pkt;
         pkt.method = M_STORE;
         pkt.key = key;
         pkt.value = value;
-
-        //HACK!!!
-        Peer::SPtr peer(new Peer(p));
 
         this->sendQuery(peer, pkt, SINGLE_REQUEST_TIMEOUT);
     }
 
     void SetterActor::timeout() {
         callback->onError();
-        delete callback;
         kill();
     }
 }

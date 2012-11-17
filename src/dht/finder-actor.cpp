@@ -23,6 +23,10 @@ namespace DHT
     :ProcessActor(n), countToFind(count), pendingRequests(0), requestedId(idToFind), callback(cb) {
     }
 
+    FinderActor::~FinderActor(){
+        delete callback;
+    }
+
     void FinderActor::start(){
         lock();
         heap_make(shortlist);
@@ -44,7 +48,7 @@ namespace DHT
         unlock();
     }
 
-    void FinderActor::onNewAnswer(Peer::SPtr peer, Packet::UPtr pkt) {
+    void FinderActor::onNewAnswer(Peer::SPtr peer, Packet::SPtr pkt) {
 
         if (pkt->method == M_FOUND && pkt->status == 0 && pkt->count > 0) {
             auto peers = pkt->foundPeers;
@@ -101,7 +105,6 @@ namespace DHT
 
     void FinderActor::timeout() {
         callback->onError();
-        delete callback;
         kill();
     }
 
@@ -114,7 +117,6 @@ namespace DHT
             //If we con't and the shortlist is empty that means we finished the search
             if(pendingRequests == 0) {
                 callback->onFound(foundPeers);
-                delete callback;
                 kill();
             }
         }

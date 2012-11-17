@@ -15,7 +15,7 @@ namespace DHT
         }
     }
 
-    void ProcessActor::treat(EPYX_AQA("process receive"), Peer::SPtr peer, Packet* pkt) {
+    void ProcessActor::treat(EPYX_AQA("process receive"), Peer::SPtr peer, Packet::SPtr pkt) {
         auto it = queries.find(pkt->connectionId);
         if (it == queries.end() || (! (*it).second)) {
             return;
@@ -43,10 +43,7 @@ namespace DHT
         queries[connectionId] = true;
         pkt.connectionId = connectionId;
 
-        //HACK: use shared pointer instead
-        Peer target(*peer);
-
-        this->n.send(pkt, target);
+        this->n.send(pkt, peer);
 
         selfId.timeout(timeout, EPYX_AQ("process timeout"), connectionId);
         return connectionId;

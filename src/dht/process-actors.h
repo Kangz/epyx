@@ -43,10 +43,10 @@ namespace DHT
     class ProcessActor: public Actor {
     public:
         ProcessActor(InternalNode& n);
-        ~ProcessActor();
+        virtual ~ProcessActor();
 
         //Fired by internal node when there is a new packet for this actor
-        void treat(EPYX_AQA("process receive"), Peer::SPtr peer, Packet::UPtr pkt);
+        void treat(EPYX_AQA("process receive"), Peer::SPtr peer, Packet::SPtr pkt);
         //Fired by the actor manager when a query timed out
         void timeout(EPYX_AQA("process timeout"), long pNumber);
 
@@ -54,7 +54,7 @@ namespace DHT
         //To be used when we want to send a message, adds the connectionId
         long sendQuery(Peer::SPtr peer, Packet& pkt, Timeout timeout);
         //Callback for when we receive a message
-        virtual void onNewAnswer(Peer::SPtr peer, Packet::UPtr pkt) = 0;
+        virtual void onNewAnswer(Peer::SPtr peer, Packet::SPtr pkt) = 0;
         //Callback for when a query times out
         virtual void onAnswerTimeout(long id);
 

@@ -8,7 +8,8 @@ namespace DHT
 {
 
     InternalNode::InternalNode(const Id& id, N2NP::Node& n2npSelf, Node& parent, const std::string& name)
-    :actors(5, name + "Actors"), id(id), myN2np(n2npSelf), parent(parent), kbucket(id),
+    :actors(5, name + "Actors"), id(id), myN2np(n2npSelf), 
+    myPeer(new Peer(id, myN2np.getId())), parent(parent), kbucket(id),
 
     //Create the actors that will respond to simple requests
     pingActor(actors.add(new PingActor(*this))),
@@ -17,39 +18,39 @@ namespace DHT
     findActor(actors.add(new FindActor(*this))) {
     }
 
-    InternalNode::~InternalNode() {
-        //TODO
-    }
+    InternalNode::~InternalNode() {}
 
-    void InternalNode::processPacket(Packet::UPtr pkt, const Peer& origSender) {
+    void InternalNode::processPacket(Packet* origPkt, const Peer& origSender) {
         //Update the routing table
         Peer::SPtr sender = this->kbucket.seenPeer(origSender.id, origSender.n2npId);
+
+        Packet::SPtr pkt(origPkt);
 
         //Dispach the packet to the right actor
         switch(pkt->method){
             case M_PING:
-                this->pingActor.post(sender, std::move(pkt));
+                this->pingActor.post(sender, pkt);
                 break;
 
             case M_PONG:
                 break;
 
             case M_GET:
-                this->getActor.post(sender, std::move(pkt));
+                this->getActor.post(sender, pkt);
                 break;
 
             case M_STORE:
-                this->storeActor.post(sender, std::move(pkt));
+                this->storeActor.post(sender, pkt);
                 break;
 
             case M_FIND:
-                this->findActor.post(sender, std::move(pkt));
+                this->findActor.post(sender, pkt);
                 break;
 
             case M_GOT:
             case M_STORED:
             case M_FOUND:
-                this->dispatchToProcessActor(std::move(pkt), sender);
+                this->dispatchToProcessActor(pkt, sender);
                 break;
 
             default:
@@ -58,18 +59,18 @@ namespace DHT
         }
     }
 
-    void InternalNode::send(Packet& pkt, const Peer& dest) {
+    void InternalNode::send(Packet& pkt, Peer::SPtr dest) {
         this->parent.send(pkt, dest, myN2np);
     }
 
-    void InternalNode::sendPing(const Peer& p){
+    void InternalNode::sendPing(Peer::SPtr p){
         Packet pkt;
         pkt.method = M_PING;
         send(pkt, p);
     }
 
-    Peer InternalNode::getConnectionInfo() const {
-        return Peer(id, myN2np.getId());
+    Peer::SPtr InternalNode::getConnectionInfo() const {
+        return myPeer;
     }
 
     //These methods spawn actors for the "long" operations
@@ -97,7 +98,7 @@ namespace DHT
         return n;
     }
 
-    void InternalNode::dispatchToProcessActor(Packet::UPtr pkt, Peer::SPtr sender){
+    void InternalNode::dispatchToProcessActor(Packet::SPtr pkt, Peer::SPtr sender){
         auto it = processActors.findAndLock(pkt->connectionId);
         if(processActors.isEnd(it)){
             processActors.endUnlock();
@@ -107,7 +108,7 @@ namespace DHT
         ActorId<ProcessActor> saved_id((*it).second);
         processActors.endUnlock();
 
-        saved_id.post(EPYX_AQ("process receive"), sender, std::move(pkt));
+        saved_id.post(EPYX_AQ("process receive"), sender, pkt);
     }
 
     void InternalNode::unregisterConnectionId(long id) {
