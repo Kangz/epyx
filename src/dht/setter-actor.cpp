@@ -14,6 +14,9 @@ namespace DHT
     void SetCallback::onError() {
     }
 
+    void SetCallback::onFoundPeers(std::shared_ptr<std::vector<Peer::SPtr>> peers){
+    }
+
     SetCallback::~SetCallback() {
     }
 

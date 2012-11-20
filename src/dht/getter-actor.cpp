@@ -1,3 +1,4 @@
+#include "getter-actor.h"
 #include "static-actors.h"
 #include "node.h"
 #include "internal-node.h"

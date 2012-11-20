@@ -24,6 +24,7 @@
 #include <mutex>
 #include "../core/common.h"
 #include "value.h"
+#include "replicater-actor.h"
 
 namespace Epyx
 {
@@ -37,7 +38,7 @@ namespace DHT
             /**
              * @brief the Storage constructor
              */
-            Storage();
+            Storage(ActorId<ReplicaterActor> replicater);
 
             /**
              * @brief does it contain a key ?
@@ -62,6 +63,7 @@ namespace DHT
             void set(const std::string& key, const std::string& data);
 
         private:
+            ActorId<ReplicaterActor> replicater;
             std::mutex lock;
             std::map<std::string, Value> data;
     };

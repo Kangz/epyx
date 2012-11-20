@@ -11,6 +11,9 @@ namespace DHT
     :actors(5, name + "Actors"), id(id), myN2np(n2npSelf), 
     myPeer(new Peer(id, myN2np.getId())), parent(parent), kbucket(id),
 
+    //The storage and replication
+    replicaterActor(actors.add(new ReplicaterActor(*this))), storage(replicaterActor),
+
     //Create the actors that will respond to simple requests
     pingActor(actors.add(new PingActor(*this))),
     getActor(actors.add(new GetActor(*this))),

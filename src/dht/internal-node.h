@@ -28,11 +28,8 @@
 #include "kbucket.h"
 #include "packet.h"
 #include "storage.h"
+#include "replicater-actor.h"
 #include "static-actors.h"
-#include "process-actors.h"
-#include "finder-actor.h"
-#include "getter-actor.h"
-#include "setter-actor.h"
 
 namespace Epyx
 {
@@ -46,6 +43,8 @@ namespace DHT
     class GetActor;
     class FindActor;
     class ProcessActor;
+    class GetCallback;
+    class SetCallback;
 
     /**
      * @class InternalNode
@@ -128,6 +127,7 @@ namespace DHT
 
         //Other components
         KBucket kbucket;
+        ActorId<ReplicaterActor> replicaterActor;
         Storage storage;
 
         //Static actors

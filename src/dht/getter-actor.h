@@ -21,7 +21,7 @@
 
 #include "../core/common.h"
 #include "../core/actor.h"
-#include "internal-node.h"
+#include "finder-actor.h"
 #include "../n2np/nodeid.h"
 #include "../n2np/node.h"
 #include "value.h"
