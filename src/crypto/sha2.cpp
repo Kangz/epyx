@@ -1,6 +1,3 @@
-#ifndef EPYX_CRYPTO_SHA2_H
-#define EPYX_CRYPTO_SHA2_H
-
 #include "sha2.h"
 #include <cryptopp/sha.h>
 #include <cryptopp/filters.h>
@@ -37,6 +34,3 @@ namespace crypto
 
 }
 }
-
-
-#endif //EPYX_CRYPTO_SHA2_H
