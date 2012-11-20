@@ -63,8 +63,8 @@ target_link_libraries(demoframe epyx)
 add_executable(test-dht src/test-dht.cpp)
 target_link_libraries(test-dht epyx)
 
-#add_executable(test-crypto ${core_sources} ${crypto_sources} src/test-crypto.cpp)
-#target_link_libraries(test-crypto epyx)
+add_executable(test-crypto ${core_sources} ${crypto_sources} src/test-crypto.cpp)
+target_link_libraries(test-crypto epyx)
 
 add_executable(demo src/demo.cpp)
 target_link_libraries(demo epyx)
