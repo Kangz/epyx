@@ -14,11 +14,11 @@
  *   limitations under the License.
  */
 /*
- * @file dht/process-actors.h
+ * @file dht/process-actor.h
  * @brief define process actors.
  */
-#ifndef EPYX_DHT_PROCESS_ACTORS_H
-#define EPYX_DHT_PROCESS_ACTORS_H
+#ifndef EPYX_DHT_PROCESS_ACTOR_H
+#define EPYX_DHT_PROCESS_ACTOR_H
 
 #include "../core/common.h"
 #include "../core/actor.h"
@@ -67,4 +67,4 @@ namespace DHT
 }
 }
 
-#endif //EPYX_DHT_STATIC_ACTORS_H
+#endif //EPYX_DHT_STATIC_ACTOR_H
