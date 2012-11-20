@@ -21,7 +21,7 @@
 #include "../n2np/nodeid.h"
 #include "../n2np/node.h"
 #include "value.h"
-#include "process-actors.h"
+#include "process-actor.h"
 
 namespace Epyx
 {

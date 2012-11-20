@@ -22,7 +22,7 @@
 #include "../core/common.h"
 #include "../core/actor.h"
 #include "../n2np/nodeid.h"
-#include "process-actors.h"
+#include "process-actor.h"
 #include "finder-actor.h"
 #include "value.h"
 
