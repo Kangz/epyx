@@ -1,6 +1,8 @@
+#include "replicater-actor.h"
 #include "node.h"
 #include "internal-node.h"
 #include "consts.h"
+#include "value.h"
 
 namespace Epyx
 {

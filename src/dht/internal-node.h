@@ -21,27 +21,22 @@
 #define EPYX_DHT_INTERNAL_NODE_H
 
 #include "../core/common.h"
-#include "../parser/gttpacket.h"
-#include "../parser/gttparser.h"
-#include "../n2np/nodeid.h"
-#include "../n2np/node.h"
 #include "kbucket.h"
-#include "packet.h"
 #include "storage.h"
-#include "replicater-actor.h"
-#include "static-actors.h"
 
 namespace Epyx
 {
 namespace DHT
 {
-
     class Node;
+    class Packet;
 
+    class ReplicatorActor;
     class PingActor;
     class StoreActor;
     class GetActor;
     class FindActor;
+
     class ProcessActor;
     class GetCallback;
     class SetCallback;

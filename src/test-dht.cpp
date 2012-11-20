@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include "api.h"
 #include "dht/node.h"
+#include "dht/getter-actor.h"
+#include "dht/setter-actor.h"
 #include "dht/id.h"
 #include "dht/kbucket.h"
 #include "dht/packet.h"

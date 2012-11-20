@@ -1,6 +1,8 @@
 #include <mutex>
 #include <condition_variable>
 #include "node.h"
+#include "getter-actor.h"
+#include "setter-actor.h"
 
 namespace Epyx
 {

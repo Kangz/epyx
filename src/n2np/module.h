@@ -27,8 +27,8 @@ namespace Epyx
 {
     namespace N2NP
     {
-        class Node; //Yes, it exists.
-        class Module;
+        class Node;
+
         /**
          * @class Module
          * @brief A virtual class for N2NP Modules

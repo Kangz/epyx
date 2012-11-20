@@ -1,4 +1,13 @@
 #include "internal-node.h"
+#include "../parser/gttpacket.h"
+#include "../n2np/nodeid.h"
+#include "../n2np/node.h"
+#include "replicater-actor.h"
+#include "getter-actor.h"
+#include "setter-actor.h"
+#include "finder-actor.h"
+#include "static-actors.h"
+#include "packet.h"
 #include "node.h"
 #include "consts.h"
 

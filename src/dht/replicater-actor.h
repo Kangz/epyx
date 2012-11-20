@@ -14,14 +14,13 @@
  *   limitations under the License.
  */
 /*
- * @file dht/replicaterer-actor.h
+ * @file dht/replicater-actor.h
  */
 #ifndef EPYX_DHT_REPLICATER_ACTOR_H
 #define EPYX_DHT_REPLICATER_ACTOR_H
 
 #include "../core/common.h"
 #include "../core/actor.h"
-#include "value.h"
 #include "setter-actor.h"
 
 namespace Epyx
