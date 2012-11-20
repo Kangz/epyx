@@ -52,6 +52,8 @@ namespace DHT
     }
 
     void SetterActor::treat(EPYX_AQA("find success"), std::shared_ptr<std::vector<Peer::SPtr>> peers) {
+        callback->onFoundPeers(peers);
+
         for(auto it = peers->begin(); it != peers->end(); it ++) {
             ask(*it);
         }
