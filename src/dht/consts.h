@@ -29,6 +29,7 @@ namespace DHT
     static const int GET_CALLBACK_TIMEOUT = 10000;
     static const int SET_CALLBACK_TIMEOUT = 10000;
     static const int SINGLE_REQUEST_TIMEOUT = 2000;
+    static const int REPLICATION_TIMEOUT = 60*1000; //very low for tests
 
     //Parameters for the FIND process
     static const int FIND_NB_NODE_REQUESTED = 5;

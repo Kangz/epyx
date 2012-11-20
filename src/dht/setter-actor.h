@@ -21,9 +21,9 @@
 
 #include "../core/common.h"
 #include "../core/actor.h"
-#include "internal-node.h"
 #include "../n2np/nodeid.h"
-#include "../n2np/node.h"
+#include "process-actors.h"
+#include "finder-actor.h"
 #include "value.h"
 
 namespace Epyx
@@ -43,6 +43,14 @@ namespace DHT
          * @brief called when the value is set
          */
         virtual void onSet() = 0;
+
+        /**
+         * @brief called when the peers handling the key are found
+         * @param peers the peers handling the key
+         *
+         * It can be used to see the found peers but also modify the vector
+         */
+        virtual void onFoundPeers(std::shared_ptr<std::vector<Peer::SPtr>> peers);
 
         /**
          * @brief called when it fails

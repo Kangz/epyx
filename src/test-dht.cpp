@@ -394,6 +394,8 @@ void test_dht_network(Epyx::API& epyx){
     dhtNodes[0]->getValueSync("value1", value);
 
     log::info << "dht[\"value1\"]=\"" << value << "\"" << log::endl;
+
+    sleep(300);
 }
 
 

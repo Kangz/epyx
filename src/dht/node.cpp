@@ -79,12 +79,12 @@ namespace DHT
             got = b;
             whereResultIsStored = storage;
         }
-        void onGot(const std::string& result) {
+        virtual void onGot(const std::string& result) {
             *got = true;
             *whereResultIsStored = result;
             cond->notify_one();
         }
-        void onError() {
+        virtual void onError() {
             *got = false;
             cond->notify_one();
         }
@@ -99,11 +99,11 @@ namespace DHT
             cond = c;
             set = b;
         }
-        void onSet() {
+        virtual void onSet() {
             *set = true;
             cond->notify_one();
         }
-        void onError() {
+        virtual void onError() {
             *set = false;
             cond->notify_one();
         }
