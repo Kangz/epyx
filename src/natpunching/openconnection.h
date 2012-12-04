@@ -36,7 +36,7 @@ namespace Epyx
             DIRECT,
             UPNP
         } method;
-        class OpenConnection : public Thread
+        class OpenConnection
         {
         public:
             /**
@@ -45,15 +45,21 @@ namespace Epyx
             OpenConnection(const std::shared_ptr<N2NP::Node>& node,
                     const N2NP::NodeId& remoteHost, bool clients = true);
 
+            ~OpenConnection();
+
             /**
              * @brief Advance from a state to another
              * @param command
              * @param headers
              */
             void getMessage(const std::string& command, const std::map<std::string, std::string>& headers);
-        protected:
-            void run();
+
         private:
+            /**
+             * @brief Runned function of the thread
+             */
+            void run();
+
             void serverStateOpen();
             N2NP::NodeId remoteHost;
             state etat;
@@ -62,8 +68,9 @@ namespace Epyx
             method tested_method;
             std::unique_ptr<TCPSocket> socket;
             std::shared_ptr<N2NP::Node> node;
+            std::thread running_thread;
         };
-    } // namespace DirectConnection
-} // namespace Epyx
+    }
+}
 
 #endif // EPYX_DIRECTCONNECTION_OPENCONNECTION_H

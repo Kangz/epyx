@@ -38,7 +38,6 @@ namespace Epyx
             static std::shared_ptr<OpenConnection> openDirectConnectionServer(const std::shared_ptr<N2NP::Node>& node,
                     const N2NP::NodeId& remoteHost);
         };
-
     } // namespace DirectConnection
 } // namespace Epyx
 

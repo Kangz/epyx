@@ -13,9 +13,14 @@ namespace Epyx
 
         OpenConnection::OpenConnection(const std::shared_ptr<N2NP::Node>& node,
             const N2NP::NodeId &remoteHost, bool clients)
-        :remoteHost(remoteHost), client_tried(false), server_tried(false),
-        tested_method(DIRECT), node(node) {
-            etat = (clients ? STATE_CLIENT : STATE_SERVER);
+        :remoteHost(remoteHost), etat(clients ? STATE_CLIENT : STATE_SERVER),
+        client_tried(false), server_tried(false), tested_method(DIRECT),
+        node(node), running_thread(&OpenConnection::run, this) {
+        }
+
+        OpenConnection::~OpenConnection() {
+            log::debug << "Waiting for OpenConnect thread" << log::endl;
+            running_thread.join();
         }
 
         void OpenConnection::getMessage(const std::string& command, const std::map<std::string, std::string>& headers) {
@@ -65,6 +70,17 @@ namespace Epyx
             } else if (command == "ESTABLISHED") {
                 //Do Shit, and register the socket to the N2NP module
                 node->offerDirectConn(remoteHost, std::move(socket));
+            }
+        }
+
+        void OpenConnection::run() {
+            if (etat == STATE_SERVER) {
+                Thread::setName("OpenConnection-Server");
+                GTTPacket pkt;
+                pkt.method = "SEND";
+                serverStateOpen();
+            } else if (etat == STATE_CLIENT) {
+                Thread::setName("OpenConnection-Client");
             }
         }
 
@@ -119,15 +135,5 @@ namespace Epyx
             node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
             this->getMessage("DID_NOT_WORK", std::map<std::string, std::string > ());
         }
-
-        void OpenConnection::run() {
-            if (etat == STATE_SERVER) {
-                GTTPacket pkt;
-                pkt.method = "SEND";
-                serverStateOpen();
-            } else if (etat == STATE_CLIENT) {
-
-            }
-        }
-    } // namespace DirectConnection
-} // namespace Epyx
+    }
+}
