@@ -177,30 +177,17 @@ public:
 };
 
 
-void test_dht_n2np(){
-     // Create Net Select for relay
-    NetSelect *selectRelay = new NetSelect(10, "wRelay");
-    selectRelay->setName("NetSelectRelay");
-    selectRelay->start();
-
+void test_dht_n2np(Epyx::API& epyx){
     // Create relay
-    SockAddress addr("127.0.0.1:4242");
-    std::shared_ptr<N2NP::Relay> relay(new N2NP::Relay(addr));
-    std::shared_ptr<N2NP::RelayServer> srv(new N2NP::RelayServer(new TCPServer(addr, 50), relay));
-    selectRelay->add(srv);
-    log::info << "Start Relay " << relay->getId() << log::endl;
-
-    // Create Net Select for nodes
-    Epyx::NetSelect *selectNodes = new Epyx::NetSelect(10, "WNodes");
-    selectNodes->setName("NetSelectNodes");
-    selectNodes->start();
+    const SockAddress addr("127.0.0.1:4242");
+    epyx.spawnRelay(addr, 50);
 
     // Create nodes
     Epyx::log::info << "Create nodes..." << Epyx::log::endl;
     std::shared_ptr<Epyx::N2NP::Node> node0(new Epyx::N2NP::Node(addr));
     std::shared_ptr<Epyx::N2NP::Node> node1(new Epyx::N2NP::Node(addr));
-    selectNodes->add(node0);
-    selectNodes->add(node1);
+    epyx.addNode(node0);
+    epyx.addNode(node1);
 
     // Wait for node IDs
     Epyx::log::info << "Waiting for nodes..." << Epyx::log::endl;
@@ -300,11 +287,6 @@ class MySetCallback: public SetCallback {
 };
 
 void test_dht_network(Epyx::API& epyx){
-    // Create Net Select for relay
-    NetSelect *selectRelay = new NetSelect(10, "wRelay");
-    selectRelay->setThreadName("NetSelectRelay");
-    selectRelay->start();
-
     // Create relay
     NetIf iface = NetIf::pickExternalInterface(4, true);
     SockAddress addr(iface.getAddress(), 4242);
@@ -312,17 +294,12 @@ void test_dht_network(Epyx::API& epyx){
         return;
     epyx.spawnRelay(addr, 50);
 
-    // Create Net Select for nodes
-    Epyx::NetSelect *selectNodes = new Epyx::NetSelect(10, "WNodes");
-    selectNodes->setThreadName("NetSelectNodes");
-    selectNodes->start();
-
     // Create nodes
     Epyx::log::info << "Create nodes..." << Epyx::log::endl;
     std::shared_ptr<Epyx::N2NP::Node> n2npNodes[NETWORK_SIZE];
     for(int i=0; i<NETWORK_SIZE; i++){
         n2npNodes[i].reset(new Epyx::N2NP::Node(addr));
-        selectNodes->add(n2npNodes[i]);
+        epyx.addNode(n2npNodes[i]);
     }
 
     // Wait for node IDs
@@ -408,7 +385,7 @@ int main(){
         //test_id_distance();
         //test_kbucket();
         //test_dhtpacket();
-        //test_dht_n2np();
+        //test_dht_n2np(epyx);
         epyx.setNetWorkers(20);
         test_dht_network(epyx);
     } catch (Epyx::Exception e) {

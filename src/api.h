@@ -122,6 +122,11 @@ namespace Epyx
         std::unique_ptr<NetSelect> netsel;
 
         /**
+         * @brief Thread of the running NetSelect
+         */
+        std::thread *netselThread;
+
+        /**
          * @brief Relay (one or none)
          */
         std::shared_ptr<N2NP::Relay> relay;

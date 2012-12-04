@@ -11,7 +11,7 @@ namespace Epyx
 {
 
     API::API(int logflags, const std::string& logfile)
-    :nsRelayId(0) {
+    :netselThread(nullptr), nsRelayId(0) {
         // Number of workers in NetSelect may be configured via netsel.setNumWorkers
         Thread::init();
         log::init(logflags, logfile);
@@ -21,6 +21,14 @@ namespace Epyx
     API::~API() {
         this->destroyAllNodes();
         this->destroyRelay(2000);
+        if (netsel) {
+            netsel->stop();
+        }
+        if (netselThread) {
+            netselThread->join();
+            delete netselThread;
+            netselThread = nullptr;
+        }
         log::flushAndQuit();
     }
 
@@ -28,10 +36,7 @@ namespace Epyx
         std::lock_guard<std::mutex> lock(mut);
         if (!netsel) {
             netsel.reset(new NetSelect(numworkers, "NetSelectWorker"));
-            netsel->setThreadName("NetSelect");
-            if (!netsel->start()) {
-                throw FailException("API::NetSelect", "failed to start");
-            }
+            netselThread = new std::thread(&NetSelect::runLoop, netsel.get(), "NetSelect");
         } else {
             netsel->setNumWorkers(numworkers);
         }
@@ -117,8 +122,8 @@ namespace Epyx
 
     void API::waitNet() {
         std::lock_guard<std::mutex> lock(mut);
-        EPYX_ASSERT(netsel);
-        netsel->wait();
+        EPYX_ASSERT(netsel && netselThread);
+        netselThread->join();
     }
 
     API::OpenConnThread::OpenConnThread(API *api)

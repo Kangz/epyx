@@ -11,15 +11,7 @@ namespace Epyx
     }
 
     NetSelect::~NetSelect() {
-        // Stop working pool
-        workers.stop();
-
-        // Stop running thread
-        running = false;
-
-        // Delete every selected stuff
-        std::lock_guard<std::mutex> lock(readersMutex);
-        readers.clear();
+        this->stop();
     }
 
     int NetSelect::add(const std::shared_ptr<NetSelectReader>& nsr) {
@@ -42,6 +34,18 @@ namespace Epyx
         }
     }
 
+    void NetSelect::stop() {
+        // Stop working pool
+        workers.stop();
+
+        // Stop running thread
+        running = false;
+
+        // Delete every selected stuff
+        std::lock_guard<std::mutex> lock(readersMutex);
+        readers.clear();
+    }
+
     std::shared_ptr<NetSelectReader> NetSelect::get(int id) {
         // Get an iterator on a map of unique_ptr to NetSelectReaderInfo
         std::lock_guard<std::mutex> lock(readersMutex);
@@ -49,7 +53,8 @@ namespace Epyx
         if (nsri != readers.end() && nsri->second->alive) {
             return nsri->second->reader;
         }
-        return std::shared_ptr<NetSelectReader>();
+        std::shared_ptr<NetSelectReader> reader;
+        return reader;
     }
 
     int NetSelect::getNumWorkers() const {
@@ -60,7 +65,8 @@ namespace Epyx
         workers.setNumWorkers(n);
     }
 
-    void NetSelect::run() {
+    void NetSelect::runLoop(std::string name) {
+        Thread::setName(name);
         fd_set rfds;
         struct timeval tv;
         int fdmax;

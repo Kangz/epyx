@@ -37,7 +37,7 @@ namespace Epyx
      *
      * Use NetSelect.start() to start this thread
      */
-    class NetSelect : public Thread
+    class NetSelect
     {
     public:
         /**
@@ -64,6 +64,11 @@ namespace Epyx
         void kill(int id);
 
         /**
+         * @brief Stop everything
+         */
+        void stop();
+
+        /**
          * @brief Get a reader
          * @param id
          * @return the reader, or NULL if it does not exist
@@ -82,8 +87,11 @@ namespace Epyx
          */
         void setNumWorkers(int n);
 
-    protected:
-        void run();
+        /**
+         * Run main loop
+         * @param name Thread name
+         */
+        void runLoop(std::string name);
 
     private:
         /**

@@ -75,21 +75,19 @@ int main()
     Epyx::API epyx;
     try {
         // Start select() thread
-        Epyx::NetSelect selectThread(20, "SelectWorker");
+        std::unique_ptr<Epyx::NetSelect> netselect(new Epyx::NetSelect(20, "SelectWorker"));
         // Do NOT delete tcpServer : it is deleted by NetSelectTCPServer
         const Epyx::SockAddress addr("", 4242);
         Epyx::TCPServer *tcpServer = new Epyx::TCPServer(addr, 20);
         Epyx::log::debug << "ServerWorker listening at " << tcpServer->getAddress() <<
             Epyx::log::endl;
         std::shared_ptr<Epyx::NetSelectReader> srv(new Epyx::NetSelectTCPServer<TestNetSelectSocket, void*>(tcpServer, NULL));
-        selectThread.add(srv);
-        selectThread.setThreadName("NetSelect");
-        Epyx::log::debug << "Start " << selectThread.getThisName() <<
-            Epyx::log::endl;
-        selectThread.start();
+        netselect->add(srv);
+        Epyx::log::debug << "Start NetSelect" << Epyx::log::endl;
+        std::thread selectThread(&Epyx::NetSelect::runLoop, netselect.get(), "NetSelect");
 
         // Wait thread
-        selectThread.wait();
+        selectThread.join();
         Epyx::log::debug << "Server thread has terminated" << Epyx::log::endl;
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
