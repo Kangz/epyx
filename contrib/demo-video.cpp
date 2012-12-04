@@ -152,8 +152,7 @@ bool Demo::run() {
 
     // Send ping ro the relay
     N2NP::NodeId relayNodeId("self", node->getId().getRelay());
-    DHT::Peer relayPeer(relayNodeId);
-    dhtNode->sendPing(relayPeer);
+    dhtNode->sendPing(DHT::Peer::SPtr(new DHT::Peer(relayNodeId)));
 
     std::shared_ptr<VideoDisplayer> videoModule(new VideoDisplayer(this));
     node->addModule("VIDEO", videoModule);

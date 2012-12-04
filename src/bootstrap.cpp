@@ -104,8 +104,7 @@ int main(int argc, char **argv) {
 
                 // Send pings
                 for (int j = 0; j < i; j++) {
-                    Epyx::DHT::Peer p = dhtNodes[j]->getConnectionInfo();
-                    dhtNodes[i]->sendPing(p);
+                    dhtNodes[i]->sendPing(dhtNodes[j]->getConnectionInfo());
                 }
             }
 
@@ -113,7 +112,7 @@ int main(int argc, char **argv) {
             Epyx::log::info << "Created " << nbNodes << " nodes:" << Epyx::log::endl;
             for (int i = 0; i < nbNodes; i++) {
                 std::ostringstream o;
-                dhtNodes[i]->getConnectionInfo().serialize(o);
+                dhtNodes[i]->getConnectionInfo()->serialize(o);
                 Epyx::log::info << " [" << i << "] " << o.str() << Epyx::log::endl;
             }
 

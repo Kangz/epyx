@@ -64,7 +64,7 @@ bool Demo::run(Epyx::API& epyx, const Epyx::SockAddress& relayAddr) {
 
     // Send ping to the relay
     N2NP::NodeId relayNodeId("self", node->getId().getRelay());
-    dhtNode->sendPing(DHT::Peer(relayNodeId));
+    dhtNode->sendPing(DHT::Peer::SPtr(new DHT::Peer(relayNodeId)));
 
     // Wait the ping to be proceeded
     sleep(1);
