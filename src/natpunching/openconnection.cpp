@@ -70,10 +70,11 @@ namespace Epyx
 
         void OpenConnection::serverStateOpen() {
             std::string testMessage = "Test";
+
             //First we open a listening socket on an available port
             Listener sockListen(new TCPServer(SockAddress("0.0.0.0:0"), 20));
             sockListen.start();
-            SockAddress addr = SockAddress(node->getNodeAddress().getIp(), sockListen.getLocalAddress().getPort());
+            SockAddress addr = SockAddress(node->getNodeAddress().getIp(), sockListen.getListenAddress().getPort());
             //If we're using UPNP, we open a port mapping
             if (tested_method == UPNP) {
                 Epyx::UPNP::Natpunch nat;
@@ -96,21 +97,27 @@ namespace Epyx
             }
             char data[10];
             size_t size = 0;
-            if (accepted) {
-                size = sockListen.getSocket()->recv((void*) data, 10);
-            }
-            if (accepted && std::string(data, size) == testMessage) {
-                pkt.method = "ESTABLISHED";
-                node->offerDirectConn(this->remoteHost, std::move(sockListen.getSocket()));
-                node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
-            } else {
-                pkt.method = "DID_NOT_WORK";
-                sockListen.getSocket()->close();
-                sockListen.term();
-                node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
-                this->getMessage("DID_NOT_WORK", std::map<std::string, std::string > ());
+            std::unique_ptr<TCPSocket> clientSock = sockListen.retrieveSocket();
+            if (accepted && clientSock) {
+                size = clientSock->recv((void*) data, 10);
+                if (std::string(data, size) == testMessage) {
+                    pkt.method = "ESTABLISHED";
+                    node->offerDirectConn(this->remoteHost, std::move(clientSock));
+                    node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
+
+                    // FIXME: is it useful ?
+                    sockListen.term();
+                    return;
+                }
             }
 
+            // An error happened
+            if (clientSock)
+                clientSock->close();
+            sockListen.term();
+            pkt.method = "DID_NOT_WORK";
+            node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
+            this->getMessage("DID_NOT_WORK", std::map<std::string, std::string > ());
         }
 
         void OpenConnection::run() {

@@ -22,6 +22,8 @@
 #define EPYX_TCPSERVER_H
 
 #include "server.h"
+#include "tcpsocket.h"
+#include <memory>
 
 namespace Epyx
 {
@@ -38,6 +40,14 @@ namespace Epyx
          * @param nbConn maximum connection number
          */
         TCPServer(const SockAddress& addr, unsigned int nbConn);
+
+        /**
+         * @brief Accept a connection
+         * @return a shared_ptr to the new client socket
+         * 
+         * The returned shared_ptr is empty when the server is not binded
+         */
+        std::unique_ptr<TCPSocket> accept();
     };
 
 }

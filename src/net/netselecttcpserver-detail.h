@@ -37,29 +37,19 @@ namespace Epyx
 
     template<class T, typename TP> bool NetSelectTCPServer<T, TP>::read() {
         EPYX_ASSERT(srv);
-        struct sockaddr_storage clientAddr;
-        socklen_t clientAddrLen;
-        int newfd = -1;
-
-        clientAddrLen = sizeof clientAddr;
-        int srvfd = srv->getFd();
-        if (srvfd < 0)
-            return false;
-        newfd = ::accept(srvfd, (struct sockaddr*) &clientAddr,
-                &clientAddrLen);
-        if (newfd == -1) {
-            if (!srv->isBinded())
-                return false;
-            throw ErrException("NetSelectTCPServer::read", "accept");
-        }
-
-        // Encapsulate socket
-        std::shared_ptr<TCPSocket> newSock(new TCPSocket(newfd, SockAddress((struct sockaddr*) &clientAddr)));
-        if (newSock->getLocalAddress().empty())
-            newSock->setLocalAddress(srv->getAddress());
 
         try {
-            std::shared_ptr<T> nsSocket(new T(newSock, param));
+            std::unique_ptr<TCPSocket> newSock = srv->accept();
+
+            // If server is closed, return false
+            if (!newSock)
+                return false;
+
+            // If fact, use a shared_ptr<Socket>
+            std::shared_ptr<Socket> shSock(newSock.release());
+            std::shared_ptr<T> nsSocket(new T(shSock, param));
+
+            // Add a new socket in the NetSelect
             this->getOwner()->add(nsSocket);
         } catch (std::exception e) {
             log::error << "Unable to setup the link:\n" << e.what() << log::endl;

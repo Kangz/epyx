@@ -10,33 +10,23 @@ namespace Epyx
         }
 
         void Listener::run() {
-            struct sockaddr_storage clientAddr;
-            socklen_t clientAddrLen;
-
-            clientAddrLen = sizeof clientAddr;
-
-            int newfd = srv->getFd();
-
-            ::accept(newfd, (struct sockaddr*) &clientAddr, &clientAddrLen);
+            EPYX_VERIFY(srv);
+            std::unique_ptr<TCPSocket> newSock = srv->accept();
             hasAccept = true;
-            sock.reset(new TCPSocket(newfd, SockAddress((struct sockaddr*) &clientAddr)));
+            sock.swap(newSock);
         }
 
-        SockAddress Listener::getAddress() {
-            return sock ? sock->getAddress() : SockAddress();
+        std::unique_ptr<TCPSocket> Listener::retrieveSocket() {
+            return std::move(sock);
         }
 
         bool Listener::hasAccepted() {
             return this->hasAccept;
         }
 
-        SockAddress Listener::getLocalAddress() {
-            sock->updateLocalAddress();
-            return sock->getLocalAddress();
+        SockAddress Listener::getListenAddress() const {
+            EPYX_VERIFY(srv);
+            return srv->getAddress();
         }
-
-        std::unique_ptr<TCPSocket>& Listener::getSocket() {
-            return sock;
-        }
-    } // namespace DirectConnection
-} // namespace Epyx
+    }
+}

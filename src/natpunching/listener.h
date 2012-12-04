@@ -25,21 +25,45 @@ namespace Epyx
 {
     namespace DirectConnection
     {
+        /**
+         * @class Listener
+         * 
+         * @brief Thread to listen to a TCP connection
+         */
         class Listener : public Thread
         {
         public:
+            /**
+             * @brief Build a new listener with a new TCPServer
+             * @param srv
+             */
             Listener(TCPServer *srv);
-            std::unique_ptr<TCPSocket>& getSocket();
-            SockAddress getAddress();
-            SockAddress getLocalAddress();
+
+            /**
+             * @brief retrieve internal socket and RESET it
+             * @return ptr to a TCP socket
+             */
+            std::unique_ptr<TCPSocket> retrieveSocket();
+
+            /**
+             * @brief Return true if the socket has been accepted
+             * @return bool
+             */
             bool hasAccepted();
+
+            /**
+             * @brief Get server address
+             * @return SockAddress
+             */
+            SockAddress getListenAddress() const;
+
         protected:
             void run();
+
         private:
             std::unique_ptr<TCPServer> srv;
             std::unique_ptr<TCPSocket> sock;
             bool hasAccept;
-            char* data;
         };
 
     } // namespace DirectConnection
