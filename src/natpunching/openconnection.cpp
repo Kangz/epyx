@@ -89,7 +89,6 @@ namespace Epyx
 
             //First we open a listening socket on an available port
             Listener sockListen(new TCPServer(SockAddress("0.0.0.0:0"), 20));
-            sockListen.start();
             SockAddress addr = SockAddress(node->getNodeAddress().getIp(), sockListen.getListenAddress().getPort());
             //If we're using UPNP, we open a port mapping
             if (tested_method == UPNP) {
@@ -120,9 +119,6 @@ namespace Epyx
                     pkt.method = "ESTABLISHED";
                     node->offerDirectConn(this->remoteHost, std::move(clientSock));
                     node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
-
-                    // FIXME: is it useful ?
-                    sockListen.term();
                     return;
                 }
             }
@@ -130,7 +126,7 @@ namespace Epyx
             // An error happened
             if (clientSock)
                 clientSock->close();
-            sockListen.term();
+
             pkt.method = "DID_NOT_WORK";
             node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
             this->getMessage("DID_NOT_WORK", std::map<std::string, std::string > ());

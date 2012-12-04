@@ -6,10 +6,16 @@ namespace Epyx
     {
 
         Listener::Listener(TCPServer *srv)
-        :srv(srv), hasAccept(false) {
+        :srv(srv), hasAccept(false),
+        running_thread(&Listener::run, this) {
+        }
+
+        Listener::~Listener() {
+            running_thread.join();
         }
 
         void Listener::run() {
+            Thread::setName("OpenConnect::Listener");
             EPYX_VERIFY(srv);
             std::unique_ptr<TCPSocket> newSock = srv->accept();
             hasAccept = true;

@@ -30,7 +30,7 @@ namespace Epyx
          * 
          * @brief Thread to listen to a TCP connection
          */
-        class Listener : public Thread
+        class Listener
         {
         public:
             /**
@@ -38,6 +38,8 @@ namespace Epyx
              * @param srv
              */
             Listener(TCPServer *srv);
+
+            ~Listener();
 
             /**
              * @brief retrieve internal socket and RESET it
@@ -57,13 +59,13 @@ namespace Epyx
              */
             SockAddress getListenAddress() const;
 
-        protected:
+        private:
             void run();
 
-        private:
             std::unique_ptr<TCPServer> srv;
             std::unique_ptr<TCPSocket> sock;
             bool hasAccept;
+            std::thread running_thread;
         };
 
     } // namespace DirectConnection
