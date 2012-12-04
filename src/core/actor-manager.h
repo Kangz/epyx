@@ -150,7 +150,7 @@ namespace Epyx
         };
 
 
-        class TimeoutLauncher: public Thread
+        class TimeoutLauncher
         {
         public:
             TimeoutLauncher(ActorManager* m, const std::string& name);
@@ -158,10 +158,11 @@ namespace Epyx
             void addTimeout(Timeout t, int id, std::function<void()> method);
 
         protected:
-            virtual void run();
+            void run(std::string name);
 
         private:
             ActorManager* manager;
+            std::thread thread;
             std::priority_queue<TimeoutEntry, std::vector<TimeoutEntry>, ActorTimeoutComparator> timeouts;
             BlockingQueue<TimeoutEntry> incoming;
         };

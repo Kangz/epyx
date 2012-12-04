@@ -27,7 +27,6 @@ namespace Epyx
 
     ActorManager::ActorManager(int num_workers, const std::string& name) :
     wp(num_workers, name, this), actorCount(0), timeouts(this, name){
-        timeouts.start();
     }
 
     ActorManager::~ActorManager() {
@@ -107,19 +106,21 @@ namespace Epyx
         return ! (a.time < b.time);
     }
 
-    ActorManager::TimeoutLauncher::TimeoutLauncher(ActorManager* m, const std::string& name): Thread(name + "Timeouts", 0), manager(m) {
+    ActorManager::TimeoutLauncher::TimeoutLauncher(ActorManager* m, const std::string& name)
+    :manager(m), thread(&ActorManager::TimeoutLauncher::run, this, name + "Timeouts") {
     }
 
     ActorManager::TimeoutLauncher::~TimeoutLauncher(){
         incoming.close();
-        this->wait();
+        thread.join();
     }
 
     void ActorManager::TimeoutLauncher::addTimeout(Timeout t, int id, std::function<void()> method){
         incoming.push(new TimeoutEntry{t, id, method});
     }
 
-    void ActorManager::TimeoutLauncher::run(){
+    void ActorManager::TimeoutLauncher::run(std::string name){
+        Thread::setName(name);
         const int epsilon = 2;
 
         std::unique_ptr<TimeoutEntry> to_add = nullptr;
