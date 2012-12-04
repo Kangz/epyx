@@ -105,7 +105,7 @@ namespace Epyx
     template<typename T> void WorkerPool<T>::addWorker() {
         std::lock_guard<std::mutex> lock(workers_mutex);
         int id = std::atomic_fetch_add(&lastId, 1);
-        workers[id] = std::unique_ptr<Worker > (new Worker(this, id));
+        workers[id] = std::unique_ptr<Worker>(new Worker(this, id));
         std::atomic_fetch_add(&worker_count, 1);
     }
 

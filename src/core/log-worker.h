@@ -32,7 +32,7 @@ namespace Epyx
 {
 namespace log
 {
-    class Worker : public Thread
+    class Worker
     {
     public:
         ~Worker();
@@ -42,7 +42,7 @@ namespace log
         void quit();
 
     protected:
-        virtual void run();
+        void run();
 
     private:
         //Used to store logs before we print them
