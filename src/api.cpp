@@ -126,20 +126,15 @@ namespace Epyx
         netselThread->join();
     }
 
-    API::OpenConnThread::OpenConnThread(API *api)
-    :api(api) {
-        EPYX_ASSERT(api != NULL);
-    }
-
-    void API::OpenConnThread::run() {
-        EPYX_ASSERT(api != NULL);
+    void API::runOpenConnect() {
+        Thread::setName("API::runOpenConnect");
         while (true) {
             // Get node indexes from the locked map
             std::list<std::shared_ptr<NetSelectReader> > nodesList;
             {
-                std::lock_guard<std::mutex> lock(api->mut);
-                for (auto i = api->nodeIndexes.begin(); i != api->nodeIndexes.end(); i++) {
-                    std::shared_ptr<NetSelectReader> nodeAsReader = api->netsel->get(i->second);
+                std::lock_guard<std::mutex> lock(mut);
+                for (auto i = nodeIndexes.begin(); i != nodeIndexes.end(); i++) {
+                    std::shared_ptr<NetSelectReader> nodeAsReader = netsel->get(i->second);
                     if (nodeAsReader) {
                         nodesList.push_back(nodeAsReader);
                     }

@@ -134,15 +134,10 @@ namespace Epyx
 
         // Node index (map index => index)
         std::map<int, int> nodeIndexes;
-        class OpenConnThread : public Thread
-        {
-        public:
-            OpenConnThread(API *api);
-        protected:
-            void run();
-        private:
-            API *api;
-        };
+
+        void runOpenConnect();
+
+        std::thread *threadOpenConnect;
     };
 }
 
