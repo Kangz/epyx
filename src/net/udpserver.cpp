@@ -22,17 +22,16 @@ namespace Epyx
     }
 
     int UDPServer::recv(void *data, int size) {
-        int r = sock.recv(data, size);
-        //sock.setAddress(sock.getLastRecvAddr());// This is not thread-safe
-        return r;
+        return sock.recv(data, size);
     }
 
-    /*
-    int UDPServer::send(const void *data, int size) {
-        throw FailException("UDPServer", "UDPServer::send is not yet implemented");
-        return sock.send(data, size);
+    int UDPServer::recvFrom(SockAddress* addr, void *data, int size) {
+        return sock.recvFrom(addr, data, size);
     }
-    */
+
+    int UDPServer::sendTo(const SockAddress& addr, const void *data, int size) {
+        return sock.sendTo(addr, data, size);
+    }
 
     void UDPServer::bindToDevice(const std::string& devicename) {
         sock.bindToDevice(devicename);

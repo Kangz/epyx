@@ -25,7 +25,6 @@
 namespace Epyx
 {
     class UDPServer;
-
     /**
      * @class UDPSocket
      * @brief UDP socket abstraction layer
@@ -68,6 +67,16 @@ namespace Epyx
         int send(const void *data, int size);
 
         /**
+         * @brief Send data through the socket
+         *
+         * @param addr destination
+         * @param data sent data buffer
+         * @param size size of data buffer
+         * @return number of sent bytes
+         */
+        int sendTo(const SockAddress& addr, const void *data, int size);
+
+        /**
          * @brief Receive data from the socket
          *
          * @param data received data buffer
@@ -75,6 +84,16 @@ namespace Epyx
          * @return number of received bytes
          */
         int recv(void *data, int size);
+
+        /**
+         * @brief Receive data from the socket
+         *
+         * @param addr (out) pointer to a source address
+         * @param data received data buffer
+         * @param size size of data buffer
+         * @return number of received bytes
+         */
+        int recvFrom(SockAddress* addr, void *data, int size);
 
         /**
          * @brief Get the remote address from which the last packet was received

@@ -39,6 +39,10 @@ namespace Epyx
     }
 
     int UDPSocket::send(const void *data, int size) {
+        return this->sendTo(address, data, size);
+    }
+
+    int UDPSocket::sendTo(const SockAddress& addr, const void *data, int size) {
         int bytes;
         struct sockaddr_storage saddr;
 
@@ -47,8 +51,9 @@ namespace Epyx
         if (sock < 0) {
             this->create();
         }
-        address.getSockAddr((struct sockaddr *) &saddr);
-        bytes = ::sendto(sock, data, size, 0, (const struct sockaddr *) &saddr, sizeof (saddr));
+        addr.getSockAddr((struct sockaddr *) &saddr);
+        bytes = ::sendto(sock, data, size, 0,
+            (const struct sockaddr *) &saddr, sizeof (saddr));
         if (localAddress.empty())
             this->updateLocalAddress();
         // TODO: Implement status error (ex. Conn closed, ...)
@@ -58,7 +63,11 @@ namespace Epyx
         return bytes;
     }
 
-    int UDPSocket::recv(void * data, int size) {
+    int UDPSocket::recv(void* data, int size) {
+        return this->recvFrom(&lastRecvAddr, data, size);
+    }
+
+    int UDPSocket::recvFrom(SockAddress* addr, void *data, int size) {
         int bytes;
         struct sockaddr_storage saddr;
         socklen_t length = sizeof (saddr);
@@ -68,6 +77,10 @@ namespace Epyx
         // TODO: Implement status error (eg. Conn closed, ...)
         if (bytes < 0)
             throw ErrException("UDPSocket", "recvfrom");
+
+        if (addr != nullptr) {
+            *addr = SockAddress((const sockaddr *) &saddr);
+        }
 
         if (bytes == 0) {
             //Socket is now closed
@@ -82,14 +95,12 @@ namespace Epyx
          */
         if (bytes < size)
             ((char*) data)[bytes] = 0;
-        lastRecvAddr = SockAddress((const sockaddr *) &saddr);
         return bytes;
     }
 
     SockAddress UDPSocket::getLastRecvAddr() const {
         return lastRecvAddr;
     }
-
 
     void UDPSocket::bindToDevice(const std::string& devicename) {
         if (sock < 0) {

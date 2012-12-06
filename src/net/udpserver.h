@@ -52,8 +52,25 @@ namespace Epyx
          */
         int recv(void *data, int size);
 
-        // send is not implemented yet
-        //int send(const void *data, int size);
+        /**
+         * @brief Receive data for the server
+         *
+         * @param addr (out) pointer to a source address
+         * @param data received data buffer
+         * @param size size of data buffer
+         * @return number of received bytes
+         */
+        int recvFrom(SockAddress* addr, void *data, int size);
+
+        /**
+         * @brief Send data from the server
+         *
+         * @param addr destination
+         * @param data sent data buffer
+         * @param size size of data buffer
+         * @return number of sent bytes
+         */
+        int sendTo(const SockAddress& addr, const void *data, int size);
 
         /**
          * @brief Bind socket to a specific device
