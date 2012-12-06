@@ -20,6 +20,7 @@
 #include "../net/tcpsocket.h"
 #include "../net/tcpserver.h"
 #include "../n2np/node.h"
+#include <condition_variable>
 
 namespace Epyx
 {
@@ -28,9 +29,9 @@ namespace Epyx
         /**
          * @class Listener
          * 
-         * @brief Thread to listen to a TCP connection
+         * @brief Wait for a TCP connection in a NetSelectReader
          */
-        class Listener
+        class Listener : public NetSelectReader
         {
         public:
             /**
@@ -39,19 +40,16 @@ namespace Epyx
              */
             Listener(TCPServer *srv);
 
-            ~Listener();
+            int getFileDescriptor() const;
+
+            bool read();
 
             /**
-             * @brief retrieve internal socket and RESET it
-             * @return ptr to a TCP socket
+             * @brief Wait for a connection to be established to the server
+             * @pram msec timeout in millis
+             * @return ptr to a TCP socket. Reset internal socket
              */
-            std::unique_ptr<TCPSocket> retrieveSocket();
-
-            /**
-             * @brief Return true if the socket has been accepted
-             * @return bool
-             */
-            bool hasAccepted();
+            std::unique_ptr<TCPSocket> waitForAccept(int msec);
 
             /**
              * @brief Get server address
@@ -60,12 +58,10 @@ namespace Epyx
             SockAddress getListenAddress() const;
 
         private:
-            void run();
-
             std::unique_ptr<TCPServer> srv;
             std::unique_ptr<TCPSocket> sock;
-            bool hasAccept;
-            std::thread running_thread;
+            bool hasAccepted;
+            std::condition_variable acceptCond;
         };
 
     } // namespace DirectConnection

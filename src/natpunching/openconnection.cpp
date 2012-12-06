@@ -88,8 +88,12 @@ namespace Epyx
             std::string testMessage = "Test";
 
             //First we open a listening socket on an available port
-            Listener sockListen(new TCPServer(SockAddress("0.0.0.0:0"), 20));
-            SockAddress addr = SockAddress(node->getNodeAddress().getIp(), sockListen.getListenAddress().getPort());
+            NetSelect selectListener(2, "DirectConnListenerW");
+            std::thread threadListener(&NetSelect::runLoop, &selectListener, "DirectConnListener");
+            std::shared_ptr<Listener> srvListener(new Listener(new TCPServer(SockAddress("0.0.0.0:0"), 20)));
+            selectListener.add(srvListener);
+            SockAddress addr = SockAddress(node->getNodeAddress().getIp(), srvListener->getListenAddress().getPort());
+
             //If we're using UPNP, we open a port mapping
             if (tested_method == UPNP) {
                 Epyx::UPNP::Natpunch nat;
@@ -102,18 +106,18 @@ namespace Epyx
             pkt.headers["Address"] = addr.toString();
             pkt.headers["Message"] = testMessage;
             node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
-            bool accepted = false;
-            for (int i = 0; i < 5; i++) {
-                accepted = sockListen.hasAccepted();
-                if (accepted)
-                    break;
-                else
-                    sleep(1);
-            }
+
+            // Wait
+            std::unique_ptr<TCPSocket> clientSock = srvListener->waitForAccept(5000);
             char data[10];
             size_t size = 0;
-            std::unique_ptr<TCPSocket> clientSock = sockListen.retrieveSocket();
-            if (accepted && clientSock) {
+
+            // Stop server
+            log::debug << "OpenConn: stopping listener server" << log::endl;
+            selectListener.stop();
+            threadListener.join();
+
+            if (clientSock) {
                 size = clientSock->recv((void*) data, 10);
                 if (std::string(data, size) == testMessage) {
                     pkt.method = "ESTABLISHED";
@@ -121,12 +125,10 @@ namespace Epyx
                     node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
                     return;
                 }
+                clientSock->close();
             }
 
             // An error happened
-            if (clientSock)
-                clientSock->close();
-
             pkt.method = "DID_NOT_WORK";
             node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
             this->getMessage("DID_NOT_WORK", std::map<std::string, std::string > ());
