@@ -1,8 +1,4 @@
 #include <stack>
-
-
-#include "natpunching/module.h"
-
 #include "api.h"
 #include "natpunching/openconnection.h"
 #include "natpunching/dispatcher.h"
@@ -149,7 +145,9 @@ namespace Epyx
                 while (!idLists.empty()) {
                     N2NP::NodeId id = idLists.top();
                     idLists.pop();
-                    DirectConnection::Module::openDirectConnection(node, id);
+                    // TODO: launch OpenConnect request here
+                    //std::shared_ptr<DirectConnection::OpenConnection> oconn(
+                    //    new DirectConnection::OpenConnection(node, id, false));
                     sleep(2);
                 }
             }

@@ -2,7 +2,6 @@
 #include "../parser/gttparser.h"
 #include "../parser/gttpacket.h"
 #include "../core/string.h"
-#include "module.h"
 #include "openconnection.h"
 #include "../n2np/nodeid.h"
 #include <string>
@@ -24,7 +23,8 @@ namespace Epyx
             std::unique_ptr<GTTPacket> packet = gttpars.getPacket();
             if (packet->method == "OPENCONNECTION") {
                 // Someone is asking to open a connection to him
-                std::shared_ptr<OpenConnection> oconn = DirectConnection::Module::openDirectConnection(this->node, from);
+                // Create a OpenConnection client instance
+                std::shared_ptr<OpenConnection> oconn(new OpenConnection(this->node, from, true));
                 std::lock_guard<std::mutex> lock(nodeConnectMutex);
                 nodeConnect[from] = oconn;
             } else {
