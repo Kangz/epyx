@@ -5,7 +5,7 @@
 
 #include "api.h"
 #include <unistd.h>
-#include <csignal>
+#include "core/input.h"
 
 /**
  * @brief Default port for relay
@@ -14,14 +14,6 @@
 
 typedef std::shared_ptr<Epyx::N2NP::Node> N2NP_Node_ptr;
 typedef std::shared_ptr<Epyx::DHT::Node> DHT_Node_ptr;
-
-static bool terminated = false;
-static std::condition_variable terminateCondition;
-
-static void sighandler(int signal) {
-    terminated = true;
-    terminateCondition.notify_all();
-}
 
 int main(int argc, char **argv) {
     Epyx::API epyx;
@@ -115,18 +107,10 @@ int main(int argc, char **argv) {
                 dhtNodes[i]->getConnectionInfo()->serialize(o);
                 Epyx::log::info << " [" << i << "] " << o.str() << Epyx::log::endl;
             }
-
-            // Wait for DHT ping to be proceeded
-            sleep(1);
         }
 
         // Wait for interrupt
-        signal(SIGINT, sighandler);
-        while (!terminated) {
-            std::mutex m;
-            std::unique_lock<std::mutex> lock(m);
-            terminateCondition.wait(lock);
-        }
+        Epyx::Input::waitForInt();
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
         return 1;

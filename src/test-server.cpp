@@ -4,10 +4,10 @@
 
 #include <cstring>
 #include "api.h"
+#include "core/input.h"
 #include "net/netselect.h"
 #include "net/netselectsocket.h"
 #include "net/netselecttcpserver.h"
-
 /**
  * @class TestNetSelectSocket
  *
@@ -16,14 +16,14 @@
 class TestNetSelectSocket : public Epyx::NetSelectSocket
 {
 public:
+
     /**
      * @brief Welcome an incomming connection
      * @param sock Incomming
      * @param unused
      */
     TestNetSelectSocket(std::shared_ptr<Epyx::Socket> sock, void *unused)
-        :NetSelectSocket(sock)
-    {
+    :NetSelectSocket(sock) {
         Epyx::log::debug << "[" << socket()->getAddress() << "] " <<
             "Incoming for " << socket()->getLocalAddress() << Epyx::log::endl;
 
@@ -34,24 +34,23 @@ public:
             "Type PAN to kill the session\n";
         socket()->write(hello.str());
     }
+
     /**
      * @brief End a connection
      */
-    ~TestNetSelectSocket()
-    {
-         Epyx::log::debug << "[" << socket()->getAddress() << "] End" <<
-             Epyx::log::endl;
+    ~TestNetSelectSocket() {
+        Epyx::log::debug << "[" << socket()->getAddress() << "] End" <<
+            Epyx::log::endl;
     }
 
     /**
      * @brief Treat received data
      */
-    void eat(const Epyx::byte_str& data)
-    {
+    void eat(const Epyx::byte_str& data) {
         std::string strline = bytes2string_c(data);
         Epyx::String::trim(strline);
         Epyx::log::debug << "[" << socket()->getAddress() << "-RECV] " <<
-           strline << Epyx::log::endl;
+            strline << Epyx::log::endl;
 
         const char *line = strline.c_str();
 
@@ -70,8 +69,7 @@ public:
     }
 };
 
-int main()
-{
+int main() {
     Epyx::API epyx;
     try {
         // Start select() thread
@@ -87,6 +85,8 @@ int main()
         std::thread selectThread(&Epyx::NetSelect::runLoop, netselect.get(), "NetSelect");
 
         // Wait thread
+        Epyx::Input::waitForInt();
+        netselect->stop();
         selectThread.join();
         Epyx::log::debug << "Server thread has terminated" << Epyx::log::endl;
     } catch (Epyx::Exception e) {
