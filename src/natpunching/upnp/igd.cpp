@@ -164,7 +164,7 @@ namespace Epyx
             EPYX_ASSERT(command != NULL);
             for (auto it = services.begin(); it != services.end(); ++it) {
                 // Looking for urn:schemas-upnp-org:service:WANIPConnection
-                if (it->first.find("WANIPConn")) {
+                if (it->first.find("WANIPConn") != std::string::npos) {
                     // First is service. Second is a relative URI to the service
                     command->setRemote(address, it->first, it->second);
                     return true;
