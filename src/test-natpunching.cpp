@@ -1,8 +1,11 @@
 #include "api.h"
 #include "core/input.h"
+#include "natpunching/openconnection.h"
 
 bool test_natpunching(Epyx::API& epyx, const Epyx::SockAddress& relayAddr,
     const Epyx::N2NP::NodeId& remoteNodeId) {
+    EPYX_VERIFY(!relayAddr.empty());
+    EPYX_VERIFY(!remoteNodeId.empty());
 
     // Create DHT node
     std::shared_ptr<Epyx::N2NP::Node> node = epyx.spawnN2NPNode(relayAddr);
@@ -14,6 +17,11 @@ bool test_natpunching(Epyx::API& epyx, const Epyx::SockAddress& relayAddr,
 
     Epyx::log::info << "My node is " << node->getId() << Epyx::log::endl;
     Epyx::log::info << "DHT " << (*(dhtNode->getConnectionInfo())) << Epyx::log::endl;
+
+    // Test to open a connection being server
+    Epyx::log::info << "Try to open connection with " << remoteNodeId << Epyx::log::endl;
+    std::shared_ptr<Epyx::DirectConnection::OpenConnection> oconn(
+        new Epyx::DirectConnection::OpenConnection(node, remoteNodeId, false));
 
     // Wait for interrupt
     Epyx::Input::waitForInt();

@@ -14,14 +14,15 @@ namespace Epyx
         void Dispatcher::addModule(const std::shared_ptr<N2NP::Node>& node) {
             EPYX_ASSERT(node);
             std::shared_ptr<Dispatcher> dispatch(new Dispatcher(node));
-            node->addModule("DIRECTCONNECTION", dispatch);
+            node->addModule(OpenConnection::n2npMethodName, dispatch);
         }
 
-        void Dispatcher::fromN2NP(N2NP::Node& node, N2NP::NodeId from, const byte_str& data) {
+        void Dispatcher::fromN2NP(N2NP::Node& uselessNode, N2NP::NodeId from, const byte_str& data) {
             GTTParser gttpars;
             gttpars.eat(data);
             std::unique_ptr<GTTPacket> packet = gttpars.getPacket();
-            if (!packet) {
+            if (!packet || packet->protocol != OpenConnection::protoName) {
+                log::debug << "Dropping invalid DirectConnection packet" << log::endl;
                 return;
             }
             if (packet->method == "OPENCONNECTION") {

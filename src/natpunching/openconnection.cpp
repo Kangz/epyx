@@ -10,6 +10,8 @@ namespace Epyx
     namespace DirectConnection
     {
         // In this protocol, the client is stupid and just obey orders
+        const std::string OpenConnection::n2npMethodName = "DIRECTCONNECTION";
+        const std::string OpenConnection::protoName = "OPENCONNECTION";
 
         OpenConnection::OpenConnection(const std::shared_ptr<N2NP::Node>& node,
             const N2NP::NodeId &remoteHost, bool clients)
@@ -37,9 +39,8 @@ namespace Epyx
                 if (!socket->sendBytes(string2bytes_c(headMessage->second))) {
                     //Failed
                     //Send Did Not Work Message
-                    GTTPacket pkt;
-                    pkt.method = "DID_NOT_WORK";
-                    node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
+                    GTTPacket pkt(protoName, "DID_NOT_WORK");
+                    node->send(this->remoteHost, n2npMethodName, pkt);
                     this->getMessage("DID_NOT_WORK", std::map<std::string, std::string > ());
                 } else {
                     //Success, Do nothing and wait for N2NP confirmation
@@ -76,8 +77,7 @@ namespace Epyx
         void OpenConnection::run() {
             if (etat == STATE_SERVER) {
                 Thread::setName("OpenConnection-Server");
-                GTTPacket pkt;
-                pkt.method = "SEND";
+                GTTPacket pkt(protoName, "SEND");
                 serverStateOpen();
             } else if (etat == STATE_CLIENT) {
                 Thread::setName("OpenConnection-Client");
@@ -101,11 +101,10 @@ namespace Epyx
                 addr = nat.openMapPort(addr.getPort());
             }
             //Now, Ask to open a connection.
-            GTTPacket pkt;
-            pkt.method = "SEND";
-            pkt.headers["Address"] = addr.toString();
-            pkt.headers["Message"] = testMessage;
-            node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
+            GTTPacket testpkt(protoName, "SEND");
+            testpkt.headers["Address"] = addr.toString();
+            testpkt.headers["Message"] = testMessage;
+            node->send(this->remoteHost, n2npMethodName, testpkt);
 
             // Wait
             std::unique_ptr<TCPSocket> clientSock = srvListener->waitForAccept(5000);
@@ -120,17 +119,17 @@ namespace Epyx
             if (clientSock) {
                 size = clientSock->recv((void*) data, 10);
                 if (std::string(data, size) == testMessage) {
-                    pkt.method = "ESTABLISHED";
+                    GTTPacket estabpkt(protoName, "ESTABLISHED");
                     node->offerDirectConn(this->remoteHost, std::move(clientSock));
-                    node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
+                    node->send(this->remoteHost, n2npMethodName, estabpkt);
                     return;
                 }
                 clientSock->close();
             }
 
             // An error happened
-            pkt.method = "DID_NOT_WORK";
-            node->send(this->remoteHost, "DIRECTCONNECTION", pkt);
+            GTTPacket errpkt(protoName, "DID_NOT_WORK");
+            node->send(this->remoteHost, n2npMethodName, errpkt);
             this->getMessage("DID_NOT_WORK", std::map<std::string, std::string > ());
         }
     }

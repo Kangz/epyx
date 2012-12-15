@@ -53,6 +53,16 @@ namespace Epyx
              * @param headers
              */
             void getMessage(const std::string& command, const std::map<std::string, std::string>& headers);
+            
+            /**
+             * @brief Name of method in N2NP packets
+             */
+            static const std::string n2npMethodName;
+            
+            /**
+             * @brief Name of protocol in GTT packets
+             */
+            static const std::string protoName;
 
         private:
             /**
