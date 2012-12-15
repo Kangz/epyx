@@ -52,10 +52,12 @@ namespace log {
     Stream& Stream::operator<<(const ErrstdStruct& f) {
         EPYX_ASSERT_NO_LOG(log::initialized);
 
-        //At least on Linux, errno is thread-safe
-        char buffer[64];
-        strerror_r(errno, buffer, sizeof(buffer));
-        *this << buffer << " (errno #" << errno << ")";
+        // At least on Linux, errno is thread-safe.
+        // strerror_r is thread-safe but may return int or char* depending on
+        // the system. The auto keyword enables us to treat both cases easily.
+        char buffer[128];
+        auto result = strerror_r(errno, buffer, sizeof(buffer));
+        *this << (result ? result : buffer) << " (errno #" << errno << ")";
 
         return *this;
     }
