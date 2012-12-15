@@ -26,21 +26,34 @@ namespace Epyx
 {
     namespace DirectConnection
     {
-        typedef enum state
+        typedef enum State
         {
             STATE_CLIENT,
             STATE_SERVER
-        } state;
-        typedef enum method
+        } State;
+        typedef enum Method
         {
             DIRECT,
             UPNP
-        } method;
+        } Method;
+        /**
+         * @class OpenConnection
+         * @brief Manage a state machine for openning a connection
+         * 
+         * Try following methods:
+         *  - Direct : Client directly connects to the server.
+         *       This works since one node is not behind a NAT nor a firewall
+         *  - UPnP : Server configures it's IGD to redirect connections
+         *       This works when both nodes are behind NAT and a NAT does UPnP-IGD
+         */
         class OpenConnection
         {
         public:
             /**
              * @brief Initialise the state Machine
+             * @param node
+             * @param remoteHost
+             * @param clients
              */
             OpenConnection(const std::shared_ptr<N2NP::Node>& node,
                     const N2NP::NodeId& remoteHost, bool clients = true);
@@ -48,17 +61,17 @@ namespace Epyx
             ~OpenConnection();
 
             /**
-             * @brief Advance from a state to another
+             * @brief Advance from a state to another by processing a message from N2NP system
              * @param command
              * @param headers
              */
             void getMessage(const std::string& command, const std::map<std::string, std::string>& headers);
-            
+
             /**
              * @brief Name of method in N2NP packets
              */
             static const std::string n2npMethodName;
-            
+
             /**
              * @brief Name of protocol in GTT packets
              */
@@ -70,12 +83,19 @@ namespace Epyx
              */
             void run();
 
+            /**
+             * @brief Start next method if the current one failed
+             * @param sendDidNotWorkMessage send a DID_NOT_WORK message to other node
+             * @return true if hope exists, false if every methods were tried
+             */
+            bool tryNextMethod(bool sendDidNotWorkMessage);
+
             void serverStateOpen();
             N2NP::NodeId remoteHost;
-            state etat;
+            State state;
             bool client_tried;
             bool server_tried;
-            method tested_method;
+            Method tested_method;
             std::unique_ptr<TCPSocket> socket;
             std::shared_ptr<N2NP::Node> node;
             std::thread running_thread;

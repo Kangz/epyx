@@ -15,73 +15,101 @@ namespace Epyx
 
         OpenConnection::OpenConnection(const std::shared_ptr<N2NP::Node>& node,
             const N2NP::NodeId &remoteHost, bool clients)
-        :remoteHost(remoteHost), etat(clients ? STATE_CLIENT : STATE_SERVER),
+        :remoteHost(remoteHost), state(clients ? STATE_CLIENT : STATE_SERVER),
         client_tried(false), server_tried(false), tested_method(DIRECT),
         node(node), running_thread(&OpenConnection::run, this) {
         }
 
         OpenConnection::~OpenConnection() {
-            log::debug << "Waiting for OpenConnect thread" << log::endl;
+            log::debug << "OpenConn: waiting for OpenConnect thread" << log::endl;
             running_thread.join();
         }
 
         void OpenConnection::getMessage(const std::string& command, const std::map<std::string, std::string>& headers) {
-            if (command == "SEND" && etat == STATE_CLIENT) {
+            if (command == "SEND" && state == STATE_CLIENT) {
+                // Send data to the server
+                // Get socket address from the headers
                 std::map<std::string, std::string>::const_iterator headAddr = headers.find("Address");
-                if (headAddr == headers.end())
-                    throw ParserException("OpenConnection", "No address in headers");
-                std::map<std::string, std::string>::const_iterator headMessage = headers.find("Message");
-                if (headMessage == headers.end())
-                    throw ParserException("OpenConnection", "No message in headers");
+                if (headAddr == headers.end()) {
+                    log::error << "OpenConnection error: SEND packet without address in headers"
+                        << log::endl;
+                    return;
+                }
+                const SockAddress addr(headAddr->second);
 
-                SockAddress addr(headAddr->second);
+                // Get message to be sent from headers
+                std::map<std::string, std::string>::const_iterator headMessage = headers.find("Message");
+                if (headMessage == headers.end()) {
+                    log::error << "OpenConnection error: SEND packet without message in headers"
+                        << log::endl;
+                    return;
+                }
+                const std::string& message = headMessage->second;
+
+                // Create a socket
+                log::debug << "OpenConn: send " << message.size() << " bytes to "
+                    << addr << log::endl;
                 socket.reset(new TCPSocket(addr));
-                if (!socket->sendBytes(string2bytes_c(headMessage->second))) {
-                    //Failed
-                    //Send Did Not Work Message
-                    GTTPacket pkt(protoName, "DID_NOT_WORK");
-                    node->send(this->remoteHost, n2npMethodName, pkt);
-                    this->getMessage("DID_NOT_WORK", std::map<std::string, std::string > ());
+                if (!socket->sendBytes(string2bytes_c(message))) {
+                    // Failed. Send Did Not Work Message
+                    this->tryNextMethod(true);
                 } else {
                     //Success, Do nothing and wait for N2NP confirmation
                 }
             } else if (command == "DID_NOT_WORK") {
-                if (etat == STATE_SERVER && !client_tried) {
-                    // If we played the server, we now play the client. Easy Case.  
-                    server_tried = true;
-                } else if (etat == STATE_SERVER) {
-                    if (tested_method == DIRECT) {
-                        tested_method = UPNP;
-                        client_tried = false;
-                        server_tried = false;
-                        etat = STATE_CLIENT;
-                    }
-                } else if (etat == STATE_CLIENT && !server_tried) {
-                    etat = STATE_SERVER;
-                    serverStateOpen();
-                } else if (STATE_CLIENT) {
-                    if (tested_method == DIRECT) {
-                        tested_method = UPNP;
-                        client_tried = false;
-                        server_tried = false;
-                        etat = STATE_SERVER;
-                    }
-                    serverStateOpen();
-                }
+                this->tryNextMethod(false);
             } else if (command == "ESTABLISHED") {
-                //Do Shit, and register the socket to the N2NP module
+                // Do Shit, and register the socket to the N2NP module
                 node->offerDirectConn(remoteHost, std::move(socket));
             }
         }
 
         void OpenConnection::run() {
-            if (etat == STATE_SERVER) {
+            if (state == STATE_SERVER) {
                 Thread::setName("OpenConnection-Server");
+                log::debug << "OpenConn: starting server" << log::endl;
                 GTTPacket pkt(protoName, "SEND");
                 serverStateOpen();
-            } else if (etat == STATE_CLIENT) {
+            } else if (state == STATE_CLIENT) {
                 Thread::setName("OpenConnection-Client");
+                log::debug << "OpenConn: starting client" << log::endl;
             }
+        }
+
+        bool OpenConnection::tryNextMethod(bool sendDidNotWorkMessage) {
+            if (sendDidNotWorkMessage) {
+                GTTPacket pkt(protoName, "DID_NOT_WORK");
+                node->send(remoteHost, n2npMethodName, pkt);
+            }
+
+            // Was server, try client now
+            if (state == STATE_SERVER && !client_tried) {
+                log::debug << "OpenConn: let's try client role !" << log::endl;
+                server_tried = true;
+                state = STATE_CLIENT;
+                return true;
+            }
+            // Was client, try server now
+            if (state == STATE_CLIENT && !server_tried) {
+                log::debug << "OpenConn: let's try server role !" << log::endl;
+                client_tried = true;
+                state = STATE_SERVER;
+                // Todo: call serverStateOpen() if etat == STATE_SERVER
+                return true;
+            }
+
+            // Change method
+            client_tried = false;
+            server_tried = false;
+            if (tested_method == DIRECT) {
+                log::debug << "OpenConn: let's try UPnP !" << log::endl;
+                tested_method = UPNP;
+                state = (state == STATE_SERVER ? STATE_CLIENT : STATE_SERVER);
+                // Todo: call serverStateOpen() if etat == STATE_SERVER
+                return true;
+            }
+            log::debug << "OpenConn: exhausted connecting methods :(" << log::endl;
+            return false;
         }
 
         void OpenConnection::serverStateOpen() {
