@@ -129,7 +129,7 @@ namespace Epyx
          * @brief Eat data and return an answer once it is ready
          * @param data data to eat
          * @param size available size
-         * @return NULL if data is incomplete, the newly-allocated answer otherwise
+         * @return empty ptr if data is incomplete, the newly-allocated answer otherwise
          */
         virtual std::unique_ptr<T> eat(const byte_str& data) = 0;
 

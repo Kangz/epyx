@@ -64,7 +64,7 @@ namespace Epyx
          * @brief Close the queue prior to deletion
          *
          * This is to be used to notify the threads waiting on the queue
-         * as it makes all the pending pop() return NULL.
+         * as it makes all the pending pop() return an empty pointer.
          */
         void close();
 
@@ -101,7 +101,7 @@ namespace Epyx
 
         /**
          * @brief Pop an element, the synchronous way
-         * @return An element or NULL if the queue gets closed
+         * @return An element or an empty pointer if the queue gets closed
          */
         TPtr pop();
 
@@ -111,7 +111,7 @@ namespace Epyx
          * This version of pop waits for an element or the specified time before returning.
          *
          * @param duration time to wait, in milliseconds
-         * @return An element or NULL if the queue gets closed or the time runs out
+         * @return An element or an empty pointer if the queue gets closed or if time runs out
          */
         TPtr pop(int msec);
 

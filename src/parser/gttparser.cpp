@@ -41,6 +41,7 @@ namespace Epyx
 
     std::unique_ptr<GTTPacket> GTTParser::getPacket() {
         std::string line;
+        std::unique_ptr<GTTPacket> nullpacket;
         try {
             while (true) {
                 switch (datapos) {
@@ -53,7 +54,7 @@ namespace Epyx
 
                         // Read first line
                         if (!lineParser.popLine(line))
-                            return NULL;
+                            return nullpacket;
 
                         this->parseFirstLine(line);
 
@@ -62,7 +63,7 @@ namespace Epyx
                     case dataposHeaders:
                         // Return lines
                         if (!lineParser.popLine(line))
-                            return NULL;
+                            return nullpacket;
                         if (line.length() != 0) {
                             this->parseHeaderLine(line);
                             break;
@@ -75,7 +76,7 @@ namespace Epyx
                             // Read body
                             byte_str body;
                             if (!lineParser.popData(&body, currentSize)) {
-                                return NULL;
+                                return nullpacket;
                             }
                             currentPkt->body.swap(body);
                         }
@@ -92,9 +93,9 @@ namespace Epyx
                 e.getMessage() << log::endl;
             errorMessage = e.getMessage();
             hasError = true;
-            return NULL;
+            return nullpacket;
         }
-        return NULL;
+        return nullpacket;
     }
 
     void GTTParser::parseFirstLine(const std::string& line) {

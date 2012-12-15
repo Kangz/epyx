@@ -110,7 +110,8 @@ namespace Epyx
     template<typename T> std::unique_ptr<T> NetQuery<T>::queryAnswer(const Timeout& timeout) {
         if (!this->query()) {
             log::error << "NetQuery: Unable to send query" << log::endl;
-            return NULL;
+            std::unique_ptr<T> nullans;
+            return nullans;
         }
         return this->answer(timeout);
     }
