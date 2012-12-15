@@ -52,14 +52,14 @@ namespace Epyx
              * @return Address of the NAT router
              */
             const SockAddress openMapPort(unsigned short localPort, unsigned short remotePort = 0);
-            //Socket OpenConnection(); //Opens a Listening Socket to receive a connection.
+
+
+            void delMapPort(const SockAddress& addr, protocol proto = Epyx::UPNP::TCP);
         private:
             void testConnection();
             void closeMapPort();
 
             std::unique_ptr<IGD> igd;
-            URI uri;
-            bool success;
         };
     }
 }

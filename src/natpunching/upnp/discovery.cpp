@@ -11,6 +11,26 @@ namespace Epyx
         Discovery::Discovery()
         :NetQuery(new UDPSocket(SockAddress("239.255.255.250", 1900))) {
         }
+        
+        std::unique_ptr<IGD> Discovery::discoverIGD(const Timeout& timeout) {
+            std::unique_ptr<IGD> nullresult;
+            // Discovery UDP socket
+            Discovery disco;
+            URI uri;
+            if (!disco.queryAnswerIn(timeout, &uri)) {
+                log::error << "UPnP discovery failed" << log::endl;
+                return nullresult;
+            }
+            //If remotePort is not set, we try to find an available one.
+            // Now use IGD
+            log::debug << "UPnP: Found IGD at URI " << uri << log::endl;
+            std::unique_ptr<IGD> igd(new IGD(uri));
+            if (!igd->getServices()) {
+                log::error << "UPnP: Unable to get IGD services" << log::endl;
+                return nullresult;
+            }
+            return std::move(igd);
+        }
 
         bool Discovery::query() {
             std::stringstream message;

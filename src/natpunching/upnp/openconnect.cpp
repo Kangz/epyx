@@ -6,43 +6,40 @@
 #include <ctime>
 #include <cstdlib>
 
-#define BUF_SIZE 4096
-#define TIMEOUT_SEC 5
-
 namespace Epyx
 {
     namespace UPNP
     {
 
-        Natpunch::Natpunch()
-        :success(false) {
+        Natpunch::Natpunch() {
+            igd = Discovery::discoverIGD(10000);
         }
 
         const SockAddress Natpunch::openMapPort(unsigned short localPort,
             unsigned short remotePort) {
-            // Discovery UDP socket
-            Discovery disco;
-            if (!disco.queryAnswerIn(10000, &uri)) {
-                log::error << "UPnP discovery failed" << log::endl;
-                return SockAddress();
-            }
-            //If remotePort is not set, we try to find an available one.
-            // Now use IGD
-            log::debug << "URI : " << uri << log::endl;
-            igd.reset(new IGD(uri));
-            if (!igd->getServices()) {
-                log::error << "Unable to get IGD services" << log::endl;
+            if (!igd) {
+                log::debug << "UPnP-IGD: openMapPort disabled as no IGD was found" << log::endl;
                 return SockAddress();
             }
 
-            log::debug << "IP addr : " << igd->getExtIPAdress() << log::endl;
             //If remotePort is not set, we try to find an available one.
             if (remotePort == 0) {
                 remotePort = igd->pickRandomFreePort(Epyx::UPNP::TCP);
             }
 
             SockAddress addr = igd->addPortMap(localPort, Epyx::UPNP::TCP, remotePort);
+            log::debug << "UPnP-IGD: Added portmap : " << localPort << " -TCP- " << addr
+                << log::endl;
             return addr;
+        }
+        
+        void Natpunch::delMapPort(const SockAddress& addr, protocol proto) {
+            if (!igd) {
+                log::debug << "UPnP-IGD: delMapPort disabled as no IGD was found" << log::endl;
+                return;
+            }
+            log::debug << "UPnP-IGD: Delete portmap to " << addr << log::endl;
+            igd->delPortMap(addr, proto);
         }
     }
 }

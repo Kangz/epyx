@@ -23,6 +23,7 @@
 #include "../../net/netquery.h"
 #include "../../net/uri.h"
 #include "../../parser/httpparser.h"
+#include "igd.h"
 
 namespace Epyx
 {
@@ -39,6 +40,13 @@ namespace Epyx
              * @brief Constructor
              */
             Discovery();
+            
+            /**
+             * @brief Launch a discovery request to discover IGD
+             * @param timeout
+             * @return a pointer to an IGD object, empty if nothing were found
+             */
+            static std::unique_ptr<IGD> discoverIGD(const Timeout& timeout);
 
             /**
              * @brief Send a search request through a UDP socket
