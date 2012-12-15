@@ -78,6 +78,11 @@ namespace Epyx
          * @brief Exception text
          */
         std::string message;
+
+        /**
+         * @brief Full message
+         */
+        std::string fullMessage;
     };
     /**
      * @class FailException

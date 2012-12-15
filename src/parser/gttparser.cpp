@@ -88,7 +88,7 @@ namespace Epyx
                         return pkt;
                 }
             }
-        } catch (ParserException e) {
+        } catch (const ParserException& e) {
             log::error << "An error occured in GTTParser while processing a packet:\n" <<
                 e.getMessage() << log::endl;
             errorMessage = e.getMessage();

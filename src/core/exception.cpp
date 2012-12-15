@@ -11,14 +11,18 @@ namespace Epyx
     Exception::Exception(const char *type, const char *module,
         const char *message)
     :type(type), module(module), message(message) {
+        std::stringstream str;
+        str << type << " in module " << module << ": " << message;
+        fullMessage = str.str();
     }
 
     void Exception::append(const std::string& txt) {
         message += txt;
+        fullMessage += txt;
     }
 
     std::ostream& operator<<(std::ostream& os, const Exception& e) {
-        return os << e.type << " in module " << e.module << ": " << e.message << "\n";
+        return os << e.fullMessage << "\n";
     }
 
     const std::string& Exception::getMessage() const {
@@ -26,7 +30,7 @@ namespace Epyx
     }
 
     const char* Exception::what() const throw() {
-        return message.c_str();
+        return fullMessage.c_str();
     }
 
     FailException::FailException(const char *module, const char *message)

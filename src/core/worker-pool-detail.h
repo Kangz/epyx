@@ -148,18 +148,11 @@ namespace Epyx
         std::ostringstream str;
         str << pool->name << " " << id;
         Thread::setName(str.str());
-        try {
-            while (running) {
-                TPtr msg = pool->messages.pop();
-                if (msg) {
-                    pool->treat(std::move(msg));
-                }
+        while (running) {
+            TPtr msg = pool->messages.pop();
+            if (msg) {
+                pool->treat(std::move(msg));
             }
-        } catch (std::exception& e) {
-            // Log message and crash
-            log::fatal << "[Exception] Unhandled exception: " << e.what() << log::endl;
-            log::waitFlush();
-            throw e;
         }
         pool->workers_to_destroy.push(new int(id));
     }

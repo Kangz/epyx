@@ -37,24 +37,18 @@ namespace Epyx
 
     template<class T, typename TP> bool NetSelectTCPServer<T, TP>::read() {
         EPYX_ASSERT(srv);
+        std::unique_ptr<TCPSocket> newSock = srv->accept();
 
-        try {
-            std::unique_ptr<TCPSocket> newSock = srv->accept();
+        // If server is closed, return false
+        if (!newSock)
+            return false;
 
-            // If server is closed, return false
-            if (!newSock)
-                return false;
+        // If fact, use a shared_ptr<Socket>
+        std::shared_ptr<Socket> shSock(newSock.release());
+        std::shared_ptr<T> nsSocket(new T(shSock, param));
 
-            // If fact, use a shared_ptr<Socket>
-            std::shared_ptr<Socket> shSock(newSock.release());
-            std::shared_ptr<T> nsSocket(new T(shSock, param));
-
-            // Add a new socket in the NetSelect
-            this->getOwner()->add(nsSocket);
-        } catch (std::exception e) {
-            log::error << "Unable to setup the link:\n" << e.what() << log::endl;
-            return true;
-        }
+        // Add a new socket in the NetSelect
+        this->getOwner()->add(nsSocket);
         return true;
     }
 }

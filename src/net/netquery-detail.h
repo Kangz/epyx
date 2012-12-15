@@ -86,7 +86,7 @@ namespace Epyx
                         this->close();
                         return ans;
                     }
-                } catch (Exception e) {
+                } catch (const MinorException& e) {
                     log::error << e << log::endl;
                     log::error << "Closing socket to " << sock->getAddress() <<
                             " due to an exception" << log::endl;
