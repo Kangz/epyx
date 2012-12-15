@@ -18,6 +18,9 @@ namespace Epyx
     }
 
     bool TCPSocket::connect() {
+        if (this->sock >= 0 && this->isConnected) {
+            return true;
+        }
         if (this->sock == -1) {
             this->sock = ::socket(AF_INET, SOCK_STREAM, 0);
             if (this->sock == -1) {
@@ -33,6 +36,7 @@ namespace Epyx
             //Replace by error log.
             log::error << "Failed connecting to " << this->address << ": "
                 << log::errstd << log::endl;
+            this->close();
             return false;
         }
         this->isConnected = true;
@@ -43,10 +47,8 @@ namespace Epyx
     int TCPSocket::send(const void *data, int size) {
         int bytes;
         EPYX_ASSERT(data != NULL);
-        if (!this->isConnected) {
-            if (!this->connect()) {
-                return 0;
-            }
+        if (!this->isConnected && !this->connect()) {
+            return 0;
         }
         EPYX_ASSERT(this->sock >= 0);
         EPYX_ASSERT(this->isConnected);
@@ -61,6 +63,9 @@ namespace Epyx
     int TCPSocket::recv(void *data, int size) {
         int bytes;
         EPYX_ASSERT(data != NULL);
+        if (!this->isConnected && !this->connect()) {
+            return 0;
+        }
         EPYX_ASSERT(this->sock >= 0);
         EPYX_ASSERT(this->isConnected);
         bytes = ::recv(this->sock, data, size, 0);
