@@ -20,11 +20,9 @@ bool test_natpunching(Epyx::API& epyx, const Epyx::SockAddress& relayAddr,
 
     // Test to open a connection being server
     Epyx::log::info << "Try to open connection with " << remoteNodeId << Epyx::log::endl;
-    std::shared_ptr<Epyx::DirectConnection::OpenConnection> oconn(
-        new Epyx::DirectConnection::OpenConnection(node, remoteNodeId, false));
-
-    // Wait for interrupt
-    Epyx::Input::waitForInt();
+    Epyx::DirectConnection::OpenConnection oconn(node, remoteNodeId, false);
+    
+    // Destructor of oconn waits for its thread to terminate
     return true;
 }
 
