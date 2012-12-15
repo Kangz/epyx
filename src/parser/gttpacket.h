@@ -38,6 +38,18 @@ namespace Epyx
     {
     public:
         /**
+         * @brief Empty constructor
+         */
+        GTTPacket();
+
+        /**
+         * @brief Build a new packet by specifying protocol and method
+         * @param protocol
+         * @param method
+         */
+        GTTPacket(const std::string& protocol, const std::string& method);
+
+        /**
          * @brief Print a short packet description in an output stream (for debug)
          * @param os output stream
          * @param pkt

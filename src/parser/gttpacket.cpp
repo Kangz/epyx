@@ -5,6 +5,12 @@
 
 namespace Epyx
 {
+    GTTPacket::GTTPacket() {        
+    }
+
+    GTTPacket::GTTPacket(const std::string& protocol, const std::string& method)
+    :protocol(protocol), method(method) {
+    }
 
     std::ostream& operator<<(std::ostream& os, const GTTPacket& pkt) {
         os << "[Proto " << pkt.protocol << " method " << pkt.method << std::endl;
