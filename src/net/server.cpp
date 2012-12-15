@@ -79,8 +79,16 @@ namespace Epyx
             // Bind to a listening address/port
             status = ::bind(this->sockfd, pai->ai_addr, pai->ai_addrlen);
             if (status == 0) {
-                // Success : remember used address
-                this->address = SockAddress(pai->ai_addr);
+                // Success : remember used address, by calling getsockname
+                struct sockaddr_storage saddr;
+                socklen_t saddr_len = sizeof (saddr);
+                if (::getsockname(sockfd, (struct sockaddr*) &saddr, &saddr_len) < 0) {
+                    log::warn << "Server::bin: getsockname error "
+                        << log::errstd << log::endl;
+                    this->address = SockAddress(pai->ai_addr);
+                } else {
+                    this->address = SockAddress((struct sockaddr*) &saddr);
+                }
                 break;
             }
             log::warn << "bind(" << SockAddress(pai->ai_addr) << "): " << log::errstd << log::endl;
