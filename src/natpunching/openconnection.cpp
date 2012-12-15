@@ -17,7 +17,8 @@ namespace Epyx
             const N2NP::NodeId &remoteHost, bool clients)
         :remoteHost(remoteHost), state(clients ? STATE_CLIENT : STATE_SERVER),
         client_tried(false), server_tried(false), tested_method(DIRECT),
-        node(node), running_thread(&OpenConnection::run, this) {
+        node(node), receivedDidNotWork(false), isEstablished(false),
+        running_thread(&OpenConnection::run, this) {
         }
 
         OpenConnection::~OpenConnection() {
@@ -47,41 +48,92 @@ namespace Epyx
                 const std::string& message = headMessage->second;
 
                 // Create a socket
-                log::debug << "OpenConn: send " << message.size() << " bytes to "
+                // FIXME: the connect of the socket may take a very long time.
+                // It needs to be timeouted.
+                log::debug << "(client) send " << message.size() << " bytes to "
                     << addr << log::endl;
                 socket.reset(new TCPSocket(addr));
-                if (!socket->sendBytes(string2bytes_c(message))) {
+                if (!socket->isOpened() || !socket->sendBytes(string2bytes_c(message))) {
                     // Failed. Send Did Not Work Message
-                    this->tryNextMethod(true);
+                    log::debug << "(client) failed to send data" << log::endl;
                 } else {
                     //Success, Do nothing and wait for N2NP confirmation
                 }
             } else if (command == "DID_NOT_WORK") {
-                this->tryNextMethod(false);
+                if (state == STATE_SERVER) {
+                    log::debug << "(server) received DID_NOT_WORK, sending back one"
+                        << log::endl;
+                    GTTPacket pkt(protoName, "DID_NOT_WORK");
+                    node->send(remoteHost, n2npMethodName, pkt);
+                } else if (state == STATE_CLIENT) {
+                    log::debug << "(client) received DID_NOT_WORK" << log::endl;
+                }
+
+                receivedDidNotWork = true;
+                condition.notify_all();
             } else if (command == "ESTABLISHED") {
                 // Do Shit, and register the socket to the N2NP module
                 node->offerDirectConn(remoteHost, std::move(socket));
+                isEstablished = true;
+                condition.notify_all();
             }
         }
 
         void OpenConnection::run() {
+            // Start the state machine
             if (state == STATE_SERVER) {
                 Thread::setName("OpenConnection-Server");
                 log::debug << "OpenConn: starting server" << log::endl;
-                GTTPacket pkt(protoName, "SEND");
-                serverStateOpen();
+
+                // Send the first packet to the client
+                GTTPacket pkt(protoName, "OPENCONNECTION");
+                node->send(remoteHost, n2npMethodName, pkt);
             } else if (state == STATE_CLIENT) {
                 Thread::setName("OpenConnection-Client");
                 log::debug << "OpenConn: starting client" << log::endl;
             }
+
+            // Loop over the methods
+            while (true) {
+                if (state == STATE_SERVER) {
+                    // Run server code
+                    if (serverStateOpen()) {
+                        // Done.
+                        return;
+                    }
+                    // Send DID_NOT_WORK message
+                    GTTPacket pkt(protoName, "DID_NOT_WORK");
+                    node->send(remoteHost, n2npMethodName, pkt);
+                } else {
+                    EPYX_ASSERT(state == STATE_CLIENT);
+                    // Client waits for messages from the server
+                    log::debug << "(client) waiting for messages"
+                        << log::endl;
+                    while (!receivedDidNotWork && !isEstablished) {
+                        std::mutex m;
+                        std::unique_lock<std::mutex> lock(m);
+                        if (condition.wait_for(lock, std::chrono::seconds(5)) == std::cv_status::timeout) {
+                            // Timeout
+                            log::debug << "(client) Timeout in waiting DID_NOT_WORK" << log::endl;
+                            // The server may decide to change state
+                            GTTPacket pkt(protoName, "DID_NOT_WORK");
+                            node->send(remoteHost, n2npMethodName, pkt);
+                        }
+                    }
+                    if (isEstablished) {
+                        return;
+                    }
+                    receivedDidNotWork = false;
+                }
+
+                if (!tryNextMethod()) {
+                    log::debug << "OpenConn: exhausted connecting methods :(" << log::endl;
+                    return;
+                }
+            }
         }
 
-        bool OpenConnection::tryNextMethod(bool sendDidNotWorkMessage) {
-            if (sendDidNotWorkMessage) {
-                GTTPacket pkt(protoName, "DID_NOT_WORK");
-                node->send(remoteHost, n2npMethodName, pkt);
-            }
-
+        bool OpenConnection::tryNextMethod() {
             // Was server, try client now
             if (state == STATE_SERVER && !client_tried) {
                 log::debug << "OpenConn: let's try client role !" << log::endl;
@@ -94,7 +146,6 @@ namespace Epyx
                 log::debug << "OpenConn: let's try server role !" << log::endl;
                 client_tried = true;
                 state = STATE_SERVER;
-                // Todo: call serverStateOpen() if etat == STATE_SERVER
                 return true;
             }
 
@@ -105,60 +156,61 @@ namespace Epyx
                 log::debug << "OpenConn: let's try UPnP !" << log::endl;
                 tested_method = UPNP;
                 state = (state == STATE_SERVER ? STATE_CLIENT : STATE_SERVER);
-                // Todo: call serverStateOpen() if etat == STATE_SERVER
                 return true;
             }
-            log::debug << "OpenConn: exhausted connecting methods :(" << log::endl;
             return false;
         }
 
-        void OpenConnection::serverStateOpen() {
+        bool OpenConnection::serverStateOpen() {
             std::string testMessage = "Test";
 
-            //First we open a listening socket on an available port
+            // First we open a listening socket on an available port
             NetSelect selectListener(2, "DirectConnListenerW");
             std::thread threadListener(&NetSelect::runLoop, &selectListener, "DirectConnListener");
             std::shared_ptr<Listener> srvListener(new Listener(new TCPServer(SockAddress("0.0.0.0:0"), 20)));
             selectListener.add(srvListener);
-            SockAddress addr = SockAddress(node->getNodeAddress().getIp(), srvListener->getListenAddress().getPort());
+            log::debug << "(srv) Started TCP server on " << srvListener->getListenAddress() << log::endl;
 
-            //If we're using UPNP, we open a port mapping
+            // Get distant address. If we're using UPNP, we open a port mapping
+            SockAddress addr(node->getNodeAddress().getIp(),
+                srvListener->getListenAddress().getPort());
             if (tested_method == UPNP) {
                 Epyx::UPNP::Natpunch nat;
-                //log::fatal << "nat.openMapPort(addr.getPort(),remotePort); not yet implemented" << log::endl;
                 addr = nat.openMapPort(addr.getPort());
             }
+            log::debug << "(srv) Remote address to the TCP server is " << addr << log::endl;
+
             //Now, Ask to open a connection.
             GTTPacket testpkt(protoName, "SEND");
             testpkt.headers["Address"] = addr.toString();
             testpkt.headers["Message"] = testMessage;
+            log::debug << "(srv) Sending SEND message to client" << log::endl;
             node->send(this->remoteHost, n2npMethodName, testpkt);
 
             // Wait
             std::unique_ptr<TCPSocket> clientSock = srvListener->waitForAccept(5000);
-            char data[10];
-            size_t size = 0;
 
             // Stop server
-            log::debug << "OpenConn: stopping listener server" << log::endl;
+            log::debug << "(srv) stopping listener server, "
+                << (clientSock ? "got incoming" : "got nothing") << log::endl;
             selectListener.stop();
             threadListener.join();
 
             if (clientSock) {
-                size = clientSock->recv((void*) data, 10);
+                char data[10];
+                size_t size = clientSock->recv((void*) data, sizeof (data));
                 if (std::string(data, size) == testMessage) {
-                    GTTPacket estabpkt(protoName, "ESTABLISHED");
+                    log::debug << "(srv) Connection established !" << log::endl;
                     node->offerDirectConn(this->remoteHost, std::move(clientSock));
+                    GTTPacket estabpkt(protoName, "ESTABLISHED");
                     node->send(this->remoteHost, n2npMethodName, estabpkt);
-                    return;
+                    return true;
                 }
                 clientSock->close();
             }
 
             // An error happened
-            GTTPacket errpkt(protoName, "DID_NOT_WORK");
-            node->send(this->remoteHost, n2npMethodName, errpkt);
-            this->getMessage("DID_NOT_WORK", std::map<std::string, std::string > ());
+            return false;
         }
     }
 }

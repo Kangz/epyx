@@ -17,6 +17,7 @@
 #define EPYX_DIRECTCONNECTION_OPENCONNECTION_H
 #include "../core/thread.h"
 #include "../net/tcpsocket.h"
+#include <condition_variable>
 #include <string>
 #include <map>
 #include "../n2np/nodeid.h"
@@ -85,12 +86,16 @@ namespace Epyx
 
             /**
              * @brief Start next method if the current one failed
-             * @param sendDidNotWorkMessage send a DID_NOT_WORK message to other node
              * @return true if hope exists, false if every methods were tried
              */
-            bool tryNextMethod(bool sendDidNotWorkMessage);
+            bool tryNextMethod();
 
-            void serverStateOpen();
+            /**
+             * @brief Do TCP server logic
+             * @return true if a socket has been obtained
+             */
+            bool serverStateOpen();
+
             N2NP::NodeId remoteHost;
             State state;
             bool client_tried;
@@ -98,6 +103,11 @@ namespace Epyx
             Method tested_method;
             std::unique_ptr<TCPSocket> socket;
             std::shared_ptr<N2NP::Node> node;
+
+            bool receivedDidNotWork;
+            bool isEstablished;
+            std::condition_variable condition;
+
             std::thread running_thread;
         };
     }
