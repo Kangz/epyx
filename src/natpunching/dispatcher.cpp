@@ -21,6 +21,9 @@ namespace Epyx
             GTTParser gttpars;
             gttpars.eat(data);
             std::unique_ptr<GTTPacket> packet = gttpars.getPacket();
+            if (!packet) {
+                return;
+            }
             if (packet->method == "OPENCONNECTION") {
                 // Someone is asking to open a connection to him
                 // Create a OpenConnection client instance
