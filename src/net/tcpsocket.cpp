@@ -4,21 +4,21 @@
 namespace Epyx
 {
 
-    TCPSocket::TCPSocket()
-    :isConnected(false) {
+    TCPSocket::TCPSocket() {
     }
 
     TCPSocket::TCPSocket(const SockAddress& addr)
-    :Socket(addr), isConnected(false) {
+    :Socket(addr) {
         this->connect();
     }
 
     TCPSocket::TCPSocket(int sock, const SockAddress &addr)
-    :Socket(sock, addr), isConnected(true) {
+    :Socket(sock, addr) {
     }
 
-    bool TCPSocket::connect() {
-        if (this->sock >= 0 && this->isConnected) {
+    bool TCPSocket::connect(bool force) {
+        // force indicates to call connect even if we already have a socket
+        if (!force && this->sock >= 0) {
             return true;
         }
         if (this->sock == -1) {
@@ -31,15 +31,15 @@ namespace Epyx
         }
         sockaddr_storage server;
         this->address.getSockAddr((struct sockaddr*) &server);
-        int result = ::connect(this->sock, (sockaddr*) & server, sizeof (server));
+        int result = ::connect(this->sock, (struct sockaddr*) &server, sizeof (server));
         if (result < 0) {
             //Replace by error log.
             log::error << "Failed connecting to " << this->address << ": "
                 << log::errstd << log::endl;
             this->close();
+            EPYX_ASSERT(this->sock < 0);
             return false;
         }
-        this->isConnected = true;
         this->updateLocalAddress();
         return true;
     }
@@ -47,31 +47,36 @@ namespace Epyx
     int TCPSocket::send(const void *data, int size) {
         int bytes;
         EPYX_ASSERT(data != NULL);
-        if (!this->isConnected && !this->connect()) {
+        if (this->sock < 0 && !this->connect()) {
             return 0;
         }
         EPYX_ASSERT(this->sock >= 0);
-        EPYX_ASSERT(this->isConnected);
         bytes = ::send(this->sock, data, size, 0);
-        // TODO: Implement status error (ex. Conn closed, ...)
-
-        if (bytes == -1)
-            throw ErrException("Socket", "send");
+        if (bytes == -1) {
+            // Verbose error and close socket
+            log::error << "TCPSocket::send error with " << address << ": "
+                << log::errstd << log::endl;
+            this->close();
+            return 0;
+        }
         return bytes;
     }
 
     int TCPSocket::recv(void *data, int size) {
         int bytes;
         EPYX_ASSERT(data != NULL);
-        if (!this->isConnected && !this->connect()) {
+        if (this->sock < 0 && !this->connect()) {
             return 0;
         }
         EPYX_ASSERT(this->sock >= 0);
-        EPYX_ASSERT(this->isConnected);
         bytes = ::recv(this->sock, data, size, 0);
-        // TODO: Implement status error (eg. Conn closed, ...)
-        if (bytes == -1)
-            throw ErrException("Socket", "recv");
+        if (bytes == -1) {
+            // Verbose error and close socket
+            log::error << "TCPSocket::recv error from " << address << ": "
+                << log::errstd << log::endl;
+            this->close();
+            return 0;
+        }
 
         /**
          * recv doesn't set the after-the-last byte to zero. We must do it to

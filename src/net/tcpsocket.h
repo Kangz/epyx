@@ -24,7 +24,6 @@
 
 namespace Epyx
 {
-
     /**
      * @class TCPSocket
      *
@@ -64,8 +63,7 @@ namespace Epyx
          */
         int recv(void *data, int size);
     private:
-        bool connect();
-        bool isConnected;
+        bool connect(bool force = false);
     };
 
 }
