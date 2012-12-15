@@ -18,13 +18,17 @@ namespace Epyx
 
         Node::Node(const SockAddress& addr)
         :NetSelectSocket(new TCPSocket(addr)), hasId(false), curId(0) {
+            // Check socket
+            if (!this->isSocketOpened()) {
+                log::error << "N2NP Node: failed to connect to relay " << addr << log::endl;
+                return;
+            }
             this->send(NodeId("", addr), "ID", byte_str());
         }
 
         bool Node::send(const NodeId& to, const std::string& method,
             const byte_str& data, bool store) {
-            if (method != "ID")
-                EPYX_ASSERT(hasId);
+            EPYX_ASSERT(method == "ID" || hasId);
 
             // Send packet to the relay by default
             std::shared_ptr<Packet> n2npPkt(new Packet(method, data));

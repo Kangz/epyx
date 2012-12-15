@@ -18,6 +18,10 @@ namespace Epyx
         return sock->getFd();
     }
 
+    bool NetSelectSocket::isSocketOpened() const {
+        return sock && sock->isOpened();
+    }
+
     bool NetSelectSocket::read() {
         EPYX_ASSERT(sock);
         const int size = 4096;

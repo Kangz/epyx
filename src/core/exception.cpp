@@ -22,7 +22,7 @@ namespace Epyx
     }
 
     std::ostream& operator<<(std::ostream& os, const Exception& e) {
-        return os << e.fullMessage << "\n";
+        return os << e.fullMessage;
     }
 
     const std::string& Exception::getMessage() const {

@@ -77,6 +77,12 @@ namespace Epyx
 
     std::shared_ptr<N2NP::Node> API::spawnN2NPNode(const SockAddress& addr, int timeout) {
         std::shared_ptr<N2NP::Node> node(new N2NP::Node(addr));
+        
+        // Check node
+        if (!node->isSocketOpened()) {
+            throw FailException("API::spawnN2NPNode", "Node failed to connect to the relay");
+        }
+        
         this->addNode(node);
 
         // Wait until connection

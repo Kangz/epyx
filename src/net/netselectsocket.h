@@ -49,6 +49,12 @@ namespace Epyx
         int getFileDescriptor() const;
 
         bool read();
+        
+        /**
+         * @brief Tell wether the socket is opened (connected) or closed
+         * @return true if the socket is opened
+         */
+        bool isSocketOpened() const;
 
     protected:
         /**
@@ -58,6 +64,7 @@ namespace Epyx
 
         /**
          * @brief Get internal socket
+         * @return sock
          */
         const std::shared_ptr<Socket>& socket() const;
 
