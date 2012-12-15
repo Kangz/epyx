@@ -72,6 +72,26 @@ namespace Epyx
             return portMapList;
         }
 
+        unsigned short IGD::pickRandomFreePort(protocol proto) {
+            std::list<portMap> portMapList = this->getListPortMap();
+            // We shall Take a number at random between 1024 and 65536
+            // and check if this number is not already taken.
+            bool foundValidPort = false;
+            unsigned short remotePort;
+            while (!foundValidPort) {
+                remotePort = 1024 + (rand() % (65536 - 1024));
+                foundValidPort = true;
+                for (auto it = portMapList.begin(); it != portMapList.end(); ++it) {
+                    if (it->nat_port == remotePort &&
+                        ((proto == TCP && it->protocol == "TCP") ||
+                        (proto == UDP && it->protocol == "UDP"))) {
+                        foundValidPort = false;
+                    }
+                }
+            }
+            return remotePort;
+        }
+
         IpAddress IGD::getLocalAdress() {
             // Find a network interface which has the same prefix
             std::vector<NetIf> interfaces = NetIf::getAllNet();

@@ -38,19 +38,7 @@ namespace Epyx
             log::debug << "IP addr : " << igd->getExtIPAdress() << log::endl;
             //If remotePort is not set, we try to find an available one.
             if (remotePort == 0) {
-                std::list<portMap> portMapList = igd->getListPortMap();
-                //We shall Take a number at random between 1024 and 65536, and check this number is not taken yet.
-                srand((unsigned) time(0));
-                bool foundValidPort = false;
-                unsigned short remotePort;
-                unsigned short range = 65536 - 1024;
-                while (!foundValidPort) {
-                    remotePort = (unsigned short) 1024 + (rand() * range / (RAND_MAX + 1.0));
-                    foundValidPort = true;
-                    for (std::list<portMap>::iterator it = portMapList.begin(); it != portMapList.end(); ++it)
-                        if (it->nat_port == remotePort)
-                            foundValidPort = false;
-                }
+                remotePort = igd->pickRandomFreePort(Epyx::UPNP::TCP);
             }
 
             SockAddress addr = igd->addPortMap(localPort, Epyx::UPNP::TCP, remotePort);

@@ -75,6 +75,12 @@ namespace Epyx
              * @return
              */
             std::list<portMap> getListPortMap();
+            
+            /**
+             * @brief Pick a random port which is free in port mapping
+             * @return 
+             */
+            unsigned short pickRandomFreePort(protocol proto);
 
             /**
              * Returns Address class with which we can join the user from
