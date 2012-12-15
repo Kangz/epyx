@@ -1,64 +1,68 @@
 #include "api.h"
-#include "natpunching/upnp/openconnect.h"
-#include "natpunching/upnp/discovery.h"
-#include "net/uri.h"
+#include "core/input.h"
 
-bool test_IGD() {
-    // Discover IGD
-    Epyx::URI uri;
-    Epyx::UPNP::Discovery disco;
-    if (!disco.queryAnswerIn(10000, &uri)) {
-        Epyx::log::error << "UPnP discovery failed" << Epyx::log::endl;
-        return false;
-    }
-    Epyx::log::debug << "URI : " << uri << Epyx::log::endl;
+bool test_natpunching(Epyx::API& epyx, const Epyx::SockAddress& relayAddr,
+    const Epyx::N2NP::NodeId& remoteNodeId) {
 
-    // Found an IGD
-    Epyx::UPNP::IGD igd(uri);
-    if (!igd.getServices()) {
-        Epyx::log::error << "Unable to get IGD services" << Epyx::log::endl;
-        return false;
-    }
+    // Create DHT node
+    std::shared_ptr<Epyx::N2NP::Node> node = epyx.spawnN2NPNode(relayAddr);
+    std::shared_ptr<Epyx::DHT::Node> dhtNode = epyx.createDHTNode("DHT", node);
 
-    Epyx::log::debug << "service list:" << Epyx::log::endl;
-    std::map<std::string, std::string> services = igd.getServiceList();
-    for (std::map<std::string, std::string>::iterator it = services.begin(); it != services.end(); ++it) {
-        Epyx::log::debug << " * " << it->first << " = " << it->second << Epyx::log::endl;
-    }
+    // Send ping to the relay
+    Epyx::N2NP::NodeId relayNodeId("self", node->getId().getRelay());
+    dhtNode->sendPing(Epyx::DHT::Peer::SPtr(new Epyx::DHT::Peer(relayNodeId)));
 
-    Epyx::log::debug << "External IP addr is " << igd.getExtIPAdress() << Epyx::log::endl;
-    Epyx::log::debug << "Local IP addr is " << igd.getLocalAdress() << Epyx::log::endl;
+    Epyx::log::info << "My node is " << node->getId() << Epyx::log::endl;
+    Epyx::log::info << "DHT " << (*(dhtNode->getConnectionInfo())) << Epyx::log::endl;
 
-    // PortMap
-    Epyx::SockAddress addr = igd.addPortMap(22, Epyx::UPNP::TCP, 1337);
-    Epyx::log::debug << "External " << addr << " now maps to local port 22" << Epyx::log::endl;
-
-    // List
-    Epyx::log::info << "List of mappings:" << Epyx::log::endl;
-    std::list<Epyx::UPNP::portMap> mappings = igd.getListPortMap();
-    for (auto it = mappings.begin(); it != mappings.end(); ++it) {
-        Epyx::log::info << (it->enabled ? "*" : "O") << " "
-            << it->protocol << " " << it->nat_port << " to " << it->destination
-            << " " << it->description << Epyx::log::endl;
-    }
-
-    Epyx::log::info << "Does it work? " << Epyx::log::endl;
-    std::string blah;
-    std::cin >> blah;
-    if (!igd.delPortMap(addr, Epyx::UPNP::TCP)) {
-        Epyx::log::debug << "Unable to delete portmap" << Epyx::log::endl;
-        return false;
-    }
-    Epyx::log::debug << "Portmap deleted" << Epyx::log::endl;
+    // Wait for interrupt
+    Epyx::Input::waitForInt();
     return true;
 }
 
-int main() {
+int main(int argc, char **argv) {
     Epyx::API epyx;
     try {
-        //Epyx::UPNP::Natpunch natpunch;
-        //natpunch.openMapPort(22, 1337);
-        test_IGD();
+        // Parse options
+        int c;
+        int nbWorkers = 50;
+        while ((c = getopt(argc, argv, "hw:")) != -1) {
+            switch (c) {
+                case 'h':
+                    std::cout << "Usage: test-natpunching [options] address:port nodeId" << std::endl
+                        << "options:" << std::endl
+                        << " -h Display help" << std::endl
+                        << " -w number Set the number of network workers"
+                        << " (which treat packets, " << nbWorkers << " by default)" << std::endl
+                        << "address:port Bound interface" << std::endl
+                        << "nodeId ID of the node to establish a contact with" << std::endl;
+                    return 0;
+                case 'w':
+                    nbWorkers = Epyx::String::toInt(optarg);
+                    break;
+                case '?':
+                    if (optopt == 'n' || optopt == 'w')
+                        std::cerr << "Option -" << optopt << " requires an argument." << std::endl;
+                    else if (isprint(optopt))
+                        std::cerr << "Unknown option `-" << optopt << "'." << std::endl;
+                    else
+                        fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+                    return 1;
+                default:
+                    throw Epyx::FailException("Main", "Invalid case");
+            }
+        }
+
+        if (optind != argc - 2) {
+            std::cerr << "Wrong number of parameters: need 2, got "
+                << (argc - optind) << ". Use -h to get help." << std::endl;
+            return 1;
+        }
+
+        const Epyx::SockAddress relayAddr(argv[optind]);
+        const Epyx::N2NP::NodeId remoteNodeId(argv[optind + 1]);
+        epyx.setNetWorkers(nbWorkers);
+        test_natpunching(epyx, relayAddr, remoteNodeId);
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }

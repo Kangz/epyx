@@ -27,9 +27,9 @@ int main(int argc, char **argv) {
         while ((c = getopt(argc, argv, "hn:w:")) != -1) {
             switch (c) {
                 case 'h':
-                    std::cout << "Usage: relay [options] address:port" << std::endl
+                    std::cout << "Usage: bootstrap [options] address:port" << std::endl
                         << "options:" << std::endl
-                        << " -h   Display help" << std::endl
+                        << " -h Display help" << std::endl
                         << " -w number Set the number of network workers"
                         << " (which treat packets, " << nbWorkers << " by default)" << std::endl
                         << " -n number Set the network size"
@@ -103,9 +103,7 @@ int main(int argc, char **argv) {
             // View information
             Epyx::log::info << "Created " << nbNodes << " nodes:" << Epyx::log::endl;
             for (int i = 0; i < nbNodes; i++) {
-                std::ostringstream o;
-                dhtNodes[i]->getConnectionInfo()->serialize(o);
-                Epyx::log::info << " [" << i << "] " << o.str() << Epyx::log::endl;
+                Epyx::log::info << " [" << i << "] " << (*(dhtNodes[i]->getConnectionInfo())) << Epyx::log::endl;
             }
         }
 

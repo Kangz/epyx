@@ -54,6 +54,9 @@ target_link_libraries(test-parser epyx)
 add_executable(test-natpunching src/test-natpunching.cpp)
 target_link_libraries(test-natpunching epyx)
 
+add_executable(test-natpunching-upnp src/test-natpunching-upnp.cpp)
+target_link_libraries(test-natpunching-upnp epyx)
+
 add_executable(test-n2np src/test-n2np.cpp)
 target_link_libraries(test-n2np epyx)
 
