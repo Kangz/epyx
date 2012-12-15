@@ -68,33 +68,33 @@ namespace Epyx
              * @brief Get external IP address
              * @return string
              */
-            IpAddress getExtIPAdress();
+            IpAddress getExtIPAdress() const;
 
             /**
              * @brief Get list of port map
              * @return
              */
-            std::list<portMap> getListPortMap();
+            std::list<portMap> getListPortMap() const;
             
             /**
              * @brief Pick a random port which is free in port mapping
              * @return 
              */
-            unsigned short pickRandomFreePort(protocol proto);
+            unsigned short pickRandomFreePort(protocol proto) const;
 
             /**
              * Returns Address class with which we can join the user from
              * the internet. For compatibility reasons the remote Port must
              * be the same as the local port
              */
-            const SockAddress addPortMap(unsigned short port, protocol proto);
-            const SockAddress addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port);
+            const SockAddress addPortMap(unsigned short port, protocol proto) const;
+            const SockAddress addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port) const;
 
             /**
              * @brief Gets the local IP adress which communicates with the IGD.
              * @return
              */
-            IpAddress getLocalAdress();
+            IpAddress getLocalAdress() const;
 
             /**
              * @brief Delete a port map
@@ -104,12 +104,12 @@ namespace Epyx
              * Addr must be the IP TCP/UDP coordinates for access to user machine
              * through IGD NAT Device. (Ex the return value of addPortMap)
              */
-            bool delPortMap(const SockAddress& addr, protocol proto);
+            bool delPortMap(const SockAddress& addr, protocol proto) const;
 
             /**
              * @brief Get list of services
              */
-            std::map<std::string, std::string> getServiceList();
+            std::map<std::string, std::string> getServiceList() const;
 
         private:
             /**

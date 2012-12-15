@@ -25,7 +25,7 @@ namespace Epyx
             return true;
         }
 
-        IpAddress IGD::getExtIPAdress() {
+        IpAddress IGD::getExtIPAdress() const {
             Command order;
             if (!this->initWanIPConnCommand(&order)) {
                 return IpAddress();
@@ -40,7 +40,7 @@ namespace Epyx
             return ip;
         }
 
-        std::list<portMap> IGD::getListPortMap() {
+        std::list<portMap> IGD::getListPortMap() const {
             std::list<portMap> portMapList;
             int index = 0;
             while (true) {
@@ -72,7 +72,7 @@ namespace Epyx
             return portMapList;
         }
 
-        unsigned short IGD::pickRandomFreePort(protocol proto) {
+        unsigned short IGD::pickRandomFreePort(protocol proto) const {
             std::list<portMap> portMapList = this->getListPortMap();
             // We shall Take a number at random between 1024 and 65536
             // and check if this number is not already taken.
@@ -92,7 +92,7 @@ namespace Epyx
             return remotePort;
         }
 
-        IpAddress IGD::getLocalAdress() {
+        IpAddress IGD::getLocalAdress() const {
             // Find a network interface which has the same prefix
             std::vector<NetIf> interfaces = NetIf::getAllNet();
             for (auto iface = interfaces.begin(); iface != interfaces.end(); ++iface) {
@@ -112,11 +112,11 @@ namespace Epyx
             return IpAddress();
         }
 
-        const SockAddress IGD::addPortMap(unsigned short port, protocol proto) {
+        const SockAddress IGD::addPortMap(unsigned short port, protocol proto) const {
             return this->addPortMap(port, proto, port);
         }
 
-        const SockAddress IGD::addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port) {
+        const SockAddress IGD::addPortMap(unsigned short loc_port, protocol proto, unsigned short ext_port) const {
             std::string prot = (proto == Epyx::UPNP::TCP) ? "TCP" : "UDP";
             std::string loc_portStr = String::fromInt(loc_port);
             std::string ext_portStr = String::fromInt(ext_port);
@@ -151,7 +151,7 @@ namespace Epyx
             return SockAddress(extIP, ext_port);
         }
 
-        bool IGD::delPortMap(const SockAddress& addr, protocol proto) {
+        bool IGD::delPortMap(const SockAddress& addr, protocol proto) const {
             Command order;
             if (!this->initWanIPConnCommand(&order)) {
                 return false;
@@ -176,7 +176,7 @@ namespace Epyx
             return true;
         }
 
-        std::map<std::string, std::string> IGD::getServiceList() {
+        std::map<std::string, std::string> IGD::getServiceList() const {
             return services;
         }
 
