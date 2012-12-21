@@ -53,10 +53,26 @@ bool test_IGD() {
     return true;
 }
 
+void test_UPnP_Natpunch() {
+    Epyx::UPNP::Natpunch nat;
+    Epyx::SockAddress addr = nat.openMapPort(22, 22);
+    Epyx::log::debug << "External " << addr << " now maps to local port 22" << Epyx::log::endl;
+    Epyx::log::info << "List of mappings:" << Epyx::log::endl;
+    nat.printMapList();
+    Epyx::log::info << "Does it work? " << Epyx::log::endl;
+    std::string blah;
+    std::cin >> blah;
+    if (!nat.delMapPort(addr, Epyx::UPNP::TCP)) {
+        Epyx::log::debug << "Unable to delete portmap" << Epyx::log::endl;
+        return;
+    }
+}
+
 int main() {
     Epyx::API epyx;
     try {
-        test_IGD();
+        //test_IGD();
+        test_UPnP_Natpunch();
     } catch (Epyx::Exception e) {
         Epyx::log::fatal << e << Epyx::log::endl;
     }

@@ -53,8 +53,12 @@ namespace Epyx
              */
             const SockAddress openMapPort(unsigned short localPort, unsigned short remotePort = 0);
 
+            bool delMapPort(const SockAddress& addr, protocol proto = Epyx::UPNP::TCP);
 
-            void delMapPort(const SockAddress& addr, protocol proto = Epyx::UPNP::TCP);
+            /**
+             * Print a list of mappings
+             */
+            void printMapList();
         private:
             void testConnection();
             void closeMapPort();

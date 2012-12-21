@@ -32,14 +32,26 @@ namespace Epyx
                 << log::endl;
             return addr;
         }
-        
-        void Natpunch::delMapPort(const SockAddress& addr, protocol proto) {
+
+        bool Natpunch::delMapPort(const SockAddress& addr, protocol proto) {
             if (!igd) {
                 log::debug << "UPnP-IGD: delMapPort disabled as no IGD was found" << log::endl;
-                return;
+                return false;
             }
             log::debug << "UPnP-IGD: Delete portmap to " << addr << log::endl;
-            igd->delPortMap(addr, proto);
+            return igd->delPortMap(addr, proto);
+        }
+
+        void Natpunch::printMapList() {
+            if (!igd)
+                return;
+
+            std::list<Epyx::UPNP::portMap> mappings = igd->getListPortMap();
+            for (auto it = mappings.begin(); it != mappings.end(); ++it) {
+                Epyx::log::info << (it->enabled ? "*" : "O") << " "
+                    << it->protocol << " " << it->nat_port << " to " << it->destination
+                    << " " << it->description << Epyx::log::endl;
+            }
         }
     }
 }
