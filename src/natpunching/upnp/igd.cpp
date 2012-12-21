@@ -5,12 +5,12 @@
 #include "../../net/tcpsocket.h"
 #include "../../core/common.h"
 
-#define EPYX_MSG "Epyx Going Through your Nat with UPnP IGD Protocol"
 
 namespace Epyx
 {
     namespace UPNP
     {
+        static const std::string portMapDescription = "Epyx Going Through your Nat with UPnP IGD Protocol";
 
         IGD::IGD(const URI& rootDescURI)
         :rootDescURI(rootDescURI), address(rootDescURI.getAddress()), services() {
@@ -137,7 +137,7 @@ namespace Epyx
             order.addArgument("NewInternalPort", loc_portStr);
             order.addArgument("NewInternalClient", localIP.toString());
             order.addArgument("NewEnabled", "1");
-            order.addArgument("NewPortMappingDescription", EPYX_MSG);
+            order.addArgument("NewPortMappingDescription", portMapDescription);
             order.addArgument("NewLeaseDuration", "0");
             std::unique_ptr<CommandResult> res = order.queryAnswer(30000);
             if (!res) {

@@ -119,6 +119,11 @@ namespace Epyx
                             GTTPacket pkt(protoName, "DID_NOT_WORK");
                             node->send(remoteHost, n2npMethodName, pkt);
                         }
+                        if (!node->isSocketOpened()) {
+                            log::debug << "(client) Oops, node vanished. Stop !"
+                                << log::endl;
+                            return;
+                        }
                     }
                     if (isEstablished) {
                         return;
