@@ -72,6 +72,8 @@ target_link_libraries(test-crypto epyx)
 add_executable(demo src/demo.cpp)
 target_link_libraries(demo epyx)
 
+add_executable(test-netif src/test-netif.cpp)
+target_link_libraries(test-netif epyx)
 
 add_executable(test-webm contrib/test-webm.cpp ${webm_sources})
 target_link_libraries(test-webm epyx vpx SDL)
