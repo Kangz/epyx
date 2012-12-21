@@ -7,8 +7,8 @@
 namespace Epyx
 {
 
-    NetIfControl::NetIfControl(const std::string& devname, int ipVersion)
-    :devname(devname) {
+    NetIfControl::NetIfControl(const std::string& ifname, int ipVersion)
+    :ifname(ifname) {
         int family = 0;
         switch (ipVersion) {
             case 4:
@@ -27,7 +27,7 @@ namespace Epyx
     }
 
     NetIfControl::NetIfControl(const NetIf& netif) {
-        devname = netif.getName();
+        ifname = netif.getName();
         // If IPv6, use IPv6 socket. If no address or IPv4 address, use IPv4
         if (netif.getAddress().getVersion() == 6) {
             sock = ::socket(PF_INET6, SOCK_DGRAM, 0);
@@ -39,15 +39,15 @@ namespace Epyx
         }
     }
 
-    NetIfControl::~NetIfControl() throw () {
-        this->close();
-    }
-
-    void NetIfControl::close() throw () {
+    NetIfControl::~NetIfControl() {
         if (sock >= 0) {
             ::close(sock);
             sock = -1;
         }
+    }
+
+    const std::string& NetIfControl::getIfName() const {
+        return ifname;
     }
 
     bool NetIfControl::setMTU(int mtu) {
@@ -93,9 +93,9 @@ namespace Epyx
     bool NetIfControl::ioctlReq(int request, struct ifreq *ifr) const {
         EPYX_ASSERT(sock >= 0);
         EPYX_ASSERT(ifr != nullptr);
-        strncpy(ifr->ifr_name, devname.c_str(), sizeof (ifr->ifr_name));
+        strncpy(ifr->ifr_name, ifname.c_str(), sizeof (ifr->ifr_name));
         if ((::ioctl(sock, request, ifr)) < 0) {
-            log::error << "Socket IO Ctl error on " << devname << ": "
+            log::error << "Socket IO Ctl error on " << ifname << ": "
                 << log::errstd << log::endl;
             return false;
         }

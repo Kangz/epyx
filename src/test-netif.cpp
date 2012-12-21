@@ -6,6 +6,7 @@
 #include <iomanip>
 #include "api.h"
 #include "net/netifcontrol.h"
+#include "net/tundev.h"
 
 using namespace Epyx;
 
@@ -33,8 +34,22 @@ void test_netif() {
     }
 }
 
+void test_tun() {
+    Tundev tun;
+    log::info << "Created tun device " << tun.getIfName() << log::endl;
+    EPYX_VERIFY(tun.activateInterface(true));
+    EPYX_VERIFY(tun.enableBroadcast(true));
+    system("ifconfig -a");
+    test_netif();
+}
+
 int main() {
     API epyx;
-    test_netif();
+    try {
+        test_netif();
+        test_tun();
+    } catch (Exception e) {
+        log::fatal << e << log::endl;
+    }
     return 0;
 }

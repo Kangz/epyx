@@ -23,22 +23,23 @@ namespace Epyx
     public:
         /**
          * @brief Build a control object from a device name
-         * @param devname
+         * @param ifname
          * @param ipVersion
          */
-        NetIfControl(const std::string& devname, int ipVersion = 4);
+        NetIfControl(const std::string& ifname, int ipVersion = 4);
 
         /**
          * @brief Constructor from a NetIf object
          */
         NetIfControl(const NetIf& netif);
 
-        ~NetIfControl() throw ();
+        virtual ~NetIfControl();
 
         /**
-         * Cleanly close the interface
+         * @brief Return interface name
+         * @return ifname
          */
-        void close() throw ();
+        const std::string& getIfName() const;
 
         /**
          * @brief Set Maximal Transmission Unit of the device interface
@@ -82,8 +83,7 @@ namespace Epyx
 
     private:
         bool ioctlReq(int request, struct ifreq *ifr) const;
-
-        std::string devname;
+        std::string ifname;
         int sock;
     };
 }
